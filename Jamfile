@@ -1,0 +1,12 @@
+project /range :
+    requirements
+    <library>/meta//meta
+    <library>/rime//rime
+    ;
+
+# Declare target /range//range as a header-only library.
+alias range : : : :
+    <include>include
+    <cxxflags>"-std=c++0x"
+    ;
+

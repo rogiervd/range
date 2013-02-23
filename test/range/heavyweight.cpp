@@ -185,7 +185,8 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         BOOST_CHECK (empty (drop (back, two, v)));
     }
 
-    BOOST_MPL_ASSERT_NOT ((range::operation::is_implemented<range::apply::view<forgotten_to_define_direction, weird_heavyweight_count> >));
+    BOOST_MPL_ASSERT_NOT ((range::operation::is_implemented<range::apply::view <
+        forgotten_to_define_direction, weird_heavyweight_count> >));
 
     // weird_heavyweight_count
     {

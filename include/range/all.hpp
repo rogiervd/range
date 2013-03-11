@@ -21,11 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RANGE_ALL_HPP_INCLUDED
 
 // The implementation of all and any is basically the same, and defined here:
-#include "detail/fold_bool.hpp"
+#include "detail/find_bool.hpp"
 
 namespace range {
 
-namespace callable { struct all : fold_bool_detail::fold_bool <true> {}; }
+namespace callable {
+    struct all : find_bool_detail::find_bool <true> {};
+} // namespace callable
 
 /**
 Return whether all elements of the range evaluate to true.
@@ -39,12 +41,9 @@ If the result is known at compile time, a compile time constant is returned.
 
 Short-circuiting is important.
 If any element is known at compile time to be false, then the following elements
-are not instantiated, and none are evaluated.
+are not instantiated.
 If any element is found at run time to false, then the following elements are
 not evaluated.
-
-Note that for consistency, even if the result is known at compile time, the
-elements up to the elements that decides this will be evaluated.
 */
 static const auto all = callable::all();
 

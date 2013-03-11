@@ -11,5 +11,6 @@ alias "range" :
     [ run std_tuple.cpp ]
 
     [ run walk_size.cpp ]
+    [ run find.cpp ]
     ;
 

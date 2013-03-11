@@ -695,7 +695,7 @@ namespace apply {
             meta::vector <meta::vector<>, Other, meta::vector <>>>
         : operation::unimplemented {};
 
-        // Explicit specialisations to keep compilers happy.
+        // Explicit specialisations to keep CLang 3.0 happy.
         template <class Implementation, class Range>
             struct prepend_default_direction <Implementation,
                 meta::vector<>, meta::vector <Range>>
@@ -716,6 +716,34 @@ namespace apply {
             auto operator() (Other && other, Range && range) const
             RETURNS (implementation (range::default_direction (range),
                 std::forward <Other> (other), std::forward <Range> (range)))
+        };
+
+        template <class Implementation, class Other1, class Other2, class Range>
+            struct prepend_default_direction <Implementation,
+                meta::vector <Other1, Other2>, meta::vector <Range>>
+        {
+            Implementation implementation;
+
+            auto operator() (Other1 && other_1, Other2 && other_2,
+                Range && range) const
+            RETURNS (implementation (range::default_direction (range),
+                std::forward <Other1> (other_1),
+                std::forward <Other2> (other_2), std::forward <Range> (range)))
+        };
+
+        template <class Implementation, class Other1, class Other2,
+            class Other3, class Range>
+        struct prepend_default_direction <Implementation,
+            meta::vector <Other1, Other2, Other3>, meta::vector <Range>>
+        {
+            Implementation implementation;
+
+            auto operator() (Other1 && other_1, Other2 && other_2,
+                Other3 && other_3, Range && range) const
+            RETURNS (implementation (range::default_direction (range),
+                std::forward <Other1> (other_1),
+                std::forward <Other2> (other_2),
+                std::forward <Other3> (other_3), std::forward <Range> (range)))
         };
 
     } // namespace automatic_arguments

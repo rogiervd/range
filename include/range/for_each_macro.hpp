@@ -26,6 +26,9 @@ namespace range { namespace for_each_macro_detail {
     template <class Type> struct assert_is_range {
         static_assert (::range::is_range <Type>::value,
             "Second parameter to RANGE_FOR_EACH must be a range");
+        static_assert (::range::is_homogeneous <typename
+            ::range::result_of::view <Type>::type>::value,
+            "Range passed into RANGE_FOR_EACH must be homogeneous");
         typedef Type type;
     };
     template <class Type> typename assert_is_range <Type>::type &&

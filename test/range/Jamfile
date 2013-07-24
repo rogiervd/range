@@ -10,6 +10,7 @@ alias "range" :
     [ run std_tuple.cpp ]
 
     [ run for_each_macro.cpp ]
+    [ run reverse.cpp ]
     [ run walk_size.cpp ]
     [ run find.cpp ]
     [ run all_any.cpp ]

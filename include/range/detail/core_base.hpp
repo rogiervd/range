@@ -207,7 +207,7 @@ namespace operation {
 Namespace with structures that normalise the parameters for the structures
 in the namespace "operation".
 They take as class template parameters the arguments that the functors (in
-callable) take, and remove cv-qualifications from  directions and increments.
+callable) take, and remove cv-qualifications from directions and increments.
 
 The classes are defined for all template parameters, and are implemented
 (i.e. do not derive from operation::unimplemented, and have an operator()) only
@@ -216,8 +216,8 @@ for the relevant ones.
 namespace apply {
     /*
     To allow the classes in callable:: to be implemented easily, with
-    template template parameters, the number of template parameters is 4,
-    even if it could be less.
+    template template parameters, the number of template parameters should be
+    variadic.
     */
 
     template <class ... Arguments> struct default_direction;
@@ -227,7 +227,7 @@ namespace apply {
 
 } // namespace apply
 
-/*
+/**
 Namespace with structures indicating whether a type of range supports an
 operation.
 For completeness, they are also implemented for silly parameters, for example,
@@ -238,7 +238,14 @@ namespace has {
     : operation::is_implemented <apply::default_direction <Arguments ...>> {};
 } // namespace has
 
+/**
+Namespace with structures indicating the return types of operations.
+For silly parameters, the types should not contain the type "type", but no error
+should otherwise be caused.
+This allows SFINAE to work well.
+*/
 namespace result_of {
+
     namespace detail {
 
         template <bool decay, template <class ...> class Apply, class Arguments>

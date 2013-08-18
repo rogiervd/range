@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 This tests some aspects of range/core.hpp.
 Other aspects are tested on different types of ranges by
 - member_view.cpp
-- std_adaptor.cpp
+- std_container.cpp
 - std_tuple.cpp
 */
 

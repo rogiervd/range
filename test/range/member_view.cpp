@@ -361,6 +361,7 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (first (drop (rime::int_ <1>(), three_view)), 3.5);
         BOOST_CHECK_EQUAL (first (drop (front, rime::int_ <1>(), three_view)),
             3.5);
+
         // Access second element of the three_view reduced to two elements
         RIME_CHECK_EQUAL (empty (drop (drop (back, three_view))), rime::false_);
         BOOST_CHECK_EQUAL (first (drop (drop (back, three_view))), 3.5);

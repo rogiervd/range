@@ -26,6 +26,7 @@ along with this program.  If not, see "http://www.gnu.org/licenses/".
 #include "detail/core_view.hpp"
 #include "detail/core_first.hpp"
 #include "detail/core_drop.hpp"
+#include "detail/core_at.hpp"
 #include "detail/core_is_homogeneous.hpp"
 #include "detail/core_fold_declaration.hpp"
 

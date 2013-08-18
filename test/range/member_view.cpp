@@ -52,6 +52,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
     using range::size;
     using range::first;
     using range::drop;
+    using range::at;
+    using range::at_c;
     using range::front;
     using range::back;
 
@@ -132,6 +134,12 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
             !range::has::drop <direction::front, empty_view_type>::value, "");
         static_assert (
             !range::has::drop <direction::back, empty_view_type>::value, "");
+
+        static_assert (!range::has::at <empty_view_type>::value, "");
+        static_assert (
+            !range::has::at <direction::front, empty_view_type>::value, "");
+        static_assert (
+            !range::has::at <direction::back, empty_view_type>::value, "");
 
         // drop of size 0 is available.
         static_assert (range::has::drop <
@@ -242,12 +250,41 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         RIME_CHECK_EQUAL (size (empty_2), rime::size_t <0>());
         RIME_CHECK_EQUAL (size (front, empty_2), rime::size_t <0>());
 
+        // The implementation of at is based on drop and first.
+        static_assert (range::has::at <
+            rime::size_t <0>, int_view_type>::value, "");
+        static_assert (range::has::at <
+            direction::front, rime::size_t <0>, int_view_type>::value, "");
+        static_assert (range::has::at <
+            direction::back, rime::size_t <0>, int_view_type>::value, "");
+
+        static_assert (!range::has::at <
+            rime::size_t <1>, int_view_type>::value, "");
+        static_assert (!range::has::at <
+            direction::front, rime::size_t <1>, int_view_type>::value, "");
+        static_assert (!range::has::at <
+            direction::back, rime::size_t <1>, int_view_type>::value, "");
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            range::result_of::at <rime::size_t <0>, int_view_type const>::type,
+            int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            range::result_of::at <
+                direction::back, rime::size_t <0>, int_view_type>::type,
+            int const &>));
+
+        BOOST_CHECK_EQUAL (at (rime::size_t <0>(), int_view), 4);
+        BOOST_CHECK_EQUAL (at (back, rime::size_t <0>(), int_view), 4);
+        BOOST_CHECK_EQUAL (at_c <0> (int_view), 4);
+        BOOST_CHECK_EQUAL (at_c <0> (back, int_view), 4);
+
         // View must be assignable.
         int_view = int_view_type (s2);
         RIME_CHECK_EQUAL (empty (int_view), rime::false_);
         // Original container, s, has not changed.
         BOOST_CHECK_EQUAL (s.i, 4);
         BOOST_CHECK_EQUAL (first (int_view), 123);
+        BOOST_CHECK_EQUAL (at (rime::size_t <0>(), int_view), 123);
     }
     {
         typedef range::member_view <structure,
@@ -340,6 +377,33 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (first (drop (rime::int_ <2>(), three_view)), 'a');
         BOOST_CHECK_EQUAL (first (drop (front, rime::int_ <2>(), three_view)),
             'a');
+
+        // at (d,n,r) is a shorthand for first (d, drop (d, n, r)).
+        static_assert (range::has::at <
+            rime::size_t <0>, three_view_type>::value, "");
+        static_assert (range::has::at <
+            rime::size_t <1>, three_view_type>::value, "");
+        static_assert (range::has::at <
+            rime::size_t <2>, three_view_type>::value, "");
+        static_assert (!range::has::at <
+            rime::size_t <3>, three_view_type>::value, "");
+
+        BOOST_CHECK_EQUAL (at (rime::size_t <0>(), three_view), 4);
+        BOOST_CHECK_EQUAL (at (rime::size_t <1>(), three_view), 3.5);
+        BOOST_CHECK_EQUAL (at (rime::size_t <2>(), three_view), 'a');
+        BOOST_CHECK_EQUAL (at (front, rime::size_t <0>(), three_view), 4);
+        BOOST_CHECK_EQUAL (at (front, rime::size_t <1>(), three_view), 3.5);
+        BOOST_CHECK_EQUAL (at (front, rime::size_t <2>(), three_view), 'a');
+        BOOST_CHECK_EQUAL (at (back, rime::size_t <0>(), three_view), 'a');
+        BOOST_CHECK_EQUAL (at (back, rime::size_t <1>(), three_view), 3.5);
+        BOOST_CHECK_EQUAL (at (back, rime::size_t <2>(), three_view), 4);
+
+        BOOST_CHECK_EQUAL (at_c <0> (three_view), 4);
+        BOOST_CHECK_EQUAL (at_c <1> (three_view), 3.5);
+        BOOST_CHECK_EQUAL (at_c <2> (three_view), 'a');
+        BOOST_CHECK_EQUAL (at_c <0> (back, three_view), 'a');
+        BOOST_CHECK_EQUAL (at_c <1> (back, three_view), 3.5);
+        BOOST_CHECK_EQUAL (at_c <2> (back, three_view), 4);
 
         rime::int_<2> two;
         // Three drops from whichever direction and the range is empty.

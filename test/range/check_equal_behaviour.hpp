@@ -250,6 +250,22 @@ template <class HasSize, class HasBack, class Zero>
             check_first_equal (direction, range1, range2);
         }
 
+        /**
+        Check that range1 and range2 are equal under \c at with increment.
+        \c reference must have already had \c increment elements dropped.
+        */
+        struct check_at {
+            template <class Direction, class Range1, class Range2,
+                class Increment>
+            void operator() (Direction const & direction,
+                Range1 const & current, Range2 const & reference, Increment gap)
+                const
+            {
+                check_equal_value (range::at (direction, gap, current),
+                    range::first (direction, reference));
+            }
+        };
+
     public:
         step() : zero() {}
 
@@ -268,7 +284,11 @@ template <class HasSize, class HasBack, class Zero>
             auto new_current = range::drop (direction, new_gap, current);
             auto new_reference = range::drop (direction, reference);
 
+            // Check current position: empty, size, first, and then at.
             check_equal (direction, new_current, new_reference);
+
+            rime::call_if (!range::empty (new_current), check_at(), nothing,
+                direction, current, reference, gap);
 
             // Recursively check combinations of drop with increment.
             // Recurse with drop (n + 1).

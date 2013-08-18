@@ -68,6 +68,10 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         check_equal_value (range::size (t), rime::size_t <0>());
 
         BOOST_MPL_ASSERT_NOT ((range::has::first <decltype (t)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has::at <rime::size_t <0>, decltype (t)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has::at <rime::size_t <1>, decltype (t)>));
     }
 
     // One element.
@@ -77,8 +81,21 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         check_equal_value (range::size (t), rime::size_t <1>());
 
         BOOST_MPL_ASSERT ((range::has::first <decltype (t) &>));
+        BOOST_MPL_ASSERT ((
+            range::has::at <rime::size_t <0>, decltype (t)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has::at <rime::size_t <1>, decltype (t)>));
 
         check_equal_value (range::first (t), 6.3);
+        check_equal_value (range::first (range::front, t), 6.3);
+        check_equal_value (range::first (range::back, t), 6.3);
+
+        check_equal_value (range::at (rime::size_t <0>(), t), 6.3);
+        check_equal_value (
+            range::at (range::front, rime::size_t <0>(), t), 6.3);
+        check_equal_value (
+            range::at (range::back, rime::size_t <0>(), t), 6.3);
+
     }
 
     // Two elements.
@@ -99,6 +116,12 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_CHECK (range::empty (range::drop (rime::size_t <2>(), t)));
         BOOST_CHECK (range::empty (range::drop (
             range::back, rime::size_t <2>(), t)));
+
+        check_equal_value (range::at (rime::size_t <0>(), t), 4);
+        check_equal_value (range::at (rime::size_t <1>(), t), 'a');
+        check_equal_value (range::at (range::front, rime::size_t <0>(), t), 4);
+        check_equal_value (range::at (range::back, rime::size_t <0>(), t), 'a');
+        check_equal_value (range::at (range::back, rime::size_t <1>(), t), 4);
     }
 
     // Three elements
@@ -123,6 +146,18 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
             range::back, rime::size_t <2>(), t)));
         BOOST_CHECK (range::empty (range::drop (
             range::back, rime::size_t <3>(), t)));
+
+        check_equal_value (range::at (rime::size_t <0>(), t), 4);
+        check_equal_value (range::at (rime::size_t <1>(), t), 'a');
+        check_equal_value (range::at (rime::size_t <2>(), t), 6.3);
+        check_equal_value (range::at (range::front, rime::size_t <0>(), t), 4);
+        check_equal_value (
+            range::at (range::front, rime::size_t <1>(), t), 'a');
+        check_equal_value (
+            range::at (range::front, rime::size_t <2>(), t), 6.3);
+        check_equal_value (range::at (range::back, rime::size_t <0>(), t), 6.3);
+        check_equal_value (range::at (range::back, rime::size_t <1>(), t), 'a');
+        check_equal_value (range::at (range::back, rime::size_t <2>(), t), 4);
     }
 }
 

@@ -45,8 +45,14 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     using range::size;
     using range::first;
     using range::drop;
+    using range::at;
+
     using range::front;
     using range::back;
+
+    rime::size_t <0> zero;
+    rime::size_t <1> one;
+    rime::size_t <2> two;
 
     std::vector <int> v;
 
@@ -65,11 +71,21 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     {
         BOOST_CHECK (!empty (v));
         BOOST_CHECK_EQUAL (size (v), 1);
+
         BOOST_CHECK_EQUAL (first (v), 5);
         BOOST_CHECK_EQUAL (first (front, v), 5);
         BOOST_CHECK_EQUAL (first (back, v), 5);
+
+        BOOST_CHECK_EQUAL (at (0, v), 5);
+        BOOST_CHECK_EQUAL (at (front, 0, v), 5);
+        BOOST_CHECK_EQUAL (at (back, 0, v), 5);
+        BOOST_CHECK_EQUAL (at (zero, v), 5);
+        BOOST_CHECK_EQUAL (at (front, zero, v), 5);
+        BOOST_CHECK_EQUAL (at (back, zero, v), 5);
+
         BOOST_CHECK (empty (drop (v)));
         BOOST_CHECK (empty (drop (1, v)));
+        BOOST_CHECK (empty (drop (one, v)));
     }
 
     v.push_back (6);
@@ -85,6 +101,18 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK (empty (drop (front, 1, drop (back, 2, v))));
         BOOST_CHECK_EQUAL (first (front, drop (front, v)), 6);
         BOOST_CHECK_EQUAL (first (back, v), 7);
+
+        BOOST_CHECK_EQUAL (at (0, v), 5);
+        BOOST_CHECK_EQUAL (at (1, v), 6);
+        BOOST_CHECK_EQUAL (at (2, v), 7);
+        BOOST_CHECK_EQUAL (at (front, 0, v), 5);
+        BOOST_CHECK_EQUAL (at (front, 1, v), 6);
+        BOOST_CHECK_EQUAL (at (front, 2, v), 7);
+        BOOST_CHECK_EQUAL (at (back, 0, v), 7);
+        BOOST_CHECK_EQUAL (at (back, 1, v), 6);
+        BOOST_CHECK_EQUAL (at (back, 2, v), 5);
+
+        BOOST_CHECK_EQUAL (at (two, v), 7);
     }
 }
 

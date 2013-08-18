@@ -59,6 +59,10 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         BOOST_MPL_ASSERT_NOT ((range::has::drop <int>));
         BOOST_MPL_ASSERT_NOT ((range::has::drop <int, char>));
         BOOST_MPL_ASSERT_NOT ((range::has::drop <double, int, char>));
+
+        BOOST_MPL_ASSERT_NOT ((range::has::at <int>));
+        BOOST_MPL_ASSERT_NOT ((range::has::at <int, char>));
+        BOOST_MPL_ASSERT_NOT ((range::has::at <double, int, char>));
     }
 
     weird_count c;
@@ -137,9 +141,29 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         weird_count const &>));
     BOOST_MPL_ASSERT ((range::has::drop <weird_direction, int, weird_count>));
 
+    BOOST_MPL_ASSERT_NOT ((
+        range::has::at <direction::front &, int, weird_count>));
+    BOOST_MPL_ASSERT_NOT ((range::has::at <int, weird_count>));
+    BOOST_MPL_ASSERT ((range::has::at <weird_direction, int, weird_count>));
+    BOOST_MPL_ASSERT_NOT ((
+        range::has::at <weird_reverse_direction, int, weird_count>));
+    BOOST_MPL_ASSERT ((std::is_same <
+        range::result_of::at <weird_direction, int, weird_count>::type,
+        int>));
+
+    BOOST_MPL_ASSERT ((range::has::at <weird_direction, rime::int_<1>,
+        weird_count const>));
+    BOOST_MPL_ASSERT ((range::has::at <weird_direction, rime::int_<5>,
+        weird_count const &>));
+    BOOST_MPL_ASSERT ((range::has::at <weird_direction, int, weird_count>));
+
     // Run-time behaviour.
     weird_direction direction (7);
     BOOST_CHECK_EQUAL (range::first (direction, c), 0);
+    BOOST_CHECK_EQUAL (range::at (direction, rime::constant <std::size_t, 0u>(),
+        c), 0);
+    BOOST_CHECK_EQUAL (range::at (direction, 2, c), 2);
+    BOOST_CHECK_EQUAL (range::at (direction, 21, c), 21);
 
     c = range::drop (direction, c);
     BOOST_CHECK_EQUAL (range::first (direction, c), 1);
@@ -159,6 +183,9 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
     c = range::drop (direction, 8,
         range::view (direction, weird_reverse_direction (direction), c));
     BOOST_CHECK_EQUAL (range::first (direction, c), 19);
+
+    BOOST_CHECK_EQUAL (range::at (direction, rime::constant <std::size_t, 5u>(),
+        c), 24);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

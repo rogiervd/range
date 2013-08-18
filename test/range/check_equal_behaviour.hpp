@@ -198,12 +198,21 @@ template <class HasSize, class HasBack, class Zero>
     Zero zero;
     check_drop_n() : zero() {}
 
-    struct step {
+    /**
+    Check equality of two ranges under drop with increment.
+    This means that after drop, empty, size, and first function the same as a
+    reference range.
+    This works with empty and non-empty ranges.
+    */
+    class step {
+    private:
         Zero zero;
         rime::size_t <1> one;
 
-        step() : zero() {}
-
+        /* check_first_equal */
+        // Not known at compile time that the range is empty.
+        // (It may be known to be non-empty, in which case this happily
+        // compiles.)
         template <class Direction, class Range>
             typename boost::disable_if <rime::equal_constant <
                 typename range::result_of::empty <Direction, Range>::type,
@@ -215,6 +224,7 @@ template <class HasSize, class HasBack, class Zero>
                 check_equal_value (range::first (direction, range1),
                     range::first (direction, range2));
         }
+        // Known only at compile time that the range is empty.
         template <class Direction, class Range>
             typename boost::enable_if <rime::equal_constant <
                 typename range::result_of::empty <Direction, Range>::type,
@@ -227,6 +237,9 @@ template <class HasSize, class HasBack, class Zero>
                 Range1 const & range1, Range2 const & range2) const;
         // Not defined.
 
+        /**
+        Check that range1 and range2 are equal under empty, size, and first.
+        */
         template <class Direction, class Range>
             void check_equal (Direction const & direction,
                 Range const & range1, Range const & range2) const
@@ -237,6 +250,16 @@ template <class HasSize, class HasBack, class Zero>
             check_first_equal (direction, range1, range2);
         }
 
+    public:
+        step() : zero() {}
+
+        /**
+        \param direction The direction to be checked.
+        \param current The current range to be checked.
+        \param reference The reference range, with \c gap elements already
+            dropped.
+        \param gap The amount of elements to be dropped from reference.
+        */
         template <class Direction, class Range1, class Range2, class Increment>
         void operator() (Direction const & direction, Range1 const & current,
             Range2 const & reference, Increment gap) const
@@ -247,6 +270,7 @@ template <class HasSize, class HasBack, class Zero>
 
             check_equal (direction, new_current, new_reference);
 
+            // Recursively check combinations of drop with increment.
             // Recurse with drop (n + 1).
             rime::call_if (!range::empty (new_current), *this, nothing,
                 direction, current, new_reference, new_gap);

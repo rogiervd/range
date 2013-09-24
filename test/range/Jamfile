@@ -1,6 +1,7 @@
 alias "range" :
     [ run direction.cpp ]
     [ run core.cpp ]
+    [ run detail/underlying.cpp ]
     [ run member_view.cpp ]
     [ run iterator_range.cpp ]
     [ run heavyweight.cpp ]

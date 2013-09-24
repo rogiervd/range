@@ -5,6 +5,7 @@ alias "range" :
     [ run member_view.cpp ]
     [ run iterator_range.cpp ]
     [ run heavyweight.cpp ]
+    [ run transform.cpp ]
 
     [ run count.cpp ]
     [ run std_container.cpp ]

@@ -342,8 +342,9 @@ namespace apply {
                     meta::front, is_direction <boost::mpl::_>, Arguments>::type
                 directions_rest;
 
-            typedef typename meta::transform <std::decay <boost::mpl::_>,
-                typename directions_rest::first>::type directions;
+            typedef typename meta::as_vector <meta::transform <
+                std::decay <boost::mpl::_>,
+                typename directions_rest::first>>::type directions;
 
             typedef typename detail::split <
                     meta::back, is_range <boost::mpl::_>,

@@ -92,11 +92,10 @@ namespace range {
             template <class ... Types> struct make_view_std_tuple {
                 // Create meta::vector <
                 //     std_tuple_extractors <rime::size_t<0>>, ...>.
-                typedef typename meta::transform <
+                typedef typename meta::as_vector <meta::transform <
                     std_tuple_extractor <boost::mpl::first <boost::mpl::_>>,
-                    typename meta::as_vector <typename meta::enumerate <
-                        meta::vector <Types...>>::type>::type
-                    >::type extractors_type;
+                    typename meta::enumerate <meta::vector <Types...>>::type
+                    >>::type extractors_type;
 
                 member_view <std::tuple <Types ...>, extractors_type>
                     operator() (std::tuple <Types ...> & t) const

@@ -78,11 +78,11 @@ namespace operation {
         template <class RangeTag, class Directions>
             struct passthrough_view <RangeTag, Directions,
                 typename boost::enable_if <
-                    meta::all <typename meta::transform <boost::mpl::and_ <
+                    meta::all <meta::transform <boost::mpl::and_ <
                         is_direction <boost::mpl::_1>,
                         is_implemented <operation::empty <
                             RangeTag, boost::mpl::_1>>>,
-                    Directions>::type>>::type>
+                    Directions>>>::type>
         : helper::call_with_last <Directions, helper::return_rvalue_reference>
         {};
     } // namespace detail

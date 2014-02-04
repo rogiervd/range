@@ -1,20 +1,5 @@
 alias "range" :
-    [ run direction.cpp ]
-    [ run core.cpp ]
-    [ run detail/underlying.cpp ]
-    [ run member_view.cpp ]
-    [ run iterator_range.cpp ]
-    [ run heavyweight.cpp ]
-    [ run transform.cpp ]
-
-    [ run count.cpp ]
-    [ run std_container.cpp ]
-    [ run std_tuple.cpp ]
-
-    [ run for_each_macro.cpp ]
-    [ run reverse.cpp ]
-    [ run walk_size.cpp ]
-    [ run find.cpp ]
-    [ run all_any.cpp ]
+    # Run all .cpp files in this directory as tests.
+    [ run_glob *.cpp detail/*.cpp ]
     ;
 

@@ -353,55 +353,68 @@ namespace apply {
             meta::vector <meta::vector<>, Other, meta::vector <>>>
         : operation::unimplemented {};
 
-        // Explicit specialisations to keep CLang 3.0 happy.
-        template <class Implementation, class Range>
+        /**
+        \return The default direction of the first range.
+        */
+        template <class Range, class ... MoreRanges> inline auto
+            first_default_direction (
+                Range const & range, MoreRanges const & ...)
+        RETURNS (::range::default_direction (range))
+
+        // Explicit specialisations for different numbers of "Other" to keep
+        // CLang 3.0 happy.
+        template <class Implementation, class ... Ranges>
             struct prepend_default_direction <Implementation,
-                meta::vector<>, meta::vector <Range>>
+                meta::vector<>, meta::vector <Ranges ...>>
         {
             Implementation implementation;
 
-            auto operator() (Range && range) const
-            RETURNS (implementation (range::default_direction (range),
-                std::forward <Range> (range)))
+            auto operator() (Ranges && ... ranges) const
+            RETURNS (implementation (first_default_direction (ranges ...),
+                std::forward <Ranges> (ranges) ...))
         };
 
-        template <class Implementation, class Other, class Range>
+        template <class Implementation, class Other, class ... Ranges>
             struct prepend_default_direction <Implementation,
-                meta::vector <Other>, meta::vector <Range>>
+                meta::vector <Other>, meta::vector <Ranges ...>>
         {
             Implementation implementation;
 
-            auto operator() (Other && other, Range && range) const
-            RETURNS (implementation (range::default_direction (range),
-                std::forward <Other> (other), std::forward <Range> (range)))
-        };
-
-        template <class Implementation, class Other1, class Other2, class Range>
-            struct prepend_default_direction <Implementation,
-                meta::vector <Other1, Other2>, meta::vector <Range>>
-        {
-            Implementation implementation;
-
-            auto operator() (Other1 && other_1, Other2 && other_2,
-                Range && range) const
-            RETURNS (implementation (range::default_direction (range),
-                std::forward <Other1> (other_1),
-                std::forward <Other2> (other_2), std::forward <Range> (range)))
+            auto operator() (Other && other, Ranges && ... ranges) const
+            RETURNS (implementation (first_default_direction (ranges ...),
+                std::forward <Other> (other),
+                std::forward <Ranges> (ranges) ...))
         };
 
         template <class Implementation, class Other1, class Other2,
-            class Other3, class Range>
-        struct prepend_default_direction <Implementation,
-            meta::vector <Other1, Other2, Other3>, meta::vector <Range>>
+                class ... Ranges>
+            struct prepend_default_direction <Implementation,
+                meta::vector <Other1, Other2>, meta::vector <Ranges ...>>
         {
             Implementation implementation;
 
             auto operator() (Other1 && other_1, Other2 && other_2,
-                Other3 && other_3, Range && range) const
-            RETURNS (implementation (range::default_direction (range),
+                Ranges && ... ranges) const
+            RETURNS (implementation (first_default_direction (ranges ...),
                 std::forward <Other1> (other_1),
                 std::forward <Other2> (other_2),
-                std::forward <Other3> (other_3), std::forward <Range> (range)))
+                std::forward <Ranges> (ranges) ...))
+        };
+
+        template <class Implementation, class Other1, class Other2,
+            class Other3, class ... Ranges>
+        struct prepend_default_direction <Implementation,
+            meta::vector <Other1, Other2, Other3>, meta::vector <Ranges ...>>
+        {
+            Implementation implementation;
+
+            auto operator() (Other1 && other_1, Other2 && other_2,
+                Other3 && other_3, Ranges && ... ranges) const
+            RETURNS (implementation (first_default_direction (ranges ...),
+                std::forward <Other1> (other_1),
+                std::forward <Other2> (other_2),
+                std::forward <Other3> (other_3),
+                std::forward <Ranges> (ranges) ...))
         };
 
     } // namespace automatic_arguments

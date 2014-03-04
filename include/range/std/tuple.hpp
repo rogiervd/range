@@ -120,7 +120,7 @@ namespace range {
             struct make_view <heavyweight_tag <std::pair <First, Second>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions,
+        : helper::call_with_last <1, Directions,
             detail::make_view_std_pair <First, Second>> {};
 
         // Specialisation for std::tuple.
@@ -128,7 +128,7 @@ namespace range {
             struct make_view <heavyweight_tag <std::tuple <Types ...>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions,
+        : helper::call_with_last <1, Directions,
             detail::make_view_std_tuple <Types ...>> {};
 
     } // namespace operation

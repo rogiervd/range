@@ -187,14 +187,14 @@ namespace range {
             struct make_view <heavyweight_tag <std::vector <Type, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::vector <Type, Allocator>>> {};
 
         template <class Type, class Allocator, class Directions>
             struct make_view <heavyweight_tag <std::deque <Type, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::deque <Type, Allocator>>> {};
 
         // forward_list: only with front.
@@ -202,7 +202,7 @@ namespace range {
             struct make_view <heavyweight_tag <
                     std::forward_list <Type, Allocator>>,
                 meta::vector <direction::front>>
-        : helper::call_with_last <meta::vector <direction::front>,
+        : helper::call_with_last <1, meta::vector <direction::front>,
             detail::view_std_container <std::forward_list <Type, Allocator>>>
         {};
 
@@ -210,7 +210,7 @@ namespace range {
             struct make_view <heavyweight_tag <std::list <Type, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::list <Type, Allocator>>> {};
 
         template <class Type, class Traits, class Allocator, class Directions>
@@ -218,7 +218,7 @@ namespace range {
                     std::basic_string <Type, Traits, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::basic_string <Type, Traits, Allocator>>> {};
 
         // Associative containers.
@@ -226,7 +226,7 @@ namespace range {
             struct make_view <heavyweight_tag <
                 std::set <Key, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::set <Key, Compare, Allocator>>>
         {};
 
@@ -234,7 +234,7 @@ namespace range {
             struct make_view <heavyweight_tag <
                 std::multiset <Key, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::multiset <Key, Compare, Allocator>>>
         {};
 
@@ -243,7 +243,7 @@ namespace range {
             struct make_view <heavyweight_tag <
                 std::map <Key, Value, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::map <Key, Value, Compare, Allocator>>>
         {};
 
@@ -252,7 +252,7 @@ namespace range {
             struct make_view <heavyweight_tag <
                 std::multimap <Key, Value, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::multimap <Key, Value, Compare, Allocator>>>
         {};
 
@@ -263,7 +263,7 @@ namespace range {
                 std::unordered_set <Key, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::unordered_set <Key, Hash, KeyEqual, Allocator>>>
         {};
 
@@ -273,7 +273,7 @@ namespace range {
                 std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>>
         {};
 
@@ -283,7 +283,7 @@ namespace range {
                 std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>>
         {};
 
@@ -294,7 +294,7 @@ namespace range {
                     Key, Value, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <Directions, detail::view_std_container <
+        : helper::call_with_last <1, Directions, detail::view_std_container <
             std::unordered_multimap <Key, Value, Hash, KeyEqual, Allocator>>>
         {};
 

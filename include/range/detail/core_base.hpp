@@ -113,47 +113,57 @@ namespace operation {
 
         /**
         Operation that skips the arguments that are given and returns only the
-        result of the function applied to the last argument.
+        result of the function applied to the last "Number" arguments.
         */
-        template <class SkipArguments, class Function> struct call_with_last;
+        template <unsigned Number, class SkipArguments, class Function>
+            struct call_with_last;
 
-        template <class ... SkipArguments, class Function>
-            struct call_with_last <meta::vector <SkipArguments ...>, Function>
+#if !(BOOST_CLANG && __clang_major__ == 3 && __clang_minor__ == 0)
+        template <unsigned Number, class ... SkipArguments, class Function>
+            struct call_with_last <
+                Number, meta::vector <SkipArguments ...>, Function>
         {
-            // Arguments are SkipArguments ..., LastArgument.
-            // We would like to return the last argument.
-            // CLang 3.0 confuses types when unpacking SkipArguments ... with
-            // LastArgument && last_argument.
-            // Workaround:
-#if (BOOST_CLANG && __clang_major__ == 3 && __clang_minor__ == 0)
-            template <class ... Arguments> struct result {
-                typedef decltype (Function() (std::declval <
-                    typename meta::first <meta::back,
-                        meta::vector <Arguments ...>>::type>())) type;
-            };
-
-            template <class OnlyArgument>
-                static typename result <OnlyArgument>::type
-                last (OnlyArgument && only_argument)
-            { return Function() (std::forward <OnlyArgument> (only_argument)); }
-
-            template <class FirstArgument, class ... Arguments>
-                static typename result <FirstArgument, Arguments ...>::type
-                last (FirstArgument &&, Arguments && ... arguments)
-            { return last (std::forward <Arguments> (arguments) ...); }
-
-            template <class ... Arguments>
-                typename result <Arguments ...>::type
-                operator() (Arguments && ... arguments) const
-            { return last (std::forward <Arguments> (arguments) ...); }
-#else
-            // Normal code.
-            template <class LastArgument> auto
+            template <class ... LastArguments> typename
+                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
+                std::result_of <Function (LastArguments ...)>>::type
                 operator() (SkipArguments const & ... skip_arguments,
-                    LastArgument && last_argument) const
-            RETURNS (Function() (std::forward <LastArgument> (last_argument)))
-#endif
+                    LastArguments && ... last_arguments) const
+            {
+                return Function() (
+                    std::forward <LastArguments> (last_arguments) ...);
+            }
         };
+#else
+        // We would like to return the last argument.
+        // CLang 3.0 confuses types when unpacking SkipArguments ... with
+        // LastArgument && last_argument.
+        // Workaround:
+        template <unsigned Number, class Function>
+            struct call_with_last <Number, meta::vector<>, Function>
+        {
+            template <class ... LastArguments> typename
+                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
+                std::result_of <Function (LastArguments ...)>>::type
+                operator() (LastArguments && ... last_arguments) const
+            {
+                return Function() (
+                    std::forward <LastArguments> (last_arguments) ...);
+            }
+        };
+
+        template <unsigned Number, class SkipArguments, class Function>
+            struct call_with_last
+        {
+            typedef call_with_last <Number,
+                typename meta::drop <SkipArguments>::type, Function> recursive;
+
+            template <class FirstArgument, class ... OtherArguments>
+                auto operator() (FirstArgument const & first_argument,
+                    OtherArguments && ... other_arguments) const
+            RETURNS (recursive() (
+                std::forward <OtherArguments> (other_arguments)...))
+        };
+#endif
 
     } // namespace helper
 

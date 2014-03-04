@@ -83,7 +83,8 @@ namespace operation {
                         is_implemented <operation::empty <
                             RangeTag, boost::mpl::_1>>>,
                     Directions>>>::type>
-        : helper::call_with_last <Directions, helper::return_rvalue_reference>
+        : helper::call_with_last <1,
+            Directions, helper::return_rvalue_reference>
         {};
     } // namespace detail
 

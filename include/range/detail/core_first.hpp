@@ -45,19 +45,8 @@ namespace apply {
     template <class ... Arguments> struct first;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct first
-    : operation::is_implemented <apply::first <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct first
-    : detail::compute_result <false, apply::first, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct first : detail::generic <apply::first> {};
+    struct first : generic <apply::first> {};
 } // namespace callable
 
 static const auto first = callable::first();

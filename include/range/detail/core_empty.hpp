@@ -52,7 +52,7 @@ namespace operation {
         struct empty    // Forward to the forward direction if it is available.
     : boost::mpl::if_ <
         boost::mpl::and_ <
-            ::direction::has::make_forward <Direction>,
+            has <direction::callable::make_forward (Direction)>,
             range_detail::is_implemented_forward <empty, RangeTag, Direction>
         >,
         range_detail::forward_operation <empty, RangeTag, Direction>,
@@ -68,19 +68,8 @@ namespace apply {
     template <class ... Arguments> struct empty;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct empty
-    : operation::is_implemented <apply::empty <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct empty
-    : detail::compute_result <false, apply::empty, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct empty : detail::generic <apply::empty> {};
+    struct empty : generic <apply::empty> {};
 } // namespace callable
 
 static const auto empty = callable::empty();

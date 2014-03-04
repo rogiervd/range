@@ -99,19 +99,8 @@ namespace apply {
     template <class ... Arguments> struct view;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct view
-    : operation::is_implemented <apply::view <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct view
-    : detail::compute_result <false, apply::view, meta::vector <Arguments...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct view : detail::generic <apply::view> {};
+    struct view : generic <apply::view> {};
 } // namespace callable
 
 static const auto view = callable::view();
@@ -152,8 +141,7 @@ template <class ... Arguments> struct is_view
             // Last argument is the range.
             typename meta::first <meta::back, meta::vector <Arguments...>>::type
             >::type,
-        typename std::decay <typename result_of::view <Arguments...>::type
-            >::type
+        typename decayed_result_of <callable::view (Arguments...)>::type
     >::type>::type {};
 
 } // namespace range

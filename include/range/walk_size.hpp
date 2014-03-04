@@ -29,14 +29,14 @@ namespace range {
 namespace callable {
 
     struct walk_size {
-        template <class Direction, class Range>
-            typename boost::lazy_enable_if <range::has::size <Direction, Range>,
-                range::result_of::size <Direction, Range>>::type
+        template <class Direction, class Range> typename
+            result_of_or <range::callable::size (Direction, Range)>::type
         operator() (Direction const & direction, Range && range) const
         { return range::size (direction, std::forward <Range> (range)); }
 
         template <class Direction, class Range>
-            typename boost::disable_if <range::has::size <Direction, Range>,
+            typename boost::disable_if <
+                range::has <range::callable::size (Direction, Range)>,
                 std::size_t>::type
         operator() (Direction const & direction, Range && range) const {
             std::size_t size = 0;

@@ -86,8 +86,10 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
         RIME_CHECK_EQUAL (empty (v), rime::true_);
         RIME_CHECK_EQUAL (size (v), rime::size_t <0u>());
 
-        BOOST_MPL_ASSERT_NOT ((range::has::first <decltype (v)>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <decltype (v)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::first (decltype (v))>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::drop (decltype (v))>));
     }
     {
         std::tuple <int> t (7);
@@ -99,8 +101,8 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
         RIME_CHECK_EQUAL (empty (v), rime::false_);
         RIME_CHECK_EQUAL (size (v), rime::size_t <1u>());
 
-        BOOST_MPL_ASSERT ((range::has::first <decltype (v)>));
-        BOOST_MPL_ASSERT ((range::has::drop <decltype (v)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (decltype (v))>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (decltype (v))>));
 
         auto f = range::first (v);
         BOOST_MPL_ASSERT ((std::is_same <decltype (f), std::tuple <int, int>>));
@@ -122,8 +124,10 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
             RIME_CHECK_EQUAL (empty (v), rime::false_);
             RIME_CHECK_EQUAL (size (v), rime::size_t <3u>());
 
-            BOOST_MPL_ASSERT ((range::has::first <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::drop <decltype (v)>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::first (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::drop (decltype (v))>));
 
             auto e1 = range::first (v);
             BOOST_MPL_ASSERT ((
@@ -179,11 +183,16 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_MPL_ASSERT ((is_homogeneous <decltype (v)>));
             // v should have elements 12, 21, -16.
 
-            BOOST_MPL_ASSERT ((range::has::empty <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::size <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::first <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::drop <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::drop <int, decltype (v)>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::empty (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::size (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::first (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::drop (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::drop (int, decltype (v))>));
 
             BOOST_CHECK (!empty (v));
             BOOST_CHECK_EQUAL (size (v), 3u);
@@ -218,11 +227,16 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_MPL_ASSERT ((is_homogeneous <decltype (v)>));
             // v should have elements 12, 21, -16.
 
-            BOOST_MPL_ASSERT ((range::has::empty <decltype (v)>));
-            BOOST_MPL_ASSERT_NOT ((range::has::size <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::first <decltype (v)>));
-            BOOST_MPL_ASSERT ((range::has::drop <decltype (v)>));
-            BOOST_MPL_ASSERT_NOT ((range::has::drop <int, decltype (v)>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::empty (decltype (v))>));
+            BOOST_MPL_ASSERT_NOT ((
+                range::has <range::callable::size (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::first (decltype (v))>));
+            BOOST_MPL_ASSERT ((
+                range::has <range::callable::drop (decltype (v))>));
+            BOOST_MPL_ASSERT_NOT ((
+                range::has <range::callable::drop (int, decltype (v))>));
 
             BOOST_CHECK (!empty (v));
 
@@ -259,13 +273,13 @@ BOOST_AUTO_TEST_CASE (test_range_transform_weird_count) {
 
         auto v = transform (weird_direction (7), twice, w);
 
-        BOOST_MPL_ASSERT ((std::is_same <
-            range::result_of::default_direction <decltype (v)>::type,
+        BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+                range::callable::default_direction (decltype (v))>::type,
             forgotten_to_define_direction>));
 
         BOOST_CHECK (!empty (direction, v));
-        BOOST_MPL_ASSERT_NOT ((
-            range::has::size <weird_direction, decltype (v)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::size (weird_direction, decltype (v))>));
 
         BOOST_CHECK_EQUAL (first (direction, v), 0);
         BOOST_CHECK_EQUAL (first (direction, drop (direction, v)), 2);

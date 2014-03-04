@@ -100,19 +100,8 @@ namespace apply {
     template <class ... Arguments> struct drop;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct drop
-    : operation::is_implemented <apply::drop <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct drop
-    : detail::compute_result <false, apply::drop, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct drop : detail::generic <apply::drop> {};
+    struct drop : generic <apply::drop> {};
 } // namespace callable
 
 static const auto drop = callable::drop();

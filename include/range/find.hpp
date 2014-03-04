@@ -116,16 +116,8 @@ namespace apply {
 
 } // namespace apply
 
-// has::find would be silly.
-
-namespace result_of {
-    template <class ... Arguments> struct find
-    : detail::compute_result <false, apply::find, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct find : detail::generic <apply::find> {};
+    struct find : generic <apply::find> {};
 } // namespace callable
 
 /**
@@ -233,8 +225,8 @@ namespace operation {
             If this is true, the resulting range will always be empty.
             */
             template <class Direction, class Range> struct always_empty {
-                typedef typename std::result_of <Predicate (typename
-                        result_of::first <Direction, Range>::type)>::type
+                typedef typename result_of <Predicate (
+                        callable::first (Direction, Range))>::type
                     predicate_result;
 
                 static const bool value = boost::mpl::and_ <
@@ -355,8 +347,8 @@ namespace operation {
             finder_type;
 
         template <class Direction, class Range> struct result
-        : std::result_of <finder_type (
-            Direction const &, typename result_of::view <Range>::type)> {};
+        : result_of <finder_type (Direction const &, callable::view (Range))>
+        {};
 
         template <class Direction, class Range>
             typename result <Direction, Range>::type

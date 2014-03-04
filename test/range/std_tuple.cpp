@@ -67,11 +67,12 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_CHECK (range::empty (t));
         check_equal_value (range::size (t), rime::size_t <0>());
 
-        BOOST_MPL_ASSERT_NOT ((range::has::first <decltype (t)>));
         BOOST_MPL_ASSERT_NOT ((
-            range::has::at <rime::size_t <0>, decltype (t)>));
+            range::has <range::callable::first (decltype (t))>));
         BOOST_MPL_ASSERT_NOT ((
-            range::has::at <rime::size_t <1>, decltype (t)>));
+            range::has <range::callable::at (rime::size_t <0>, decltype (t))>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::at (rime::size_t <1>, decltype (t))>));
     }
 
     // One element.
@@ -80,11 +81,12 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_CHECK (!range::empty (t));
         check_equal_value (range::size (t), rime::size_t <1>());
 
-        BOOST_MPL_ASSERT ((range::has::first <decltype (t) &>));
         BOOST_MPL_ASSERT ((
-            range::has::at <rime::size_t <0>, decltype (t)>));
+            range::has <range::callable::first (decltype (t) &)>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::at (rime::size_t <0>, decltype (t))>));
         BOOST_MPL_ASSERT_NOT ((
-            range::has::at <rime::size_t <1>, decltype (t)>));
+            range::has <range::callable::at (rime::size_t <1>, decltype (t))>));
 
         check_equal_value (range::first (t), 6.3);
         check_equal_value (range::first (range::front, t), 6.3);

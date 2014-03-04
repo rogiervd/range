@@ -52,12 +52,13 @@ BOOST_AUTO_TEST_CASE (test_range_count_homogeneous) {
         BOOST_CHECK (!empty (c));
         BOOST_CHECK (!empty (front, c));
 
-        static_assert (!range::has::size <decltype (c)>::value, "");
-        static_assert (
-            !range::has::size <direction::front, decltype (c)>::value, "");
+        static_assert (!range::has <
+            range::callable::size (decltype (c))>::value, "");
+        static_assert (!range::has <
+            range::callable::size (direction::front, decltype (c))>::value, "");
 
-        static_assert (
-            !range::has::first <direction::back, decltype (c)>::value, "");
+        static_assert (!range::has <
+            range::callable::first (direction::back, decltype (c))>::value, "");
 
         RIME_CHECK_EQUAL (first (c), -1);
         c = drop (c);
@@ -113,12 +114,13 @@ BOOST_AUTO_TEST_CASE (test_range_count_heterogeneous) {
         BOOST_CHECK (!empty (c));
         BOOST_CHECK (!empty (front, c));
 
-        static_assert (!range::has::size <decltype (c)>::value, "");
-        static_assert (
-            !range::has::size <direction::front, decltype (c)>::value, "");
+        static_assert (!range::has <
+            range::callable::size (decltype (c))>::value, "");
+        static_assert (!range::has <
+            range::callable::size (direction::front, decltype (c))>::value, "");
 
-        static_assert (
-            !range::has::first <direction::back, decltype (c)>::value, "");
+        static_assert (!range::has <
+            range::callable::first (direction::back, decltype (c))>::value, "");
 
         RIME_CHECK_EQUAL (first (c), rime::int_ <-3>());
         auto c2 = drop (c);

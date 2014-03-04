@@ -37,6 +37,7 @@ sequences.
 #include <boost/mpl/not.hpp>
 
 #include "rime/core.hpp"
+#include "detail/callable_traits.hpp"
 
 #include "direction/tag.hpp"
 
@@ -57,18 +58,21 @@ namespace range {
 } // namespace range
 
 namespace direction {
-    namespace has {
-        template <class Direction> struct reverse;
-        template <class Direction> struct make_forward;
-        template <class Direction> struct ensure_forward;
-    } // namespace has
+
+    namespace callable {
+        struct reverse;
+        struct make_forward;
+        struct ensure_forward;
+    } // namespace callable
+
+    using callable_traits::has;
+    using callable_traits::result_of;
+    using callable_traits::result_of_or;
 
     namespace operation {
 
-        struct unimplemented {};
-
-        template <class Operation> struct is_implemented
-        : boost::mpl::not_ <std::is_base_of <unimplemented, Operation>> {};
+        using ::callable_traits::unimplemented;
+        using ::callable_traits::is_implemented;
 
         /**
         Convert direction into a forward direction.
@@ -103,7 +107,7 @@ namespace direction {
         */
         template <class Direction> struct ensure_forward
         : boost::mpl::eval_if <is_direction <Direction>,
-            boost::mpl::if_ <has::make_forward <Direction>,
+            boost::mpl::if_ <has <callable::make_forward (Direction)>,
                 make_forward <Direction>,
                 pass_through <Direction>>,
             boost::mpl::identity <unimplemented>
@@ -125,66 +129,31 @@ namespace direction {
 
     } // namespace apply
 
-    namespace has {
+    namespace callable {
 
-        template <class Direction> struct reverse
-        : operation::is_implemented <apply::reverse <Direction>> {};
+        using ::callable_traits::generic;
 
-        template <class Direction> struct make_forward
-        : operation::is_implemented <apply::make_forward <Direction>> {};
+        struct reverse : generic <apply::reverse> {};
+        struct make_forward : generic <apply::make_forward> {};
+        struct ensure_forward : generic <apply::ensure_forward> {};
 
-        template <class Direction> struct ensure_forward
-        : operation::is_implemented <apply::ensure_forward <Direction>> {};
-
-    } // namespace has
-
-    namespace result_of {
-
-        template <class Direction, class Enable = void> struct make_forward;
-        template <class Direction>
-            struct make_forward <Direction, typename boost::enable_if <
-                has::make_forward <Direction>>::type>
-        : std::decay <decltype (apply::make_forward <Direction>() (
-            std::declval <Direction>()))> {};
-
-        template <class Direction, class Enable = void> struct reverse;
-        template <class Direction>
-            struct reverse <Direction, typename boost::enable_if <
-                has::reverse <Direction>>::type>
-        : std::decay <decltype (apply::reverse <Direction>() (
-            std::declval <Direction>()))> {};
-
-        template <class Direction, class Enable = void> struct ensure_forward;
-        template <class Direction>
-            struct ensure_forward <Direction, typename boost::enable_if <
-                is_direction <Direction>>::type>
-        : std::decay <decltype (apply::ensure_forward <Direction>() (
-            std::declval <Direction>()))> {};
-
-    } // namespace result_of
+    } // namespace callable
 
     /**
     \return The reverse of direction.
     */
-    template <class Direction>
-        auto reverse (Direction const & direction)
-        -> decltype (apply::reverse <Direction>() (direction))
-    { return apply::reverse <Direction>() (direction); }
+    static const auto reverse = callable::reverse();
 
     /**
     \return The forward equivalent of a backward direction.
     */
-    template <class Direction> auto make_forward (Direction const & direction)
-        -> decltype (apply::make_forward <Direction>() (direction))
-    { return apply::make_forward <Direction>() (direction); }
+    static const auto make_forward = callable::make_forward();
 
     /**
     \return The reverse of the direction if it is backward.
         Otherwise, return the argument.
     */
-    template <class Direction> auto ensure_forward (Direction const & direction)
-        -> decltype (apply::ensure_forward <Direction>() (direction))
-    { return apply::ensure_forward <Direction>() (direction); }
+    static const auto ensure_forward = callable::ensure_forward();
 
 } // namespace direction
 

@@ -66,202 +66,226 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
     // has::
     {
         // view
-        BOOST_MPL_ASSERT ((range::has::view <random_access_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::view <int, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::view <
-            direction::front, random_access_type const &>));
-        BOOST_MPL_ASSERT ((range::has::view <
-            direction::back &, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::view <
-            direction::front const, direction::back &, random_access_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::view (random_access_type)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::view (int, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::view (
+            direction::front, random_access_type const &)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::view (
+            direction::back &, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::view (
+            direction::front const, direction::back &, random_access_type)>));
 
         // empty
-        BOOST_MPL_ASSERT ((range::has::empty <random_access_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::empty <int, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::empty <
-            direction::front, random_access_type const &>));
-        BOOST_MPL_ASSERT ((range::has::empty <
-            direction::back, random_access_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::empty (random_access_type)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::empty (int, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+            direction::front, random_access_type const &)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+            direction::back, random_access_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::empty <bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::empty <const_bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::empty <
-            direction::front, bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::empty <
-            direction::back, bidirectional_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::empty (bidirectional_type)>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::empty (const_bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+            direction::front, bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+            direction::back, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::empty <forward_type &>));
-        BOOST_MPL_ASSERT ((range::has::empty <direction::front, forward_type>));
-        BOOST_MPL_ASSERT ((range::has::empty <direction::back, forward_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::empty (forward_type &)>));
+        BOOST_MPL_ASSERT ((range::has <
+            range::callable::empty (direction::front, forward_type)>));
+        BOOST_MPL_ASSERT ((range::has <
+            range::callable::empty (direction::back, forward_type)>));
 
         // size
-        BOOST_MPL_ASSERT ((range::has::size <random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::size <
-            direction::front, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::size <
-            direction::back, random_access_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::size (random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::size (
+            direction::front, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::size (
+            direction::back, random_access_type)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::size <bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <const_bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <
-            direction::front, bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <
-            direction::back, bidirectional_type const &>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::size (bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::size (const_bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+            direction::front, bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+            direction::back, bidirectional_type const &)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::size <forward_type const>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <
-            direction::front, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <
-            direction::back, forward_type>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::size (forward_type const)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+            direction::front, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+            direction::back, forward_type)>));
 
         // first
-        BOOST_MPL_ASSERT ((range::has::first <random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::first <
-            direction::front, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::first <
-            direction::back, random_access_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::first (random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            direction::front, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            direction::back, random_access_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::first <bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::first <
-            direction::front, bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::first <
-            direction::back, bidirectional_type>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::first (bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            direction::front, bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            direction::back, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::first <forward_type>));
-        BOOST_MPL_ASSERT ((range::has::first <direction::front, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::first <
-            direction::back, forward_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (forward_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            direction::front, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
+            direction::back, forward_type)>));
 
         // drop without increment
-        BOOST_MPL_ASSERT ((range::has::drop <random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, random_access_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, random_access_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::drop <bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, bidirectional_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::drop <forward_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <direction::front, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, forward_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            forward_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, forward_type)>));
 
         // drop with increment of 1
-        BOOST_MPL_ASSERT ((range::has::drop <
-            rime::int_ <1>, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, rime::int_ <1>, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, rime::int_ <1>, random_access_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            rime::int_ <1>, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <1>, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <1>, random_access_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::drop <
-            rime::int_ <1>, bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, rime::int_ <1>, bidirectional_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, rime::int_ <1>, bidirectional_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            rime::int_ <1>, bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <1>, bidirectional_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <1>, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT ((range::has::drop <rime::int_ <1>, forward_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, rime::int_ <1>, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, rime::int_ <1>, forward_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            rime::int_ <1>, forward_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <1>, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <1>, forward_type)>));
 
         // drop with increment of 2
-        BOOST_MPL_ASSERT ((range::has::drop <
-            rime::int_ <2>, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, rime::int_ <2>, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, rime::int_ <2>, random_access_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            rime::int_ <2>, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <2>, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <2>, random_access_type)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            rime::int_ <2>, bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::front, rime::int_ <2>, bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, rime::int_ <2>, bidirectional_type>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            rime::int_ <2>, bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <2>, bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <2>, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            rime::int_ <2>, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::front, rime::int_ <2>, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, rime::int_ <2>, forward_type>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            rime::int_ <2>, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::front, rime::int_ <2>, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, rime::int_ <2>, forward_type)>));
 
         // drop with increment of int
-        BOOST_MPL_ASSERT ((range::has::drop <int, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::front, int, random_access_type>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            direction::back, int, random_access_type>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            int, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::front, int, random_access_type)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            direction::back, int, random_access_type)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <int, bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::front, int, bidirectional_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, int, bidirectional_type>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            int, bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::front, int, bidirectional_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, int, bidirectional_type)>));
 
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <int, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::front, int, forward_type>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <
-            direction::back, int, forward_type>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            int, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::front, int, forward_type)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
+            direction::back, int, forward_type)>));
     }
 
     // Spot check result_of::
     {
         // view
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::view <random_access_type>::type,
+            range::result_of <range::callable::view (random_access_type)>::type,
             random_access_type &&>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::view <direction::back,
-            bidirectional_type &>::type, bidirectional_type &>));
+            range::result_of <range::callable::view (direction::back,
+            bidirectional_type &)>::type, bidirectional_type &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::view <direction::front &,
-                forward_type const &>::type, forward_type const &>));
+            range::result_of <range::callable::view (direction::front &,
+                forward_type const &)>::type, forward_type const &>));
 
         // empty
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::empty <random_access_type>::type, bool>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::empty <direction::back, bidirectional_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::empty (random_access_type)>::type, bool>));
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::empty (direction::back, bidirectional_type)>::type,
             bool>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::empty <direction::front, forward_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::empty (direction::front, forward_type)>::type,
             bool>));
 
         // size returns an unsigned integer.
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::size <random_access_type>::type, std::size_t>));
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::size (random_access_type)>::type, std::size_t>));
 
         // first
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::first <random_access_type>::type, int &>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::first <direction::back, bidirectional_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::first (random_access_type)>::type, int &>));
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::first (direction::back, bidirectional_type)>::type,
             double &>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::first <direction::back, const_bidirectional_type
-            >::type, double const &>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::first <direction::front, forward_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::first (direction::back, const_bidirectional_type
+            )>::type, double const &>));
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::first (direction::front, forward_type)>::type,
             char &>));
 
         // drop
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::drop <random_access_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::drop (random_access_type)>::type,
             random_access_type>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::drop <direction::back, bidirectional_type &
-            >::type, bidirectional_type>));
-        BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of::drop <forward_type>::type,
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::drop (direction::back, bidirectional_type &
+            )>::type, bidirectional_type>));
+        BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
+            range::callable::drop (forward_type)>::type,
             forward_type>));
     }
 }

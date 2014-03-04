@@ -119,12 +119,14 @@ namespace range {
 BOOST_AUTO_TEST_SUITE(test_range_heavyweight)
 
 BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
-    BOOST_MPL_ASSERT ((range::has::empty <std::forward_list <int>>));
-    BOOST_MPL_ASSERT ((range::has::empty <
-        direction::front, std::forward_list <int> &>));
-    BOOST_MPL_ASSERT_NOT ((range::has::size <std::forward_list <int> const>));
-    BOOST_MPL_ASSERT_NOT ((range::has::size <
-        direction::front &, std::forward_list <int> const &>));
+    BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+        std::forward_list <int>)>));
+    BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+        direction::front, std::forward_list <int> &)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+        std::forward_list <int> const)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+        direction::front &, std::forward_list <int> const &)>));
 
     using range::empty;
     using range::size;
@@ -191,28 +193,32 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
     // weird_heavyweight_count
     {
         // weird_direction.
-        BOOST_MPL_ASSERT ((range::has::view <
-            weird_direction, weird_heavyweight_count>));
-        BOOST_MPL_ASSERT ((range::has::empty <
-            weird_direction, weird_heavyweight_count>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <
-            weird_direction, weird_heavyweight_count>));
-        BOOST_MPL_ASSERT ((range::has::first <
-            weird_direction, weird_heavyweight_count const &>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            weird_direction, weird_heavyweight_count &>));
-        BOOST_MPL_ASSERT ((range::has::drop <
-            weird_direction, int, weird_heavyweight_count &>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::view (
+            weird_direction, weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::empty (
+            weird_direction, weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
+            weird_direction, weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::first (
+            weird_direction, weird_heavyweight_count const &)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            weird_direction, weird_heavyweight_count &)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::drop (
+            weird_direction, int, weird_heavyweight_count &)>));
 
         // without direction
-        BOOST_MPL_ASSERT_NOT ((range::has::view <weird_heavyweight_count>));
-        BOOST_MPL_ASSERT_NOT ((range::has::empty <weird_heavyweight_count>));
-        BOOST_MPL_ASSERT_NOT ((range::has::size <weird_heavyweight_count>));
-        BOOST_MPL_ASSERT_NOT ((
-            range::has::first <weird_heavyweight_count const &>));
-        BOOST_MPL_ASSERT_NOT ((range::has::drop <weird_heavyweight_count &>));
-        BOOST_MPL_ASSERT_NOT ((
-            range::has::drop <int, weird_heavyweight_count &>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::view (weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::empty (weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::size (weird_heavyweight_count)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::first (weird_heavyweight_count const &)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::drop (weird_heavyweight_count &)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::drop (int, weird_heavyweight_count &)>));
 
         weird_heavyweight_count w;
         weird_direction d (7);

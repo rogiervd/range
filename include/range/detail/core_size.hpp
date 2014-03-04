@@ -49,7 +49,7 @@ namespace operation {
     // Forward to the forward direction if it is available.
     : boost::mpl::if_ <
         boost::mpl::and_ <
-            ::direction::has::make_forward <Direction>,
+            has <direction::callable::make_forward (Direction)>,
             range_detail::is_implemented_forward <size, RangeTag, Direction>
         >,
         range_detail::forward_operation <size, RangeTag, Direction>,
@@ -65,19 +65,8 @@ namespace apply {
     template <class ... Arguments> struct size;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct size
-    : operation::is_implemented <apply::size <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct size
-    : detail::compute_result <false, apply::size, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct size : detail::generic <apply::size> {};
+    struct size : generic <apply::size> {};
 } // namespace callable
 
 static const auto size = callable::size();

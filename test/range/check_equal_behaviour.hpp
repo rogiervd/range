@@ -93,8 +93,10 @@ template <class Range, class Reference>
     void check_empty (Range const & range, Reference const & reference)
 {
     // \todo Without direction.
-    static_assert (range::has::empty <direction::front, Range>::value, "");
-    static_assert (range::has::empty <direction::back, Range>::value, "");
+    static_assert (range::has <range::callable::empty (
+        direction::front, Range)>::value, "");
+    static_assert (range::has <range::callable::empty (
+        direction::back, Range)>::value, "");
     check_equal_value (range::empty (range::front, range),
         range::empty (range::front, reference));
     check_equal_value (range::empty (range::back, range),
@@ -106,8 +108,10 @@ template <class HasSize, class Range, class Reference>
     typename boost::enable_if <HasSize>::type
     check_size (Range const & range, Reference const & reference)
 {
-    static_assert (range::has::size <direction::front, Range>::value, "");
-    static_assert (range::has::size <direction::back, Range>::value, "");
+    static_assert (range::has <range::callable::size (
+        direction::front, Range)>::value, "");
+    static_assert (range::has <range::callable::size (
+        direction::back, Range)>::value, "");
     check_equal_value (range::size (range::front, range),
         range::size (range::front, reference));
     check_equal_value (range::size (range::back, range),
@@ -116,7 +120,10 @@ template <class HasSize, class Range, class Reference>
 template <class HasSize, class Range, class Reference>
     typename boost::disable_if <HasSize>::type
     check_size (Range const & range, Reference const & reference, void * = 0)
-{ static_assert (!range::has::size <direction::front, Range>::value, ""); }
+{
+    static_assert (!range::has <range::callable::size (
+        direction::front, Range)>::value, "");
+}
 
 /* Main loop. */
 
@@ -215,7 +222,8 @@ template <class HasSize, class HasBack, class Zero>
         // compiles.)
         template <class Direction, class Range>
             typename boost::disable_if <rime::equal_constant <
-                typename range::result_of::empty <Direction, Range>::type,
+                typename range::result_of <range::callable::empty (
+                    Direction, Range)>::type,
                 rime::true_type>>::type
             check_first_equal (Direction const & direction,
                 Range const & range1, Range const & range2) const
@@ -227,7 +235,8 @@ template <class HasSize, class HasBack, class Zero>
         // Known only at compile time that the range is empty.
         template <class Direction, class Range>
             typename boost::enable_if <rime::equal_constant <
-                typename range::result_of::empty <Direction, Range>::type,
+                typename range::result_of <range::callable::empty (
+                    Direction, Range)>::type,
                 rime::true_type>>::type
             check_first_equal (Direction const & direction,
                 Range const & range1, Range const & range2) const {}

@@ -67,9 +67,8 @@ namespace operation {
     {
         template <class Range> struct result {
             typedef typename std::decay <Function>::type function_type;
-            typedef typename std::decay <
-                    typename range::result_of::view <Directions..., Range>::type
-                >::type range_type;
+            typedef typename decayed_result_of <range::callable::view (
+                Directions..., Range)>::type range_type;
 
             typedef range::transform_view <function_type, range_type> type;
         };
@@ -123,15 +122,8 @@ namespace apply {
     template <class ... Arguments> struct transform;
 } // namespace apply
 
-namespace result_of {
-    template <class ... Arguments> struct transform
-    : detail::compute_result <false, apply::transform,
-        meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct transform : detail::generic <apply::transform> {};
+    struct transform : generic <apply::transform> {};
 } // namespace callable
 
 /**
@@ -213,8 +205,8 @@ namespace operation {
     {
         template <class Function, class Underlying> struct result {
             typedef transform_view <Function, typename
-                range::result_of::drop <Direction, Increment, Underlying>::type>
-                type;
+                range::decayed_result_of <range::callable::drop (
+                    Direction, Increment, Underlying)>::type> type;
         };
 
         // Compute drop (n, underlying) and then re-wrap it in a transform_view.

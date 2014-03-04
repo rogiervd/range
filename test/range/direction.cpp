@@ -30,40 +30,52 @@ BOOST_AUTO_TEST_SUITE(test_range_direction)
 
 BOOST_AUTO_TEST_CASE (test_weird_direction) {
     // make_forward
-    static_assert (!direction::has::make_forward <int>::value, "");
-    static_assert (!direction::has::make_forward <int const>::value, "");
-    static_assert (!direction::has::make_forward <direction::front>::value, "");
-    static_assert (!direction::has::make_forward <direction::front const>
-        ::value, "");
-    static_assert (direction::has::make_forward <direction::back>::value, "");
-    static_assert (direction::has::make_forward <direction::back const>
-        ::value, "");
-    static_assert (!direction::has::make_forward <weird_direction>::value, "");
-    static_assert (!direction::has::make_forward <weird_direction const>
-        ::value, "");
-    static_assert (direction::has::make_forward <weird_reverse_direction>
-        ::value, "");
-    static_assert (direction::has::make_forward <weird_reverse_direction const>
-        ::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        int)>::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        int const)>::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        direction::front)>::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        direction::front const)>::value, "");
+    static_assert (direction::has <direction::callable::make_forward (
+        direction::back)>::value, "");
+    static_assert (direction::has <direction::callable::make_forward (
+        direction::back const)>::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        weird_direction)>::value, "");
+    static_assert (!direction::has <direction::callable::make_forward (
+        weird_direction const)>::value, "");
+    static_assert (direction::has <direction::callable::make_forward (
+        weird_reverse_direction)>::value, "");
+    static_assert (direction::has <direction::callable::make_forward (
+        weird_reverse_direction const)>::value, "");
 
-    static_assert (!direction::has::ensure_forward <int>::value, "");
-    static_assert (direction::has::ensure_forward <direction::front>
-        ::value, "");
-    static_assert (direction::has::ensure_forward <direction::back>::value, "");
-    static_assert (direction::has::ensure_forward <weird_direction>::value, "");
-    static_assert (direction::has::ensure_forward <weird_reverse_direction>
-        ::value, "");
-    static_assert (direction::has::ensure_forward <weird_reverse_direction &>
-        ::value, "");
+    static_assert (!direction::has <direction::callable::ensure_forward (
+        int)>::value, "");
+    static_assert (direction::has <direction::callable::ensure_forward (
+        direction::front)>::value, "");
+    static_assert (direction::has <direction::callable::ensure_forward (
+        direction::back)>::value, "");
+    static_assert (direction::has <direction::callable::ensure_forward (
+        weird_direction)>::value, "");
+    static_assert (direction::has <direction::callable::ensure_forward (
+        weird_reverse_direction)>::value, "");
+    static_assert (direction::has <direction::callable::ensure_forward (
+        weird_reverse_direction &)>::value, "");
 
-    static_assert (!direction::has::reverse <int>::value, "");
-    static_assert (direction::has::reverse <direction::front>::value, "");
-    static_assert (direction::has::reverse <direction::back>::value, "");
-    static_assert (direction::has::reverse <weird_direction>::value, "");
-    static_assert (direction::has::reverse <weird_reverse_direction>
-        ::value, "");
-    static_assert (direction::has::reverse <weird_reverse_direction &&>
-        ::value, "");
+    static_assert (!direction::has <direction::callable::reverse (
+        int)>::value, "");
+    static_assert (direction::has <direction::callable::reverse (
+        direction::front)>::value, "");
+    static_assert (direction::has <direction::callable::reverse (
+        direction::back)>::value, "");
+    static_assert (direction::has <direction::callable::reverse (
+        weird_direction)>::value, "");
+    static_assert (direction::has <direction::callable::reverse (
+        weird_reverse_direction)>::value, "");
+    static_assert (direction::has <direction::callable::reverse (
+        weird_reverse_direction &&)>::value, "");
 
     // 7 is the magic number.
     weird_direction d (7);
@@ -78,22 +90,22 @@ BOOST_AUTO_TEST_CASE (test_weird_direction) {
     auto d3 = direction::ensure_forward (d1);
     static_assert (std::is_same <decltype (d3), weird_direction>::value, "");
 
-    static_assert (std::is_same <
-        direction::result_of::make_forward <weird_reverse_direction>::type,
+    static_assert (std::is_same <direction::result_of <
+        direction::callable::make_forward (weird_reverse_direction)>::type,
         weird_direction>::value, "");
 
-    static_assert (std::is_same <
-        direction::result_of::reverse <weird_direction const>::type,
+    static_assert (std::is_same < direction::result_of <
+        direction::callable::reverse (weird_direction const)>::type,
         weird_reverse_direction>::value, "");
-    static_assert (std::is_same <
-        direction::result_of::reverse <weird_reverse_direction &>::type,
+    static_assert (std::is_same < direction::result_of <
+        direction::callable::reverse (weird_reverse_direction &)>::type,
         weird_direction>::value, "");
 
-    static_assert (std::is_same <
-        direction::result_of::ensure_forward <weird_direction &&>::type,
+    static_assert (std::is_same < direction::result_of <
+        direction::callable::ensure_forward (weird_direction &&)>::type,
         weird_direction>::value, "");
-    static_assert (std::is_same <
-        direction::result_of::ensure_forward <weird_reverse_direction>::type,
+    static_assert (std::is_same < direction::result_of <
+        direction::callable::ensure_forward (weird_reverse_direction)>::type,
         weird_direction>::value, "");
 }
 

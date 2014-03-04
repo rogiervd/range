@@ -41,16 +41,12 @@ namespace detail {
     Return true iff Range is homogeneous in Direction.
     \pre bump <Direction, Range> exists.
     */
-    template <class Direction, class Range> struct is_homogeneous_in_impl
-    : boost::is_same <
-        typename std::decay <Range>::type,
-        typename std::decay <typename result_of::drop <Direction, Range>::type
-            >::type
-    > {};
-
     template <class Direction, class Range> struct is_homogeneous_in
-    : boost::mpl::and_ <has::drop <Direction, Range>,
-        is_homogeneous_in_impl <Direction, Range>> {};
+    : boost::is_same <
+        typename std::decay <typename result_of <Range>::type>::type,
+        typename std::decay <typename result_of_or <
+            callable::drop (Direction, Range), void>::type>::type
+    > {};
 
     /**
     Metafunction that returns true iff the range, the last argument, is
@@ -74,6 +70,7 @@ number of times, a homogeneous range cannot become heterogeneous.
 The last argument is Range.
 The arguments before it form Directions.
 If only one argument is given, it is Range, and its default direction is used.
+Range can also be a callable expression.
 */
 template <class ... Arguments> struct is_homogeneous;
 
@@ -85,7 +82,8 @@ template <class ... Arguments> struct is_homogeneous
 >::type {};
 
 template <class Range> struct is_homogeneous <Range>
-: is_homogeneous <typename result_of::default_direction <Range>::type, Range>
+: is_homogeneous <
+    typename result_of <callable::default_direction (Range)>::type, Range>
 {};
 
 } // namespace range

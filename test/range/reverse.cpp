@@ -163,8 +163,10 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_homogeneous) {
         std::list <char> l;
 
         auto r = reverse (l);
-        static_assert (!range::has::size <decltype (r)>::value, "");
-        static_assert (!range::has::drop <int, decltype (r)>::value, "");
+        static_assert (
+            !range::has <range::callable::size (decltype (r))>::value, "");
+        static_assert (
+            !range::has <range::callable::drop (int, decltype (r))>::value, "");
 
         BOOST_CHECK (empty (r));
 

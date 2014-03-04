@@ -59,30 +59,6 @@ namespace operation {
         struct view <heavyweight_tag <Container>, Directions>
     : make_view <heavyweight_tag <Container>, Directions> {};
 
-    namespace heavyweight_detail {
-
-        struct make_nothing {};
-
-        template <template <class ...> class Apply,
-            class Container, class Direction, class ... Other>
-        struct enable_if_implemented_view_implementation
-        : boost::enable_if <is_implemented <Apply <Direction, Other ...,
-            typename result_of::view <Direction, Container>::type>>> {};
-
-        /**
-        Contain "typedef void type" iff view (Direction, Container) is
-        implemented and Apply <Direction, Other ..., view (...)> is implemented.
-        */
-        template <template <class ...> class Apply,
-            class Container, class Direction, class ... Other>
-        struct enable_if_implemented_view
-        : boost::mpl::if_ <has::view <Direction, Container>,
-            enable_if_implemented_view_implementation <
-                Apply, Container, Direction, Other ...>,
-            make_nothing>::type {};
-
-    } // namespace heavyweight_detail
-
     /*
     Operations on heavyweight ranges forward to the same operation applied to
     the result of view (direction, range).
@@ -93,8 +69,8 @@ namespace operation {
     // empty
     template <class Container, class Direction>
         struct empty <heavyweight_tag <Container>, Direction,
-            typename heavyweight_detail::enable_if_implemented_view <
-                apply::empty, Container, Direction>::type>
+            typename boost::enable_if <has <callable::empty (
+                Direction, callable::view (Direction, Container))>>::type>
     {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
@@ -105,8 +81,8 @@ namespace operation {
     // size
     template <class Container, class Direction>
         struct size <heavyweight_tag <Container>, Direction,
-            typename heavyweight_detail::enable_if_implemented_view <
-                apply::size, Container, Direction>::type>
+            typename boost::enable_if <has <callable::size (
+                Direction, callable::view (Direction, Container))>>::type>
     {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
@@ -117,8 +93,8 @@ namespace operation {
     // first
     template <class Container, class Direction>
         struct first <heavyweight_tag <Container>, Direction,
-            typename heavyweight_detail::enable_if_implemented_view <
-                apply::first, Container, Direction>::type>
+            typename boost::enable_if <has <callable::first (
+                Direction, callable::view (Direction, Container))>>::type>
     {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
@@ -129,8 +105,9 @@ namespace operation {
     // drop
     template <class Container, class Direction, class Increment>
         struct drop <heavyweight_tag <Container>, Direction, Increment,
-            typename heavyweight_detail::enable_if_implemented_view <
-                apply::drop, Container, Direction, Increment>::type>
+            typename boost::enable_if <has <callable::drop (
+                Direction, Increment, callable::view (Direction, Container))>
+            >::type>
     {
         template <class CVContainer> auto
         operator() (Direction const & direction, Increment const & increment,

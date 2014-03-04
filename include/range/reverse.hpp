@@ -57,14 +57,15 @@ template <class UnderlyingTag> struct reverse_view_tag;
 template <class Underlying> struct tag_of_bare <reverse_view <Underlying>>
 { typedef reverse_view_tag <typename tag_of <Underlying>::type> type; };
 
-namespace result_of {
+namespace reverse_detail {
     template <class Range> class reverse {
-        typedef typename range::result_of::view <Range>::type view;
+        typedef typename range::result_of <range::callable::view (Range)>::type
+            view;
         typedef typename std::decay <view>::type decayed_view;
     public:
         typedef reverse_view <decayed_view> type;
     };
-} // namespace result_of
+} // namespace reverse_detail
 
 /**
 Returns a view of the range with the elements reversed.
@@ -77,10 +78,10 @@ converted on the fly by direction::reverse().
     It is turned into a view before it is stored inside the return type.
 */
 template <class Range> inline
-    typename result_of::reverse <Range>::type
+    typename reverse_detail::reverse <Range>::type
     reverse (Range && range)
 {
-    return typename result_of::reverse <Range>::type (
+    return typename reverse_detail::reverse <Range>::type (
         range::view (std::forward <Range> (range)));
 }
 
@@ -135,7 +136,8 @@ namespace operation {
             struct is_reverse_implemented_implementation
         : operation::is_implemented <
             typename boost::mpl::apply <OperationLambda,
-                typename direction::result_of::reverse <Direction>::type>::type>
+                typename result_of <direction::callable::reverse (Direction)
+                >::type>::type>
         {};
 
         /**
@@ -146,7 +148,7 @@ namespace operation {
         template <class OperationLambda, class Direction>
             struct is_reverse_implemented
         : boost::mpl::and_ <
-            direction::has::reverse <Direction>,
+            has <direction::callable::reverse (Direction)>,
             is_reverse_implemented_implementation <OperationLambda, Direction>>
         {};
 
@@ -160,9 +162,9 @@ namespace operation {
         // The return type is given explicitly because otherwise GCC 4.6
         // fails.
         template <class ReverseView>
-            typename range::result_of::empty <
-                typename direction::result_of::reverse <Direction>::type,
-                typename reverse_detail::underlying_type <ReverseView>::type
+            typename range::result_of <range::callable::empty (
+                direction::callable::reverse (Direction),
+                typename reverse_detail::underlying_type <ReverseView>::type)
             >::type operator() (Direction const & direction,
                 ReverseView && reverse_view) const
         {
@@ -178,9 +180,9 @@ namespace operation {
                 size <UnderlyingTag, boost::mpl::_1>, Direction>>::type>
     {
         template <class ReverseView>
-            typename range::result_of::size <
-                typename direction::result_of::reverse <Direction>::type,
-                typename reverse_detail::underlying_type <ReverseView>::type
+            typename range::result_of <range::callable::size (
+                direction::callable::reverse (Direction),
+                typename reverse_detail::underlying_type <ReverseView>::type)
             >::type operator() (Direction const & direction,
                 ReverseView && reverse_view) const
         {
@@ -196,9 +198,9 @@ namespace operation {
                 first <UnderlyingTag, boost::mpl::_1>, Direction>>::type>
     {
         template <class ReverseView>
-            typename range::result_of::first <
-                typename direction::result_of::reverse <Direction>::type,
-                typename reverse_detail::underlying_type <ReverseView>::type
+            typename range::result_of <range::callable::first (
+                direction::callable::reverse (Direction),
+                typename reverse_detail::underlying_type <ReverseView>::type)
             >::type operator() (Direction const & direction,
                 ReverseView && reverse_view) const
         {
@@ -220,12 +222,11 @@ namespace operation {
             >::type>
     {
         template <class ReverseView>
-            typename range::result_of::reverse <
-                typename range::result_of::drop <
-                    typename direction::result_of::reverse <Direction>::type,
-                    Increment,
+            typename range::reverse_detail::reverse <
+                typename result_of <range::callable::drop (
+                    direction::callable::reverse (Direction), Increment,
                     typename reverse_detail::underlying_type <ReverseView>::type
-                >::type
+                )>::type
             >::type operator() (Direction const & direction,
                 Increment const & increment, ReverseView && reverse_view) const
         {

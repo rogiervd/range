@@ -51,19 +51,8 @@ namespace apply {
     template <class ... Arguments> struct at;
 } // namespace apply
 
-namespace has {
-    template <class ... Arguments> struct at
-    : operation::is_implemented <apply::at <Arguments ...>> {};
-} // namespace has
-
-namespace result_of {
-    template <class ... Arguments> struct at
-    : detail::compute_result <false, apply::at, meta::vector <Arguments ...>>
-    {};
-} // namespace result_of
-
 namespace callable {
-    struct at : detail::generic <apply::at> {};
+    struct at : generic <apply::at> {};
 } // namespace callable
 
 /**
@@ -110,9 +99,8 @@ namespace apply {
 
         template <class Direction, class Index, class Range>
             struct at
-        : boost::mpl::if_ <operation::is_implemented <
-            apply::first <Direction, typename range::result_of::drop <
-                Direction, Index, Range>::type>>,
+        : boost::mpl::if_ <range::has <callable::first (Direction,
+                range::callable::drop (Direction, Index, Range))>,
             at_implementation <Direction, Index, Range>,
             operation::unimplemented
         >::type {};
@@ -128,11 +116,9 @@ namespace apply {
         template <class Direction, class Index, class Range>
             struct at <meta::vector <Direction>, meta::vector <Index>,
                 meta::vector <Range>>
-        : boost::mpl::if_ <boost::mpl::and_ <
+        : boost::mpl::if_ <
             operation::is_implemented <
-                apply::drop <Direction, Index, Range>>,
-            operation::is_implemented <
-                apply::detail::at <Direction, Index, Range>>>,
+                apply::detail::at <Direction, Index, Range>>,
             apply::detail::at <Direction, Index, Range>,
             operation::unimplemented>::type {};
 

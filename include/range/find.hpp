@@ -112,7 +112,8 @@ namespace apply {
     /** find */
     template <class ... Arguments> struct find
     : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::find, meta::vector <Arguments ...>>::type {};
+        automatic_arguments::call_with_view <automatic_arguments::find>::apply,
+        meta::vector <Arguments ...>>::type {};
 
 } // namespace apply
 
@@ -347,7 +348,7 @@ namespace operation {
             finder_type;
 
         template <class Direction, class Range> struct result
-        : result_of <finder_type (Direction const &, callable::view (Range))>
+        : result_of <finder_type (Direction const &, Range)>
         {};
 
         template <class Direction, class Range>
@@ -360,8 +361,7 @@ namespace operation {
             finder_type finder (std::forward <Predicate> (predicate),
                 std::forward <NonEmptyActor> (non_empty_actor),
                 std::forward <EmptyActor> (empty_actor));
-            return finder (direction,
-                range::view (std::forward <Range> (range)));
+            return finder (direction, std::forward <Range> (range));
         }
     };
 

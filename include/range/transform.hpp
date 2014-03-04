@@ -59,62 +59,24 @@ private:
 
 namespace operation {
 
-    template <class RangeTag, class Directions, class Function>
-        struct transform;
+    namespace transform_detail {
 
-    template <class RangeTag, class ... Directions, class Function>
-        struct transform <RangeTag, meta::vector <Directions ...>, Function>
-    {
-        template <class Range> struct result {
-            typedef typename std::decay <Function>::type function_type;
-            typedef typename decayed_result_of <range::callable::view (
-                Directions..., Range)>::type range_type;
-
-            typedef range::transform_view <function_type, range_type> type;
+        struct make_transform_view {
+            template <class Function, class Range> auto
+                operator() (Function && function, Range && range) const
+            RETURNS (range::transform_view <
+                    typename std::decay <Function>::type,
+                    typename std::decay <Range>::type>
+                (std::forward <Function> (function),
+                    std::forward <Range> (range)))
         };
 
-#if !(BOOST_CLANG && __clang_major__ == 3 && __clang_minor__ == 0)
-        /**
-        If the Range is not a view, call view (Range), i.e. use the default
-        direction.
-        */
-        template <class Range> typename result <Range>::type
-            operator() (Directions const & ... directions,
-                Function && function, Range && range) const
-        {
-            return typename result <Range>::type
-                (std::forward <Function> (function),
-                    range::view (directions ..., std::forward <Range> (range)));
-        }
-#else
-        /*
-        Workaround for CLang 3, which does not deal with expanding
-            Directions const & ... directions
-        very well if other parameters follow.
-        Instead, specialise manually:
-        */
-        template <class Direction1, class Range> typename result <Range>::type
-            operator() (Direction1 const & direction1,
-                Function && function, Range && range) const
-        {
-            return typename result <Range>::type
-                (std::forward <Function> (function),
-                    range::view (direction1, std::forward <Range> (range)));
-        }
+    } // namespace transform_detail
 
-        template <class Direction1, class Direction2, class Range>
-            typename result <Range>::type
-            operator() (Direction1 const & direction1,
-                Direction2 const & direction2,
-                Function && function, Range && range) const
-        {
-            return typename result <Range>::type
-                (std::forward <Function> (function),
-                    range::view (direction1, direction2,
-                        std::forward <Range> (range)));
-        }
-#endif
-    };
+    template <class RangeTag, class Directions, class Function>
+        struct transform
+    : helper::call_with_last <2, Directions,
+        transform_detail::make_transform_view> {};
 
 } // namespace callable
 
@@ -160,7 +122,9 @@ namespace apply {
 
     template <class ... Arguments> struct transform
     : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::transform, meta::vector <Arguments ...>>::type {};
+        automatic_arguments::call_with_view <automatic_arguments::transform
+            >::apply,
+        meta::vector <Arguments ...>>::type {};
 
 } // namespace apply
 
@@ -226,4 +190,3 @@ namespace operation {
 } // namespace range
 
 #endif // RANGE_TRANSFORM_HPP_INCLUDED
-

@@ -22,6 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <type_traits>
 
+#include <boost/preprocessor/repetition/enum.hpp>
+#include <boost/preprocessor/repetition/enum_params.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
+
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/placeholders.hpp>
@@ -144,6 +148,154 @@ template <class ... Arguments> struct is_view
             >::type,
         typename decayed_result_of <callable::view (Arguments...)>::type
     >::type>::type {};
+
+
+namespace apply {
+
+    namespace automatic_arguments {
+
+        /* apply_with_view. */
+
+        template <class Directions, class Range> struct is_view_in;
+        template <class ... Directions, class Range>
+            struct is_view_in <meta::vector <Directions ...>, Range>
+        : is_view <Directions ..., Range> {};
+
+        /**
+        Contain a type "apply", that when called, calls Apply with the
+        arguments given.
+        If the ranges (the third argument) are all views in the directions (the
+        first argument), then "apply" will derive from Apply.
+        If not all ranges are views, they are first converted to views, and then
+        the arguments are forwarded to Apply.
+        */
+        template <template <class, class, class, class> class Apply>
+            struct call_with_view
+        {
+            template <class Directions, class Other, class Ranges,
+                class Enable = void>
+            struct apply : operation::unimplemented {};
+
+            // If all ranges are views.
+            template <class Directions, class Others, class ... Ranges>
+                struct apply <Directions, Others, meta::vector <Ranges ...>,
+                    typename boost::enable_if <
+                        meta::all <meta::vector <
+                            is_view_in <Directions, Ranges> ...>>>::type>
+            : Apply <Directions, Others, meta::vector <Ranges ...>, void> {};
+
+            /*
+            This implementation for the case where not all ranges are views
+            should work, but does not on any compiler I have tried because they
+            get confused about multiple variable arguments.
+            Below, therefore, there are specialisations for different numbers
+            of arguments for Directions and Others.
+            */
+            /*
+            template <class ... Directions, class ... Others, class ... Ranges>
+                struct apply <meta::vector <Directions ...>,
+                    meta::vector <Others ...>, meta::vector <Ranges ...>,
+                    typename boost::disable_if <
+                        meta::all <meta::vector <
+                            is_view_in <meta::vector <Directions ...>,
+                            Ranges> ...>>>::type>
+            {
+                Apply <meta::vector <Directions ...>, meta::vector <Others ...>,
+                    meta::vector <typename result_of <
+                        callable::view (Directions ..., Ranges)>::type...>,
+                    void> underlying;
+
+                auto operator() (Directions const & ... directions,
+                    Others && ... others,
+                    Ranges && ... ranges) const
+                RETURNS (underlying (directions ...,
+                    std::forward <Others> (others) ...,
+                    range::view (directions ...,
+                        std::forward <Ranges> (ranges)) ...))
+            };*/
+
+#define RANGE_CORE_BASE_class_Direction(z, n, data) \
+                class Direction ## n ,
+#define RANGE_CORE_BASE_class_Other(z, n, data) \
+                class Other ## n ,
+
+#define RANGE_CORE_BASE_Direction_const_direction(z, n, data) \
+                Direction ## n const & direction ## n ,
+#define RANGE_CORE_BASE_Other_other(z, n, data) \
+                Other ## n && other ## n ,
+
+#define RANGE_CORE_BASE_Direction(z, n, data) Direction ## n ,
+#define RANGE_CORE_BASE_direction(z, n, data) direction ## n ,
+#define RANGE_CORE_BASE_std_forward_other(z, n, data) \
+                std::forward <Other ## n > ( other ## n ),
+
+#define RANGE_CORE_BASE_apply(z, direction_num, others_num) \
+            template < \
+                BOOST_PP_REPEAT (direction_num, \
+                    RANGE_CORE_BASE_class_Direction,) \
+                BOOST_PP_REPEAT (others_num, RANGE_CORE_BASE_class_Other,) \
+                class ... Ranges> \
+            struct apply < \
+                meta::vector <  \
+                    BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
+                meta::vector <BOOST_PP_ENUM_PARAMS (others_num, Other)>, \
+                meta::vector <Ranges ...>, \
+                typename boost::disable_if < \
+                    meta::all <meta::vector < \
+                        is_view_in <meta::vector < \
+                        BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
+                        Ranges> ...>>>::type> \
+            { \
+                Apply < \
+                    meta::vector < \
+                        BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
+                    meta::vector <BOOST_PP_ENUM_PARAMS (others_num, Other)>, \
+                    meta::vector <typename result_of < callable::view ( \
+                        BOOST_PP_REPEAT (direction_num, \
+                            RANGE_CORE_BASE_Direction,) \
+                        Ranges)> \
+                    ::type...>, void> underlying; \
+            \
+                auto operator() ( \
+                    BOOST_PP_REPEAT (direction_num, \
+                        RANGE_CORE_BASE_Direction_const_direction,) \
+                    BOOST_PP_REPEAT (others_num, RANGE_CORE_BASE_Other_other,) \
+                    Ranges && ... ranges) const \
+                RETURNS (underlying ( \
+                    BOOST_PP_REPEAT (direction_num, \
+                        RANGE_CORE_BASE_direction,) \
+                    BOOST_PP_REPEAT (others_num, \
+                        RANGE_CORE_BASE_std_forward_other,) \
+                    range::view ( \
+                        BOOST_PP_REPEAT (direction_num, \
+                            RANGE_CORE_BASE_direction,) \
+                        std::forward <Ranges> (ranges)) ...)) \
+            };
+
+            // RANGE_CORE_BASE_apply(z, 0..5, n)
+#define RANGE_CORE_BASE_apply_direction_num(z, n, data) \
+            BOOST_PP_REPEAT (5, RANGE_CORE_BASE_apply, n)
+
+            // RANGE_CORE_BASE_apply_direction_num (z, 0..5, data)
+            // i.e. RANGE_CORE_BASE_apply(z, 0..5, 0..5)
+            BOOST_PP_REPEAT (5, RANGE_CORE_BASE_apply_direction_num,)
+
+#undef RANGE_CORE_BASE_class_Direction
+#undef RANGE_CORE_BASE_class_Other
+#undef RANGE_CORE_BASE_Direction_const_direction
+#undef RANGE_CORE_BASE_Other_other
+#undef RANGE_CORE_BASE_Direction
+#undef RANGE_CORE_BASE_direction
+#undef RANGE_CORE_BASE_std_forward_other
+#undef RANGE_CORE_BASE_apply
+#undef RANGE_CORE_BASE_apply_direction_num
+
+        };
+
+    } // namespace automatic_arguments
+
+} // namespace apply
+
 
 } // namespace range
 

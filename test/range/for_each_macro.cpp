@@ -33,8 +33,6 @@ Test the RANGE_FOR_EACH macro.
 
 BOOST_AUTO_TEST_SUITE(test_range_for_each_macro)
 
-template <class Type> Type && get_lrvalue (Type &&);
-
 BOOST_AUTO_TEST_CASE (test_example) {
 
     using range::view;
@@ -102,7 +100,7 @@ BOOST_AUTO_TEST_CASE (test_example) {
         // (an lvalue or rvalue reference, as appropriate) to the sequence.
         // This makes sure the sequence does not prematurely disappear from
         // memory.
-        for (decltype (get_lrvalue (is)) && sequence = is; !done; done = true)
+        for (auto && sequence = is; !done; done = true)
         // The boolean "seen" seems silly, but it serves two purposes:
         //  1.  The inner for loop is to give the variable "element" scope.
         //  2.  If there is a "break" statement, the variable will have an
@@ -115,8 +113,9 @@ BOOST_AUTO_TEST_CASE (test_example) {
                 break;
             else
         // Declare a variable of the type that range::first (v) returns.
-        // This is not the same as "auto": it can be a reference.
-                for (decltype (range::first (v)) element = range::first (v);
+        // "auto &&" binds correctly to all kinds of types: lvalue or rvalue,
+        // qualified or not.
+                for (auto && element = range::first (v);
                         !seen; seen = true)
         // Inner loop, user-provided:
                 {

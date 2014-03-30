@@ -31,8 +31,6 @@ namespace range { namespace for_each_macro_detail {
             "Range passed into RANGE_FOR_EACH must be homogeneous");
         typedef Type type;
     };
-    template <class Type> typename assert_is_range <Type>::type &&
-        get_lrvalue (Type &&);
 }} // namespace range::for_each_macro_detail
 
 /** \macro RANGE_FOR_EACH
@@ -58,9 +56,7 @@ A more readable version with comments is in test/for_each_macro.cpp.
         /* Declare variable. */ \
         if (bool RANGE_FOR_EACH_internal_done = false) {} else \
         /* Declare reference to range_expression. */ \
-        for (decltype ( ::range::for_each_macro_detail:: \
-                get_lrvalue (range_expression)) \
-                RANGE_FOR_EACH_internal_range = range_expression; \
+        for (auto && RANGE_FOR_EACH_internal_range = range_expression; \
             !RANGE_FOR_EACH_internal_done; \
             RANGE_FOR_EACH_internal_done = true) \
         /* Declare variable. */ \
@@ -78,11 +74,10 @@ A more readable version with comments is in test/for_each_macro.cpp.
                     break; \
                 else \
                     /* Declare variable "variable_name". */ \
-                    for (decltype ( ::range::first ( \
-                        RANGE_FOR_EACH_internal_view)) variable_name \
-                            = ::range::first (RANGE_FOR_EACH_internal_view); \
-                            !RANGE_FOR_EACH_internal_seen; \
-                            RANGE_FOR_EACH_internal_seen = true)
+                    for (auto && variable_name \
+                        = ::range::first (RANGE_FOR_EACH_internal_view); \
+                        !RANGE_FOR_EACH_internal_seen; \
+                        RANGE_FOR_EACH_internal_seen = true)
 
 #endif  // RANGE_FOR_EACH_MACRO_HPP_INCLUDED
 

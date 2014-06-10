@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/mpl/assert.hpp>
 
-#include "utility/counted.hpp"
+#include "utility/test/tracked.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_detail_underlying)
 
@@ -46,8 +46,8 @@ public:
 
 using range::detail::get_underlying;
 
-using utility::counted;
-using utility::object_counter;
+using utility::tracked;
+using utility::tracked_registry;
 
 BOOST_AUTO_TEST_CASE (test_range_detail_underlying) {
     // Reference.
@@ -77,14 +77,14 @@ BOOST_AUTO_TEST_CASE (test_range_detail_underlying) {
         BOOST_CHECK_EQUAL (get_underlying (std::move (u)), 8);
     }
 
-    // Test with counted_object.
+    // Test with tracked.
     {
-        object_counter c;
-        has_underlying <counted <int>> u (c, 9);
+        tracked_registry c;
+        has_underlying <tracked <int>> u (c, 9);
         BOOST_CHECK_EQUAL (c.value_construct_count(), 1);
-        counted <int> object (get_underlying (std::move (u)));
+        tracked <int> object (get_underlying (std::move (u)));
         BOOST_CHECK_EQUAL (c.move_count(), 1);
-        c.expect (1, 0, 1, 0, 0, 0, 0, 0);
+        c.check_counts (1, 0, 1, 0, 0, 0, 0, 0);
     }
 
     // Reference to const.

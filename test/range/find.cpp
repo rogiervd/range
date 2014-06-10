@@ -42,7 +42,7 @@ public:
 
     template <class Left>
         auto operator() (Left const & left) const
-    RETURNS (left < right)
+    RETURNS (left < right);
 };
 
 using range::front;
@@ -296,10 +296,10 @@ public:
 struct is_floating_point {
     void operator() (bool) const; // Not defined.
 
-    auto operator() (int) const RETURNS (rime::false_)
-    auto operator() (short) const RETURNS (rime::false_)
-    auto operator() (float) const RETURNS (rime::true_)
-    auto operator() (double) const RETURNS (rime::true_)
+    auto operator() (int) const RETURNS (rime::false_);
+    auto operator() (short) const RETURNS (rime::false_);
+    auto operator() (float) const RETURNS (rime::true_);
+    auto operator() (double) const RETURNS (rime::true_);
 };
 
 /**

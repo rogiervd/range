@@ -211,7 +211,7 @@ namespace apply {
                 RETURNS (underlying (directions ...,
                     std::forward <Others> (others) ...,
                     range::view (directions ...,
-                        std::forward <Ranges> (ranges)) ...))
+                        std::forward <Ranges> (ranges)) ...));
             };*/
 
 #define RANGE_CORE_BASE_class_Direction(z, n, data) \
@@ -269,7 +269,7 @@ namespace apply {
                     range::view ( \
                         BOOST_PP_REPEAT (direction_num, \
                             RANGE_CORE_BASE_direction,) \
-                        std::forward <Ranges> (ranges)) ...)) \
+                        std::forward <Ranges> (ranges)) ...)); \
             };
 
             // RANGE_CORE_BASE_apply(z, 0..5, n)

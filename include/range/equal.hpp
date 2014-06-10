@@ -86,7 +86,8 @@ namespace operation {
             RETURNS (rime::call_if (rime::or_ (range::empty (direction, range1),
                 range::empty (direction, range2)),
                 when_empty <Range1>(), when_not_empty <Range1>(), direction,
-                std::forward <Range1> (range1), std::forward <Range2> (range2)))
+                std::forward <Range1> (range1),
+                std::forward <Range2> (range2)));
         };
 
         template <class Dummy> struct when_empty {
@@ -94,7 +95,7 @@ namespace operation {
             auto operator() (Direction const & direction,
                 Range1 && range1, Range2 && range2) const
             RETURNS (range::empty (direction, range1)
-                == range::empty (direction, range2))
+                == range::empty (direction, range2));
         };
 
         struct return_false {
@@ -111,7 +112,7 @@ namespace operation {
                     == range::first (direction, range2)),
                 return_false(), next <Range1>(), direction,
                 std::forward <Range1> (range1),
-                std::forward <Range2> (range2)))
+                std::forward <Range2> (range2)));
         };
 
         template <class Dummy> struct next {
@@ -120,7 +121,7 @@ namespace operation {
                 Range1 && range1, Range2 && range2) const
             RETURNS (equal() (direction,
                 range::drop (direction, std::forward <Range1> (range1)),
-                range::drop (direction, std::forward <Range2> (range2))))
+                range::drop (direction, std::forward <Range2> (range2))));
         };
 
     public:
@@ -132,7 +133,7 @@ namespace operation {
                 is_homogeneous <Direction, Range2>()),
             when_homogeneous(), when_heterogeneous(), direction,
             std::forward <Range1> (range1),
-            std::forward <Range2> (range2)))
+            std::forward <Range2> (range2)));
     };
 
 } // namespace callable

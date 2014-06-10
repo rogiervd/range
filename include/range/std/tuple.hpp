@@ -82,7 +82,8 @@ namespace range {
             // For std::tuple, a custom extractor is useful.
             template <class Index> struct std_tuple_extractor {
                 template <class Tuple> auto operator() (Tuple && tuple) const
-                RETURNS (std::get <Index::value> (std::forward <Tuple> (tuple)))
+                RETURNS (std::get <Index::value> (
+                    std::forward <Tuple> (tuple)));
             };
 
             /**

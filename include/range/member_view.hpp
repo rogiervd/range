@@ -188,7 +188,7 @@ namespace operation {
 
         template <class Range> auto operator() (Direction const &,
             Range const & range) const
-        RETURNS (typename extractor <Range>::type() (range.structure()))
+        RETURNS (typename extractor <Range>::type() (range.structure()));
     };
 
     template <> struct first <member_view_tag <0u>, direction::front>
@@ -215,7 +215,7 @@ namespace operation {
         template <class Range> auto
             operator() (Direction const &, Increment const &,
                 Range const & range) const
-        RETURNS (typename result <Range>::type (range))
+        RETURNS (typename result <Range>::type (range));
     };
 
 } // namespace operation

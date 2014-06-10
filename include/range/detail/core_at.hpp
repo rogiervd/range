@@ -73,7 +73,7 @@ This is equivalent to at (direction, rime::size_t<Index>(), range).
 template <size_t Index, class Direction, class Range>
     inline auto at_c (Direction const & direction, Range && range)
 RETURNS (at (
-    direction, rime::size_t <Index>(), std::forward <Range> (range)))
+    direction, rime::size_t <Index>(), std::forward <Range> (range)));
 
 /**
 Return the element at a specific index in a range.
@@ -82,7 +82,7 @@ This is equivalent to at (rime::size_t<Index>(), range).
 */
 template <size_t Index, class Range>
     inline auto at_c (Range && range)
-RETURNS (at (rime::size_t <Index>(), std::forward <Range> (range)))
+RETURNS (at (rime::size_t <Index>(), std::forward <Range> (range)));
 
 namespace apply {
 
@@ -94,7 +94,7 @@ namespace apply {
             auto operator() (Direction const & direction,
                 Index const & index, Range && range) const
             RETURNS (range::first (direction, range::drop (
-                direction, index, std::forward <Range> (range))))
+                direction, index, std::forward <Range> (range))));
         };
 
         template <class Direction, class Index, class Range>

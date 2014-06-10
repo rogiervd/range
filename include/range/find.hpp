@@ -84,7 +84,7 @@ namespace apply {
             RETURNS (implementation (direction,
                 std::forward <Predicate> (predicate),
                 std::forward <Actor> (actor), std::forward <Actor> (actor),
-                std::forward <Range> (range)))
+                std::forward <Range> (range)));
         };
 
         // No actor passed in: use find_detail::identity.
@@ -104,7 +104,7 @@ namespace apply {
                 std::forward <Predicate> (predicate),
                 operation::find_detail::identity(),
                 operation::find_detail::identity(),
-                std::forward <Range> (range)))
+                std::forward <Range> (range)));
         };
 
     } // namespace automatic_arguments
@@ -290,7 +290,7 @@ namespace operation {
                 template <class Direction, class Range>
                     auto operator() (finder_ & f,
                         Direction const &, Range && range) const
-                RETURNS (f.empty_actor (std::forward <Range> (range)))
+                RETURNS (f.empty_actor (std::forward <Range> (range)));
             };
 
             // \pre !empty (range) && predicate (first (range)).
@@ -298,7 +298,7 @@ namespace operation {
                 template <class Direction, class Range>
                     auto operator() (finder_ & f,
                         Direction const &, Range && range) const
-                RETURNS (f.non_empty_actor (std::forward <Range> (range)))
+                RETURNS (f.non_empty_actor (std::forward <Range> (range)));
             };
 
             // \pre !empty (range) || !predicate (first (range)).
@@ -323,7 +323,7 @@ namespace operation {
                 RETURNS (rime::call_if (
                     f.predicate (range::first (direction, range)),
                     when_found(), when_not_done(),
-                    f, direction, std::forward <Range> (range)))
+                    f, direction, std::forward <Range> (range)));
             };
 
             // Entry point.
@@ -332,7 +332,7 @@ namespace operation {
                     Range && range) const
             RETURNS (rime::call_if (range::empty (direction, range),
                 when_empty(), when_not_empty(),
-                f, direction, std::forward <Range> (range)))
+                f, direction, std::forward <Range> (range)));
         };
 
     } // namespace find_detail

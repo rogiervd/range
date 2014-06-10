@@ -79,12 +79,12 @@ namespace operation {
     {
         template <class Wrapper> auto operator() (Wrapper && wrapper) const
         RETURNS (UnderlyingOperation() (
-            range::detail::get_underlying (std::forward <Wrapper> (wrapper))))
+            range::detail::get_underlying (std::forward <Wrapper> (wrapper))));
 
         template <class Direction, class Wrapper> auto
             operator() (Direction const & direction, Wrapper && wrapper) const
         RETURNS (UnderlyingOperation() (direction,
-            range::detail::get_underlying (std::forward <Wrapper> (wrapper))))
+            range::detail::get_underlying (std::forward <Wrapper> (wrapper))));
     };
 
 } // namespace operation

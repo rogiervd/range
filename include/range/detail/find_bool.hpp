@@ -37,12 +37,12 @@ template <bool value> struct equals;
 
 template <> struct equals <false> {
     template <class Type> auto operator() (Type const & v) const
-    RETURNS (rime::not_ (v))
+    RETURNS (rime::not_ (v));
 };
 
 template <> struct equals <true> {
     template <class Type> auto operator() (Type const & v) const
-    RETURNS (!rime::not_ (v))
+    RETURNS (!rime::not_ (v));
 };
 
 /**
@@ -62,11 +62,11 @@ template <bool Value> struct find_bool {
     template <class Direction, class Range>
         auto operator() (Direction const & direction, Range && range) const
     RETURNS (range::find (direction,
-        equals_value, when_not_empty, when_empty, range))
+        equals_value, when_not_empty, when_empty, range));
 
     template <class Range>
         auto operator() (Range && range) const
-    RETURNS (range::find (equals_value, when_not_empty, when_empty, range))
+    RETURNS (range::find (equals_value, when_not_empty, when_empty, range));
 };
 
 }}} // namespace range::callable::find_bool_detail

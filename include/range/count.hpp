@@ -62,7 +62,7 @@ template <class First> inline
 { return count_range <First> (first); }
 
 inline auto count()
-RETURNS (count (std::size_t (0)))
+RETURNS (count (std::size_t (0)));
 
 namespace operation {
 
@@ -71,7 +71,7 @@ namespace operation {
     template <> struct empty <count_range_tag, direction::front> {
         template <class CountRange>
             auto operator() (direction::front, CountRange const &) const
-        RETURNS (rime::false_)
+        RETURNS (rime::false_);
     };
 
     // size is not implemented: count_range has infinite length
@@ -92,7 +92,7 @@ namespace operation {
                 direction::front, Increment const & increment,
                 count_range <First> const & r) const
         RETURNS (range::count (
-            rime::cast_value <First> (rime::plus (r.first(), increment))))
+            rime::cast_value <First> (rime::plus (r.first(), increment))));
     };
 
 } // namespace operation

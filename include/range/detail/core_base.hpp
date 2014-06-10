@@ -161,7 +161,7 @@ namespace operation {
                 auto operator() (FirstArgument const & first_argument,
                     OtherArguments && ... other_arguments) const
             RETURNS (recursive() (
-                std::forward <OtherArguments> (other_arguments)...))
+                std::forward <OtherArguments> (other_arguments)...));
         };
 #endif
 
@@ -369,7 +369,7 @@ namespace apply {
         template <class Range, class ... MoreRanges> inline auto
             first_default_direction (
                 Range const & range, MoreRanges const & ...)
-        RETURNS (::range::default_direction (range))
+        RETURNS (::range::default_direction (range));
 
         // Explicit specialisations for different numbers of "Other" to keep
         // CLang 3.0 happy.
@@ -381,7 +381,7 @@ namespace apply {
 
             auto operator() (Ranges && ... ranges) const
             RETURNS (implementation (first_default_direction (ranges ...),
-                std::forward <Ranges> (ranges) ...))
+                std::forward <Ranges> (ranges) ...));
         };
 
         template <class Implementation, class Other, class ... Ranges>
@@ -393,7 +393,7 @@ namespace apply {
             auto operator() (Other && other, Ranges && ... ranges) const
             RETURNS (implementation (first_default_direction (ranges ...),
                 std::forward <Other> (other),
-                std::forward <Ranges> (ranges) ...))
+                std::forward <Ranges> (ranges) ...));
         };
 
         template <class Implementation, class Other1, class Other2,
@@ -408,7 +408,7 @@ namespace apply {
             RETURNS (implementation (first_default_direction (ranges ...),
                 std::forward <Other1> (other_1),
                 std::forward <Other2> (other_2),
-                std::forward <Ranges> (ranges) ...))
+                std::forward <Ranges> (ranges) ...));
         };
 
         template <class Implementation, class Other1, class Other2,
@@ -424,7 +424,7 @@ namespace apply {
                 std::forward <Other1> (other_1),
                 std::forward <Other2> (other_2),
                 std::forward <Other3> (other_3),
-                std::forward <Ranges> (ranges) ...))
+                std::forward <Ranges> (ranges) ...));
         };
 
     } // namespace automatic_arguments

@@ -136,7 +136,7 @@ namespace apply {
 
             auto operator() (Direction const & direction, Range && range) const
             RETURNS (implementation (
-                direction, one_type(), std::forward <Range> (range)))
+                direction, one_type(), std::forward <Range> (range)));
         };
 
     } // namespace automatic_arguments

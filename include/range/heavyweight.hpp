@@ -75,7 +75,7 @@ namespace operation {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
         RETURNS (::range::empty (direction, ::range::view (
-            direction, std::forward <CVContainer> (container))))
+            direction, std::forward <CVContainer> (container))));
     };
 
     // size
@@ -87,7 +87,7 @@ namespace operation {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
         RETURNS (::range::size (direction, ::range::view (
-            direction, std::forward <CVContainer> (container))))
+            direction, std::forward <CVContainer> (container))));
     };
 
     // first
@@ -99,7 +99,7 @@ namespace operation {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
         RETURNS (::range::first (direction, ::range::view (
-            direction, std::forward <CVContainer> (container))))
+            direction, std::forward <CVContainer> (container))));
     };
 
     // drop
@@ -113,7 +113,7 @@ namespace operation {
         operator() (Direction const & direction, Increment const & increment,
             CVContainer && container) const
         RETURNS (::range::drop (direction, increment, ::range::view (
-            direction, std::forward <CVContainer> (container))))
+            direction, std::forward <CVContainer> (container))));
     };
 
 } // namespace operation

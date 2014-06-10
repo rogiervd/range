@@ -68,7 +68,7 @@ namespace operation {
                     typename std::decay <Function>::type,
                     typename std::decay <Range>::type>
                 (std::forward <Function> (function),
-                    std::forward <Range> (range)))
+                    std::forward <Range> (range)));
         };
 
     } // namespace transform_detail
@@ -158,7 +158,7 @@ namespace operation {
         template <class Range> auto operator() (
             Direction const & direction, Range const & range) const
         RETURNS (range.function() (
-            range::first (direction, range::detail::get_underlying (range))))
+            range::first (direction, range::detail::get_underlying (range))));
     };
 
     // drop: forward to underlying and re-wrap.

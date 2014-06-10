@@ -92,7 +92,7 @@ namespace operation {
     {
         template <class ReverseView>
             auto operator() (ReverseView const & r) const
-        RETURNS (range::default_direction (r.underlying()))
+        RETURNS (range::default_direction (r.underlying()));
     };
 
     namespace reverse_detail {

@@ -22,7 +22,7 @@ Test the RANGE_FOR_EACH macro.
 */
 
 #define BOOST_TEST_MODULE test_range_for_each_macro
-#include "../boost_unit_test.hpp"
+#include "utility/test/boost_unit_test.hpp"
 
 #include <iostream>
 #include "range/for_each_macro.hpp"

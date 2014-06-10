@@ -29,7 +29,7 @@ evaluated.
 */
 
 #define BOOST_TEST_MODULE test_range_all_any
-#include "../boost_unit_test.hpp"
+#include "utility/test/boost_unit_test.hpp"
 
 #include "range/all.hpp"
 #include "range/any.hpp"

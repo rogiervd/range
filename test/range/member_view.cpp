@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE test_range_member_view
-#include "../boost_unit_test.hpp"
+#include "utility/test/boost_unit_test.hpp"
 
 #include "range/member_view.hpp"
 

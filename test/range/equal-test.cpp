@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #define BOOST_TEST_MODULE range_equal_test
-#include "../boost_unit_test.hpp"
+#include "utility/test/boost_unit_test.hpp"
 
 #include "range/equal.hpp"
 

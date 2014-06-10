@@ -26,7 +26,7 @@ Other aspects are tested on different types of ranges by
 */
 
 #define BOOST_TEST_MODULE test_range_core
-#include "../boost_unit_test.hpp"
+#include "utility/test/boost_unit_test.hpp"
 
 #include "range/core.hpp"
 

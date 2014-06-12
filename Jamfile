@@ -1,6 +1,7 @@
 project /range :
     requirements
     <library>/meta//meta
+    <library>/utility//utility
     <library>/rime//rime
     ;
 

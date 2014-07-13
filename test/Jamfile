@@ -5,6 +5,7 @@ project
       <library>/boost/test//boost_unit_test_framework
       <library>/range//range
       <warnings-as-errors>on
+      <c++-template-depth>512
       <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
     ;
 

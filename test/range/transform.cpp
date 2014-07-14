@@ -203,6 +203,14 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_CHECK_EQUAL (first (back, v), -16.);
             BOOST_CHECK_EQUAL (at (back, 1, v), 21.);
             BOOST_CHECK_EQUAL (at (back, 2, v), 12.);
+
+            // Check that the transform view is assignable.
+            v = drop (v);
+            BOOST_CHECK_EQUAL (first (v), 21.);
+            v = drop (v);
+            BOOST_CHECK_EQUAL (first (v), -16.);
+            v = drop (v);
+            BOOST_CHECK (empty (v));
         }
         {
             // Transform the container into a range of pointers to elements.

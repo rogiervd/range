@@ -53,8 +53,8 @@ public:
 
 private:
     friend class ::range::detail::callable::get_underlying;
-    Function const function_;
-    Underlying const underlying_;
+    Function function_;
+    Underlying underlying_;
 };
 
 namespace operation {

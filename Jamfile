@@ -8,6 +8,7 @@ project /range :
 # Declare target /range//range as a header-only library.
 alias range : : : :
     <include>include
-    <cxxflags>"-std=c++0x"
+    # Require C++11.
+    <toolset>gcc:<cxxflags>-std=gnu++0x <toolset>clang:<cxxflags>-std=c++11
     ;
 

@@ -6,7 +6,7 @@ project
       <library>/range//range
       <warnings-as-errors>on
       <c++-template-depth>512
-      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+      <target-os>linux:<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
     ;
 
 alias "range-tests" : range ;

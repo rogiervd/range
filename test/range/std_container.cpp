@@ -336,5 +336,32 @@ BOOST_AUTO_TEST_CASE (test_other_homogeneous_containers) {
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+// Test that there is no difference between a container and its view regarding
+// the const- and reference-qualification and calling std::begin() and
+// std::end().
 
+template <class Type> struct type {};
+
+template <class Container>
+    auto get_iterator_type (Container &&)
+RETURNS (type <decltype (std::begin (std::declval <Container>()))>());
+
+BOOST_AUTO_TEST_CASE (test_std_container_const) {
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (get_iterator_type (std::vector <int>())),
+        decltype (get_iterator_type (range::view (std::vector <int>())))
+        >));
+
+    std::vector <int> v;
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (get_iterator_type (v)),
+        decltype (get_iterator_type (range::view (v)))
+        >));
+
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (get_iterator_type (std::move (v))),
+        decltype (get_iterator_type (range::view (std::move (v))))
+        >));
+}
+
+BOOST_AUTO_TEST_SUITE_END()

@@ -77,32 +77,18 @@ private:
     Iterator end_;
 };
 
-template <class Iterator> struct iterator_range_tag;
+template <class IteratorTag> struct iterator_range_tag;
 
-template <class Iterator> struct tag_of_bare <iterator_range <Iterator>>
-{ typedef iterator_range_tag <Iterator> type; };
-
-namespace detail {
-
-    template <class Iterator> struct is_forward_iterator
-    : std::is_base_of <std::forward_iterator_tag,
-        typename std::iterator_traits <Iterator>::iterator_category> {};
-
-    template <class Iterator> struct is_bidirectional_iterator
-    : std::is_base_of <std::bidirectional_iterator_tag,
-        typename std::iterator_traits <Iterator>::iterator_category> {};
-
-    template <class Iterator> struct is_random_access_iterator
-    : std::is_base_of <std::random_access_iterator_tag,
-        typename std::iterator_traits <Iterator>::iterator_category> {};
-
-} // namespace detail
+template <class Iterator> struct tag_of_bare <iterator_range <Iterator>> {
+    typedef iterator_range_tag <
+        typename std::iterator_traits <Iterator>::iterator_category> type;
+};
 
 namespace operation {
 
     // empty
-    template <class Iterator>
-        struct empty <iterator_range_tag <Iterator>, direction::front>
+    template <class IteratorTag>
+        struct empty <iterator_range_tag <IteratorTag>, direction::front>
     {
         template <class Range> bool operator() (
             direction::front, Range && range) const
@@ -110,30 +96,34 @@ namespace operation {
     };
 
     // size
-    template <class Iterator>
-        struct size <iterator_range_tag <Iterator>, direction::front,
-            typename boost::enable_if <
-                range::detail::is_random_access_iterator <Iterator>>::type>
+    template <class IteratorTag>
+        struct size <iterator_range_tag <IteratorTag>, direction::front,
+            typename boost::enable_if <std::is_base_of <
+                std::random_access_iterator_tag, IteratorTag>>::type>
     {
         // The distance type is usually signed.
         // However, we know that the size of the range is non-negative,
         // so we turn this into an unsigned type.
-        typedef decltype (std::declval <Iterator>() - std::declval <Iterator>())
-            distance_type;
-        typedef typename std::make_unsigned <distance_type>::type result_type;
+        template <class Iterator> struct unsigned_distance {
+            typedef decltype (
+                std::declval <Iterator>() - std::declval <Iterator>())
+                distance_type;
+            typedef typename std::make_unsigned <distance_type>::type type;
+        };
 
-        template <class Range> result_type operator() (
-            direction::front, Range && range) const
+        template <class Iterator>
+            typename unsigned_distance <Iterator>::type operator() (
+                direction::front, iterator_range <Iterator> const & range) const
         {
-            distance_type distance = range.end() - range.begin();
+            auto distance = range.end() - range.begin();
             assert (distance >= 0);
-            return result_type (distance);
+            return typename unsigned_distance <Iterator>::type (distance);
         }
     };
 
     // first (front, range): always defined.
-    template <class Iterator>
-        struct first <iterator_range_tag <Iterator>, direction::front>
+    template <class IteratorTag>
+        struct first <iterator_range_tag <IteratorTag>, direction::front>
     {
         template <class Range> auto operator() (
             direction::front, Range && range) const
@@ -145,10 +135,10 @@ namespace operation {
     };
 
     // first (back, range): only defined for bidirectional iterators.
-    template <class Iterator>
-        struct first <iterator_range_tag <Iterator>, direction::back,
-            typename boost::enable_if <
-                range::detail::is_bidirectional_iterator <Iterator>>::type>
+    template <class IteratorTag>
+        struct first <iterator_range_tag <IteratorTag>, direction::back,
+            typename boost::enable_if <std::is_base_of <
+                std::bidirectional_iterator_tag, IteratorTag>>::type>
     {
         template <class Range> auto operator() (
             direction::back, Range && range) const
@@ -160,12 +150,13 @@ namespace operation {
     };
 
     // drop (front, one, range): always defined.
-    template <class Iterator>
-        struct drop_one <iterator_range_tag <Iterator>, direction::front>
+    template <class IteratorTag>
+        struct drop_one <iterator_range_tag <IteratorTag>, direction::front>
     {
-        template <class Increment, class Range>
+        template <class Increment, class Iterator>
             iterator_range <Iterator> operator() (
-                direction::front, Increment const &, Range && range) const
+                direction::front, Increment const &,
+                iterator_range <Iterator> const & range) const
         {
             assert (!::range::empty (range));
             return iterator_range <Iterator> (
@@ -174,14 +165,15 @@ namespace operation {
     };
 
     // drop (back, one, range): only defined for bidirectional iterators.
-    template <class Iterator>
-        struct drop_one <iterator_range_tag <Iterator>, direction::back,
-            typename boost::enable_if <
-                range::detail::is_bidirectional_iterator <Iterator>>::type>
+    template <class IteratorTag>
+        struct drop_one <iterator_range_tag <IteratorTag>, direction::back,
+            typename boost::enable_if <std::is_base_of <
+                std::bidirectional_iterator_tag, IteratorTag>>::type>
     {
-        template <class Increment, class Range>
+        template <class Increment, class Iterator>
             iterator_range <Iterator> operator() (
-                direction::back, Increment const &, Range && range) const
+                direction::back, Increment const &,
+                iterator_range <Iterator> const & range) const
         {
             assert (!::range::empty (range));
             return iterator_range <Iterator> (
@@ -190,14 +182,14 @@ namespace operation {
     };
 
     // drop (front, n, range): only defined for random-access iterators.
-    template <class Iterator, class Increment>
-        struct drop <iterator_range_tag <Iterator>, direction::front, Increment,
-            typename boost::enable_if <
-                range::detail::is_random_access_iterator <Iterator>>::type>
+    template <class IteratorTag, class Increment>
+        struct drop <iterator_range_tag <IteratorTag>, direction::front,
+            Increment, typename boost::enable_if <std::is_base_of <
+                std::random_access_iterator_tag, IteratorTag>>::type>
     {
-        template <class Range> iterator_range <Iterator>
-            operator() (direction::front,
-                Increment const & increment, Range && range) const
+        template <class Iterator> iterator_range <Iterator>
+            operator() (direction::front, Increment const & increment,
+                iterator_range <Iterator> const & range) const
         {
             assert (increment >= 0);
             typedef decltype (::range::size (range)) size_type;
@@ -208,14 +200,14 @@ namespace operation {
     };
 
     // drop (back, n, range): only defined for random-access iterators.
-    template <class Iterator, class Increment>
-        struct drop <iterator_range_tag <Iterator>, direction::back, Increment,
-            typename boost::enable_if <
-                range::detail::is_random_access_iterator <Iterator>>::type>
+    template <class IteratorTag, class Increment>
+        struct drop <iterator_range_tag <IteratorTag>, direction::back,
+            Increment, typename boost::enable_if <std::is_base_of <
+                std::random_access_iterator_tag, IteratorTag>>::type>
     {
-        template <class Range> iterator_range <Iterator>
-            operator() (direction::back,
-                Increment const & increment, Range && range) const
+        template <class Iterator> iterator_range <Iterator>
+            operator() (direction::back, Increment const & increment,
+                iterator_range <Iterator> const & range) const
         {
             assert (increment >= 0);
             typedef decltype (::range::size (range)) size_type;

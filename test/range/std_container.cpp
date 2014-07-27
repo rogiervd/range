@@ -344,7 +344,8 @@ template <class Type> struct type {};
 
 template <class Container>
     auto get_iterator_type (Container &&)
-RETURNS (type <decltype (std::begin (std::declval <Container>()))>());
+RETURNS (type <typename std::decay <
+    decltype (std::begin (std::declval <Container>()))>::type>());
 
 BOOST_AUTO_TEST_CASE (test_std_container_const) {
     BOOST_MPL_ASSERT ((std::is_same <

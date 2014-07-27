@@ -69,8 +69,8 @@ public:
 
     iterator_range() : begin_(), end_() {}
 
-    Iterator begin() const { return begin_; }
-    Iterator end() const { return end_; }
+    Iterator const & begin() const { return begin_; }
+    Iterator const & end() const { return end_; }
 
 private:
     Iterator begin_;

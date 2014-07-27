@@ -1,5 +1,12 @@
 alias "range" :
     # Run all .cpp files in this directory as tests.
     [ run_glob *.cpp detail/*.cpp ]
+
+    # Switch on iterator debugging for GCC.
+    # (On CLang with libstdc++ this can cause compilation problems.)
+    [ run iterator_range.cpp : :
+        : <toolset>gcc:<define>_GLIBCXX_DEBUG
+        : test-iterator_range-iterator_debug
+    ]
     ;
 

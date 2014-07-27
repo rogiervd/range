@@ -44,6 +44,20 @@ typedef range::iterator_range <bidirectional_container_type::const_iterator>
 typedef range::iterator_range <forward_container_type::iterator>
     forward_type;
 
+// If the standard library used has a debug iterator mode and it is switched on,
+// the following will trigger an error.
+// Even normal debugging does not normally switch on this mode, because it is so
+// slow.
+// The Jamfile in this directory tests this file with iterator debug mode on
+// where it is available.
+/*
+BOOST_AUTO_TEST_CASE (test_range_iterator_debug_mode) {
+    std::vector <int> v;
+    std::vector <int>::iterator i = v.begin();
+    // Increment an iterator beyond its limits.
+    ++ i;
+}
+*/
 
 BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
     // is_homogeneous

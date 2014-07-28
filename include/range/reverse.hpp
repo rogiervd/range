@@ -63,20 +63,66 @@ template <class UnderlyingTag> struct reverse_view_tag;
 template <class Underlying> struct tag_of_bare <reverse_view <Underlying>>
 { typedef reverse_view_tag <typename tag_of <Underlying>::type> type; };
 
+namespace operation {
+
+    namespace reverse_detail {
+
+        struct make_reverse_view {
+            template <class Range> auto operator() (Range && range) const
+            RETURNS (range::reverse_view <typename std::decay <Range>::type>
+                (std::forward <Range> (range)));
+        };
+
+    } // namespace reverse_detail
+
+    template <class RangeTag, class Directions, class Enable = void>
+        struct reverse
+    : helper::call_with_last <1, Directions, reverse_detail::make_reverse_view>
+    {};
+
+} // namespace operation
+
+namespace apply {
+
+    namespace automatic_arguments {
+
+        template <class Directions, class Other, class Ranges,
+            class Enable = void>
+        struct reverse : operation::unimplemented {};
+
+        template <class Directions, class Range>
+            struct reverse <Directions, meta::vector<>, meta::vector <Range>>
+        : operation::reverse <typename range::tag_of <Range>::type, Directions>
+        {};
+
+    } // namespace automatic_arguments
+
+    template <class ... Arguments> struct reverse
+    : automatic_arguments::categorise_arguments_default_direction <
+        automatic_arguments::call_with_view <automatic_arguments::reverse
+            >::apply,
+        meta::vector <Arguments ...>>::type {};
+
+} // namespace apply
+
+namespace callable {
+    struct reverse : generic <apply::reverse> {};
+} // namespace callable
+
 /**
 Return a view of the range with the elements reversed.
 This works for any direction that the range is used in that has a reverse.
 For example, first (front, reverse (r)) is equivalent to first (back, r).
 This simply wraps the range so that the directions for all operations are
 converted on the fly by direction::reverse().
+\param directions
+    The directions that the view should be in.
+    If no directions are given, the default direction is used.
 \param range
     The range to be reversed.
     It is turned into a view before it is stored inside the return type.
 */
-template <class Range> inline auto reverse (Range && range)
-RETURNS (reverse_view <
-    typename decayed_result_of <range::callable::view (Range)>::type> (
-    range::view (std::forward <Range> (range))));
+static auto const reverse = callable::reverse();
 
 namespace operation {
 

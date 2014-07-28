@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <tuple>
 
+#include <boost/mpl/assert.hpp>
+
 #include "range/std.hpp"
 
 #include "check_equal.hpp"
@@ -44,6 +46,13 @@ using range::size;
 using range::first;
 using range::drop;
 using range::is_homogeneous;
+
+BOOST_AUTO_TEST_CASE (test_range_reverse_static) {
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::reverse (int)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::reverse ()>));
+    BOOST_MPL_ASSERT ((
+        range::has <range::callable::reverse (std::vector <int> &)>));
+}
 
 BOOST_AUTO_TEST_CASE (test_range_reverse_homogeneous) {
     /* std::vector. */

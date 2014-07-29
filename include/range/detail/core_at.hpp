@@ -116,11 +116,7 @@ namespace apply {
         template <class Direction, class Index, class Range>
             struct at <meta::vector <Direction>, meta::vector <Index>,
                 meta::vector <Range>>
-        : boost::mpl::if_ <
-            operation::is_implemented <
-                apply::detail::at <Direction, Index, Range>>,
-            apply::detail::at <Direction, Index, Range>,
-            operation::unimplemented>::type {};
+        : apply::detail::at <Direction, Index, Range> {};
 
     } // namespace automatic_arguments
 

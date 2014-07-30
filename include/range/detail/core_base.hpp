@@ -90,16 +90,24 @@ namespace operation {
     struct unimplemented : ::callable_traits::unimplemented {
         typedef unimplemented type;
 
+        struct no_return_type {};
+
         // Make false_type depend on Arguments so the static assertion is
         // triggered only if operator() is actually called.
         template <class ... Arguments> struct false_type : rime::false_type {};
 
         template <class ... Arguments>
-            int operator() (Arguments const & ...) const
+            no_return_type operator() (Arguments const & ...) const
         {
+            typedef typename
+                meta::first <meta::back, meta::vector <Arguments...>>::type
+                last_argument;
+            static_assert (is_range <last_argument>::value,
+                "Last argument must be a range. "
+                "Did you forget to include 'std_adaptor.hpp'?");
             static_assert (false_type <Arguments ...>::value,
-                "Range operation not implemented");
-            return 0;
+                "Range operation not implemented.");
+            return no_return_type();
         }
     };
 

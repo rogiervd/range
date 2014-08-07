@@ -42,7 +42,8 @@ operation::helper::call_with_last may be particularly helpful in this regard.
 */
 template <class Container> struct heavyweight_tag;
 
-template <class Container> struct tag_of_bare <heavyweight_tag <Container>>
+template <class Container>
+    struct tag_of_unqualified <heavyweight_tag <Container>>
 { typedef heavyweight_tag <Container> type; };
 
 namespace operation {

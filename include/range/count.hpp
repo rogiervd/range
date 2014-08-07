@@ -43,7 +43,7 @@ public:
 
 struct count_range_tag;
 
-template <class First> struct tag_of_bare <count_range <First>>
+template <class First> struct tag_of_unqualified <count_range <First>>
 { typedef count_range_tag type; };
 
 /**

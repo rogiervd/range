@@ -36,7 +36,7 @@ struct weird_heavyweight_count {};
 
 namespace range {
 
-    template <> struct tag_of_bare <weird_heavyweight_count>
+    template <> struct tag_of_unqualified <weird_heavyweight_count>
     { typedef heavyweight_tag <weird_heavyweight_count> type; };
 
     namespace operation {
@@ -66,10 +66,11 @@ Adapt STL containers (badly) as heavyweights.
 namespace range {
 
     // Of course the containers have too few parameters here.
-    template <typename Type> struct tag_of_bare <std::forward_list <Type>>
+    template <typename Type>
+        struct tag_of_unqualified <std::forward_list <Type>>
     { typedef heavyweight_tag <std::forward_list <Type>> type; };
 
-    template <typename Type> struct tag_of_bare <std::vector <Type>>
+    template <typename Type> struct tag_of_unqualified <std::vector <Type>>
     { typedef heavyweight_tag <std::vector <Type>> type; };
 
     namespace operation {

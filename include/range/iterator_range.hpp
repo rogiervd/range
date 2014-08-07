@@ -79,7 +79,7 @@ private:
 
 template <class IteratorTag> struct iterator_range_tag;
 
-template <class Iterator> struct tag_of_bare <iterator_range <Iterator>> {
+template <class Iterator> struct tag_of_unqualified <iterator_range <Iterator>> {
     typedef iterator_range_tag <
         typename std::iterator_traits <Iterator>::iterator_category> type;
 };

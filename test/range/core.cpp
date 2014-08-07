@@ -37,7 +37,57 @@ Other aspects are tested on different types of ranges by
 #include "weird_direction.hpp"
 #include "weird_count.hpp"
 
+struct fake_range_1;
+struct fake_range_1_tag;
+
+struct fake_range_2;
+struct fake_range_2_normal_tag;
+struct fake_range_2_rvalue_tag;
+struct fake_range_2_lvalue_reference_tag;
+
+namespace range {
+
+    template <> struct tag_of_unqualified <fake_range_1>
+    { typedef fake_range_1_tag type; };
+
+    template <> struct tag_of_unqualified <fake_range_2>
+    { typedef fake_range_2_normal_tag type; };
+    template <> struct tag_of_rvalue <fake_range_2>
+    { typedef fake_range_2_rvalue_tag type; };
+    template <> struct tag_of_lvalue_reference <fake_range_2>
+    { typedef fake_range_2_lvalue_reference_tag type; };
+
+} // namespace range
+
 BOOST_AUTO_TEST_SUITE(test_range_core)
+
+BOOST_AUTO_TEST_CASE (test_range_tag) {
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1>::type, fake_range_1_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1 const>::type, fake_range_1_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1 &>::type, fake_range_1_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1 const &>::type, fake_range_1_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1 &&>::type, fake_range_1_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_1 const &&>::type, fake_range_1_tag>));
+
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2>::type, fake_range_2_rvalue_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2 const>::type, fake_range_2_normal_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2 &>::type, fake_range_2_lvalue_reference_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2 const &>::type, fake_range_2_normal_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2 &&>::type, fake_range_2_rvalue_tag>));
+    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
+        fake_range_2 const &&>::type, fake_range_2_normal_tag>));
+}
 
 BOOST_AUTO_TEST_CASE (test_range_core) {
     {

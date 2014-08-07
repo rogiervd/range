@@ -155,7 +155,7 @@ public:
 template <std::size_t Size> struct member_view_tag;
 
 template <class Structure, class Extractors>
-    struct tag_of_bare <member_view <Structure, Extractors> >
+    struct tag_of_unqualified <member_view <Structure, Extractors> >
 {
     typedef member_view_tag <meta::size <Extractors>::type::value> type;
 };

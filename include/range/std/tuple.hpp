@@ -49,11 +49,11 @@ namespace range {
     // Tags.
 
     template <class First, class Second>
-        struct tag_of_bare <std::pair <First, Second>>
+        struct tag_of_unqualified <std::pair <First, Second>>
     { typedef heavyweight_tag <std::pair <First, Second>> type; };
 
     template <class ... Types>
-        struct tag_of_bare <std::tuple <Types ...>>
+        struct tag_of_unqualified <std::tuple <Types ...>>
     { typedef heavyweight_tag <std::tuple <Types ...>> type; };
 
     namespace operation {

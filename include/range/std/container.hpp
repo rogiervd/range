@@ -69,23 +69,23 @@ namespace range {
 
     // Sequence containers.
     template <class Type, class Allocator>
-        struct tag_of_bare <std::vector <Type, Allocator>>
+        struct tag_of_unqualified <std::vector <Type, Allocator>>
     { typedef heavyweight_tag <std::vector <Type, Allocator>> type; };
 
     template <class Type, class Allocator>
-        struct tag_of_bare <std::deque <Type, Allocator>>
+        struct tag_of_unqualified <std::deque <Type, Allocator>>
     { typedef heavyweight_tag <std::deque <Type, Allocator>> type; };
 
     template <class Type, class Allocator>
-        struct tag_of_bare <std::forward_list <Type, Allocator>>
+        struct tag_of_unqualified <std::forward_list <Type, Allocator>>
     { typedef heavyweight_tag <std::forward_list <Type, Allocator>> type; };
 
     template <class Type, class Allocator>
-        struct tag_of_bare <std::list <Type, Allocator>>
+        struct tag_of_unqualified <std::list <Type, Allocator>>
     { typedef heavyweight_tag <std::list <Type, Allocator>> type; };
 
     template <class Type, class Traits, class Allocator>
-        struct tag_of_bare <std::basic_string <Type, Traits, Allocator>>
+        struct tag_of_unqualified <std::basic_string <Type, Traits, Allocator>>
     {
         typedef heavyweight_tag <std::basic_string <Type, Traits, Allocator>>
             type;
@@ -93,35 +93,36 @@ namespace range {
 
     // Associative containers.
     template <class Key, class Compare, class Allocator>
-        struct tag_of_bare <std::set <Key, Compare, Allocator>>
+        struct tag_of_unqualified <std::set <Key, Compare, Allocator>>
     { typedef heavyweight_tag <std::set <Key, Compare, Allocator>> type; };
 
     template <class Key, class Compare, class Allocator>
-        struct tag_of_bare <std::multiset <Key, Compare, Allocator>>
+        struct tag_of_unqualified <std::multiset <Key, Compare, Allocator>>
     { typedef heavyweight_tag <std::multiset <Key, Compare, Allocator>> type; };
 
     template <class Key, class Value, class Compare, class Allocator>
-    struct tag_of_bare <std::map <Key, Value, Compare, Allocator>> {
+    struct tag_of_unqualified <std::map <Key, Value, Compare, Allocator>> {
         typedef heavyweight_tag <std::map <Key, Value, Compare, Allocator>>
             type;
     };
 
     template <class Key, class Value, class Compare, class Allocator>
-    struct tag_of_bare <std::multimap <Key, Value, Compare, Allocator>> {
+    struct tag_of_unqualified <std::multimap <Key, Value, Compare, Allocator>> {
         typedef heavyweight_tag <std::multimap <Key, Value, Compare, Allocator>>
             type;
     };
 
     // Unordered associative containers.
     template <class Key, class Hash, class KeyEqual, class Allocator>
-        struct tag_of_bare <std::unordered_set <Key, Hash, KeyEqual, Allocator>>
+        struct tag_of_unqualified <
+            std::unordered_set <Key, Hash, KeyEqual, Allocator>>
     {
         typedef heavyweight_tag <std::unordered_set <
             Key, Hash, KeyEqual, Allocator>> type;
     };
 
     template <class Key, class Hash, class KeyEqual, class Allocator>
-        struct tag_of_bare <
+        struct tag_of_unqualified <
             std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>
     {
         typedef heavyweight_tag <std::unordered_multiset <
@@ -130,7 +131,7 @@ namespace range {
 
     template <class Key, class Value, class Hash, class KeyEqual,
             class Allocator>
-        struct tag_of_bare <
+        struct tag_of_unqualified <
             std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>
     {
         typedef heavyweight_tag <std::unordered_map <
@@ -139,7 +140,7 @@ namespace range {
 
     template <class Key, class Value, class Hash, class KeyEqual,
             class Allocator>
-        struct tag_of_bare <
+        struct tag_of_unqualified <
             std::unordered_multimap <Key, Value, Hash, KeyEqual, Allocator>>
     {
         typedef heavyweight_tag <std::unordered_multimap <

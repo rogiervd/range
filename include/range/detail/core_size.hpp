@@ -44,7 +44,7 @@ namespace operation {
     Direction is a decayed type.
     The range is forwarded as is.
     */
-    template <class RangeTag, class Direction, class Enable = void>
+    template <class RangeTag, class Direction, class Enable>
         struct size
     // Forward to the forward direction if it is available.
     : boost::mpl::if_ <

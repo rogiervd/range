@@ -33,8 +33,8 @@ namespace operation {
     /**
     Return the first element in the range.
     */
-    template <class RangeTag, class Direction, class Enable = void>
-    struct first : unimplemented {/*
+    template <class RangeTag, class Direction, class Enable> struct first
+    : unimplemented {/*
         template <class Range>
             ... operator() (Direction const & direction, Range && range) const;
     */};

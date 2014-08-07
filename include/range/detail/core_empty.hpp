@@ -48,8 +48,8 @@ namespace operation {
     Direction is a decayed type.
     The range is forwarded as is.
     */
-    template <class RangeTag, class Direction, class Enable = void>
-        struct empty    // Forward to the forward direction if it is available.
+    template <class RangeTag, class Direction, class Enable> struct empty
+    // Forward to the forward direction if it is available.
     : boost::mpl::if_ <
         boost::mpl::and_ <
             has <direction::callable::make_forward (Direction)>,

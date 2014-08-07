@@ -68,8 +68,18 @@ Types in this namespace must be specialised to implement range operations.
 This is (hopefully) as simple as possible.
 */
 namespace operation {
-    // Forward declaration.
+
+    // Forward declarations for operations so they can refer to each other.
     template <class RangeTag, class Enable = void> struct default_direction;
+    template <class RangeTag, class Direction, class Enable = void>
+        struct empty;
+    template <class RangeTag, class Direction, class Enable = void>
+        struct size;
+    template <class RangeTag, class Direction, class Enable = void>
+        struct first;
+    template <class RangeTag, class Direction, class Increment,
+            class Enable = void>
+        struct drop;
 
     /**
     Base class for marking an operation as not implemented.

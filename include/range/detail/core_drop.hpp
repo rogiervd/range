@@ -36,9 +36,8 @@ namespace range {
 
 namespace operation {
 
-    template <class RangeTag, class Direction, class Increment,
-        class Enable = void>
-    struct drop;
+    template <class RangeTag, class Direction, class Increment, class Enable>
+        struct drop;
 
     template <class RangeTag, class Direction, class Increment,
         class Enable = void>

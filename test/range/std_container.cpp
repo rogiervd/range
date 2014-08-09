@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -45,6 +45,8 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     using range::size;
     using range::first;
     using range::drop;
+    using range::chop;
+    using range::chop_in_place;
     using range::at;
 
     using range::front;
@@ -65,6 +67,11 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
 
         BOOST_CHECK (empty (v));
         BOOST_CHECK_EQUAL (size (v), 0);
+
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::chop_in_place (decltype (v))>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::chop_in_place (decltype (view))>));
     }
 
     v.push_back (5);
@@ -87,6 +94,15 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK (empty (drop (v)));
         BOOST_CHECK (empty (drop (1, v)));
         BOOST_CHECK (empty (drop (one, v)));
+
+        auto first_and_empty = chop (v);
+        BOOST_CHECK_EQUAL (first_and_empty.first(), 5);
+        BOOST_CHECK (empty (first_and_empty.rest()));
+
+        auto mutated = range::view (v);
+        BOOST_CHECK (!empty (mutated));
+        BOOST_CHECK_EQUAL (chop_in_place (mutated), 5);
+        BOOST_CHECK (empty (mutated));
     }
 
     v.push_back (6);
@@ -114,6 +130,23 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK_EQUAL (at (back, 2, v), 5);
 
         BOOST_CHECK_EQUAL (at (two, v), 7);
+
+        auto first_and_empty = chop (v);
+        BOOST_CHECK_EQUAL (first_and_empty.first(), 5);
+        BOOST_CHECK_EQUAL (first (first_and_empty.rest()), 6);
+
+        auto last_and_empty = chop (back, v);
+        BOOST_CHECK_EQUAL (last_and_empty.first(), 7);
+        BOOST_CHECK_EQUAL (first (back, last_and_empty.rest()), 6);
+
+        auto mutated = range::view (v);
+        BOOST_CHECK (!empty (mutated));
+        BOOST_CHECK_EQUAL (chop_in_place (mutated), 5);
+        BOOST_CHECK (!empty (mutated));
+        BOOST_CHECK_EQUAL (chop_in_place (mutated), 6);
+        BOOST_CHECK (!empty (mutated));
+        BOOST_CHECK_EQUAL (chop_in_place (mutated), 7);
+        BOOST_CHECK (empty (mutated));
     }
 }
 

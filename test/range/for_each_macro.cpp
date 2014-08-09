@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -28,10 +28,14 @@ Test the RANGE_FOR_EACH macro.
 #include "range/for_each_macro.hpp"
 
 #include "range/std.hpp"
+#include "range/function_range.hpp"
 
 #include <vector>
 
 BOOST_AUTO_TEST_SUITE(test_range_for_each_macro)
+
+bool is_rvalue_reference (int &&) { return true; }
+bool is_rvalue_reference (int const &) { return false; }
 
 BOOST_AUTO_TEST_CASE (test_example) {
 
@@ -49,6 +53,22 @@ BOOST_AUTO_TEST_CASE (test_example) {
     is.push_back (8);
     is.push_back (16); // Break after this.
     is.push_back (32);
+
+    {
+        int i = 5;
+        auto && i2 = 5;
+
+        BOOST_CHECK_EQUAL (i2, 5);
+
+        // The declared type of i2 is int &&.
+        BOOST_MPL_ASSERT ((std::is_same <decltype (i2), int &&>));
+
+        BOOST_CHECK (!is_rvalue_reference (i));
+        // Since i2 has a name, it is not an rvalue reference here.
+        BOOST_CHECK (!is_rvalue_reference (i2));
+        // But it can be explicitly cast to an rvalue reference.
+        BOOST_CHECK (is_rvalue_reference (static_cast <decltype (i2)> (i2)));
+    }
 
     // This is what we'd like to do.
     // This tests "continue" and "break".
@@ -91,8 +111,8 @@ BOOST_AUTO_TEST_CASE (test_example) {
         This does the job:
             if (bool done = false)
                 for (Type variable = ...; !done; done = true)
-        The "if (false) else" construction makes sure that when RANGE_FOR_EACH is
-        used in an if-else statement, the else part gets executed correctly.
+        The "if (false) else" construction makes sure that when RANGE_FOR_EACH
+        is used in an if-else statement, the else part gets executed correctly.
         */
 
         if (bool done = false) {} else
@@ -106,16 +126,17 @@ BOOST_AUTO_TEST_CASE (test_example) {
         //  2.  If there is a "break" statement, the variable will have an
         //      unexpected value, which signals that the loop can be aborted.
         if (bool seen = false) {} else
-        for (auto v = range::view (sequence); !range::empty (v);
-                v = range::drop (v), seen = !seen)
+        for (
+            auto v = range::view (static_cast <decltype (sequence)> (sequence));
+                !range::empty (v); seen = !seen)
             if (seen)
         // This can only happen if the inner loop has hit a "break".
                 break;
             else
-        // Declare a variable of the type that range::first (v) returns.
+        // Declare a variable of the type that range::chop_in_place (v) returns.
         // "auto &&" binds correctly to all kinds of types: lvalue or rvalue,
         // qualified or not.
-                for (auto && element = range::first (v);
+                for (auto && element = range::chop_in_place (v);
                         !seen; seen = true)
         // Inner loop, user-provided:
                 {
@@ -257,7 +278,7 @@ BOOST_AUTO_TEST_CASE (test_macro) {
             BOOST_CHECK (!is_const (i));
         }
         RANGE_FOR_EACH (i, longer_and_longer()) {
-            BOOST_CHECK (!is_const (i));
+            BOOST_CHECK (is_const (i));
         }
         RANGE_FOR_EACH (i, longer_and_longer_reference()) {
             BOOST_CHECK (!is_const (i));
@@ -279,6 +300,31 @@ BOOST_AUTO_TEST_CASE (test_macro) {
         }
         BOOST_CHECK (if_false_else_executed);
     }
+}
+
+struct next_integer {
+    int i;
+    next_integer() : i (0) {}
+    int operator() () { return i ++; }
+};
+
+BOOST_AUTO_TEST_CASE (test_input_range) {
+    auto range = range::make_function_range (next_integer());
+    int first = range::chop_in_place (range);
+    BOOST_CHECK_EQUAL (first, 0);
+    int second = range::chop_in_place (range);
+    BOOST_CHECK_EQUAL (second, 1);
+
+    int total = 0;
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (range::view (std::move (range))),
+        decltype (std::move (range))>));
+    RANGE_FOR_EACH (n, std::move (range)) {
+        total += n;
+        if (n == 10)
+            break;
+    }
+    BOOST_CHECK_EQUAL (total, 2+3+4+5+6+7+8+9+10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

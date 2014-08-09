@@ -63,10 +63,10 @@ A more readable version with comments is in test/for_each_macro.cpp.
         if (bool RANGE_FOR_EACH_internal_seen = false) {} else \
             /* Actual for loop. */ \
             for (auto RANGE_FOR_EACH_internal_view = \
-                    ::range::view (RANGE_FOR_EACH_internal_range); \
+                    ::range::view (static_cast < \
+                        decltype (RANGE_FOR_EACH_internal_range)> ( \
+                            RANGE_FOR_EACH_internal_range)); \
                     ! ::range::empty (RANGE_FOR_EACH_internal_view); \
-                    RANGE_FOR_EACH_internal_view = \
-                        ::range::drop (RANGE_FOR_EACH_internal_view), \
                     RANGE_FOR_EACH_internal_seen = \
                         !RANGE_FOR_EACH_internal_seen) \
                 if (RANGE_FOR_EACH_internal_seen) \
@@ -74,8 +74,8 @@ A more readable version with comments is in test/for_each_macro.cpp.
                     break; \
                 else \
                     /* Declare variable "variable_name". */ \
-                    for (auto && variable_name \
-                        = ::range::first (RANGE_FOR_EACH_internal_view); \
+                    for (auto && variable_name = \
+                        ::range::chop_in_place (RANGE_FOR_EACH_internal_view); \
                         !RANGE_FOR_EACH_internal_seen; \
                         RANGE_FOR_EACH_internal_seen = true)
 

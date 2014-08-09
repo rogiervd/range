@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "meta/vector.hpp"
 
+#include "core_base.hpp"
+
 namespace range {
 
 namespace operation {

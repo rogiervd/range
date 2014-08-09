@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utility/returns.hpp"
 
+#include "core_base.hpp"
+
 namespace range {
 
 namespace operation {
@@ -48,12 +50,30 @@ namespace operation {
 
     typedef rime::size_t <1> one_type;
 
+    namespace drop_detail {
+
+        template <class RangeTag, class Direction> struct forward_to_chop {
+            template <class Range, class One> auto
+                operator() (Direction const & direction, One const &,
+                    Range && range) const
+            RETURNS (chop <RangeTag, Direction>() (
+                direction, std::forward <Range> (range)).forward_rest());
+        };
+
+    } // namespace drop_detail
+
     /**
     Convenience operation.
     Can be specialised if "drop" is only available for an increment of one.
+
+    If operation::chop is implemented, this is automatically implemented in
+    terms of it.
     */
     template <class RangeTag, class Direction, class Enable>
-    struct drop_one : unimplemented
+    struct drop_one
+    : boost::mpl::if_ <is_implemented <chop <RangeTag, Direction>>,
+        drop_detail::forward_to_chop <RangeTag, Direction>, unimplemented
+    >::type
     {/*
         template <class Range>
             ... operator() (Direction const & direction,

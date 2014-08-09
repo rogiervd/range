@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -26,15 +26,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "meta/vector.hpp"
 
+#include "core_base.hpp"
+
 namespace range {
 
 namespace operation {
 
+    namespace first_detail {
+
+        template <class RangeTag, class Direction> struct forward_to_chop {
+            template <class Range> auto
+                operator() (Direction const & direction, Range && range) const
+            RETURNS (chop <RangeTag, Direction>() (
+                direction, std::forward <Range> (range)).forward_first());
+        };
+
+    } // namespace first_detail
+
     /**
     Return the first element in the range.
+
+    If operation::chop is implemented, this is automatically implemented in
+    terms of it.
     */
     template <class RangeTag, class Direction, class Enable> struct first
-    : unimplemented {/*
+    : boost::mpl::if_ <is_implemented <chop <RangeTag, Direction>>,
+        first_detail::forward_to_chop <RangeTag, Direction>, unimplemented
+    >::type {/*
         template <class Range>
             ... operator() (Direction const & direction, Range && range) const;
     */};

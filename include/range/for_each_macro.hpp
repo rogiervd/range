@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 

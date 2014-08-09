@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -80,6 +80,10 @@ namespace operation {
     template <class RangeTag, class Direction, class Increment,
             class Enable = void>
         struct drop;
+    template <class RangeTag, class Direction, class Enable = void>
+        struct chop;
+    template <class RangeTag, class Direction, class Enable = void>
+        struct chop_in_place;
 
     /**
     Base class for marking an operation as not implemented.

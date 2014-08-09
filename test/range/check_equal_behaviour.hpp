@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -131,7 +131,7 @@ template <class HasSize, class HasBack, class InitialDirection>
 struct check_equal_behaviour_recursive_from;
 
 template <class HasSize, class HasBack, class Range, class Reference>
-void check_equal_behaviour_recursive (
+void check_equal_behaviour_recursive (bool use_chop,
     Range const & range, Reference const & reference)
 {
     detail::check_empty (range, reference);
@@ -144,21 +144,28 @@ void check_equal_behaviour_recursive (
         check_equal_behaviour_recursive_from <
             HasSize, HasBack, direction::front>(),
         nothing,
-        range, reference);
+        use_chop, range, reference);
 
     rime::call_if (rime::and_ (!range::empty (range), !range::empty (reference),
             HasBack()),
         check_equal_behaviour_recursive_from <
             HasSize, HasBack, direction::back>(),
         nothing,
-        range, reference);
+        use_chop, range, reference);
 }
 
-// Check first and drop
+/**
+Check first and drop, or chop.
+On one recursion depth, first and drop are used; on the next, chop.
+(It would be possible to use both recursively at both depths but that seems
+rather silly and would lead to exponential complexity in the length of the
+sequence.)
+*/
 template <class HasSize, class HasBack, class InitialDirection>
 struct check_equal_behaviour_recursive_from {
     template <class Range, class Reference>
-        void operator() (Range const & range, Reference const & reference) const
+        void operator() (bool use_chop,
+            Range const & range, Reference const & reference) const
     {
         assert (!range::empty (range));
 
@@ -166,9 +173,17 @@ struct check_equal_behaviour_recursive_from {
 
         check_equal_value (
             ::range::first (d, range), ::range::first (d, reference));
+        auto first_and_rest = ::range::chop (d, range);
+        check_equal_value (
+            first_and_rest.forward_first(), ::range::first (d, reference));
 
-        check_equal_behaviour_recursive <HasSize, HasBack> (
-            ::range::drop (d, range), ::range::drop (d, reference));
+        if (!use_chop) {
+            check_equal_behaviour_recursive <HasSize, HasBack> (!use_chop,
+                ::range::drop (d, range), ::range::drop (d, reference));
+        } else {
+            check_equal_behaviour_recursive <HasSize, HasBack> (!use_chop,
+                first_and_rest.forward_rest(), ::range::drop (d, reference));
+        }
     }
 };
 
@@ -331,8 +346,12 @@ void check_equal_behaviour (Range const & range, Reference const & reference)
     BOOST_MPL_ASSERT ((range::is_range <Reference>));
     BOOST_MPL_ASSERT ((range::is_range <Range>));
 
+    // Start off with first and drop.
     detail::check_equal_behaviour_recursive <HasSize, HasBack> (
-        range, reference);
+        false, range, reference);
+    // Start off with chop.
+    detail::check_equal_behaviour_recursive <HasSize, HasBack> (
+        true, range, reference);
 
     rime::call_if (HasDropRuntimeN(),
         detail::check_drop_n <HasSize, HasBack, std::size_t>(), detail::nothing,
@@ -352,4 +371,3 @@ void check_equal_behaviour (Range const & range, Reference const & reference)
 }
 
 #endif  // RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED
-

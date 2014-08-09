@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -73,6 +73,9 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
             range::has <range::callable::at (rime::size_t <0>, decltype (t))>));
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::at (rime::size_t <1>, decltype (t))>));
+
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::chop (decltype (t))>));
     }
 
     // One element.
@@ -88,6 +91,19 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::at (rime::size_t <1>, decltype (t))>));
 
+        BOOST_MPL_ASSERT ((range::has <
+            range::callable::chop (decltype (t))>));
+        BOOST_MPL_ASSERT ((range::has <
+            range::callable::chop (decltype (range::view (t)))>));
+
+        // Tuples are not homogeneous.
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (t))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)) &)>));
+
         check_equal_value (range::first (t), 6.3);
         check_equal_value (range::first (range::front, t), 6.3);
         check_equal_value (range::first (range::back, t), 6.3);
@@ -98,6 +114,14 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         check_equal_value (
             range::at (range::back, rime::size_t <0>(), t), 6.3);
 
+        auto first_and_empty_1 = range::chop (t);
+        auto first_and_empty_2 = range::chop (range::back, t);
+        check_equal_value (first_and_empty_1.first(), 6.3);
+        check_equal_value (first_and_empty_2.first(), 6.3);
+        check_equal_value (
+            range::empty (first_and_empty_1.rest()), rime::true_);
+        check_equal_value (
+            range::empty (first_and_empty_2.rest()), rime::true_);
     }
 
     // Two elements.
@@ -124,6 +148,26 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         check_equal_value (range::at (range::front, rime::size_t <0>(), t), 4);
         check_equal_value (range::at (range::back, rime::size_t <0>(), t), 'a');
         check_equal_value (range::at (range::back, rime::size_t <1>(), t), 4);
+
+        auto first_and_rest = range::chop (t);
+        auto last_and_rest = range::chop (range::back, t);
+        check_equal_value (first_and_rest.first(), 4);
+        check_equal_value (last_and_rest.first(), 'a');
+        check_equal_value (range::size (first_and_rest.rest()),
+            rime::size_t <1>());
+        check_equal_value (range::size (last_and_rest.rest()),
+            rime::size_t <1>());
+
+        auto first_and_empty = range::chop (last_and_rest.rest());
+        check_equal_value (first_and_empty.first(), 4);
+        check_equal_value (range::empty (first_and_empty.rest()), rime::true_);
+
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (t))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)) &)>));
     }
 
     // Three elements
@@ -160,6 +204,31 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         check_equal_value (range::at (range::back, rime::size_t <0>(), t), 6.3);
         check_equal_value (range::at (range::back, rime::size_t <1>(), t), 'a');
         check_equal_value (range::at (range::back, rime::size_t <2>(), t), 4);
+
+        auto first_and_rest = range::chop (t);
+        auto last_and_rest = range::chop (range::back, t);
+        check_equal_value (first_and_rest.first(), 4);
+        check_equal_value (last_and_rest.first(), 6.3);
+        check_equal_value (range::size (first_and_rest.rest()),
+            rime::size_t <2>());
+        check_equal_value (range::size (last_and_rest.rest()),
+            rime::size_t <2>());
+
+        auto first_and_middle = range::chop (last_and_rest.rest());
+        check_equal_value (first_and_middle.first(), 4);
+        check_equal_value (range::size (first_and_middle.rest()),
+            rime::size_t <1>());
+
+        auto middle_and_empty = range::chop (first_and_middle.rest());
+        check_equal_value (middle_and_empty.first(), 'a');
+        check_equal_value (range::empty (middle_and_empty.rest()), rime::true_);
+
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (t))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)))>));
+        BOOST_MPL_ASSERT_NOT ((range::has <
+            range::callable::chop_in_place (decltype (range::view (t)) &)>));
     }
 }
 

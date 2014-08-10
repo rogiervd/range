@@ -43,7 +43,7 @@ operation::helper::call_with_last may be particularly helpful in this regard.
 template <class Container> struct heavyweight_tag;
 
 template <class Container>
-    struct tag_of_unqualified <heavyweight_tag <Container>>
+    struct tag_of_qualified <heavyweight_tag <Container>>
 { typedef heavyweight_tag <Container> type; };
 
 namespace operation {

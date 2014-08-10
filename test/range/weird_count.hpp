@@ -44,7 +44,7 @@ struct weird_count_tag;
 
 namespace range {
 
-template<> struct tag_of_unqualified <weird_count>
+template<> struct tag_of_qualified <weird_count>
 { typedef weird_count_tag type; };
 
 namespace operation {

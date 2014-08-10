@@ -48,14 +48,14 @@ struct fake_range_2_lvalue_reference_tag;
 
 namespace range {
 
-    template <> struct tag_of_unqualified <fake_range_1>
+    template <> struct tag_of_qualified <fake_range_1>
     { typedef fake_range_1_tag type; };
 
-    template <> struct tag_of_unqualified <fake_range_2>
+    template <> struct tag_of_qualified <fake_range_2, const_reference>
     { typedef fake_range_2_normal_tag type; };
-    template <> struct tag_of_rvalue <fake_range_2>
+    template <> struct tag_of_qualified <fake_range_2, temporary>
     { typedef fake_range_2_rvalue_tag type; };
-    template <> struct tag_of_lvalue_reference <fake_range_2>
+    template <> struct tag_of_qualified <fake_range_2, reference>
     { typedef fake_range_2_lvalue_reference_tag type; };
 
 } // namespace range

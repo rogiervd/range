@@ -58,31 +58,28 @@ private:
     function_type function_;
 };
 
-template <bool rvalue> struct function_range_tag;
+template <qualification qualifier> struct function_range_tag;
 
 template <class Function> function_range <Function>
     make_function_range (Function const & function)
 { return function_range <Function> (function); }
 
-template <class Function> struct tag_of_unqualified <function_range <Function>>
-{ typedef function_range_tag <false> type; };
-
-template <class Function>
-    struct tag_of_rvalue <function_range <Function>>
-{ typedef function_range_tag <true> type; };
+template <class Function, qualification qualifier>
+    struct tag_of_qualified <function_range <Function>, qualifier>
+{ typedef function_range_tag <qualifier> type; };
 
 namespace operation {
 
     /* Forward to underlying for default_direction, empty, size. */
 
-    template <bool rvalue>
-        struct empty <function_range_tag <rvalue>, direction::front>
+    template <qualification qualifier>
+        struct empty <function_range_tag <qualifier>, direction::front>
     : rime::callable::always_default <rime::false_type> {};
 
     // size is unimplemented.
     // first drop are defined automatically for rvalues.
 
-    template <> struct chop <function_range_tag <true>, direction::front> {
+    template <> struct chop <function_range_tag <temporary>, direction::front> {
         template <class Function>
             auto operator() (
                 direction::front, function_range <Function> && range) const

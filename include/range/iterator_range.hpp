@@ -176,31 +176,21 @@ public:
     iterator_range & operator = (iterator_range &&) = default;
 };
 
-template <class IteratorTag, bool rvalue = false, bool reference = false>
+template <class IteratorTag, qualification qualifier>
     struct iterator_range_tag;
 
-template <class Iterator>
-    struct tag_of_unqualified <iterator_range <Iterator>>
+template <class Iterator, qualification qualifier>
+    struct tag_of_qualified <iterator_range <Iterator>, qualifier>
 {
     typedef iterator_range_tag <typename
-        std::iterator_traits <Iterator>::iterator_category> type;
-};
-
-template <class Iterator> struct tag_of_rvalue <iterator_range <Iterator>> {
-    typedef iterator_range_tag <typename
-        std::iterator_traits <Iterator>::iterator_category, true> type;
-};
-
-template <class Iterator> struct tag_of <iterator_range <Iterator> &> {
-    typedef iterator_range_tag <typename
-        std::iterator_traits <Iterator>::iterator_category, false, true> type;
+        std::iterator_traits <Iterator>::iterator_category, qualifier> type;
 };
 
 namespace operation {
 
     // empty
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct empty <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct empty <iterator_range_tag <IteratorTag, qualifier>,
             direction::front>
     {
         template <class Range> bool operator() (
@@ -209,8 +199,8 @@ namespace operation {
     };
 
     // size
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct size <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct size <iterator_range_tag <IteratorTag, qualifier>,
             direction::front,
             typename boost::enable_if <std::is_base_of <
                 std::random_access_iterator_tag, IteratorTag>>::type>
@@ -240,8 +230,8 @@ namespace operation {
     This is defined explicitly for forward iterators.
     (Explain why that makes sense and chop is defined for input iterators.)
     */
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct first <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct first <iterator_range_tag <IteratorTag, qualifier>,
             direction::front,
             typename boost::enable_if <std::is_base_of <
                 std::forward_iterator_tag, IteratorTag>>::type>
@@ -256,8 +246,8 @@ namespace operation {
     };
 
     // first (back, range): only defined for bidirectional iterators.
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct first <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct first <iterator_range_tag <IteratorTag, qualifier>,
             direction::back,
             typename boost::enable_if <std::is_base_of <
                 std::bidirectional_iterator_tag, IteratorTag>>::type>
@@ -272,8 +262,8 @@ namespace operation {
     };
 
     // drop (front, one, range): defined for forward iterators.
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct drop_one <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct drop_one <iterator_range_tag <IteratorTag, qualifier>,
             direction::front,
             typename boost::enable_if <std::is_base_of <
                 std::forward_iterator_tag, IteratorTag>>::type>
@@ -290,8 +280,8 @@ namespace operation {
     };
 
     // drop (back, one, range): only defined for bidirectional iterators.
-    template <class IteratorTag, bool rvalue, bool reference>
-        struct drop_one <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, qualification qualifier>
+        struct drop_one <iterator_range_tag <IteratorTag, qualifier>,
             direction::back,
             typename boost::enable_if <std::is_base_of <
                 std::bidirectional_iterator_tag, IteratorTag>>::type>
@@ -308,8 +298,8 @@ namespace operation {
     };
 
     // drop (front, n, range): only defined for random-access iterators.
-    template <class IteratorTag, class Increment, bool rvalue, bool reference>
-        struct drop <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, class Increment, qualification qualifier>
+        struct drop <iterator_range_tag <IteratorTag, qualifier>,
             direction::front, Increment,
             typename boost::enable_if <std::is_base_of <
                 std::random_access_iterator_tag, IteratorTag>>::type>
@@ -327,8 +317,8 @@ namespace operation {
     };
 
     // drop (back, n, range): only defined for random-access iterators.
-    template <class IteratorTag, class Increment, bool rvalue, bool reference>
-        struct drop <iterator_range_tag <IteratorTag, rvalue, reference>,
+    template <class IteratorTag, class Increment, qualification qualifier>
+        struct drop <iterator_range_tag <IteratorTag, qualifier>,
             direction::back, Increment,
             typename boost::enable_if <std::is_base_of <
                 std::random_access_iterator_tag, IteratorTag>>::type>
@@ -369,8 +359,8 @@ namespace operation {
     This is only defined for rvalue ranges.
     */
     template <class IteratorTag>
-        struct chop <iterator_range_tag <IteratorTag, true>, direction::front,
-            typename boost::disable_if <std::is_base_of <
+        struct chop <iterator_range_tag <IteratorTag, temporary>,
+            direction::front, typename boost::disable_if <std::is_base_of <
                 std::forward_iterator_tag, IteratorTag>>::type>
     {
         template <class Iterator> struct result {
@@ -399,7 +389,7 @@ namespace operation {
     (Note that no performance improvements have been observed.)
     */
     template <class IteratorTag>
-        struct chop_in_place <iterator_range_tag <IteratorTag, false, true>,
+        struct chop_in_place <iterator_range_tag <IteratorTag, reference>,
             direction::front>
     {
         template <class Iterator>

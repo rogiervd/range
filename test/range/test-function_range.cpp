@@ -66,21 +66,24 @@ BOOST_AUTO_TEST_CASE (test_range_function_range_reference) {
     f_range r (std::move (r_temp));
 
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range>::type, range::function_range_tag <true>>));
+        range::tag_of <f_range>::type,
+        range::function_range_tag <range::temporary>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range &&>::type, range::function_range_tag <true>>));
+        range::tag_of <f_range &&>::type,
+        range::function_range_tag <range::temporary>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range &>::type, range::function_range_tag <false>>));
+        range::tag_of <f_range &>::type,
+        range::function_range_tag <range::reference>>));
 
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <f_range const>::type,
-        range::function_range_tag <false>>));
+        range::function_range_tag <range::const_reference>>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <f_range const &&>::type,
-        range::function_range_tag <false>>));
+        range::function_range_tag <range::const_reference>>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <f_range const &>::type,
-        range::function_range_tag <false>>));
+        range::function_range_tag <range::const_reference>>));
 
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (f_range)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (f_range &&)>));

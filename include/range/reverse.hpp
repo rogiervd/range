@@ -61,7 +61,7 @@ public:
 template <class UnderlyingTag> struct reverse_view_tag;
 
 template <class Underlying>
-    struct tag_of_unqualified <reverse_view <Underlying>>
+    struct tag_of_qualified <reverse_view <Underlying>>
 { typedef reverse_view_tag <typename tag_of <Underlying>::type> type; };
 
 namespace operation {

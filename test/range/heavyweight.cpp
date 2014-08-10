@@ -36,7 +36,7 @@ struct weird_heavyweight_count {};
 
 namespace range {
 
-    template <> struct tag_of_unqualified <weird_heavyweight_count>
+    template <> struct tag_of_qualified <weird_heavyweight_count>
     { typedef heavyweight_tag <weird_heavyweight_count> type; };
 
     namespace operation {
@@ -67,10 +67,10 @@ namespace range {
 
     // Of course the containers have too few parameters here.
     template <typename Type>
-        struct tag_of_unqualified <std::forward_list <Type>>
+        struct tag_of_qualified <std::forward_list <Type>>
     { typedef heavyweight_tag <std::forward_list <Type>> type; };
 
-    template <typename Type> struct tag_of_unqualified <std::vector <Type>>
+    template <typename Type> struct tag_of_qualified <std::vector <Type>>
     { typedef heavyweight_tag <std::vector <Type>> type; };
 
     namespace operation {

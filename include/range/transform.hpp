@@ -35,10 +35,10 @@ template <class Function, class Underlying> struct transform_view;
 template <class UnderlyingTag> struct transform_view_tag;
 
 template <class Function, class Underlying>
-    struct tag_of_unqualified <transform_view <Function, Underlying>>
+    struct tag_of_qualified <transform_view <Function, Underlying>>
 {
     typedef transform_view_tag <typename
-        tag_of_unqualified <Underlying>::type> type;
+        tag_of_qualified <Underlying>::type> type;
 };
 
 template <class Function, class Underlying> struct transform_view {

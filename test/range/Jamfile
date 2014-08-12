@@ -4,7 +4,7 @@ alias "range" :
 
     # Switch on iterator debugging for GCC.
     # (On CLang with libstdc++ this can cause compilation problems.)
-    [ run iterator_range.cpp : :
+    [ run test-iterator_range.cpp : :
         : <toolset>gcc:<define>_GLIBCXX_DEBUG
         : test-iterator_range-iterator_debug
     ]

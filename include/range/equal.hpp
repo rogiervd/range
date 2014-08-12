@@ -32,21 +32,21 @@ namespace range {
 namespace operation {
 
     template <class Range1Tag, class Range2Tag, class Direction,
-        class Enable = void>
+        class Predicate, class Enable = void>
     struct equal
     {
     private:
         // Homogeneous implementation.
         struct when_homogeneous {
-            template <class Range1, class Range2>
-            bool operator() (Direction const & direction,
+            template <class Range1, class Range2> bool operator() (
+                Direction const & direction, Predicate && predicate,
                 Range1 range1, Range2 range2)
             {
                 while (!range::empty (direction, range1)
                     && !range::empty (direction, range2))
                 {
-                    if (! (range::first (direction, range1)
-                        == range::first (direction, range2)))
+                    if (!predicate (range::first (direction, range1),
+                            range::first (direction, range2)))
                         return false;
                     range1 = range::drop (range1);
                     range2 = range::drop (range2);
@@ -63,8 +63,8 @@ namespace operation {
 
         // Heterogeneous implementation: recursive.
         struct when_heterogeneous {
-            template <class Range1, class Range2>
-            auto operator() (Direction const & direction,
+            template <class Range1, class Range2> auto operator() (
+                Direction const & direction, Predicate && predicate,
                 Range1 && range1, Range2 && range2) const
             // This is the run-time recursive implementation:
             /*{
@@ -73,8 +73,8 @@ namespace operation {
                     return range::empty (direction, range1)
                         == range::empty (direction, range2);
                 else {
-                    if (!(range::first (direction, range1)
-                        == range::first (direction, range2)))
+                    if (!predicate (range::first (direction, range1),
+                            range::first (direction, range2)))
                         return false;
                     else {
                         return (*this) (direction,
@@ -85,14 +85,15 @@ namespace operation {
             }*/
             RETURNS (rime::call_if (rime::or_ (range::empty (direction, range1),
                 range::empty (direction, range2)),
-                when_empty <Range1>(), when_not_empty <Range1>(), direction,
+                when_empty <Range1>(), when_not_empty <Range1>(),
+                direction, predicate,
                 std::forward <Range1> (range1),
                 std::forward <Range2> (range2)));
         };
 
         template <class Dummy> struct when_empty {
-            template <class Range1, class Range2>
-            auto operator() (Direction const & direction,
+            template <class Range1, class Range2> auto operator() (
+                Direction const & direction, Predicate && predicate,
                 Range1 && range1, Range2 && range2) const
             RETURNS (range::empty (direction, range1)
                 == range::empty (direction, range2));
@@ -105,38 +106,39 @@ namespace operation {
         };
 
         template <class Dummy> struct when_not_empty {
-            template <class Range1, class Range2>
-            auto operator() (Direction const & direction,
+            template <class Range1, class Range2> auto operator() (
+                Direction const & direction, Predicate && predicate,
                 Range1 && range1, Range2 && range2) const
-            RETURNS (rime::call_if (!(range::first (direction, range1)
-                    == range::first (direction, range2)),
-                return_false(), next <Range1>(), direction,
+            RETURNS (rime::call_if (
+                !predicate (range::first (direction, range1),
+                    range::first (direction, range2)),
+                return_false(), next <Range1>(), direction, predicate,
                 std::forward <Range1> (range1),
                 std::forward <Range2> (range2)));
         };
 
         template <class Dummy> struct next {
-            template <class Range1, class Range2>
-            auto operator() (Direction const & direction,
+            template <class Range1, class Range2> auto operator() (
+                Direction const & direction, Predicate && predicate,
                 Range1 && range1, Range2 && range2) const
-            RETURNS (equal() (direction,
+            RETURNS (equal() (direction, predicate,
                 range::drop (direction, std::forward <Range1> (range1)),
                 range::drop (direction, std::forward <Range2> (range2))));
         };
 
     public:
         template <class Range1, class Range2>
-        auto operator() (Direction const & direction,
+        auto operator() (Direction const & direction, Predicate && predicate,
             Range1 && range1, Range2 && range2) const
         RETURNS (rime::call_if (rime::and_ (
                 is_homogeneous <Direction, Range1>(),
                 is_homogeneous <Direction, Range2>()),
-            when_homogeneous(), when_heterogeneous(), direction,
+            when_homogeneous(), when_heterogeneous(), direction, predicate,
             std::forward <Range1> (range1),
             std::forward <Range2> (range2)));
     };
 
-} // namespace callable
+} // namespace operation
 
 namespace apply {
     template <class ... Arguments> struct equal;
@@ -149,12 +151,19 @@ namespace callable {
 /**
 Compare two ranges for equality.
 
+\return \c true iff the two arguments have equal length and all elements
+compare equal.
+
 \param direction
     (optional) Direction that should be used to traverse the ranges.
+    If not given, the default direction of the first range is used.
+\param predicate
+    (optional) Predicate to use to compare individual elements.
+    If not given, then \c operator== is used.
 \param range1
+    The first range to compare.
 \param range2
-    The two ranges to compare.
-\todo Give element equality predicate?
+    The second range to compare.
 */
 static const auto equal = callable::equal();
 
@@ -162,16 +171,45 @@ namespace apply {
 
     namespace automatic_arguments {
 
+        namespace equal_detail {
+
+            struct element_equal {
+                template <class Left, class Right>
+                auto operator() (Left && left, Right && right) const
+                RETURNS (std::forward <Left> (left)
+                    == std::forward <Right> (right));
+            };
+
+        } // namespace equal_detail
+
         template <class Directions, class Other, class Ranges,
             class Enable = void>
         struct equal : operation::unimplemented {};
 
-        template <class Direction, class Range1, class Range2>
-            struct equal <meta::vector <Direction>, meta::vector<>,
+        template <class Direction, class Predicate, class Range1, class Range2>
+            struct equal <meta::vector <Direction>, meta::vector <Predicate>,
                 meta::vector <Range1, Range2>>
         : operation::equal <typename range::tag_of <Range1>::type,
-            typename range::tag_of <Range2>::type, Direction> {};
+            typename range::tag_of <Range2>::type, Direction, Predicate const &>
+        {};
 
+        template <class Direction, class Range1, class Range2>
+            struct equal <meta::vector <Direction>,
+                meta::vector<>, meta::vector <Range1, Range2>>
+        {
+            typedef operation::equal <
+                typename range::tag_of <Range1>::type,
+                typename range::tag_of <Range2>::type, Direction,
+                equal_detail::element_equal const &>
+                implementation;
+
+            auto operator() (Direction const & direction,
+                Range1 && range1, Range2 && range2) const
+            RETURNS (implementation() (direction,
+                equal_detail::element_equal(),
+                std::forward <Range1> (range1),
+                std::forward <Range2> (range2)));
+        };
     } // namespace automatic_arguments
 
     template <class ... Arguments> struct equal

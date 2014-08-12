@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/mpl/less_equal.hpp>
 
 #include "core.hpp"
 
@@ -200,9 +199,8 @@ namespace operation {
     template <std::size_t size, class Direction, class Increment>
         struct drop_constant <member_view_tag <size>, Direction, Increment,
             // Only implement if Increment <= size.
-            typename boost::enable_if <
-                boost::mpl::less_equal <Increment, rime::size_t <size>>>::type
-        >
+            typename std::enable_if <(std::size_t (Increment::value) <= size)
+        >::type>
     {
         template <class Range> struct result {
             typedef typename std::decay <Range>::type range;

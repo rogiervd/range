@@ -165,7 +165,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         static_assert (range::has <range::callable::drop (
             rime::size_t <0>, empty_view_type)>::value, "");
         static_assert (range::has <range::callable::drop (
-            direction::front, rime::size_t <0>, empty_view_type)>::value, "");
+            direction::front, std::integral_constant <std::size_t, 0>,
+            empty_view_type)>::value, "");
         static_assert (range::has <range::callable::drop (
             direction::back, rime::size_t <0>, empty_view_type)>::value, "");
 
@@ -179,7 +180,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         static_assert (!range::has <range::callable::drop (
             rime::size_t <2>, empty_view_type)>::value, "");
         static_assert (!range::has <range::callable::drop (
-            direction::front, rime::size_t <3>, empty_view_type)>::value, "");
+            direction::front, std::integral_constant <std::size_t, 3>,
+            empty_view_type)>::value, "");
         static_assert (!range::has <range::callable::drop (
             direction::back, rime::size_t <3>, empty_view_type)>::value, "");
 
@@ -415,9 +417,10 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         static_assert (range::has <range::callable::drop (
             direction::front, rime::int_<1>, three_view_type)>::value, "");
         static_assert (range::has <range::callable::drop (
-            direction::back, rime::int_<2>, three_view_type)>::value, "");
+            direction::back, boost::mpl::int_<2>, three_view_type)>::value, "");
         static_assert (range::has <range::callable::drop (
-            direction::back, rime::int_<3>, three_view_type)>::value, "");
+            direction::back, std::integral_constant <std::size_t, 3>,
+            three_view_type)>::value, "");
         static_assert (!range::has <range::callable::drop (
             direction::back, rime::int_<4>, three_view_type)>::value, "");
         static_assert (!range::has <range::callable::drop (
@@ -472,7 +475,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
 
         BOOST_CHECK_EQUAL (first (drop (three_view)), 3.5);
         BOOST_CHECK_EQUAL (first (drop (front, three_view)), 3.5);
-        BOOST_CHECK_EQUAL (first (drop (rime::int_ <1>(), three_view)), 3.5);
+        BOOST_CHECK_EQUAL (
+            first (drop (std::integral_constant <int, 1>(), three_view)), 3.5);
         BOOST_CHECK_EQUAL (first (drop (front, rime::int_ <1>(), three_view)),
             3.5);
 
@@ -513,11 +517,12 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (at (rime::size_t <1>(), three_view), 3.5);
         BOOST_CHECK_EQUAL (at (rime::size_t <2>(), three_view), 'a');
         BOOST_CHECK_EQUAL (at (front, rime::size_t <0>(), three_view), 4);
-        BOOST_CHECK_EQUAL (at (front, rime::size_t <1>(), three_view), 3.5);
+        BOOST_CHECK_EQUAL (
+            at (front, std::integral_constant <size_t, 1>(), three_view), 3.5);
         BOOST_CHECK_EQUAL (at (front, rime::size_t <2>(), three_view), 'a');
         BOOST_CHECK_EQUAL (at (back, rime::size_t <0>(), three_view), 'a');
         BOOST_CHECK_EQUAL (at (back, rime::size_t <1>(), three_view), 3.5);
-        BOOST_CHECK_EQUAL (at (back, rime::size_t <2>(), three_view), 4);
+        BOOST_CHECK_EQUAL (at (back, boost::mpl::size_t <2>(), three_view), 4);
 
         BOOST_CHECK_EQUAL (at_c <0> (three_view), 4);
         BOOST_CHECK_EQUAL (at_c <1> (three_view), 3.5);
@@ -590,7 +595,8 @@ BOOST_AUTO_TEST_CASE (test_range_functions) {
     BOOST_CHECK_EQUAL (first (structure_view), 678);
     BOOST_CHECK_EQUAL (first (drop (structure_view)), "hello");
     BOOST_CHECK_EQUAL (first (drop (rime::int_<2>(), structure_view)), 'b');
-    BOOST_CHECK_EQUAL (first (drop (rime::int_<3>(), structure_view)), 678);
+    BOOST_CHECK_EQUAL (
+        first (drop (std::integral_constant <int, 3>(), structure_view)), 678);
     first (drop (rime::int_<3>(), structure_view)) = 3;
     BOOST_CHECK_EQUAL (s.i, 3);
     BOOST_CHECK_EQUAL (first (drop (rime::int_<4>(), structure_view)), 890.1);

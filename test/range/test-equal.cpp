@@ -152,4 +152,37 @@ BOOST_AUTO_TEST_CASE (test_range_equal_mixed) {
     CHECK_range_equal (v1, std::make_tuple(1, 4, 5), false, false);
 }
 
+// Mix homogeneous and heterogeneous ranges.
+BOOST_AUTO_TEST_CASE (test_range_equal_constants) {
+    rime::int_ <1> one;
+    rime::int_ <3> three;
+    rime::int_ <4> four;
+
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple(), std::make_tuple()), rime::true_);
+
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (one), std::make_tuple (one)), rime::true_);
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (one), std::make_tuple (one, three)), rime::false_);
+
+    RIME_CHECK_EQUAL (range::equal (
+            std::make_tuple (one, three), std::make_tuple (one, three)),
+        rime::true_);
+    RIME_CHECK_EQUAL (range::equal (
+            std::make_tuple (one, three), std::make_tuple (one, four)),
+        rime::false_);
+
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (one), std::make_tuple (one, 3)), rime::false_);
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (1), std::make_tuple (one)), true);
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (2), std::make_tuple (one)), false);
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (four, 1), std::make_tuple (four, one)), true);
+    RIME_CHECK_EQUAL (range::equal (
+        std::make_tuple (four, 2), std::make_tuple (four, one)), false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

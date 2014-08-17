@@ -137,7 +137,7 @@ template <class Structure, class Extractors> class member_view
 : public detail::member_view_base <Structure> {
     typedef detail::member_view_base <Structure> base;
 public:
-    member_view (Structure & structure) : base (structure) {}
+    explicit member_view (Structure & structure) : base (structure) {}
 
     /**
     Generalised copy constructor.

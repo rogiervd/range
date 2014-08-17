@@ -84,6 +84,10 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         typedef range::member_view <structure, meta::vector<>> empty_view_type;
         empty_view_type empty_view (s);
 
+        static_assert (
+            !std::is_convertible <structure &, empty_view_type>::value,
+            "member_view should be only explicitly is_convertible.");
+
         static_assert (std::is_same <typename range::result_of <
             range::callable::default_direction (empty_view_type)>::type,
             direction::front>::value, "");

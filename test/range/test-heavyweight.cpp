@@ -133,6 +133,7 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
     using range::size;
     using range::first;
     using range::drop;
+    using range::chop;
     using range::front;
     using range::back;
 
@@ -149,11 +150,27 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         BOOST_CHECK (!empty (l));
         BOOST_CHECK_EQUAL (first (l), 3);
 
+        auto first_and_rest = chop (l);
+        BOOST_CHECK_EQUAL (first_and_rest.first(), 3);
+        BOOST_CHECK (empty (first_and_rest.rest()));
+
         l.push_front (5);
         BOOST_CHECK (!empty (l));
         BOOST_CHECK_EQUAL (first (l), 5);
         BOOST_CHECK_EQUAL (first (drop (l)), 3);
         BOOST_CHECK (empty (drop (drop (l))));
+
+        first_and_rest = chop (l);
+        BOOST_CHECK_EQUAL (first_and_rest.first(), 5);
+        first_and_rest = chop (first_and_rest.rest());
+        BOOST_CHECK_EQUAL (first_and_rest.first(), 3);
+        BOOST_CHECK (empty (first_and_rest.rest()));
+
+        auto v = range::view (l);
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::chop_in_place (decltype (l) &)>));
+        BOOST_MPL_ASSERT ((
+            range::has <range::callable::chop_in_place (decltype (v) &)>));
     }
 
     // std::vector
@@ -206,8 +223,10 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
             weird_direction, weird_heavyweight_count &)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
             weird_direction, int, weird_heavyweight_count &)>));
+        BOOST_MPL_ASSERT ((range::has <range::callable::chop (
+            weird_direction, weird_heavyweight_count &)>));
 
-        // without direction
+        // without direction.
         BOOST_MPL_ASSERT_NOT ((range::has <
             range::callable::view (weird_heavyweight_count)>));
         BOOST_MPL_ASSERT_NOT ((range::has <
@@ -229,6 +248,10 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         BOOST_CHECK_EQUAL (first (d, drop (d, w)), 1);
         BOOST_CHECK_EQUAL (first (d, drop (d, one, w)), 1);
         BOOST_CHECK_EQUAL (first (d, drop (d, two, w)), 2);
+
+        auto first_and_rest = chop (d, w);
+        BOOST_CHECK_EQUAL (first_and_rest.first(), 0);
+        BOOST_CHECK_EQUAL (first (d, first_and_rest.rest()), 1);
     }
 }
 

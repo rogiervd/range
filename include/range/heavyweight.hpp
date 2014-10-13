@@ -34,17 +34,31 @@ namespace range {
 
 /**
 Tag for heavyweight objects that can be used as ranges.
+Heavyweight ranges are converted to a view, either explicitly, with view() or
+make_view() or explicitly, by calling empty(), first(), drop(), et cetera.
+The former is a matter of implementing operation::make_view.
+The latter is taken care of by using this tag.
 
-operation::default_direction must be defined if it is not front.
-operation::make_view must be defined for all combinations of directions that the
-range supports.
-operation::helper::call_with_last may be particularly helpful in this regard.
+To allow a heavy-weight container to be converted to a view, use code like the
+following:
+\code
+template <class ... TemplateArguments>
+    struct tag_of_qualified <your_container <TemplateArguments ...>>
+{ typedef heavyweight_tag <your_container <TemplateArguments ...>> type; };
+\endcode
+
+Then, implement the following operations for
+\c heavyweight_tag <your_container <TemplateArguments ...>> :
+
+\li operation::default_direction must be defined if it is not front.
+
+\li operation::make_view must be defined for all combinations of directions that
+    the range supports.
+    operation::helper::call_with_last may be particularly helpful.
+
+\li All relevant operations for the range.
 */
 template <class Container> struct heavyweight_tag;
-
-template <class Container>
-    struct tag_of_qualified <heavyweight_tag <Container>>
-{ typedef heavyweight_tag <Container> type; };
 
 namespace operation {
     /*
@@ -67,7 +81,7 @@ namespace operation {
     version was longer than this.
     */
 
-    // empty
+    // empty.
     template <class Container, class Direction>
         struct empty <heavyweight_tag <Container>, Direction,
             typename boost::enable_if <has <callable::empty (
@@ -79,7 +93,7 @@ namespace operation {
             direction, std::forward <CVContainer> (container))));
     };
 
-    // size
+    // size.
     template <class Container, class Direction>
         struct size <heavyweight_tag <Container>, Direction,
             typename boost::enable_if <has <callable::size (
@@ -91,7 +105,7 @@ namespace operation {
             direction, std::forward <CVContainer> (container))));
     };
 
-    // first
+    // first.
     template <class Container, class Direction>
         struct first <heavyweight_tag <Container>, Direction,
             typename boost::enable_if <has <callable::first (
@@ -103,7 +117,7 @@ namespace operation {
             direction, std::forward <CVContainer> (container))));
     };
 
-    // drop
+    // drop.
     template <class Container, class Direction, class Increment>
         struct drop <heavyweight_tag <Container>, Direction, Increment,
             typename boost::enable_if <has <callable::drop (
@@ -116,6 +130,22 @@ namespace operation {
         RETURNS (::range::drop (direction, increment, ::range::view (
             direction, std::forward <CVContainer> (container))));
     };
+
+    // chop.
+    template <class Container, class Direction>
+        struct chop <heavyweight_tag <Container>, Direction,
+            typename boost::enable_if <has <callable::chop (
+                Direction, callable::view (Direction, Container))>
+            >::type>
+    {
+        template <class CVContainer> auto
+        operator() (Direction const & direction, CVContainer && container) const
+        RETURNS (::range::chop (direction, ::range::view (
+            direction, std::forward <CVContainer> (container))));
+    };
+
+    // chop_in_place is not defined: by definition, the (heavyweight) container
+    // is not returned.
 
 } // namespace operation
 } // namespace range

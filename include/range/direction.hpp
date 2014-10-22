@@ -167,12 +167,20 @@ types direction::front and direction::back, respectively.
 namespace direction {
 
     struct front {
-        rime::bool_ <true> operator == (front const &) const
+        rime::true_type operator == (front const &) const
         { return rime::true_; }
+
+        template <class OtherDirection>
+            rime::false_type operator == (OtherDirection const &) const
+        { return rime::false_; }
     };
     struct back {
-        rime::bool_ <true> operator == (back const &) const
+        rime::true_type operator == (back const &) const
         { return rime::true_; }
+
+        template <class OtherDirection>
+            rime::false_type operator == (OtherDirection const &) const
+        { return rime::false_; }
     };
 
     namespace operation {

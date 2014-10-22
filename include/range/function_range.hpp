@@ -91,6 +91,16 @@ namespace operation {
         }
     };
 
+    template <>
+        struct chop_in_place <function_range_tag <reference>, direction::front>
+    {
+        template <class Function>
+            auto operator() (
+                direction::front, function_range <Function> & range) const
+        -> decltype (range.function()())
+        { return range.function()(); }
+    };
+
 } // namespace operation
 
 } // namespace range

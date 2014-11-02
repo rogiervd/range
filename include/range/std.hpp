@@ -29,6 +29,6 @@ declarations as necessary.
 
 #include "std/container.hpp"
 #include "std/tuple.hpp"
+#include "std/view_optional.hpp"
 
 #endif  // RANGE_STD_HPP_INCLUDED
-

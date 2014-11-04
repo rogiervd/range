@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <tuple>
 #include <string>
 
+#include "utility/config.hpp"
+
 #include "range/std.hpp"
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
@@ -94,6 +96,7 @@ BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_homogeneous) {
     CHECK_range_less_lexicographical (v1, v2, false);
 }
 
+#ifndef UTILITY_CONFIG_CLANG_RANDOM_TEMPLATE_CRASHES
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_heterogeneous) {
     CHECK_range_less_lexicographical (
         std::make_tuple(), std::make_tuple(), rime::false_);
@@ -154,8 +157,9 @@ BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_heterogeneous) {
     CHECK_range_less_lexicographical (
         std::make_tuple (1, 2, 4), std::make_tuple (1, 2, 3), false);
 }
+#endif // UTILITY_CONFIG_CLANG_RANDOM_TEMPLATE_CRASHES
 
-
+#ifndef UTILITY_CONFIG_CLANG_RANDOM_TEMPLATE_CRASHES
 // Mix homogeneous and heterogeneous ranges.
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_mixed) {
     std::vector <int> v1;
@@ -200,6 +204,7 @@ BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_mixed) {
     CHECK_range_less_lexicographical (v1, std::make_tuple(1, 4, 5), true);
     CHECK_range_less_lexicographical (std::make_tuple(1, 4, 5), v1, false);
 }
+#endif // UTILITY_CONFIG_CLANG_RANDOM_TEMPLATE_CRASHES
 
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_types) {
     std::tuple <char> t1 ('a');

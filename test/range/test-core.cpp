@@ -189,6 +189,8 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <
         range::callable::empty (weird_reverse_direction, weird_count)>::type,
         rime::false_type>));
+    BOOST_MPL_ASSERT_NOT ((range::always_empty <weird_direction, weird_count>));
+    BOOST_MPL_ASSERT ((range::never_empty <weird_direction, weird_count>));
 
     // size.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (

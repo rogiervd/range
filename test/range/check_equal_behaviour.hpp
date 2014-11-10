@@ -236,11 +236,8 @@ template <class HasSize, class HasBack, class Zero>
         // (It may be known to be non-empty, in which case this happily
         // compiles.)
         template <class Direction, class Range>
-            typename boost::disable_if <rime::equal_constant <
-                typename range::result_of <range::callable::empty (
-                    Direction, Range)>::type,
-                rime::true_type>>::type
-            check_first_equal (Direction const & direction,
+            typename boost::disable_if <range::always_empty <Direction, Range>
+            >::type check_first_equal (Direction const & direction,
                 Range const & range1, Range const & range2) const
         {
             if (!range::empty (direction, range1))
@@ -249,11 +246,8 @@ template <class HasSize, class HasBack, class Zero>
         }
         // Known only at compile time that the range is empty.
         template <class Direction, class Range>
-            typename boost::enable_if <rime::equal_constant <
-                typename range::result_of <range::callable::empty (
-                    Direction, Range)>::type,
-                rime::true_type>>::type
-            check_first_equal (Direction const & direction,
+            typename boost::enable_if <range::always_empty <Direction, Range>
+            >::type check_first_equal (Direction const & direction,
                 Range const & range1, Range const & range2) const {}
 
         template <class Direction, class Range1, class Range2>

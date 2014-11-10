@@ -47,6 +47,8 @@ BOOST_AUTO_TEST_CASE (test_range_function_range) {
     // f_range r_temp (&count);
     f_range r (std::move (r_temp));
 
+    BOOST_MPL_ASSERT ((range::never_empty <direction::front, f_range>));
+
     range::chopped <int, f_range> next = range::chop (std::move (r));
     BOOST_CHECK_EQUAL (next.first(), 1);
     range::chopped <int, f_range> next2 = range::chop (next.forward_rest());

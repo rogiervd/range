@@ -64,6 +64,10 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_MPL_ASSERT ((
             range::has <range::callable::empty (decltype (view))>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (decltype (v))>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::always_empty <direction::front, decltype (v)>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::never_empty <direction::front, decltype (v)>));
 
         BOOST_CHECK (empty (v));
         BOOST_CHECK_EQUAL (size (v), 0);

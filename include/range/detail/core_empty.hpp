@@ -29,6 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "meta/vector.hpp"
 
+#include "rime/core.hpp"
+
 #include "core_base.hpp"
 
 namespace range {
@@ -97,7 +99,32 @@ namespace apply {
 
 } // namespace apply
 
+/**
+Evaluate to \c true iff the range is known at compile time to be empty.
+This happens when <c>empty (direction, range)</c> returns a compile-time
+constant with value true.
+
+If this evaluates to \c false, it is still possible for the range to be empty at
+run time.
+*/
+template <class Direction, class Range> struct always_empty
+: rime::equal_constant <
+    typename result_of <callable::empty (Direction, Range)>::type,
+    rime::true_type> {};
+
+/**
+Evaluate to \c true iff the range is known at compile time to be not empty.
+This happens when <c>empty (direction, range)</c> returns a compile-time
+constant with value false.
+
+If this evaluates to \c false, it is still possible for the range to be
+non-empty at run time.
+*/
+template <class Direction, class Range> struct never_empty
+: rime::equal_constant <
+    typename result_of <callable::empty (Direction, Range)>::type,
+    rime::false_type> {};
+
 } // namespace range
 
 #endif  // RANGE_DETAIL_CORE_EMPTY_HPP_INCLUDED
-

@@ -135,6 +135,10 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
             rime::true_);
         RIME_CHECK_EQUAL (empty (front, empty_view), rime::true_);
         RIME_CHECK_EQUAL (empty (direction::back(), empty_view), rime::true_);
+        BOOST_MPL_ASSERT ((
+            range::always_empty <direction::front, empty_view_type>));
+        BOOST_MPL_ASSERT ((
+            range::always_empty <direction::back, empty_view_type>));
 
         // size.
         RIME_CHECK_EQUAL (size (empty_view), rime::size_t <0>());
@@ -230,6 +234,10 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_MPL_ASSERT ((std::is_same <range::result_of <
             range::callable::empty (direction::front, int_view_type)>::type,
             rime::false_type>));
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::front, int_view_type>));
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::back, int_view_type>));
 
         // size.
         static_assert (range::has <range::callable::size (
@@ -449,6 +457,11 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         RIME_CHECK_EQUAL (empty (three_view), rime::false_);
         RIME_CHECK_EQUAL (empty (front, three_view), rime::false_);
         RIME_CHECK_EQUAL (empty (back, three_view), rime::false_);
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::front, three_view_type>));
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::back, three_view_type>));
+
         RIME_CHECK_EQUAL (size (three_view), rime::size_t <3>());
         RIME_CHECK_EQUAL (size (front, three_view), rime::size_t <3>());
         RIME_CHECK_EQUAL (size (back, three_view), rime::size_t <3>());

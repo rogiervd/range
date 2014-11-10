@@ -65,6 +65,10 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
     {
         std::tuple<> t;
         BOOST_CHECK (range::empty (t));
+        BOOST_MPL_ASSERT ((
+            range::always_empty <direction::front, decltype (t)>));
+        BOOST_MPL_ASSERT ((
+            range::always_empty <direction::back, decltype (t)>));
         check_equal_value (range::size (t), rime::size_t <0>());
 
         BOOST_MPL_ASSERT_NOT ((
@@ -82,6 +86,9 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
     {
         std::tuple <double> const t (6.3);
         BOOST_CHECK (!range::empty (t));
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::front, decltype (t)>));
+        BOOST_MPL_ASSERT ((range::never_empty <direction::back, decltype (t)>));
         check_equal_value (range::size (t), rime::size_t <1>());
 
         BOOST_MPL_ASSERT ((
@@ -122,6 +129,10 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
             range::empty (first_and_empty_1.rest()), rime::true_);
         check_equal_value (
             range::empty (first_and_empty_2.rest()), rime::true_);
+        BOOST_MPL_ASSERT ((range::always_empty <
+            direction::front, decltype (first_and_empty_2.rest())>));
+        BOOST_MPL_ASSERT ((range::always_empty <
+            direction::back, decltype (first_and_empty_2.rest())>));
     }
 
     // Two elements.
@@ -129,6 +140,9 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         std::tuple <int, char> t (4, 'a');
 
         BOOST_CHECK (!range::empty (t));
+        BOOST_MPL_ASSERT ((
+            range::never_empty <direction::front, decltype (t)>));
+        BOOST_MPL_ASSERT ((range::never_empty <direction::back, decltype (t)>));
         check_equal_value (range::size (t), rime::size_t <2>());
 
         check_equal_value (range::first (range::front, t), 4);

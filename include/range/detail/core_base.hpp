@@ -84,6 +84,8 @@ namespace operation {
         struct chop;
     template <class RangeTag, class Direction, class Enable = void>
         struct chop_in_place;
+    template <class RangeTag, class Direction, class Index, class Enable = void>
+        struct at;
 
     /**
     Base class for marking an operation as not implemented.

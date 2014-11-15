@@ -121,6 +121,19 @@ namespace operation {
             direction, std::forward <CVContainer> (container))));
     };
 
+    // at.
+    template <class Container, class Direction, class Index>
+        struct at <heavyweight_tag <Container>, Direction, Index,
+            typename boost::enable_if <has <callable::at (Direction, Index,
+                callable::view_once (Direction, Container))>>::type>
+    {
+        template <class CVContainer> auto
+        operator() (Direction const & direction, Index const & index,
+            CVContainer && container) const
+        RETURNS (::range::at (direction, index, ::range::view_once (
+            direction, std::forward <CVContainer> (container))));
+    };
+
     // drop.
     template <class Container, class Direction, class Increment>
         struct drop <heavyweight_tag <Container>, Direction, Increment,

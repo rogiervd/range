@@ -156,6 +156,7 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
     using range::empty;
     using range::size;
     using range::first;
+    using range::at;
     using range::drop;
     using range::chop;
     using range::front;
@@ -231,6 +232,11 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         BOOST_CHECK_EQUAL (first (drop (back, v)), 3.3);
         BOOST_CHECK_EQUAL (first (back, drop (back, one, v)), 3.3);
 
+        BOOST_CHECK_EQUAL (at (0, v), 3.3);
+        BOOST_CHECK_EQUAL (at (1, v), 5.5);
+        BOOST_CHECK_EQUAL (at (back, 0, v), 5.5);
+        BOOST_CHECK_EQUAL (at (back, 1, v), 3.3);
+
         BOOST_CHECK (empty (drop (drop (v))));
         BOOST_CHECK (empty (drop (back, drop (v))));
         BOOST_CHECK (empty (drop (front, drop (back, one, v))));
@@ -238,6 +244,17 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         BOOST_CHECK (empty (drop (back, 2u, v)));
         BOOST_CHECK (empty (drop (two, v)));
         BOOST_CHECK (empty (drop (back, two, v)));
+
+        auto moved_view = range::view_once (std::move (v));
+
+        auto && first_element = at (0, moved_view);
+        BOOST_CHECK_EQUAL (first_element, 3.3);
+        BOOST_MPL_ASSERT ((std::is_same <decltype (first_element), double &&>));
+
+        auto && second_element = at (1, moved_view);
+        BOOST_CHECK_EQUAL (second_element, 5.5);
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second_element), double &&>));
     }
 
     BOOST_MPL_ASSERT_NOT ((range::operation::is_implemented<range::apply::view <

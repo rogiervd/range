@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RANGE_DETAIL_CORE_SIZE_HPP_INCLUDED
 
 #include <type_traits>
+#include <stdexcept>
 
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
@@ -94,7 +95,18 @@ namespace apply {
 
 } // namespace apply
 
+/**
+Exception class that is thrown when it is attempted to convert one range into
+another but the size of the source range makes this impossible at run time.
+For example, when converting a vector with 3 elements to a tuple with 2
+elements.
+*/
+class size_mismatch : public std::runtime_error {
+public:
+    explicit size_mismatch()
+    : std::runtime_error ("Mismatched size of range") {}
+};
+
 } // namespace range
 
 #endif  // RANGE_DETAIL_CORE_SIZE_HPP_INCLUDED
-

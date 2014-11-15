@@ -72,7 +72,10 @@ namespace operation {
     */
     template <class Container, class Directions>
         struct view <heavyweight_tag <Container>, Directions>
-    : make_view <heavyweight_tag <Container>, Directions> {};
+    : make_view <false, heavyweight_tag <Container>, Directions> {};
+    template <class Container, class Directions>
+        struct view_once <heavyweight_tag <Container>, Directions>
+    : make_view <true, heavyweight_tag <Container>, Directions> {};
 
     /*
     Operations on heavyweight ranges forward to the same operation applied to
@@ -109,11 +112,12 @@ namespace operation {
     template <class Container, class Direction>
         struct first <heavyweight_tag <Container>, Direction,
             typename boost::enable_if <has <callable::first (
-                Direction, callable::view (Direction, Container))>>::type>
+                Direction, callable::view_once (Direction, Container))>>::type>
     {
         template <class CVContainer> auto
         operator() (Direction const & direction, CVContainer && container) const
-        RETURNS (::range::first (direction, ::range::view (
+        // Use view_once in case the container is a temporary.
+        RETURNS (::range::first (direction, ::range::view_once (
             direction, std::forward <CVContainer> (container))));
     };
 
@@ -151,4 +155,3 @@ namespace operation {
 } // namespace range
 
 #endif  // RANGE_HEAVYWEIGHT_HPP_INCLUDED
-

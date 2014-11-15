@@ -156,7 +156,10 @@ namespace range {
             begin() and end() methods.
             This returns an iterator_range.
             */
-            template <class Container> struct view_std_container
+            template <bool Move, class Container> struct view_std_container;
+
+            template <class Container>
+                struct view_std_container <false, Container>
             {
                 typedef typename Container::iterator iterator;
                 typedef typename Container::const_iterator const_iterator;
@@ -178,124 +181,147 @@ namespace range {
                 }
             };
 
+            template <class Container>
+                struct view_std_container <true, Container>
+            : view_std_container <false, Container>
+            {
+                using view_std_container <false, Container>::operator();
+
+                typedef std::move_iterator <typename Container::iterator>
+                    move_iterator;
+
+                iterator_range <move_iterator>
+                    operator() (Container && container) const
+                {
+                    return iterator_range <move_iterator> (
+                        move_iterator (container.begin()),
+                        move_iterator (container.end()));
+                }
+            };
+
         } // namespace detail
 
         /* Enable make_view for all standard containers. */
 
         // Sequence containers.
 
-        template <class Type, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <std::vector <Type, Allocator>>,
-                Directions,
+        template <bool Move, class Type, class Allocator, class Directions>
+            struct make_view <Move,
+                heavyweight_tag <std::vector <Type, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::vector <Type, Allocator>>> {};
+            Move, std::vector <Type, Allocator>>> {};
 
-        template <class Type, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <std::deque <Type, Allocator>>,
-                Directions,
+        template <bool Move, class Type, class Allocator, class Directions>
+            struct make_view <Move,
+                heavyweight_tag <std::deque <Type, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::deque <Type, Allocator>>> {};
+            Move, std::deque <Type, Allocator>>> {};
 
         // forward_list: only with front.
-        template <class Type, class Allocator>
-            struct make_view <heavyweight_tag <
-                    std::forward_list <Type, Allocator>>,
+        template <bool Move, class Type, class Allocator>
+            struct make_view <Move,
+                heavyweight_tag <std::forward_list <Type, Allocator>>,
                 meta::vector <direction::front>>
         : helper::call_with_last <1, meta::vector <direction::front>,
-            detail::view_std_container <std::forward_list <Type, Allocator>>>
+            detail::view_std_container <Move,
+                std::forward_list <Type, Allocator>>>
         {};
 
-        template <class Type, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <std::list <Type, Allocator>>,
-                Directions,
+        template <bool Move, class Type, class Allocator, class Directions>
+            struct make_view <Move,
+                heavyweight_tag <std::list <Type, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::list <Type, Allocator>>> {};
+            Move, std::list <Type, Allocator>>> {};
 
-        template <class Type, class Traits, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Type, class Traits, class Allocator,
+                class Directions>
+            struct make_view <Move, heavyweight_tag <
                     std::basic_string <Type, Traits, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::basic_string <Type, Traits, Allocator>>> {};
+            Move, std::basic_string <Type, Traits, Allocator>>> {};
 
         // Associative containers.
-        template <class Key, class Compare, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Compare, class Allocator,
+                class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::set <Key, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::set <Key, Compare, Allocator>>>
+            Move, std::set <Key, Compare, Allocator>>>
         {};
 
-        template <class Key, class Compare, class Allocator, class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Compare, class Allocator,
+                class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::multiset <Key, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::multiset <Key, Compare, Allocator>>>
+            Move, std::multiset <Key, Compare, Allocator>>>
         {};
 
-        template <class Key, class Value, class Compare, class Allocator,
-                class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Value, class Compare,
+                class Allocator, class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::map <Key, Value, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::map <Key, Value, Compare, Allocator>>>
+            Move, std::map <Key, Value, Compare, Allocator>>>
         {};
 
-        template <class Key, class Value, class Compare, class Allocator,
-                class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Value, class Compare,
+                class Allocator, class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::multimap <Key, Value, Compare, Allocator>>, Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::multimap <Key, Value, Compare, Allocator>>>
+            Move, std::multimap <Key, Value, Compare, Allocator>>>
         {};
 
         // Unordered (hashed) associative containers.
-        template <class Key, class Hash, class KeyEqual, class Allocator,
-                class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Hash, class KeyEqual,
+                class Allocator, class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::unordered_set <Key, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::unordered_set <Key, Hash, KeyEqual, Allocator>>>
+            Move, std::unordered_set <Key, Hash, KeyEqual, Allocator>>>
         {};
 
-        template <class Key, class Hash, class KeyEqual, class Allocator,
-            class Directions>
-            struct make_view <heavyweight_tag <
+        template <bool Move, class Key, class Hash, class KeyEqual,
+                class Allocator, class Directions>
+            struct make_view <Move, heavyweight_tag <
                 std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>>
+            Move, std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>>
         {};
 
-        template <class Key, class Value, class Hash, class KeyEqual,
+        template <bool Move, class Key, class Value, class Hash, class KeyEqual,
                 class Allocator, class Directions>
-            struct make_view <heavyweight_tag <
+            struct make_view <Move, heavyweight_tag <
                 std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
-            std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>>
+            Move, std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>>
         {};
 
-        template <class Key, class Value, class Hash, class KeyEqual,
+        template <bool Move, class Key, class Value, class Hash, class KeyEqual,
                 class Allocator, class Directions>
-            struct make_view <heavyweight_tag <
+            struct make_view <Move, heavyweight_tag <
                 std::unordered_multimap <
                     Key, Value, Hash, KeyEqual, Allocator>>,
                 Directions,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions, detail::view_std_container <
+            Move,
             std::unordered_multimap <Key, Value, Hash, KeyEqual, Allocator>>>
         {};
 
@@ -304,4 +330,3 @@ namespace range {
 } // namespace range
 
 #endif  // RANGE_STD_CONTAINER_HPP_INCLUDED
-

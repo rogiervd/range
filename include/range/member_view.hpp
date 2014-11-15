@@ -43,9 +43,9 @@ There are three types of ways that this "something" can be extracted.
 1. The value of a member variable.
 For a struct "structure" with a member "int i", this looks like
     member_extractor <int structure::*, &structure::i>.
-This works with any type that is implicitly convertible to structure & or
-structure const &.
-This will return a reference to the member variable.
+This works with any type that is implicitly convertible to structure &,
+structure const &, or structure &&.
+This will return the same type of reference to the member variable.
 
 2. The return value of a nullary member function.
 For a member function
@@ -78,6 +78,9 @@ template <typename Structure, typename Type, Type Structure::* member>
 
     Type const & operator() (Structure const & structure) const
     { return structure.*member; }
+
+    Type && operator() (Structure && structure) const
+    { return static_cast <Type &&> (structure.*member); }
 };
 
 // Specialisation for a member function.
@@ -97,12 +100,12 @@ struct member_extractor <ReturnType (Structure::*)() const, member_function> {
 
 // Specialisation for a free function.
 template <typename Structure, typename ReturnType,
-    ReturnType (* function) (Structure &)>
-struct member_extractor <ReturnType (*) (Structure &), function> {
+    ReturnType (* function) (Structure)>
+struct member_extractor <ReturnType (*) (Structure), function> {
     typedef ReturnType value_type;
 
-    ReturnType operator() (Structure & structure) const
-    { return (function) (structure); }
+    ReturnType operator() (Structure structure) const
+    { return (function) (std::forward <Structure> (structure)); }
 };
 
 namespace detail {
@@ -113,14 +116,17 @@ namespace detail {
     This makes conversion (such as in "drop") easy.
     */
     template <class Structure> class member_view_base {
+        static_assert (std::is_reference <Structure>::value,
+            "Structure must be an lvalue or rvalue reference.");
     public:
-        member_view_base (Structure & structure_)
+        member_view_base (Structure structure_)
         : structure_ (&structure_) {}
 
-        Structure & structure() const { return *structure_; }
+        Structure structure() const
+        { return static_cast <Structure> (*structure_); }
 
     private:
-        Structure * structure_;
+        typename std::add_pointer <Structure>::type structure_;
     };
 } // namespace detail
 
@@ -131,13 +137,17 @@ The range can be used from either "front" or "back" direction.
 The Extractors is a meta-list of member_extractor<> (or similar) classes,
 which each extract a specific member from a structure.
 
-Structure can be const-qualified.
+\a Structure must be a reference; it can be a lvalue reference, a const
+reference, or an rvalue reference.
+Extractors are passed the structure qualified in exactly that way, and are
+free to do with this with they please.
 */
 template <class Structure, class Extractors> class member_view
 : public detail::member_view_base <Structure> {
     typedef detail::member_view_base <Structure> base;
 public:
-    explicit member_view (Structure & structure) : base (structure) {}
+    explicit member_view (Structure structure)
+    : base (static_cast <Structure> (structure)) {}
 
     /**
     Generalised copy constructor.
@@ -221,4 +231,3 @@ namespace operation {
 } // namespace range
 
 #endif  // RANGE_MEMBER_VIEW_HPP_INCLUDED
-

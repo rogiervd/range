@@ -44,12 +44,6 @@ namespace range {
 
 namespace operation {
 
-    template <class RangeTag, class Directions, class Enable = void>
-        struct make_view;
-
-    template <class RangeTag, class Directions, class Enable = void>
-        struct view;
-
     /**
     Produce a lightweight range, a "view", on a heavyweight range such as a
     container.
@@ -65,9 +59,58 @@ namespace operation {
 
     Directions is a meta::vector<> of decayed types.
     The range is forwarded as is.
+
+    If \a Move is true, then view_once was called, and each element in the view
+    can be assumed to be seen only once.
+    Therefore, if a container is passed in that owns the elements, they can be
+    viewed as rvalue references.
+
+    It makes sense to specialise this first for <c>Move=true</c> and providing a
+    view that does not move the elements.
+    Then, an additional specialisation for <c>Move=true</c> can be added.
+    This will usually do the same as when <c>Move=false</c>, except for adding
+    an overload that receives an rvalue reference.
+    It can therefore derive from the specialisation with <c>Move=false</c> and
+    say <c>using make_view \<false, ...>::operator();</c>.
+    The additional overload can then be added.
     */
-    template <class RangeTag, class Directions, class Enable>
-        struct make_view : unimplemented {};
+    template <bool Move, class RangeTag, class Directions, class Enable = void>
+        struct make_view
+    : std::conditional <Move,
+        make_view <false, RangeTag, Directions>, unimplemented>::type {};
+
+    /**
+    Call make_view, or, if that is not defined, return the range as is.
+    Do not specialise this; merely specialise make_view for heavyweight ranges.
+    */
+    template <class RangeTag, class Directions, class Enable = void>
+        struct view;
+
+    /**
+    Produce a lightweight range on a heavyweight range, assuming each element
+    will be consumed only once.
+    The default definition of this forwards to normal "view", and this often
+    provides the correct behaviour.
+
+    However, instantiate this if the view of the heavyweight range should be
+    different if an rvalue reference is passed in.
+    If the range is the sole owner of the elements, the desired behaviour of the
+    view can be for first() to return the elements by rvalue reference instead
+    of normal reference.
+    Usually, a specialisation can derive from view <RangeTag, Directions>,
+    import its \c operator() with <c>using operator();</c>, and provide an
+    additional overload for rvalue references.
+
+    Not that even when an rvalue is passed in, the view should not contain a
+    copy of the heavyweight range.
+    The view should still assume that the reference remains usable as long as
+    the view is used.
+
+    Only specialise this if make_view is also defined, otherwise "is_view" is
+    not defined sensibly.
+    */
+    template <class RangeTag, class Directions, class Enable = void>
+        struct view_once;
 
     namespace detail {
         /**
@@ -94,26 +137,58 @@ namespace operation {
 
     template <class RangeTag, class Directions, class Enable> struct view
     : boost::mpl::if_ <
-        is_implemented <make_view <RangeTag, Directions>>,
-        make_view <RangeTag, Directions>,
+        // First argument ("Move") to make_view is "false".
+        is_implemented <make_view <false, RangeTag, Directions>>,
+        make_view <false, RangeTag, Directions>,
+        detail::passthrough_view <RangeTag, Directions>>::type {};
+
+    template <class RangeTag, class Directions, class Enable> struct view_once
+    : boost::mpl::if_ <
+        // First argument ("Move") to make_view is "true".
+        is_implemented <make_view <true, RangeTag, Directions>>,
+        make_view <true, RangeTag, Directions>,
         detail::passthrough_view <RangeTag, Directions>>::type {};
 
 } // namespace operation
 
 namespace apply {
     template <class ... Arguments> struct view;
+    template <class ... Arguments> struct view_once;
 } // namespace apply
 
 namespace callable {
     struct view : generic <apply::view> {};
+    struct view_once : generic <apply::view_once> {};
 } // namespace callable
 
+/**
+Turn a range into a view.
+A view should be lightweight.
+
+If the range is already a view, then the range itself is returned.
+
+\param directions
+    Directions that the view should allow traversal in.
+    If this is not given, then the default direction is used.
+\param range
+    Range that the view should be over.
+*/
 static const auto view = callable::view();
+
+/**
+Turn a range into a view that, if the range is a temporary, can return rvalue
+references as elements.
+That is, the elements can be moved.
+The caller must therefore only access each element only once (or have knowledge
+particular to the view).
+*/
+static const auto view_once = callable::view_once();
 
 namespace apply {
 
     namespace automatic_arguments {
 
+        /* view. */
         template <class Directions, class Other, class Ranges,
             class Enable = void>
         struct view : operation::unimplemented {};
@@ -122,11 +197,25 @@ namespace apply {
             struct view <Directions, meta::vector<>, meta::vector <Range>>
         : operation::view <typename range::tag_of <Range>::type, Directions> {};
 
+        /* view_once. */
+        template <class Directions, class Other, class Ranges,
+            class Enable = void>
+        struct view_once : operation::unimplemented {};
+
+        template <class Directions, class Range>
+            struct view_once <Directions, meta::vector<>, meta::vector <Range>>
+        : operation::view_once <
+            typename range::tag_of <Range>::type, Directions> {};
+
     } // namespace automatic_arguments
 
     template <class ... Arguments> struct view
     : automatic_arguments::categorise_arguments_default_direction <
         automatic_arguments::view, meta::vector <Arguments ...>>::type {};
+
+    template <class ... Arguments> struct view_once
+    : automatic_arguments::categorise_arguments_default_direction <
+        automatic_arguments::view_once, meta::vector <Arguments ...>>::type {};
 
 } // namespace apply
 
@@ -296,8 +385,6 @@ namespace apply {
 
 } // namespace apply
 
-
 } // namespace range
 
 #endif  // RANGE_DETAIL_CORE_VIEW_HPP_INCLUDED
-

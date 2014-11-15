@@ -48,7 +48,7 @@ namespace range {
         };
 
         template <>
-            struct make_view <heavyweight_tag <weird_heavyweight_count>,
+            struct make_view <false, heavyweight_tag <weird_heavyweight_count>,
                 meta::vector <weird_direction>>
         {
             weird_count operator() (
@@ -76,7 +76,12 @@ namespace range {
     namespace operation {
 
         namespace detail {
-            template <class Container> struct view_stl_container {
+
+            template <bool Move, class Container> struct view_stl_container;
+
+            template <class Container>
+                struct view_stl_container <false, Container>
+            {
                 typedef typename Container::iterator iterator;
                 typedef typename Container::const_iterator
                     const_iterator;
@@ -97,22 +102,41 @@ namespace range {
                 }
             };
 
+            template <class Container>
+                struct view_stl_container <true, Container>
+            : view_stl_container <false, Container>
+            {
+                using view_stl_container <false, Container>::operator();
+
+                typedef std::move_iterator <typename Container::iterator>
+                    move_iterator;
+
+                template <class Direction>
+                    iterator_range <move_iterator> operator() (
+                        Direction const &, Container && list) const
+                {
+                    return iterator_range <move_iterator> (
+                        move_iterator (list.begin()),
+                        move_iterator (list.end()));
+                }
+            };
+
         } // namespace detail
 
-        template <typename Type>
-            struct make_view <heavyweight_tag <std::forward_list <Type>>,
+        template <bool Move, typename Type>
+            struct make_view <Move, heavyweight_tag <std::forward_list <Type>>,
                 meta::vector <direction::front>>
-        : detail::view_stl_container <std::forward_list <Type>> {};
+        : detail::view_stl_container <Move, std::forward_list <Type>> {};
 
-        template <typename Type>
-            struct make_view <heavyweight_tag <std::vector <Type>>,
+        template <bool Move, typename Type>
+            struct make_view <Move, heavyweight_tag <std::vector <Type>>,
                 meta::vector <direction::front>>
-        : detail::view_stl_container <std::vector <Type>> {};
+        : detail::view_stl_container <Move, std::vector <Type>> {};
 
-        template <typename Type>
-            struct make_view <heavyweight_tag <std::vector <Type>>,
+        template <bool Move, typename Type>
+            struct make_view <Move, heavyweight_tag <std::vector <Type>>,
                 meta::vector <direction::back>>
-        : detail::view_stl_container <std::vector <Type>> {};
+        : detail::view_stl_container <Move, std::vector <Type>> {};
 
     } // namespace operation
 } // namespace range
@@ -171,6 +195,17 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
             range::has <range::callable::chop_in_place (decltype (l) &)>));
         BOOST_MPL_ASSERT ((
             range::has <range::callable::chop_in_place (decltype (v) &)>));
+
+        // view_once on lvalue: equivalent to view.
+        auto v2 = range::view_once (l);
+        BOOST_MPL_ASSERT ((std::is_same <decltype (v2), decltype (v)>));
+
+        // view_once on rvalue reference: move elements out.
+        auto v3 = range::view_once (std::move (l));
+        BOOST_MPL_ASSERT_NOT ((std::is_same <decltype (v3), decltype (v)>));
+        auto && element = first (v3);
+        BOOST_CHECK_EQUAL (element, 5);
+        BOOST_MPL_ASSERT ((std::is_same <decltype (element), int &&>));
     }
 
     // std::vector

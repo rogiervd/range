@@ -36,6 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/mpl/assert.hpp>
 
+#include "utility/test/tracked.hpp"
+
+#include "../check_equal.hpp"
 #include "../check_equal_behaviour.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_container_std_adaptor)
@@ -49,6 +52,7 @@ using range::chop_in_place;
 using range::at;
 
 using range::view;
+using range::view_once;
 
 using range::front;
 using range::back;
@@ -68,11 +72,17 @@ rime::size_t <2> two;
 using rime::false_type;
 using rime::true_type;
 
+using utility::tracked;
+
 BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     std::vector <int> v;
 
     {
         auto view = range::view (v);
+        auto other_view = range::view_once (v);
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (view), decltype (other_view)>));
 
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (v))>));
@@ -160,6 +170,35 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK (!empty (mutated));
         BOOST_CHECK_EQUAL (chop_in_place (mutated), 7);
         BOOST_CHECK (empty (mutated));
+    }
+
+    utility::tracked_registry r;
+    {
+        // Use view_once: elements are returned by rvalue reference.
+        std::vector <tracked <int>> c;
+        c.reserve (2);
+        c.push_back (tracked <int> (r, 7));
+        c.push_back (tracked <int> (r, 45));
+
+        // Check the status quo.
+        RIME_CHECK_EQUAL (first (c).content(), 7);
+        RIME_CHECK_EQUAL (first (back, c).content(), 45);
+        r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+
+        auto v = view_once (std::move (c));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (v)), tracked <int> &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (back, v)), tracked <int> &&>));
+
+        // The elements should be moved out.
+        tracked <int> i = at (0, v);
+        BOOST_CHECK_EQUAL (i.content(), 7);
+        r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
+
+        tracked <int> d = at (1, v);
+        BOOST_CHECK_EQUAL (d.content(), 45);
+        r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
     }
 }
 
@@ -372,16 +411,46 @@ BOOST_AUTO_TEST_CASE (test_std_container_const) {
         decltype (get_iterator_type (view (std::vector <int>())))
         >));
 
-    std::vector <int> v;
     BOOST_MPL_ASSERT ((std::is_same <
-        decltype (get_iterator_type (v)),
-        decltype (get_iterator_type (view (v)))
+        decltype (get_iterator_type (view_once (std::vector <int>()))),
+        type <std::move_iterator <std::vector <int>::iterator>>
         >));
 
-    BOOST_MPL_ASSERT ((std::is_same <
-        decltype (get_iterator_type (std::move (v))),
-        decltype (get_iterator_type (view (std::move (v))))
-        >));
+    {
+        std::vector <int> v;
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (v)),
+            decltype (get_iterator_type (view (v)))
+            >));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (v)),
+            decltype (get_iterator_type (view_once (v)))
+            >));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (std::move (v))),
+            decltype (get_iterator_type (view (std::move (v))))
+            >));
+    }
+
+    {
+        std::vector <int> const v;
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (v)),
+            decltype (get_iterator_type (view (v)))
+            >));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (v)),
+            decltype (get_iterator_type (view_once (v)))
+            >));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (get_iterator_type (std::move (v))),
+            decltype (get_iterator_type (view (std::move (v))))
+            >));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

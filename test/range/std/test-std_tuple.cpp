@@ -27,6 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/mpl/assert.hpp>
 
+#include "utility/test/tracked.hpp"
+
+#include "../check_equal.hpp"
 #include "../check_equal_behaviour.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_container_std_tuple)
@@ -45,6 +48,7 @@ using range::front;
 using range::back;
 
 using range::view;
+using range::view_once;
 
 using range::always_empty;
 using range::never_empty;
@@ -59,6 +63,8 @@ rime::size_t <3> three;
 
 using rime::true_;
 using rime::false_;
+
+using utility::tracked;
 
 BOOST_AUTO_TEST_CASE (test_std_tuple_types) {
     {
@@ -82,6 +88,20 @@ BOOST_AUTO_TEST_CASE (test_std_tuple_types) {
         std::tuple <int, double> t (4, 5.);
         BOOST_MPL_ASSERT ((is_view <decltype (view (t)) const>));
         BOOST_MPL_ASSERT_NOT ((is_homogeneous <decltype (view (t))>));
+    }
+
+    {
+        std::tuple <int> t;
+        BOOST_MPL_ASSERT ((std::is_same <decltype (first (t)), int &>));
+    }
+    {
+        std::tuple <int> const t;
+        BOOST_MPL_ASSERT ((std::is_same <decltype (first (t)), int const &>));
+    }
+    {
+        std::tuple <int> t;
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (std::move (t))), int &&>));
     }
 }
 
@@ -245,6 +265,33 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_MPL_ASSERT_NOT ((has <
             range::callable::chop_in_place (decltype (view (t)) &)>));
     }
+
+    utility::tracked_registry r;
+    {
+        // Use view_once: elements are returned by rvalue reference.
+        std::tuple <tracked <int>, tracked <double>> t (
+            tracked <int> (r, 7), tracked <double> (r, 4.5));
+        RIME_CHECK_EQUAL (first (t).content(), 7);
+        RIME_CHECK_EQUAL (first (back, t).content(), 4.5);
+
+        // Check the status quo.
+        r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+
+        auto v = view_once (std::move (t));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (v)), tracked <int> &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (back, v)), tracked <double> &&>));
+
+        // The elements should be moved out.
+        tracked <int> i = at_c <0> (v);
+        BOOST_CHECK_EQUAL (i.content(), 7);
+        r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
+
+        tracked <double> d = at_c <1> (v);
+        BOOST_CHECK_EQUAL (d.content(), 4.5);
+        r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
+    }
 }
 
 BOOST_AUTO_TEST_CASE (test_std_pair) {
@@ -254,7 +301,14 @@ BOOST_AUTO_TEST_CASE (test_std_pair) {
     // HasSize, HasBack, HasDropConstantN, HasDropRuntimeN.
     check_equal_behaviour <rime::true_type, rime::true_type,
         rime::true_type, rime::false_type> (p, t);
+
+    auto && second = at_c <1> (view_once (p));
+    BOOST_MPL_ASSERT ((std::is_same <decltype (second), char &>));
+    BOOST_CHECK_EQUAL (second, 'a');
+
+    auto && second_move = at_c <1> (view_once (std::move (p)));
+    BOOST_MPL_ASSERT ((std::is_same <decltype (second_move), char &&>));
+    BOOST_CHECK_EQUAL (second_move, 'a');
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

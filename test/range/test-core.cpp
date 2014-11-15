@@ -100,6 +100,12 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::view (
             double, int, char)>));
 
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::view_once (int)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::view_once (
+            int, char)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::view_once (
+            double, int, char)>));
+
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::empty (int)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::empty (
             int, char)>));
@@ -173,6 +179,19 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         weird_direction, weird_count)>::type, weird_count &&>));
     BOOST_MPL_ASSERT ((std::is_same <
         decltype (range::view (weird_direction (7), c)), weird_count &>));
+
+    // view_once.
+    BOOST_MPL_ASSERT_NOT ((range::has <
+        range::callable::view_once (weird_count)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <
+        range::callable::view_once (direction::front, weird_count)>));
+    BOOST_MPL_ASSERT ((range::has <range::callable::view_once (
+        weird_direction, weird_count)>));
+    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        range::callable::view_once (weird_direction, weird_count)>::type,
+        weird_count &&>));
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (range::view_once (weird_direction (7), c)), weird_count &>));
 
     // empty.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::empty (
@@ -310,7 +329,7 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
     BOOST_CHECK_EQUAL (range::chop_in_place (direction, c), 8);
 
     c = range::drop (direction, 2,
-        range::view (weird_reverse_direction (direction), c));
+        range::view_once (weird_reverse_direction (direction), c));
     BOOST_CHECK_EQUAL (range::first (direction, c), 11);
 
     c = range::drop (direction, 8,
@@ -322,4 +341,3 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

@@ -52,6 +52,8 @@ int & get_int (structure & s) { return s.i; }
 
 double get_double (structure const & s) { return s.d; }
 
+double && move_double (structure && s) { return std::move (s.d); }
+
 BOOST_AUTO_TEST_CASE (test_range_member_view) {
     using range::view;
     using range::empty;
@@ -81,7 +83,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         member_c;
 
     {
-        typedef range::member_view <structure, meta::vector<>> empty_view_type;
+        typedef range::member_view <structure &, meta::vector<>>
+            empty_view_type;
         empty_view_type empty_view (s);
 
         static_assert (
@@ -109,6 +112,20 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         static_assert (range::has <range::callable::view (
             direction::back, empty_view_type const &)>::value, "");
         static_assert (range::has <range::callable::view (
+                direction::back &, direction::front const,
+                empty_view_type &)>::value,
+            "");
+
+        // view_once.
+        static_assert (range::has <range::callable::view_once (
+            empty_view_type const)>::value, "");
+        static_assert (!range::has <range::callable::view_once (
+            int, empty_view_type const)>::value, "");
+        static_assert (range::has <range::callable::view_once (
+            direction::front, empty_view_type &)>::value, "");
+        static_assert (range::has <range::callable::view_once (
+            direction::back, empty_view_type const &)>::value, "");
+        static_assert (range::has <range::callable::view_once (
                 direction::back &, direction::front const,
                 empty_view_type &)>::value,
             "");
@@ -217,9 +234,9 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
     }
 
     {
-        typedef range::member_view <structure const, meta::vector <member_i>>
+        typedef range::member_view <structure const &, meta::vector <member_i>>
             int_view_type;
-        typedef range::member_view <structure const, meta::vector<>>
+        typedef range::member_view <structure const &, meta::vector<>>
             empty_view_type;
         int_view_type int_view (s);
 
@@ -394,7 +411,7 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (at (rime::size_t <0>(), int_view), 123);
     }
     {
-        typedef range::member_view <structure,
+        typedef range::member_view <structure &,
             meta::vector <member_i, member_d, member_c>> three_view_type;
         three_view_type three_view (s);
 
@@ -578,6 +595,23 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (first (drop (three_view)), 432.1);
         BOOST_CHECK_EQUAL (first (back, three_view), char (234));
     }
+    // Rvalue reference to the structure.
+    {
+        typedef range::member_view <structure &&,
+            meta::vector <member_i, member_d, member_c>> three_view_type;
+        three_view_type three_view (std::move (s));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (three_view)), int &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at_c <1> (three_view)), double &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at_c <2> (three_view)), char const &&>));
+
+        BOOST_CHECK_EQUAL (first (three_view), 6);
+        BOOST_CHECK_EQUAL (at_c <1> (three_view), 98.7);
+        BOOST_CHECK_EQUAL (at_c <2> (three_view), 'a');
+    }
 }
 
 BOOST_AUTO_TEST_CASE (test_range_functions) {
@@ -585,6 +619,7 @@ BOOST_AUTO_TEST_CASE (test_range_functions) {
     using range::empty;
     using range::size;
     using range::first;
+    using range::at_c;
     using range::drop;
     using range::front;
     using range::back;
@@ -604,20 +639,35 @@ BOOST_AUTO_TEST_CASE (test_range_functions) {
     s.i = 678;
     s.d = 890.1;
 
-    typedef range::member_view <structure,
-            meta::vector <member_i, member_s, member_c, member_i_2, member_d_2>>
-        view_type;
-    view_type structure_view (s);
+    {
+        typedef range::member_view <structure &,
+                meta::vector <member_i, member_s, member_c, member_i_2,
+                member_d_2>>
+            view_type;
+        view_type structure_view (s);
 
-    BOOST_CHECK_EQUAL (first (structure_view), 678);
-    BOOST_CHECK_EQUAL (first (drop (structure_view)), "hello");
-    BOOST_CHECK_EQUAL (first (drop (rime::int_<2>(), structure_view)), 'b');
-    BOOST_CHECK_EQUAL (
-        first (drop (std::integral_constant <int, 3>(), structure_view)), 678);
-    first (drop (rime::int_<3>(), structure_view)) = 3;
-    BOOST_CHECK_EQUAL (s.i, 3);
-    BOOST_CHECK_EQUAL (first (drop (rime::int_<4>(), structure_view)), 890.1);
+        BOOST_CHECK_EQUAL (first (structure_view), 678);
+        BOOST_CHECK_EQUAL (at_c <1> (structure_view), "hello");
+        BOOST_CHECK_EQUAL (at_c <2> (structure_view), 'b');
+        BOOST_CHECK_EQUAL (at_c <3> (structure_view), 678);
+        at_c <3>(structure_view) = 3;
+        BOOST_CHECK_EQUAL (s.i, 3);
+        BOOST_CHECK_EQUAL (at_c <4> (structure_view), 890.1);
+    }
+
+    {
+        // Rvalue reference.
+        typedef range::member_extractor <double && (*) (structure &&),
+            &move_double> member_d_move;
+        typedef range::member_view <structure &&,
+            meta::vector <member_d_move, member_s>> view_type;
+        view_type structure_view (std::move (s));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (structure_view)), double &&>));
+        BOOST_CHECK_EQUAL (first (structure_view), 890.1);
+        // Use nonconst function.
+        BOOST_CHECK_EQUAL (at_c <1> (structure_view), "hello");
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

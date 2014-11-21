@@ -39,13 +39,34 @@ namespace detail {
 
     /**
     Return true iff Range is homogeneous in Direction.
-    \pre bump <Direction, Range> exists.
+    This means that either:
+    \li <c>drop \<Direction, Range></c> exists and returns a range of type
+        \a Range modulo qualifications.
+    \li <c>chop \<Direction, Range></c> exists and the range that it returns
+        is of type \a Range modulo qualifications.
     */
-    template <class Direction, class Range> struct is_homogeneous_in
+    template <class Direction, class Range, class Enable = void>
+        struct is_homogeneous_in
+    : boost::mpl::false_ {};
+
+    template <class Direction, class Range>
+    struct is_homogeneous_in <Direction, Range, typename
+        boost::enable_if <range::has <callable::drop (Direction, Range)>>::type>
     : boost::is_same <
-        typename std::decay <typename result_of <Range>::type>::type,
-        typename std::decay <typename result_of_or <
-            callable::drop (Direction, Range), void>::type>::type
+        typename std::decay <Range>::type,
+        typename decayed_result_of <callable::drop (Direction, Range)>::type
+    > {};
+
+    template <class Direction, class Range>
+    struct is_homogeneous_in <Direction, Range, typename
+        boost::enable_if_c <
+            !range::has <callable::drop (Direction, Range)>::value &&
+            range::has <callable::chop (Direction, Range)>::value
+        >::type>
+    : boost::is_same <
+        typename std::decay <Range>::type,
+        typename decayed_result_of <callable::chop (Direction, Range)>::type
+            ::rest_type
     > {};
 
     /**

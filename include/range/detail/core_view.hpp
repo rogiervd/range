@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -261,17 +261,48 @@ namespace apply {
         template <template <class, class, class, class> class Apply, class View>
             struct call_with_view_implementation
         {
+            /**
+            Take standard arguments, plus Implementation and AllViews.
+            \tparam Implementation
+                The underlying implementation that takes views.
+            \tparam AllViews
+                Whether all ranges are views in all directions.
+                If so, this will derive from Implementation.
+                If not, this will forward to Implementation.
+            */
+            template <bool AllViews, class Directions, class Other,
+                class Ranges, class Implementation,
+                class Enable1 = void, class Enable2 = void>
+            struct apply_implementation : operation::unimplemented {};
+
             template <class Directions, class Other, class Ranges,
                 class Enable = void>
-            struct apply : operation::unimplemented {};
+            struct apply;
+
+            // Forward to apply_implementation
+            template <class ... Directions, class Others, class ... Ranges>
+                struct apply <meta::vector <Directions ...>, Others,
+                    meta::vector <Ranges ...>>
+            : apply_implementation <
+                // AllViews: whether all ranges are already views in all
+                // directions.
+                meta::all <meta::vector <is_view_in <
+                    meta::vector <Directions ...>, Ranges> ...>>::value,
+                meta::vector <Directions ...>, Others,
+                meta::vector <Ranges ...>,
+                // Implementation: take views of ranges.
+                Apply <meta::vector <Directions ...>, Others,
+                    meta::vector <typename result_of <
+                        View (Directions ..., Ranges)>::type...>,
+                    void>
+            > {};
 
             // If all ranges are views.
-            template <class Directions, class Others, class ... Ranges>
-                struct apply <Directions, Others, meta::vector <Ranges ...>,
-                    typename boost::enable_if <
-                        meta::all <meta::vector <
-                            is_view_in <Directions, Ranges> ...>>>::type>
-            : Apply <Directions, Others, meta::vector <Ranges ...>, void> {};
+            template <class Directions, class Others, class Ranges,
+                class Implementation>
+            struct apply_implementation <
+                true, Directions, Others, Ranges, Implementation>
+            : Implementation {};
 
             /*
             This implementation for the case where not all ranges are views
@@ -281,18 +312,15 @@ namespace apply {
             of arguments for Directions and Others.
             */
             /*
-            template <class ... Directions, class ... Others, class ... Ranges>
-                struct apply <meta::vector <Directions ...>,
-                    meta::vector <Others ...>, meta::vector <Ranges ...>,
-                    typename boost::disable_if <
-                        meta::all <meta::vector <
-                            is_view_in <meta::vector <Directions ...>,
-                            Ranges> ...>>>::type>
+            template <class ... Directions, class ... Others, class ... Ranges,
+                class Implementation>
+            struct apply_implementation <false,
+                meta::vector <Directions ...>, meta::vector <Others ...>,
+                meta::vector <Ranges ...>, Implementation,
+                typename boost::enable_if <
+                    operation::is_implemented <Implementation>>::type>
             {
-                Apply <meta::vector <Directions ...>, meta::vector <Others ...>,
-                    meta::vector <typename result_of <
-                        View (Directions ..., Ranges)>::type...>,
-                    void> underlying;
+                Implementation underlying;
 
                 auto operator() (Directions const & ... directions,
                     Others && ... others,
@@ -323,27 +351,16 @@ namespace apply {
                 BOOST_PP_REPEAT (direction_num, \
                     RANGE_CORE_BASE_class_Direction,) \
                 BOOST_PP_REPEAT (others_num, RANGE_CORE_BASE_class_Other,) \
-                class ... Ranges> \
-            struct apply < \
-                meta::vector <  \
+                class ... Ranges, class Implementation> \
+            struct apply_implementation <false, \
+                meta::vector < \
                     BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
                 meta::vector <BOOST_PP_ENUM_PARAMS (others_num, Other)>, \
                 meta::vector <Ranges ...>, \
-                typename boost::disable_if < \
-                    meta::all <meta::vector < \
-                        is_view_in <meta::vector < \
-                        BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
-                        Ranges> ...>>>::type> \
+                Implementation, typename boost::enable_if < \
+                    operation::is_implemented <Implementation>>::type> \
             { \
-                Apply < \
-                    meta::vector < \
-                        BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
-                    meta::vector <BOOST_PP_ENUM_PARAMS (others_num, Other)>, \
-                    meta::vector <typename result_of <View ( \
-                        BOOST_PP_REPEAT (direction_num, \
-                            RANGE_CORE_BASE_Direction,) \
-                        Ranges)> \
-                    ::type...>, void> underlying; \
+                Implementation underlying; \
             \
                 auto operator() ( \
                     BOOST_PP_REPEAT (direction_num, \

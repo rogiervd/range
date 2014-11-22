@@ -258,8 +258,8 @@ namespace apply {
         If not all ranges are views, they are first converted to views, and then
         the arguments are forwarded to Apply.
         */
-        template <template <class, class, class, class> class Apply>
-            struct call_with_view
+        template <template <class, class, class, class> class Apply, class View>
+            struct call_with_view_implementation
         {
             template <class Directions, class Other, class Ranges,
                 class Enable = void>
@@ -291,7 +291,7 @@ namespace apply {
             {
                 Apply <meta::vector <Directions ...>, meta::vector <Others ...>,
                     meta::vector <typename result_of <
-                        callable::view (Directions ..., Ranges)>::type...>,
+                        View (Directions ..., Ranges)>::type...>,
                     void> underlying;
 
                 auto operator() (Directions const & ... directions,
@@ -299,7 +299,7 @@ namespace apply {
                     Ranges && ... ranges) const
                 RETURNS (underlying (directions ...,
                     std::forward <Others> (others) ...,
-                    range::view (directions ...,
+                    View() (directions ...,
                         std::forward <Ranges> (ranges)) ...));
             };*/
 
@@ -339,7 +339,7 @@ namespace apply {
                     meta::vector < \
                         BOOST_PP_ENUM_PARAMS (direction_num, Direction)>, \
                     meta::vector <BOOST_PP_ENUM_PARAMS (others_num, Other)>, \
-                    meta::vector <typename result_of < callable::view ( \
+                    meta::vector <typename result_of <View ( \
                         BOOST_PP_REPEAT (direction_num, \
                             RANGE_CORE_BASE_Direction,) \
                         Ranges)> \
@@ -355,7 +355,7 @@ namespace apply {
                         RANGE_CORE_BASE_direction,) \
                     BOOST_PP_REPEAT (others_num, \
                         RANGE_CORE_BASE_std_forward_other,) \
-                    range::view ( \
+                    View() ( \
                         BOOST_PP_REPEAT (direction_num, \
                             RANGE_CORE_BASE_direction,) \
                         std::forward <Ranges> (ranges)) ...)); \
@@ -380,6 +380,14 @@ namespace apply {
 #undef RANGE_CORE_BASE_apply_direction_num
 
         };
+
+        template <template <class, class, class, class> class Apply>
+            struct call_with_view
+        : call_with_view_implementation <Apply, callable::view> {};
+
+        template <template <class, class, class, class> class Apply>
+            struct call_with_view_once
+        : call_with_view_implementation <Apply, callable::view_once> {};
 
     } // namespace automatic_arguments
 

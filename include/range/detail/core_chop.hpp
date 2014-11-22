@@ -231,7 +231,7 @@ namespace apply {
 
         template <class Direction, class Range, class Enable = void>
             class chop_synthesise
-        : operation::unimplemented {};
+        : public operation::unimplemented {};
 
         /* chop. */
 

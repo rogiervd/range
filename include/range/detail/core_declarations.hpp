@@ -53,6 +53,24 @@ namespace range { namespace operation {
                 Function &&, State && state, Range && range) const;
     };*/
 
+    /**
+    Call a function on each element of a range.
+    This is normally implemented through "fold", which is by default implemented
+    where possible.
+    Specialise this for a particular type of range if that makes it more
+    efficient.
+    In particular, for_each always returns void and it does not have to compute
+    any return types.
+    Therefore, the number of template instantiations can be lower.
+    */
+    template <class RangeTag, class Direction, class Function,
+        class Enable = void>
+    struct for_each;
+    /*{
+        template <class Range>
+            void operator() (Direction const &, Function &&, Range &&) const;
+    };*/
+
 }} // namespace range::operation
 
 #endif // RANGE_DETAIL_DECLARATIONS_HPP_INCLUDED

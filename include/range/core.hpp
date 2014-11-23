@@ -29,7 +29,7 @@ along with this program.  If not, see "http://www.gnu.org/licenses/".
 #include "detail/core_chop.hpp"
 #include "detail/core_at.hpp"
 #include "detail/core_is_homogeneous.hpp"
-#include "detail/core_fold_declaration.hpp"
+#include "detail/core_declarations.hpp"
 
 #endif  // RANGE_CORE_HPP_INCLUDED
 

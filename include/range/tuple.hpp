@@ -798,6 +798,98 @@ namespace operation {
         }
     };
 
+    // It would be possible to specialised "fold" to improve compile times.
+    // However, the return type must still be computed, so the improvement would
+    // not be great.
+
+    // for_each.
+    // This does not need to be specialised, but this gives a constant-time
+    // improvement in compile time.
+    // These specialisations are only for direction::front.
+    // This is unrolled for up to 4 elements.
+    // Then, a recursive call is made for every next 4 elements.
+    template <class Function> struct for_each <
+        tuple_detail::tuple_view_tag <0>, direction::front, Function>
+    {
+        template <class View>
+        void operator() (direction::front, Function &&, View const &) const {}
+    };
+    template <class Function> struct for_each <
+        tuple_detail::tuple_view_tag <1>, direction::front, Function>
+    {
+        template <class View>
+        void operator() (direction::front, Function && function,
+            View const & view) const
+        {
+            static constexpr std::size_t begin_index =
+                View::tuple_size - View::begin_position - 1;
+            function (range::tuple_detail::extract <
+                (begin_index - 0)>() (view.tuple()));
+        }
+    };
+    template <class Function> struct for_each <
+        tuple_detail::tuple_view_tag <2>, direction::front, Function>
+    {
+        template <class View>
+        void operator() (direction::front, Function && function,
+            View const & view) const
+        {
+            static constexpr std::size_t begin_index =
+                View::tuple_size - View::begin_position - 1;
+            function (range::tuple_detail::extract <
+                (begin_index - 0)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 1)>() (view.tuple()));
+        }
+    };
+    template <class Function> struct for_each <
+        tuple_detail::tuple_view_tag <3>, direction::front, Function>
+    {
+        template <class View>
+        void operator() (direction::front, Function && function,
+            View const & view) const
+        {
+            static constexpr std::size_t begin_index =
+                View::tuple_size - View::begin_position - 1;
+            function (range::tuple_detail::extract <
+                (begin_index - 0)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 1)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 2)>() (view.tuple()));
+        }
+    };
+    // Size >= 4
+    template <std::size_t Size, class Function> struct for_each <
+        tuple_detail::tuple_view_tag <Size>, direction::front, Function>
+    {
+        template <std::size_t Begin, std::size_t End, class TupleReference>
+        void operator() (direction::front const & direction,
+            Function && function,
+            tuple_detail::tuple_view <Begin, End, TupleReference> const & view)
+        const
+        {
+            typedef tuple_detail::tuple_view <Begin, End, TupleReference>
+                view_type;
+            static constexpr std::size_t begin_index =
+                view_type::tuple_size - view_type::begin_position - 1;
+            function (range::tuple_detail::extract <
+                (begin_index - 0)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 1)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 2)>() (view.tuple()));
+            function (range::tuple_detail::extract <
+                (begin_index - 3)>() (view.tuple()));
+
+            for_each <tuple_detail::tuple_view_tag <Size - 4>,
+                direction::front, Function> recursive;
+            recursive (direction, std::forward <Function> (function),
+                tuple_detail::tuple_view <Begin + 4, End, TupleReference> (
+                    view));
+        }
+    };
+
     namespace tuple_detail {
 
         template <bool Move, class ... Types> struct make_view_tuple;

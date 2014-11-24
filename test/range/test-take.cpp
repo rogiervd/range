@@ -46,7 +46,7 @@ using range::first;
 using range::drop;
 using range::front;
 using range::back;
-using range::count;
+using range::count_from;
 
 rime::size_t <0> zero;
 rime::size_t <1> one;
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE (test_range_take_list_runtime) {
 }
 
 BOOST_AUTO_TEST_CASE (test_range_take_infinite_homogeneous_runtime) {
-    auto c = count (5);
+    auto c = count_from (5);
 
     {
         auto t = take (7, c);
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE (test_range_take_heterogeneous_runtime) {
 }
 
 BOOST_AUTO_TEST_CASE (test_range_take_infinite_heterogeneous_constant) {
-    auto c = count (rime::size_t <5>());
+    auto c = count_from (rime::size_t <5>());
 
     auto t = take (rime::int_ <7>(), c);
     BOOST_MPL_ASSERT_NOT ((is_homogeneous <decltype (t)>));

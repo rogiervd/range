@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -23,61 +23,326 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/count.hpp"
 
 #include <type_traits>
-#include <boost/mpl/int.hpp>
 
 #include "range/core.hpp"
+#include "range/for_each_macro.hpp"
 
 #include "check_equal.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_count)
 
 using range::count;
+using range::count_from;
 
 using range::default_direction;
-using range::front;
-
 using range::empty;
 using range::first;
+using range::size;
 using range::drop;
+using range::at;
+using range::chop;
+
+using range::front;
+using range::back;
+
 using range::is_homogeneous;
 
-BOOST_AUTO_TEST_CASE (test_range_count_homogeneous) {
+BOOST_AUTO_TEST_CASE (straightforward) {
     {
-        auto c = count (-1);
-
-        static_assert (is_homogeneous <decltype (c)>::value, "");
-
-        BOOST_CHECK (default_direction (c) == front);
-
-        BOOST_CHECK (!empty (c));
-        BOOST_CHECK (!empty (front, c));
-
-        static_assert (!range::has <
-            range::callable::size (decltype (c))>::value, "");
-        static_assert (!range::has <
-            range::callable::size (direction::front, decltype (c))>::value, "");
-
-        static_assert (!range::has <
-            range::callable::first (direction::back, decltype (c))>::value, "");
-
-        RIME_CHECK_EQUAL (first (c), -1);
-        c = drop (c);
-        RIME_CHECK_EQUAL (first (c), 0);
-        c = drop (5, c);
-        RIME_CHECK_EQUAL (first (c), 5);
-        c = drop (rime::int_ <17>(), c);
-        RIME_CHECK_EQUAL (first (c), 22);
+        int total = 0;
+        RANGE_FOR_EACH (n, count (10))
+            total += n;
+        BOOST_CHECK_EQUAL (total, 45);
     }
     {
-        // Start at std::size_t (0).
+        int total = 0;
+        RANGE_FOR_EACH (n, count (5, 8))
+            total += n;
+        BOOST_CHECK_EQUAL (total, 18);
+    }
+}
+
+template <class True, class Zero, class One, class Two, class Three,
+    class Four, class Five, class Six>
+void check_finite (True true_,
+    Zero zero, One one, Two two, Three three, Four four, Five five, Six six)
+{
+    {
+        auto c = count (zero);
+        RIME_CHECK_EQUAL (empty (c), true_);
+        RIME_CHECK_EQUAL (size (c), zero);
+    }
+    {
+        auto c = count (one);
+        RIME_CHECK_EQUAL (empty (c), !true_);
+        RIME_CHECK_EQUAL (size (c), one);
+
+        RIME_CHECK_EQUAL (first (c), zero);
+        RIME_CHECK_EQUAL (first (front, c), zero);
+        RIME_CHECK_EQUAL (first (back, c), zero);
+
+        auto chopped = chop (c);
+        RIME_CHECK_EQUAL (chopped.first(), zero);
+        BOOST_CHECK (empty (chopped.rest()));
+    }
+    {
+        auto c = count (three);
+        RIME_CHECK_EQUAL (empty (c), !true_);
+        RIME_CHECK_EQUAL (size (c), three);
+
+        RIME_CHECK_EQUAL (first (c), zero);
+        RIME_CHECK_EQUAL (first (front, c), zero);
+        RIME_CHECK_EQUAL (first (back, c), two);
+
+        RIME_CHECK_EQUAL (at (one, c), one);
+        RIME_CHECK_EQUAL (at (front, one, c), one);
+        RIME_CHECK_EQUAL (at (two, c), two);
+        RIME_CHECK_EQUAL (at (front, two, c), two);
+
+        RIME_CHECK_EQUAL (at (back, one, c), one);
+        RIME_CHECK_EQUAL (at (back, two, c), zero);
+
+        auto c2 = drop (c);
+        RIME_CHECK_EQUAL (first (c2), one);
+        RIME_CHECK_EQUAL (first (front, c2), one);
+        RIME_CHECK_EQUAL (first (back, c2), two);
+
+        auto c3 = drop (two, c);
+        RIME_CHECK_EQUAL (first (c3), two);
+        RIME_CHECK_EQUAL (first (front, c3), two);
+        RIME_CHECK_EQUAL (first (back, c3), two);
+
+        auto c4 = drop (3, c);
+        BOOST_CHECK (empty (c4));
+
+        auto c5 = drop (back, c);
+        RIME_CHECK_EQUAL (first (c5), zero);
+        RIME_CHECK_EQUAL (first (front, c5), zero);
+        RIME_CHECK_EQUAL (first (back, c5), one);
+
+        auto c6 = drop (back, two, c);
+        RIME_CHECK_EQUAL (first (c6), zero);
+        RIME_CHECK_EQUAL (first (front, c6), zero);
+        RIME_CHECK_EQUAL (first (back, c6), zero);
+
+        auto chopped = chop (back, c);
+        RIME_CHECK_EQUAL (chopped.first(), two);
+        RIME_CHECK_EQUAL (first (chopped.rest()), zero);
+        RIME_CHECK_EQUAL (first (back, chopped.rest()), one);
+    }
+    // Nonzero begin.
+    {
+        auto c = count (one, one);
+        RIME_CHECK_EQUAL (empty (c), true_);
+    }
+    {
+        auto c = count (two, three);
+        RIME_CHECK_EQUAL (empty (c), !true_);
+        RIME_CHECK_EQUAL (size (c), one);
+
+        RIME_CHECK_EQUAL (first (c), two);
+        RIME_CHECK_EQUAL (first (back, c), two);
+    }
+    {
+        auto c = count (three, six);
+        auto c2 = drop (three, count (six));
+
+        // This does not have to be true:
+        // rime::size_t<1> vs rime::constant <size_t, 1>.
+        // BOOST_MPL_ASSERT ((std::is_same <decltype (c), decltype (c2)>));
+
+        RIME_CHECK_EQUAL (first (c), three);
+        RIME_CHECK_EQUAL (first (c2), three);
+        RIME_CHECK_EQUAL (first (back, c), five);
+        RIME_CHECK_EQUAL (first (back, c2), five);
+
+        // If we trust c2, then we trust c.
+    }
+}
+
+template <class True,
+    class MinusTwo, class MinusOne, class Zero, class One, class Two>
+void check_finite_negative (True true_,
+    MinusTwo minus_two, MinusOne minus_one, Zero zero, One one, Two two)
+{
+    {
+        auto c = count (minus_one, one);
+        RIME_CHECK_EQUAL (empty (c), !true_);
+        RIME_CHECK_EQUAL (size (c), two);
+        RIME_CHECK_EQUAL (first (c), minus_one);
+
+        auto c2 = drop (c);
+        RIME_CHECK_EQUAL (first (c2), zero);
+        RIME_CHECK_EQUAL (first (drop (c)), zero);
+    }
+    {
+        auto c = count (minus_two, minus_two);
+        RIME_CHECK_EQUAL (empty (c), true_);
+        RIME_CHECK_EQUAL (size (c), zero);
+    }
+}
+
+template <class Zero, class One, class Two, class Three, class Four>
+    void check_infinite (Zero zero, One one, Two two, Three three, Four four)
+{
+    auto c = count_from (one);
+
+    RIME_CHECK_EQUAL (empty (c), rime::false_);
+    RIME_CHECK_EQUAL (empty (front, c), rime::false_);
+
+    RIME_CHECK_EQUAL (first (c), one);
+
+    auto c2 = drop (c);
+    RIME_CHECK_EQUAL (first (c2), two);
+    auto c3 = drop (two, c2);
+    RIME_CHECK_EQUAL (first (c3), four);
+
+    auto chopped = chop (c2);
+    RIME_CHECK_EQUAL (chopped.first(), two);
+    RIME_CHECK_EQUAL (first (chopped.rest()), three);
+}
+
+template <class MinusTwo, class MinusOne, class Zero, class One, class Two>
+    void check_infinite_negative (
+        MinusTwo minus_two, MinusOne minus_one, Zero zero, One one, Two two)
+{
+    auto c = count_from (minus_two);
+
+    BOOST_CHECK (default_direction (c) == front);
+
+    RIME_CHECK_EQUAL (empty (c), rime::false_);
+    RIME_CHECK_EQUAL (empty (front, c), rime::false_);
+
+    static_assert (!range::has <
+        range::callable::size (decltype (c))>::value, "");
+    static_assert (!range::has <
+        range::callable::size (direction::front, decltype (c))>::value, "");
+    static_assert (!range::has <
+        range::callable::first (direction::back, decltype (c))>::value, "");
+
+    RIME_CHECK_EQUAL (first (c), minus_two);
+    auto c2 = drop (c);
+    RIME_CHECK_EQUAL (first (c2), minus_one);
+    auto c3 = drop (two, c2);
+    RIME_CHECK_EQUAL (first (c3), one);
+
+    auto chopped = chop (c2);
+    RIME_CHECK_EQUAL (chopped.first(), minus_one);
+    RIME_CHECK_EQUAL (first (chopped.rest()), zero);
+}
+
+BOOST_AUTO_TEST_CASE (heterogeneous) {
+    // size_t.
+    check_finite (rime::true_,
+        rime::size_t <0>(), rime::size_t <1>(), rime::size_t <2>(),
+        rime::size_t <3>(), rime::size_t <4>(), rime::size_t <5>(),
+        rime::size_t <6>());
+
+    // int.
+    check_finite (rime::true_,
+        rime::int_<0>(), rime::int_<1>(), rime::int_<2>(),
+        rime::int_<3>(), rime::int_<4>(), rime::int_<5>(), rime::int_<6>());
+    check_finite_negative (rime::true_,
+        rime::int_<-2>(), rime::int_<-1>(),
+        rime::int_<0>(), rime::int_<1>(), rime::int_<2>());
+
+    // short.
+    check_finite (rime::true_,
+        rime::constant <short, 0>(), rime::constant <short, 1>(),
+        rime::constant <short, 2>(), rime::constant <short, 3>(),
+        rime::constant <short, 4>(), rime::constant <short, 5>(),
+        rime::constant <short, 6>());
+    check_finite_negative (rime::true_,
+        rime::constant <short, -2>(), rime::constant <short, -1>(),
+        rime::constant <short, 0>(), rime::constant <short, 1>(),
+        rime::constant <short, 2>());
+
+    // Infinite.
+    check_infinite (rime::size_t <0>(), rime::size_t <1>(), rime::size_t <2>(),
+        rime::size_t <3>(), rime::size_t <4>());
+
+    check_infinite (rime::int_ <0>(), rime::int_ <1>(), rime::int_ <2>(),
+        rime::int_ <3>(), rime::int_ <4>());
+    check_infinite_negative (rime::int_ <-2>(), rime::int_ <-1>(),
+        rime::int_ <0>(), rime::int_ <1>(), rime::int_ <2>());
+
+    check_infinite (rime::constant <short, 0>(), rime::constant <short, 1>(),
+        rime::constant <short, 2>(), rime::constant <short, 3>(),
+        rime::constant <short, 4>());
+    check_infinite_negative (
+        rime::constant <short, -2>(), rime::constant <short, -1>(),
+        rime::constant <short, 0>(),
+        rime::constant <short, 1>(), rime::constant <short, 2>());
+
+    // This causes compiler errors, because the ranges would have negative
+    // length:
+    // count (rime::int_ <-1>());
+    // count (rime::int_ <1>(), rime::int_ <-1>());
+    // count (rime::size_t <3>(), rime::size_t <2>());
+}
+
+BOOST_AUTO_TEST_CASE (homogeneous) {
+    // size_t.
+    check_finite (true,
+        std::size_t (0), std::size_t (1), std::size_t (2),
+        std::size_t (3), std::size_t (4), std::size_t (5), std::size_t (6));
+
+    // int.
+    check_finite (true, 0, 1, 2, 3, 4, 5, 6);
+    check_finite_negative (true, -2, -1, 0, 1, 2);
+
+    // short.
+    check_finite (true, short (0), short (1), short (2),
+        short (3), short (4), short (5), short (6));
+    check_finite_negative (true, short (-2), short (-1),
+        short (0), short (1), short (2));
+
+    // Check that chop works properly.
+    {
+        auto c = count (3);
+        BOOST_MPL_ASSERT ((is_homogeneous <decltype (c)>));
+
+        auto chopped = chop (back, c);
+        BOOST_CHECK_EQUAL (chopped.first(), 2);
+        BOOST_CHECK_EQUAL (first (chopped.rest()), 0);
+        BOOST_CHECK_EQUAL (first (back, chopped.rest()), 1);
+
+        c = drop (chopped.rest());
+
+        BOOST_CHECK_EQUAL (size (c), 1);
+        BOOST_CHECK_EQUAL (first (c), 1);
+
+        // chopped has not changed.
+        BOOST_CHECK_EQUAL (chopped.first(), 2);
+        BOOST_CHECK_EQUAL (first (chopped.rest()), 0);
+        BOOST_CHECK_EQUAL (first (back, chopped.rest()), 1);
+    }
+
+    // Infinite.
+    check_infinite (std::size_t (0), std::size_t (1), std::size_t (2),
+        std::size_t (3), std::size_t (4));
+
+    check_infinite (0, 1, 2, 3, 4);
+    check_infinite_negative (-2, -1, 0, 1, 2);
+
+    check_infinite (short (0), short (1), short (2), short (3), short (4));
+    check_infinite_negative (short (-2), short (-1),
+        short (0), short (1), short (2));
+
+    {
+        auto c = count (3);
+        BOOST_MPL_ASSERT ((is_homogeneous <decltype (c)>));
+    }
+    {
+        // Without arguments: start at std::size_t (0).
         auto c = count();
 
-        static_assert (is_homogeneous <decltype (c)>::value, "");
+        BOOST_MPL_ASSERT ((is_homogeneous <decltype (c)>));
 
         BOOST_CHECK (default_direction (c) == front);
 
-        BOOST_CHECK (!empty (c));
-        BOOST_CHECK (!empty (front, c));
+        RIME_CHECK_EQUAL (empty (c), rime::false_);
+        RIME_CHECK_EQUAL (empty (front, c), rime::false_);
 
         RIME_CHECK_EQUAL (first (c), size_t (0));
         c = drop (c);
@@ -87,78 +352,12 @@ BOOST_AUTO_TEST_CASE (test_range_count_homogeneous) {
         c = drop (rime::size_t <17>(), c);
         RIME_CHECK_EQUAL (first (c), size_t (23));
     }
-    {
-        // Different types for current value and increment: should remain short.
-        auto c = count (short (5));
 
-        static_assert (is_homogeneous <decltype (c)>::value, "");
-        RIME_CHECK_EQUAL (first (c), short (5));
-
-        auto c2 = drop (c);
-        RIME_CHECK_EQUAL (first (c2), short (6));
-        auto c3 = drop (5, c2);
-        RIME_CHECK_EQUAL (first (c3), short (11));
-        auto c4 = drop (std::size_t (7), c3);
-        RIME_CHECK_EQUAL (first (c4), short (18));
-    }
-}
-
-BOOST_AUTO_TEST_CASE (test_range_count_heterogeneous) {
-    {
-        auto c = count (rime::int_ <-3>());
-
-        static_assert (!is_homogeneous <decltype (c)>::value, "");
-
-        BOOST_CHECK (default_direction (c) == front);
-
-        BOOST_CHECK (!empty (c));
-        BOOST_CHECK (!empty (front, c));
-
-        static_assert (!range::has <
-            range::callable::size (decltype (c))>::value, "");
-        static_assert (!range::has <
-            range::callable::size (direction::front, decltype (c))>::value, "");
-
-        static_assert (!range::has <
-            range::callable::first (direction::back, decltype (c))>::value, "");
-
-        RIME_CHECK_EQUAL (first (c), rime::int_ <-3>());
-        auto c2 = drop (c);
-        RIME_CHECK_EQUAL (first (c2), rime::int_ <-2>());
-        // Continue as constant.
-        {
-            auto c3 = drop (rime::int_ <5>(), c2);
-            RIME_CHECK_EQUAL (first (c3), (std::integral_constant <int, 3>()));
-            auto c4 = drop (rime::size_t <17>(), c3);
-            RIME_CHECK_EQUAL (first (c4), boost::mpl::int_ <20>());
-        }
-        // Continue as run-time value.
-        {
-            auto c3 = drop (5, c2);
-            RIME_CHECK_EQUAL (first (c3), 3);
-            auto c4 = drop (rime::constant <short, 17>(), c3);
-            RIME_CHECK_EQUAL (first (c4), 20);
-            auto c5 = drop (std::size_t (3), c4);
-            RIME_CHECK_EQUAL (first (c5), 23);
-        }
-    }
-
-    {
-        auto c = count (rime::size_t <3>());
-
-        // Keep type (i.e. do not turn into a signed type).
-        {
-            // Heterogeneous.
-            auto c2 = drop (rime::int_ <2>(), c);
-            RIME_CHECK_EQUAL (first (c2), rime::size_t <5>());
-        }
-        {
-            // Homogeneous.
-            auto c2 = drop (2, c);
-            RIME_CHECK_EQUAL (first (c2), std::size_t (5));
-        }
-    }
+    // This causes assertions to fail, because the ranges would have negative
+    // length:
+    // count (-1);
+    // count (1, -1);
+    // count (std::size_t (3), std::size_t (2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

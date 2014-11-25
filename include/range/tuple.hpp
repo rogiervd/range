@@ -34,6 +34,7 @@ Define a general heterogeneous container.
 #include "utility/storage.hpp"
 #include "utility/is_assignable.hpp"
 #include "utility/type_sequence_traits.hpp"
+#include "utility/disable_if_same.hpp"
 
 #include "rime/core.hpp"
 #include "rime/assert.hpp"
@@ -151,7 +152,8 @@ namespace tuple_detail {
     called if Type is default-constructible.
 
     Copy- and move-construction work as expected.
-    Copy- and move-assignment are disabled.
+    Copy- and move-assignment perform assignment on <c>Type &</c>, not on the
+    type as it is stored.
 
     \todo If Type is empty, then derive from it privately instead of containing
     it.
@@ -169,16 +171,30 @@ namespace tuple_detail {
     public:
         contain() : element_() {};
 
-        template <class ... Arguments>
-            explicit contain (Arguments && ... arguments)
-        : element_ (std::forward <Arguments> (arguments) ...) {}
+        template <class Argument, class Enable = typename
+            utility::disable_if_same_or_derived <contain, Argument>::type>
+        explicit contain (Argument && argument)
+        : element_ (std::forward <Argument> (argument)) {}
 
         contain (contain const & that) : element_ (that.element_) {}
         contain (contain && that)
         : element_ (static_cast <stored_type &&> (that.element_)) {}
 
-        contain & operator = (contain const &) = delete;
-        contain & operator = (contain &&) = delete;
+        template <class Type2 = Type, class Enable = typename boost::enable_if <
+            utility::is_assignable <Type2 &, Type2 const &>>::type>
+        contain & operator= (contain const & that) {
+            static_cast <Type &> (this->element_) =
+                static_cast <Type const &> (that.element_);
+            return *this;
+        }
+
+        template <class Type2 = Type, class Enable = typename boost::enable_if <
+            utility::is_assignable <Type2 &, Type2 &&>>::type>
+        contain & operator= (contain && that) {
+            static_cast <Type &> (this->element_) =
+                static_cast <Type &&> (that.element_);
+            return *this;
+        }
 
         /**
         Return \c *this, the \c contain class corresponding to \a Index.
@@ -321,12 +337,18 @@ namespace tuple_detail {
         template <class Range> struct range_is_constructible
         : boost::mpl::not_ <never_empty <direction::front, Range>> {};
 
+        static constexpr bool is_copy_assignable = true;
+        static constexpr bool is_move_assignable = true;
+
         // assignable if \a Range can be empty.
         template <class Range> struct range_is_assignable
         : boost::mpl::not_ <never_empty <direction::front, Range>> {};
 
     public:
         elements() {}
+
+        elements (elements const &) {}
+        elements (elements &&) {}
 
         explicit elements (from_elements) {}
 
@@ -335,10 +357,14 @@ namespace tuple_detail {
                 throw size_mismatch();
         }
 
-        template <class Range> void assign_from_range (Range && range) const {
+        template <class Range> elements & operator= (Range && range) {
             if (!empty (front, range))
                 throw size_mismatch();
+            return *this;
         }
+
+        elements & operator= (elements const &) noexcept { return *this; }
+        elements & operator= (elements &&) noexcept { return *this; }
 
         void swap (elements & that) const {}
     };
@@ -416,8 +442,8 @@ namespace tuple_detail {
         > {};
 
         /**
-        Whether all elements of \a Range are assignable and the length is known
-        to be equal.
+        Whether all elements of \a Range are assignable and the length could be
+        equal.
         */
         template <class Range, bool KnownEmpty
             = always_empty <direction::front, Range>::value>
@@ -434,6 +460,13 @@ namespace tuple_detail {
             typename rest_type::template range_is_assignable <typename
                 result_of <callable::drop (direction::front, Range)>::type>
         > {};
+
+        static constexpr bool is_copy_assignable =
+            rest_type::is_copy_assignable &&
+                utility::is_assignable <First &, First const &>::value;
+        static constexpr bool is_move_assignable =
+            rest_type::is_move_assignable &&
+                utility::is_assignable <First &, First &&>::value;
 
     public:
         elements() : contain_type(), rest_type() {}
@@ -452,17 +485,21 @@ namespace tuple_detail {
                 drop_if_size_matches (front, std::forward <Range> (range))) {}
 
         // This could be faster than the generic constructors.
-        elements (elements const &) = default;
-        elements (elements &&) = default;
+        elements (elements const & that)
+        : contain_type (that), rest_type (that) {}
+
+        elements (elements && that)
+        : contain_type (std::move (that)), rest_type (std::move (that)) {}
 
         // Don't use assignment.
-        elements & operator = (elements const &) = delete;
-        elements & operator = (elements &&) = delete;
+        elements & operator= (elements const &) = default;
+        elements & operator= (elements &&) = default;
 
-        template <class Range> void assign_from_range (Range && range) {
+        template <class Range> elements & operator= (Range && range) {
             this->first_element() = first_if_size_matches (front, range);
-            static_cast <rest_type *> (this)->assign_from_range (
-                drop_if_size_matches (front, range));
+            *static_cast <rest_type *> (this) =
+                drop_if_size_matches (front, range);
+            return *this;
         }
 
         void swap (elements & that) {
@@ -500,6 +537,22 @@ template <class ... Types> class tuple {
 
     struct dummy_type {};
 
+    /**
+    Type that is \c tuple if all elements are copy-assignable, and otherwise
+    is \c dummy_type.
+    This is used to conditionally enable the copy constructor.
+    */
+    typedef typename std::conditional <elements_type::is_copy_assignable,
+        tuple, dummy_type>::type tuple_if_copy_assignable;
+
+    /**
+    Type that is \c tuple if all elements are move-assignable, and otherwise
+    is \c dummy_type.
+    This is used to conditionally enable the move constructor.
+    */
+    typedef typename std::conditional <elements_type::is_move_assignable,
+        tuple, dummy_type>::type tuple_if_move_assignable;
+
 public:
     /**
     Default-construct all elements.
@@ -514,8 +567,8 @@ public:
             utility::are_default_constructible <Types2>>::type>
     tuple() : elements_() {}
 
-    tuple (tuple const &) = default;
-    tuple (tuple &&) = default;
+    tuple (tuple const & that) : elements_ (that.elements_) {}
+    tuple (tuple && that) : elements_ (std::move (that.elements_)) {}
 
     /**
     Construct element-wise.
@@ -579,14 +632,25 @@ public:
     \throw size_mismatch Iff the size of the range passed in is not the size of
     this.
     */
-    template <class Range, class Enable = typename
-        boost::enable_if <typename elements_type::template range_is_assignable <
-            typename range::result_of <
-                callable::view_once (direction::front, Range)>::type>>::type>
-    tuple & operator = (Range && range)
-    {
-        elements_.assign_from_range (
-            view_once (front, std::forward <Range> (range)));
+    template <class Range,
+        class Enable = typename boost::enable_if <typename
+            elements_type::template range_is_assignable <typename
+                range::result_of <callable::view_once (direction::front, Range)
+            >::type>>::type,
+        class Enable2 = typename
+            utility::disable_if_same_or_derived <tuple, Range>::type>
+    tuple & operator= (Range && range) {
+        elements_ = view_once (front, std::forward <Range> (range));
+        return *this;
+    }
+
+    // Explicit copy and move assignment.
+    tuple & operator= (tuple_if_copy_assignable const & that) {
+        elements_ = view_once (front, that);
+        return *this;
+    }
+    tuple & operator= (tuple_if_move_assignable && that) {
+        elements_ = view_once (front, std::move (that));
         return *this;
     }
 

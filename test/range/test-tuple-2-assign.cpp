@@ -403,4 +403,24 @@ BOOST_AUTO_TEST_CASE (tuple_assign_from_range_more) {
     }
 }
 
+// Type that contains a tuple, and default-generated assignment operators.
+struct product_type {
+    tuple <int, float> t;
+
+    product_type (int i, float f) : t (i, f) {}
+
+    product_type & operator = (product_type const &) = default;
+    product_type & operator = (product_type &&) = default;
+};
+
+BOOST_AUTO_TEST_CASE (contained_assign) {
+    product_type p1 (5, 6.7);
+
+    product_type p2 (12, 13.5);
+    product_type p3 (17, 18.5);
+
+    p3 = p1;
+    p3 = std::move (p2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

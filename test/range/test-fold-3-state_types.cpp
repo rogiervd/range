@@ -33,8 +33,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using range::fold;
 using range::at_c;
 
+struct int_holder {
+    int i;
+    int_holder() : i(0) {}
+    int_holder (int i) : i (i) {}
+};
+
 struct add_return_const {
-    int const operator() (int i, int j) const { return i + j; }
+    // "const" is only retained in return types for class types, so return
+    // "int_holder const" and not just "int const".
+    int_holder const operator() (int_holder i, int j) const
+    { return int_holder (i.i + j); }
 };
 
 BOOST_AUTO_TEST_SUITE(test_range_fold_state_types)
@@ -46,20 +55,23 @@ BOOST_AUTO_TEST_CASE (test_fold_const_state) {
         v.push_back (2);
         v.push_back (3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), 0, v)), int const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), 0, v), 6);
+            decltype (fold (add_return_const(), int_holder(), v)),
+            int_holder const>));
+        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
     }
     {
         std::tuple <int, short, int> v (1,2,3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), 0, v)), int const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), 0, v), 6);
+            decltype (fold (add_return_const(), int_holder(), v)),
+            int_holder const>));
+        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
     }
     {
         range::tuple <int, short, int> v (1,2,3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), 0, v)), int const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), 0, v), 6);
+            decltype (fold (add_return_const(), int_holder(), v)),
+            int_holder const>));
+        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
     }
 }
 

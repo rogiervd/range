@@ -113,7 +113,7 @@ namespace tuple_detail {
     /**
     Extract the element at \a Index from the tuple.
     */
-    template <std::size_t Index> struct extract;
+    template <std::size_t Index> class extract;
 
     // Contain all elements of the tuple.
     template <class ... Types> class elements;
@@ -165,7 +165,7 @@ namespace tuple_detail {
 
         stored_type element_;
 
-        friend struct extract <Index>;
+        friend class extract <Index>;
         template <class ... Types> friend class elements;
 
     public:
@@ -217,7 +217,7 @@ namespace tuple_detail {
     /**
     Extract member at index \a Index from a tuple, counting from the end.
     */
-    template <std::size_t Index> struct extract {
+    template <std::size_t Index> class extract {
     public:
         template <class Tuple> class element {
             static_assert (Index < tuple_size <Tuple>::value,
@@ -229,7 +229,6 @@ namespace tuple_detail {
             typedef typename contain_type::type type;
         };
 
-    public:
         template <class Tuple> struct result
         : utility::storage::get <typename element <Tuple>::type, Tuple &&> {};
 
@@ -324,7 +323,7 @@ namespace tuple_detail {
         // a compiler error.
         void get_contain();
         void get_contained_type();
-        template <std::size_t> friend struct tuple_detail::extract;
+        template <std::size_t> friend class tuple_detail::extract;
 
         // Always default-constructible.
         static constexpr bool default_constructible = true;

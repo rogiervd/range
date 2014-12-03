@@ -35,8 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace range {
 
 /**
-Range that internally two iterators with the same type to denote its begin and
-end.
+Range that internally contains two iterators with the same type to denote its
+begin and end.
 The type of iterator determines which operations are possible.
 
 There is a sharp difference between an iterator_range based on input iterators
@@ -94,6 +94,13 @@ namespace iterator_range_detail {
             std::is_base_of <std::forward_iterator_tag, iterator_tag>::value,
             "The iterator must be an input iterator or a forward iterator.");
     public:
+        typedef Iterator iterator_type;
+
+        typedef typename std::make_unsigned <typename
+            std::iterator_traits <Iterator>::difference_type>::type size_type;
+
+        typedef typename std::iterator_traits <Iterator>::value_type value_type;
+
         iterator_range_base (Iterator const & begin, Iterator const & end)
         : begin_ (begin), end_ (end) {}
 
@@ -194,7 +201,7 @@ namespace operation {
             direction::front>
     {
         template <class Range> bool operator() (
-            direction::front, Range && range) const
+            direction::front, Range const & range) const
         { return range.begin() == range.end(); }
     };
 
@@ -205,23 +212,13 @@ namespace operation {
             typename boost::enable_if <std::is_base_of <
                 std::random_access_iterator_tag, IteratorTag>>::type>
     {
-        // The distance type is usually signed.
-        // However, we know that the size of the range is non-negative,
-        // so we turn this into an unsigned type.
-        template <class Iterator> struct unsigned_distance {
-            typedef decltype (
-                std::declval <Iterator>() - std::declval <Iterator>())
-                distance_type;
-            typedef typename std::make_unsigned <distance_type>::type type;
-        };
-
         template <class Iterator>
-            typename unsigned_distance <Iterator>::type operator() (
+            typename iterator_range <Iterator>::size_type operator() (
                 direction::front, iterator_range <Iterator> const & range) const
         {
             auto distance = range.end() - range.begin();
             assert (distance >= 0);
-            return typename unsigned_distance <Iterator>::type (distance);
+            return typename iterator_range <Iterator>::size_type (distance);
         }
     };
 
@@ -237,7 +234,7 @@ namespace operation {
                 std::forward_iterator_tag, IteratorTag>>::type>
     {
         template <class Range> auto operator() (
-            direction::front, Range && range) const
+            direction::front, Range const & range) const
         -> decltype (*range.begin())
         {
             assert (!::range::empty (range));
@@ -253,7 +250,7 @@ namespace operation {
                 std::bidirectional_iterator_tag, IteratorTag>>::type>
     {
         template <class Range> auto operator() (
-            direction::back, Range && range) const
+            direction::back, Range const & range) const
         -> decltype (*range.begin())
         {
             assert (!::range::empty (range));
@@ -305,12 +302,13 @@ namespace operation {
                 std::random_access_iterator_tag, IteratorTag>>::type>
     {
         template <class Iterator> iterator_range <Iterator>
-            operator() (direction::front, Increment const & increment,
+            operator() (direction::front, Increment const & increment_,
                 iterator_range <Iterator> const & range) const
         {
+            typename iterator_range <Iterator>::size_type
+                increment (increment_);
             assert (increment >= 0);
-            typedef decltype (::range::size (range)) size_type;
-            assert (size_type (increment) <= ::range::size (range));
+            assert (increment <= ::range::size (range));
             return iterator_range <Iterator> (
                 range.begin() + increment, range.end());
         }
@@ -324,12 +322,13 @@ namespace operation {
                 std::random_access_iterator_tag, IteratorTag>>::type>
     {
         template <class Iterator> iterator_range <Iterator>
-            operator() (direction::back, Increment const & increment,
+            operator() (direction::back, Increment const & increment_,
                 iterator_range <Iterator> const & range) const
         {
+            typename iterator_range <Iterator>::size_type
+                increment (increment_);
             assert (increment >= 0);
-            typedef decltype (::range::size (range)) size_type;
-            assert (size_type (increment) <= ::range::size (range));
+            assert (increment <= ::range::size (range));
             return iterator_range <Iterator> (
                 range.begin(), range.end() - increment);
         }
@@ -363,22 +362,20 @@ namespace operation {
             direction::front, typename boost::disable_if <std::is_base_of <
                 std::forward_iterator_tag, IteratorTag>>::type>
     {
-        template <class Iterator> struct result {
-            typedef chopped <
-                typename std::iterator_traits <Iterator>::value_type,
-                iterator_range <Iterator>> type;
+        template <class IteratorRange> struct result {
+            typedef chopped <typename IteratorRange::value_type, IteratorRange>
+                type;
         };
 
         // rvalue range only.
         template <class Iterator>
-            typename result <Iterator>::type
+            typename result <iterator_range <Iterator>>::type
             operator() (direction::front, iterator_range <Iterator> && range)
             const
         {
-            typedef typename std::iterator_traits <Iterator>::value_type
-                value_type;
+            typedef typename iterator_range <Iterator>::value_type value_type;
             value_type first = *range.begin() ++;
-            return typename result <Iterator>::type (
+            return typename result <iterator_range <Iterator>>::type (
                 static_cast <value_type &&> (first), std::move (range));
         }
     };

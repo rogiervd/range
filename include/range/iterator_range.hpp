@@ -340,7 +340,7 @@ namespace operation {
         : boost::mpl::if_ <
             std::is_base_of <std::forward_iterator_tag,
                 typename std::iterator_traits <Iterator>::iterator_category>,
-            decltype (* std::declval <Iterator>() ++),
+            decltype (* std::declval <Iterator &>() ++),
             typename std::iterator_traits <Iterator>::value_type> {};
 
     } // namespace iterator_range_detail

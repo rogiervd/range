@@ -193,6 +193,42 @@ template <class Iterator, qualification qualifier>
         std::iterator_traits <Iterator>::iterator_category, qualifier> type;
 };
 
+/* make_iterator_range */
+
+/**
+Make an iterator_range from begin and end iterators.
+\param begin The begin iterator.
+\param end The past-the-end iterator.
+*/
+template <class Iterator, class Enable
+    = typename std::iterator_traits <Iterator>::iterator_category>
+inline iterator_range <Iterator> make_iterator_range (
+    Iterator const & begin, Iterator const & end)
+{ return iterator_range <Iterator> (begin, end); }
+
+namespace make_iterator_range_detail {
+
+    using std::begin;
+    using std::end;
+
+    template <class Container, class Iterator
+        = decltype (begin (std::declval <Container &&>()))> inline
+    iterator_range <Iterator> implementation (Container && container)
+    { return iterator_range <Iterator> (begin (container), end (container)); }
+
+} // namespace make_iterator_range_detail
+
+/**
+Make an iterator_range from a container.
+\param container
+    The container to iterate.
+    Begin and end iterators are found with unqualified calls to \c begin
+    and \c end, after <c>using std::begin</c> and <c>using std::end</c>.
+*/
+template <class Container>
+    inline auto make_iterator_range (Container && container)
+RETURNS (make_iterator_range_detail::implementation (container));
+
 namespace operation {
 
     // empty

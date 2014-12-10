@@ -901,4 +901,51 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
     }
 }
 
+BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
+    using range::empty;
+    using range::size;
+    using range::first;
+    using range::at;
+
+    std::vector <int> v;
+    auto ir = range::make_iterator_range (v);
+    static_assert (std::is_same <decltype (ir), random_access_type>::value, "");
+
+    BOOST_CHECK (empty (ir));
+
+    BOOST_CHECK (v.begin() == ir.begin());
+    BOOST_CHECK (v.end() == ir.end());
+
+    v.push_back (4);
+    v.push_back (7);
+    ir = range::make_iterator_range (v);
+
+    BOOST_CHECK (v.begin() == ir.begin());
+    BOOST_CHECK (v.end() == ir.end());
+
+    BOOST_CHECK_EQUAL (size (ir), 2);
+    BOOST_CHECK_EQUAL (first (ir), 4);
+    BOOST_CHECK_EQUAL (at (1, ir), 7);
+
+    v.push_back (27);
+
+    auto ir2 = range::make_iterator_range (v.begin(), v.end());
+    BOOST_CHECK (v.begin() == ir2.begin());
+    BOOST_CHECK (v.end() == ir2.end());
+
+    BOOST_CHECK_EQUAL (size (ir2), 3);
+    BOOST_CHECK_EQUAL (first (ir2), 4);
+    BOOST_CHECK_EQUAL (at (1, ir2), 7);
+    BOOST_CHECK_EQUAL (at (2, ir2), 27);
+
+#if !defined (BOOST_NO_INITIALIZER_LISTS)
+    auto initializer_list = {6, 32};
+    auto ilir = range::make_iterator_range (initializer_list);
+
+    BOOST_CHECK_EQUAL (size (ilir), 2);
+    BOOST_CHECK_EQUAL (first (ilir), 6);
+    BOOST_CHECK_EQUAL (at (1, ilir), 32);
+#endif
+}
+
 BOOST_AUTO_TEST_SUITE_END()

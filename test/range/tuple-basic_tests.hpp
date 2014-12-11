@@ -31,6 +31,8 @@ using range::first;
 using range::drop;
 using range::at;
 using range::at_c;
+using range::second;
+using range::third;
 using range::chop;
 
 using range::front;
@@ -161,6 +163,13 @@ template <class Tuple, class Element>
     check_empty (drop (back, t));
 
     check_has_no_drop (two, t);
+
+    static_assert (has <callable::first (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <1> (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <2> (direction::back, Tuple)>::value,
+        "");
+    static_assert (!has <callable::second (direction::back, Tuple)>::value, "");
+    static_assert (!has <callable::seventh (Tuple)>::value, "");
 }
 
 template <class Tuple, class Element1, class Element2>
@@ -196,6 +205,10 @@ template <class Tuple, class Element1, class Element2>
     RIME_CHECK_EQUAL (at (front, one, t), element2);
     RIME_CHECK_EQUAL (at (back, one, t), element1);
 
+    RIME_CHECK_EQUAL (second (t), element2);
+    RIME_CHECK_EQUAL (second (front, t), element2);
+    RIME_CHECK_EQUAL (second (back, t), element1);
+
     // Check subranges.
     check_one_element (drop (t), element2);
     check_one_element (drop (front, t), element2);
@@ -206,6 +219,13 @@ template <class Tuple, class Element1, class Element2>
     check_empty (drop (back, two, t));
 
     check_has_no_drop (three, t);
+
+    static_assert (has <callable::second (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <2> (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <3> (direction::back, Tuple)>::value,
+        "");
+    static_assert (!has <callable::third (direction::back, Tuple)>::value, "");
+    static_assert (!has <callable::seventh (Tuple)>::value, "");
 }
 
 template <class Tuple, class Element1, class Element2, class Element3>
@@ -242,6 +262,10 @@ template <class Tuple, class Element1, class Element2, class Element3>
     RIME_CHECK_EQUAL (at (front, one, t), element2);
     RIME_CHECK_EQUAL (at (back, one, t), element2);
 
+    RIME_CHECK_EQUAL (second (t), element2);
+    RIME_CHECK_EQUAL (second (front, t), element2);
+    RIME_CHECK_EQUAL (second (back, t), element2);
+
     // at (2).
     RIME_CHECK_EQUAL (at_c <2> (t), element3);
     RIME_CHECK_EQUAL (at_c <2> (front, t), element3);
@@ -250,6 +274,10 @@ template <class Tuple, class Element1, class Element2, class Element3>
     RIME_CHECK_EQUAL (at (two, t), element3);
     RIME_CHECK_EQUAL (at (front, two, t), element3);
     RIME_CHECK_EQUAL (at (back, two, t), element1);
+
+    RIME_CHECK_EQUAL (third (t), element3);
+    RIME_CHECK_EQUAL (third (front, t), element3);
+    RIME_CHECK_EQUAL (third (back, t), element1);
 
     // Check subranges.
     check_two_elements (drop (t), element2, element3);
@@ -265,6 +293,13 @@ template <class Tuple, class Element1, class Element2, class Element3>
     check_empty (drop (back, three, t));
 
     check_has_no_drop (four, t);
+
+    static_assert (has <callable::third (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <3> (Tuple)>::value, "");
+    static_assert (!has <callable::at_c <4> (direction::back, Tuple)>::value,
+        "");
+    static_assert (!has <callable::fourth (direction::back, Tuple)>::value, "");
+    static_assert (!has <callable::seventh (Tuple)>::value, "");
 }
 
 #endif // RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED

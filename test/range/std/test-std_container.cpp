@@ -50,6 +50,9 @@ using range::drop;
 using range::chop;
 using range::chop_in_place;
 using range::at;
+using range::at_c;
+using range::second;
+using range::third;
 
 using range::view;
 using range::view_once;
@@ -152,6 +155,23 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK_EQUAL (at (back, 1, v), 6);
         BOOST_CHECK_EQUAL (at (back, 2, v), 5);
 
+        BOOST_CHECK_EQUAL (at_c <0> (v), 5);
+        BOOST_CHECK_EQUAL (at_c <1> (v), 6);
+        BOOST_CHECK_EQUAL (at_c <2> (v), 7);
+        BOOST_CHECK_EQUAL (at_c <0> (front, v), 5);
+        BOOST_CHECK_EQUAL (at_c <1> (front, v), 6);
+        BOOST_CHECK_EQUAL (at_c <2> (front, v), 7);
+        BOOST_CHECK_EQUAL (at_c <0> (back, v), 7);
+        BOOST_CHECK_EQUAL (at_c <1> (back, v), 6);
+        BOOST_CHECK_EQUAL (at_c <2> (back, v), 5);
+
+        BOOST_CHECK_EQUAL (second (v), 6);
+        BOOST_CHECK_EQUAL (third (v), 7);
+        BOOST_CHECK_EQUAL (second (front, v), 6);
+        BOOST_CHECK_EQUAL (third (front, v), 7);
+        BOOST_CHECK_EQUAL (second (back, v), 6);
+        BOOST_CHECK_EQUAL (third (back, v), 5);
+
         BOOST_CHECK_EQUAL (at (two, v), 7);
 
         auto first_and_empty = chop (v);
@@ -200,6 +220,23 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK_EQUAL (d.content(), 45);
         r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
     }
+}
+
+BOOST_AUTO_TEST_CASE (test_std_list_adaptor) {
+    std::list <int> l;
+
+    auto view = range::view (l);
+    static_assert (has <callable::empty (decltype (view))>::value, "");
+    static_assert (!has <callable::size (decltype (view))>::value, "");
+
+    static_assert (has <callable::first (decltype (view))>::value, "");
+    // second (l) is equivalent to first (drop (l)) and should therefore be
+    // available.
+    static_assert (has <callable::second (decltype (view))>::value, "");
+    static_assert (!has <callable::third (decltype (view))>::value, "");
+    static_assert (!has <callable::seventh (decltype (view))>::value, "");
+
+    static_assert (!has <callable::at (decltype (view))>::value, "");
 }
 
 template <class Type>

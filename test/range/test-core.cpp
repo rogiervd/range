@@ -138,6 +138,18 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at (int, char)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at (
             double, int, char)>));
+
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at_c <2> (int)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at_c <0> (
+            int, char)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at_c <1> (
+            double, int, char)>));
+
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::second (int)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::third (
+            int, char)>));
+        BOOST_MPL_ASSERT_NOT ((range::has <range::callable::seventh (
+            double, int, char)>));
     }
 
     weird_count c;
@@ -305,10 +317,23 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
     // Run-time behaviour.
     weird_direction direction (7);
     BOOST_CHECK_EQUAL (range::first (direction, c), 0);
+    BOOST_CHECK_EQUAL (range::second (direction, c), 1);
+    BOOST_CHECK_EQUAL (range::third (direction, c), 2);
+    BOOST_CHECK_EQUAL (range::fourth (direction, c), 3);
+    BOOST_CHECK_EQUAL (range::fifth (direction, c), 4);
+    BOOST_CHECK_EQUAL (range::sixth (direction, c), 5);
+    BOOST_CHECK_EQUAL (range::seventh (direction, c), 6);
+    BOOST_CHECK_EQUAL (range::eighth (direction, c), 7);
+    BOOST_CHECK_EQUAL (range::ninth (direction, c), 8);
+    BOOST_CHECK_EQUAL (range::tenth (direction, c), 9);
+
     BOOST_CHECK_EQUAL (range::at (direction, rime::constant <std::size_t, 0u>(),
         c), 0);
     BOOST_CHECK_EQUAL (range::at (direction, 2, c), 2);
     BOOST_CHECK_EQUAL (range::at (direction, 21, c), 21);
+
+    BOOST_CHECK_EQUAL (range::at_c <2> (direction, c), 2);
+    BOOST_CHECK_EQUAL (range::at_c <5> (direction, c), 5);
 
     c = range::drop (direction, c);
     BOOST_CHECK_EQUAL (range::first (direction, c), 1);

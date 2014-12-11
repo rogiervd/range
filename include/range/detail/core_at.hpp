@@ -90,15 +90,41 @@ namespace operation {
 
 namespace apply {
     template <class ... Arguments> struct at;
+    template <std::size_t Index, class ... Arguments> struct at_c;
 } // namespace apply
 
 namespace callable {
+
     struct at : generic <apply::at> {};
+
+    // It is not possible to use "generic <apply::at_c <Index, ?>>".
+    template <std::size_t Index> struct at_c {
+        template <class ... Arguments> struct apply
+        : ::range::apply::at_c <Index, Arguments ...> {};
+
+        template <class ... Arguments>
+            auto operator() (Arguments && ... arguments) const
+        RETURNS (apply <Arguments ...>() (
+            std::forward <Arguments> (arguments) ...));
+    };
+
+    // Convenience definitions.
+    struct second : at_c <1> {};
+    struct third : at_c <2> {};
+    struct fourth : at_c <3> {};
+    struct fifth : at_c <4> {};
+    struct sixth : at_c <5> {};
+    struct seventh : at_c <6> {};
+    struct eighth : at_c <7> {};
+    struct ninth : at_c <8> {};
+    struct tenth : at_c <9> {};
+
 } // namespace callable
 
 /**
 Return the element at a specific index in a range.
-This is equivalent to first (direction, drop (direction, index, range)).
+This is equivalent to <c>first (direction, drop (direction, index, range))</c>,
+and is only available if that is available.
 \param direction (optional) The direction of traversal.
 \param index The index of the desired element.
 \param range The range within which the element is sought.
@@ -111,21 +137,115 @@ Return the element at a specific index in a range.
 The first template parameter (the index) must be given explicitly.
 This is equivalent to at (direction, rime::size_t<Index>(), range).
 */
-template <size_t Index, class Direction, class Range>
+template <std::size_t Index, class Direction, class Range>
     inline auto at_c (Direction const & direction, Range && range)
-RETURNS (at (
-    direction, rime::size_t <Index>(), std::forward <Range> (range)));
+RETURNS (callable::at_c <Index>() (direction, std::forward <Range> (range)));
 
 /**
 Return the element at a specific index in a range.
 The first template parameter (the index) must be given explicitly.
 This is equivalent to at (rime::size_t<Index>(), range).
 */
-template <size_t Index, class Range>
+template <std::size_t Index, class Range>
     inline auto at_c (Range && range)
-RETURNS (at (rime::size_t <Index>(), std::forward <Range> (range)));
+RETURNS (callable::at_c <Index>() (std::forward <Range> (range)));
+
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>first (drop (direction, range))</c>.
+It is also available for ranges that implement \c drop only with an increment of
+one.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto second = callable::second();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<2> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto third = callable::third();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<3> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto fourth = callable::fourth();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<4> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto fifth = callable::fifth();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<5> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto sixth = callable::sixth();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<6> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto seventh = callable::seventh();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<7> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto eighth = callable::eighth();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<8> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto ninth = callable::ninth();
+
+/**
+Return the element at the ... position in a range.
+This is equivalent to <c>at_c<9> (...)</c>.
+\param direction (optional)
+    The direction from which to count.
+\param range
+    The range from which the element is taken.
+*/
+static const auto tenth = callable::tenth();
 
 namespace apply {
+
+    /* at. */
 
     namespace detail {
 
@@ -183,6 +303,57 @@ namespace apply {
     template <class ... Arguments> struct at
     : automatic_arguments::categorise_arguments_default_direction <
         automatic_arguments::at, meta::vector <Arguments ...>>::type {};
+
+    /* at_c. */
+    // This forwards to "at".
+    // Since it has a template argument, the Direction argument must be handled
+    // explicitly.
+
+    namespace at_c_detail {
+
+        // With direction.
+        template <std::size_t Index, class Direction, class Range,
+            class Underlying =
+                apply::at <Direction, rime::size_t <Index>, Range>,
+            class Enable = void>
+        struct with_direction : operation::unimplemented {};
+
+        template <std::size_t Index, class Direction, class Range,
+            class Underlying>
+        struct with_direction <Index, Direction, Range, Underlying, typename
+            boost::enable_if <operation::is_implemented <Underlying>>::type>
+        {
+            auto operator() (Direction const & direction, Range && range) const
+            RETURNS (Underlying() (direction, rime::size_t <Index>(),
+                std::forward <Range> (range)));
+        };
+
+        // Without direction.
+        template <std::size_t Index, class Range, class Underlying =
+                apply::at <rime::size_t <Index>, Range>,
+            class Enable = void>
+        struct without_direction : operation::unimplemented {};
+
+        template <std::size_t Index, class Range, class Underlying>
+        struct without_direction <Index, Range, Underlying, typename
+            boost::enable_if <operation::is_implemented <Underlying>>::type>
+        {
+            auto operator() (Range && range) const
+            RETURNS (Underlying() (
+                rime::size_t <Index>(), std::forward <Range> (range)));
+        };
+
+    } // namespace at_c_detail
+
+    template <std::size_t Index, class ... Arguments> struct at_c
+    : operation::unimplemented {};
+
+    template <std::size_t Index, class Range> struct at_c <Index, Range>
+    : at_c_detail::without_direction <Index, Range> {};
+
+    template <std::size_t Index, class Direction, class Range>
+        struct at_c <Index, Direction, Range>
+    : at_c_detail::with_direction <Index, Direction, Range> {};
 
 } // namespace apply
 

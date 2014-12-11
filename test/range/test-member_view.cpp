@@ -64,6 +64,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
     using range::chop_in_place;
     using range::at;
     using range::at_c;
+    using range::second;
+    using range::third;
     using range::front;
     using range::back;
 
@@ -565,6 +567,11 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (at_c <1> (back, three_view), 3.5);
         BOOST_CHECK_EQUAL (at_c <2> (back, three_view), 4);
 
+        BOOST_CHECK_EQUAL (second (three_view), 3.5);
+        BOOST_CHECK_EQUAL (third (three_view), 'a');
+        BOOST_CHECK_EQUAL (second (back, three_view), 3.5);
+        BOOST_CHECK_EQUAL (third (back, three_view), 4);
+
         rime::int_<2> two;
         // Three drops from whichever direction and the range is empty.
         RIME_CHECK_EQUAL (empty (drop (drop (drop (three_view)))), rime::true_);
@@ -606,7 +613,11 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at_c <1> (three_view)), double &&>));
         BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second (three_view)), double &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
             decltype (at_c <2> (three_view)), char const &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (third (three_view)), char const &&>));
 
         BOOST_CHECK_EQUAL (first (three_view), 6);
         BOOST_CHECK_EQUAL (at_c <1> (three_view), 98.7);

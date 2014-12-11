@@ -42,8 +42,10 @@ using range::element_type;
 
 using range::size;
 using range::first;
+using range::drop;
 using range::at;
 using range::at_c;
+using range::second;
 using range::view;
 using range::view_once;
 
@@ -101,18 +103,29 @@ BOOST_AUTO_TEST_CASE (tuple_types) {
     // Test reference, const reference, and
     // rvalue reference without and with view_once.
     {
-        tuple <int> t;
+        tuple <int, int> t;
         BOOST_MPL_ASSERT ((std::is_same <decltype (first (t)), int &>));
         BOOST_MPL_ASSERT ((std::is_same <decltype (at_c <0> (t)), int &>));
         BOOST_MPL_ASSERT ((std::is_same <decltype (at (zero, t)), int &>));
+
+        BOOST_MPL_ASSERT ((std::is_same <decltype (first (drop (t))), int &>));
+        BOOST_MPL_ASSERT ((std::is_same <decltype (second (t)), int &>));
+        BOOST_MPL_ASSERT ((std::is_same <decltype (at (one, t)), int &>));
     }
     {
-        tuple <int> const t;
+        tuple <int, int> const t;
         BOOST_MPL_ASSERT ((std::is_same <decltype (first (t)), int const &>));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at_c <0> (t)), int const &>));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at (zero, t)), int const &>));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (drop (t))), int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second (t)), int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at (one, t)), int const &>));
     }
     {
         BOOST_MPL_ASSERT ((std::is_same <
@@ -121,6 +134,13 @@ BOOST_AUTO_TEST_CASE (tuple_types) {
             decltype (at_c <0> (view (tuple <int>()))), int const &>));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at (zero, view (tuple <int>()))), int const &>));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (drop (view (tuple <int, int>())))), int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second (view (tuple <int, int>()))), int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at (one, view (tuple <int, int>()))), int const &>));
     }
     {
         BOOST_MPL_ASSERT ((std::is_same <
@@ -129,6 +149,13 @@ BOOST_AUTO_TEST_CASE (tuple_types) {
             decltype (at_c <0> (view_once (tuple <int>()))), int &&>));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at (zero, view_once (tuple <int>()))), int &&>));
+
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (drop (view_once (tuple <int, int>())))), int &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second (view_once (tuple <int, int>()))), int &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at (one, view_once (tuple <int, int>()))), int &&>));
     }
     {
         // first uses view_once.
@@ -138,6 +165,15 @@ BOOST_AUTO_TEST_CASE (tuple_types) {
             decltype (at_c <0> (tuple <int>())), int &&>));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (at (zero, tuple <int>())), int &&>));
+
+        // first (drop()) is not the same as second()!
+        // first (drop()) uses view, second() uses view_once.
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (first (drop (tuple <int, int>()))), int const &>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (second (tuple <int, int>())), int &&>));
+        BOOST_MPL_ASSERT ((std::is_same <
+            decltype (at (one, tuple <int, int>())), int &&>));
     }
 
     // The same on a const contained type.

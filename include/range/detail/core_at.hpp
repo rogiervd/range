@@ -123,7 +123,8 @@ namespace callable {
 
 /**
 Return the element at a specific index in a range.
-This is equivalent to <c>first (direction, drop (direction, index, range))</c>,
+This is equivalent to
+<c>first (direction, drop (direction, index, view_once (range)))</c>,
 and is only available if that is available.
 \param direction (optional) The direction of traversal.
 \param index The index of the desired element.
@@ -153,7 +154,7 @@ RETURNS (callable::at_c <Index>() (std::forward <Range> (range)));
 
 /**
 Return the element at the ... position in a range.
-This is equivalent to <c>first (drop (direction, range))</c>.
+This is equivalent to <c>first (drop (direction, view_once (range)))</c>.
 It is also available for ranges that implement \c drop only with an increment of
 one.
 \param direction (optional)

@@ -24,10 +24,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <type_traits>
 #include <string>
+#include <vector>
+#include <list>
 
 #include <boost/mpl/assert.hpp>
 
 #include "range/std.hpp"
+#include "range/take.hpp"
 
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
@@ -36,12 +39,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using range::tuple;
 using range::make_tuple;
+using range::make_tuple_from;
+using range::tie_from;
 using range::swap;
+using range::take;
 
 using range::back;
 
 using range::first;
+using range::drop;
 using range::at_c;
+using range::second;
+using range::third;
 
 using utility::tracked_registry;
 using utility::tracked;
@@ -108,6 +117,78 @@ BOOST_AUTO_TEST_CASE (test_range_make_tuple) {
         BOOST_CHECK_EQUAL (at_c <1> (t), 9.5f);
         BOOST_CHECK_EQUAL (at_c <2> (t), 13.75f);
     }
+}
+
+BOOST_AUTO_TEST_CASE (test_range_make_tuple_from) {
+    int i = 4;
+    float f = 7.75;
+    bool b = true;
+    {
+        std::tuple <int, float> st (i, f);
+
+        auto copy = make_tuple_from (st);
+        static_assert (std::is_same <
+            decltype (copy), tuple <int, float>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+    }
+    {
+        std::tuple <int &, float &&, bool const &> st (i, std::move (f), b);
+
+        auto copy = make_tuple_from (st);
+        static_assert (std::is_same <decltype (copy),
+            tuple <int, float, bool>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+        BOOST_CHECK_EQUAL (third (copy), true);
+    }
+    // From a list that is cut off at a point known at compile time.
+    {
+        std::list <int> l;
+
+        // The list can turn out to be too short at run time.
+        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (3);
+        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (4);
+        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (6);
+        {
+            auto copy = make_tuple_from (take (rime::size_t <3>(), l));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int, int, int>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 3);
+            BOOST_CHECK_EQUAL (second (copy), 4);
+            BOOST_CHECK_EQUAL (third (copy), 6);
+        }
+
+        l.push_back (9);
+        {
+            auto copy = make_tuple_from (take (rime::size_t <3>(), l));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int, int, int>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 3);
+            BOOST_CHECK_EQUAL (second (copy), 4);
+            BOOST_CHECK_EQUAL (third (copy), 6);
+        }
+    }
+    // This fails to compile.
+    /*{
+        std::vector <int> l;
+        make_tuple_from (l);
+    }*/
 }
 
 // Check tie.
@@ -210,6 +291,102 @@ BOOST_AUTO_TEST_CASE (test_range_tie) {
         BOOST_CHECK_EQUAL (c, 'b');
         BOOST_CHECK_EQUAL (i, 9);
     }
+}
+
+BOOST_AUTO_TEST_CASE (test_range_tie_from) {
+    int i = 4;
+    float f = 7.75;
+    bool b = true;
+    {
+        std::tuple <int, float> st (i, f);
+
+        auto copy = tie_from (st);
+        static_assert (std::is_same <
+            decltype (copy), tuple <int &, float &>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+
+        first (copy) = 67;
+        BOOST_CHECK_EQUAL (first (st), 67);
+        second (copy) = 42.25;
+        BOOST_CHECK_EQUAL (second (st), 42.25);
+    }
+    {
+        std::tuple <int &, float &&, bool const &> st (i, std::move (f), b);
+
+        auto copy = tie_from (st);
+        static_assert (std::is_same <decltype (copy),
+            tuple <int &, float &, bool const &>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+        BOOST_CHECK_EQUAL (third (copy), true);
+
+        first (copy) = 14;
+        BOOST_CHECK_EQUAL (i, 14);
+        second (copy) = 17.75;
+        BOOST_CHECK_EQUAL (f, 17.75);
+    }
+    // From a list that is cut off at a point known at compile time.
+    {
+        std::list <int> l;
+
+        // The list can turn out to be too short at run time.
+        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (3);
+        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (4);
+        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (6);
+        {
+            auto copy = tie_from (take (rime::size_t <3>(), l));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int &, int &, int &>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 3);
+            BOOST_CHECK_EQUAL (second (copy), 4);
+            BOOST_CHECK_EQUAL (third (copy), 6);
+
+            first (copy) += 10;
+            BOOST_CHECK_EQUAL (l.front(), 13);
+            second (copy) += 20;
+            BOOST_CHECK_EQUAL (second (l), 24);
+            third (copy) += 30;
+            BOOST_CHECK_EQUAL (second (drop (l)), 36);
+        }
+
+        l.push_back (9);
+        {
+            auto copy = tie_from (take (rime::size_t <3>(), l));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int &, int &, int &>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 13);
+            BOOST_CHECK_EQUAL (second (copy), 24);
+            BOOST_CHECK_EQUAL (third (copy), 36);
+
+            first (copy) += 10;
+            BOOST_CHECK_EQUAL (l.front(), 23);
+            second (copy) += 20;
+            BOOST_CHECK_EQUAL (second (l), 44);
+            third (copy) += 30;
+            BOOST_CHECK_EQUAL (second (drop (l)), 66);
+        }
+    }
+    // This fails to compile.
+    /*{
+        std::vector <int> l;
+        tie_from (l);
+    }*/
 }
 
 // Check forward_as_tuple.

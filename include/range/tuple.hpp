@@ -42,6 +42,7 @@ Define a general heterogeneous container.
 
 #include "core.hpp"
 #include "heavyweight.hpp"
+#include "element_types.hpp"
 
 #include "detail/enable_if_front_back.hpp"
 
@@ -72,7 +73,6 @@ Connected with this is the layout
 
 \todo Implement tuple_cat? Probably rather make_tuple_from (concatenate (...)).
 \todo uses_allocator
-\todo make_tuple_from, only fixed length ranges.
 \todo Comparison between tuples.
 \todo Using delegate constructors, it is probably possible to allow
 initialisation from input ranges, by recursively delegating to constructors with
@@ -668,6 +668,30 @@ template <class ... Types>
 inline void swap (tuple <Types ...> & tuple1, tuple <Types ...> & tuple2)
 { tuple1.swap (tuple2); }
 
+namespace make_tuple_from_detail {
+
+    template <template <class> class Transform, class Types>
+        struct tuple_from_types
+    : tuple_from_types <Transform, typename meta::as_vector <Types>::type> {};
+
+    template <template <class> class Transform, class ... Types>
+        struct tuple_from_types <Transform, meta::vector <Types ...>>
+    { typedef tuple <typename Transform <Types>::type ...> type; };
+
+    template <template <class> class Transform, class Range> struct tuple_from {
+        typedef typename std::result_of <callable::view_once (Range)>::type
+            view_type;
+        static_assert (!is_homogeneous <direction::front, view_type>::value,
+            "The range pased in is homogeneous and potentially infinite. "
+            "Unable to convert it into a tuple.");
+        typedef typename tuple_from_types <Transform,
+            typename element_types <view_type>::type>::type type;
+    };
+
+    template <class Type> struct add_reference { typedef Type & type; };
+
+} // namespace make_tuple_from_detail
+
 /**
 Make a tuple from the arguments passed in.
 The arguments are stripped of qualifications.
@@ -680,6 +704,29 @@ template <class ... Types> inline
 { return tuple <Types ...> (arguments ...); }
 
 /**
+Make a tuple from the range passed in.
+The range is traversed in direction::front.
+The range must be known to end after a fixed number of elements.
+This could be a heterogeneous container, like std::tuple.
+It could also be an adapted heterogeneous container.
+
+For a variable-length range, the resulting tuple has the longest number of
+elements possible.
+If \a range is a standard homogeneous container, this is obviously impossible,
+and a compile error about recursive template instantiations will result.
+
+\throw size_mismatch
+    If the range turns out at compile time to finish sooner than it could.
+    In this case, the tuple type will have more elements than the range turns
+    out to have, so constructing the tuple type elicits the exception.
+\param range
+    The range to construct the range from.
+*/
+template <class Range> inline auto make_tuple_from (Range && range)
+RETURNS (typename make_tuple_from_detail::tuple_from <std::decay, Range>::type (
+    std::forward <Range> (range)));
+
+/**
 Make a tuple of references to each of the arguments.
 
 This is equivalent to \c std::tie except that it returns a \c range::tuple.
@@ -687,6 +734,30 @@ This is equivalent to \c std::tie except that it returns a \c range::tuple.
 template <class ... Types> inline
     tuple <Types & ...> tie (Types & ... arguments)
 { return tuple <Types & ...> (arguments ...); }
+
+/**
+Make a tuple of references to the elements of the range passed in.
+The range is traversed in direction::front.
+The range must be known to end after a fixed number of elements.
+This could be a heterogeneous container, like std::tuple.
+It could also be an adapted heterogeneous container.
+
+For a variable-length range, the resulting tuple has the longest number of
+elements possible.
+If \a range is a standard homogeneous container, this is obviously impossible,
+and a compile error about recursive template instantiations will result.
+
+\throw size_mismatch
+    If the range turns out at compile time to finish sooner than it could.
+    In this case, the tuple type will have more elements than the range turns
+    out to have, so constructing the tuple type elicits the exception.
+\param range
+    The range to construct the range from.
+*/
+template <class Range> inline auto tie_from (Range && range)
+RETURNS (typename make_tuple_from_detail::tuple_from <
+    make_tuple_from_detail::add_reference, Range>::type (
+        std::forward <Range> (range)));
 
 /**
 Make a tuple of rvalue references to each of the arguments.

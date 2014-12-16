@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
         // view
         BOOST_MPL_ASSERT ((std::is_same <typename
             range::result_of <range::callable::view (random_access_type)>::type,
-            random_access_type &&>));
+            random_access_type>));
         BOOST_MPL_ASSERT ((std::is_same <typename
             range::result_of <range::callable::view (direction::back,
             bidirectional_type &)>::type, bidirectional_type &>));
@@ -412,6 +412,20 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
                 forward_type const &)>::type, forward_type const &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
             range::result_of <range::callable::view (direction::front &,
+                input_type)>::type, input_type>));
+
+        // forward_view.
+        BOOST_MPL_ASSERT ((std::is_same <typename
+            range::result_of <range::callable::forward_view (
+                random_access_type)>::type, random_access_type &&>));
+        BOOST_MPL_ASSERT ((std::is_same <typename
+            range::result_of <range::callable::forward_view (direction::back,
+                bidirectional_type &)>::type, bidirectional_type &>));
+        BOOST_MPL_ASSERT ((std::is_same <typename
+            range::result_of <range::callable::forward_view (direction::front &,
+                forward_type const &)>::type, forward_type const &>));
+        BOOST_MPL_ASSERT ((std::is_same <typename
+            range::result_of <range::callable::forward_view (direction::front &,
                 input_type)>::type, input_type &&>));
 
         // empty

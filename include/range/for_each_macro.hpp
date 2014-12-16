@@ -63,7 +63,7 @@ A more readable version with comments is in test/for_each_macro.cpp.
         if (bool RANGE_FOR_EACH_internal_seen = false) {} else \
             /* Actual for loop. */ \
             for (auto RANGE_FOR_EACH_internal_view = \
-                    ::range::view (static_cast < \
+                    ::range::forward_view (static_cast < \
                         decltype (RANGE_FOR_EACH_internal_range)> ( \
                             RANGE_FOR_EACH_internal_range)); \
                     ! ::range::empty (RANGE_FOR_EACH_internal_view); \

@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE (test_input_range) {
 
     int total = 0;
     BOOST_MPL_ASSERT ((std::is_same <
-        decltype (range::view (std::move (range))),
+        decltype (range::forward_view (std::move (range))),
         decltype (std::move (range))>));
     RANGE_FOR_EACH (n, std::move (range)) {
         total += n;

@@ -153,11 +153,13 @@ namespace operation {
 
 namespace apply {
     template <class ... Arguments> struct view;
+    template <class ... Arguments> struct forward_view;
     template <class ... Arguments> struct view_once;
 } // namespace apply
 
 namespace callable {
     struct view : generic <apply::view> {};
+    struct forward_view : generic <apply::forward_view> {};
     struct view_once : generic <apply::view_once> {};
 } // namespace callable
 
@@ -166,6 +168,8 @@ Turn a range into a view.
 A view should be lightweight.
 
 If the range is already a view, then the range itself is returned.
+If an rvalue reference to a view is passed in, then the unqualified view is
+returned.
 
 \param directions
     Directions that the view should allow traversal in.
@@ -174,6 +178,24 @@ If the range is already a view, then the range itself is returned.
     Range that the view should be over.
 */
 static const auto view = callable::view();
+
+/**
+Turn a range into a view.
+A view should be lightweight.
+
+If the range is already a view, then the range itself is returned.
+Unlike for \ref view, the resulting type can be an rvalue reference.
+This means that you need to make sure that if a temporary can be passed in, the
+temporary is not destructed until the result of this function goes out of scope.
+Alternatively, use \ref view, which is safer.
+
+\param directions
+    Directions that the view should allow traversal in.
+    If this is not given, then the default direction is used.
+\param range
+    Range that the view should be over.
+*/
+static const auto forward_view = callable::forward_view();
 
 /**
 Turn a range into a view that, if the range is a temporary, can return rvalue
@@ -188,13 +210,14 @@ namespace apply {
 
     namespace automatic_arguments {
 
-        /* view. */
+        /* forward_view. */
         template <class Directions, class Other, class Ranges,
             class Enable = void>
-        struct view : operation::unimplemented {};
+        struct forward_view : operation::unimplemented {};
 
         template <class Directions, class Range>
-            struct view <Directions, meta::vector<>, meta::vector <Range>>
+            struct forward_view <
+                Directions, meta::vector<>, meta::vector <Range>>
         : operation::view <typename range::tag_of <Range>::type, Directions> {};
 
         /* view_once. */
@@ -209,9 +232,37 @@ namespace apply {
 
     } // namespace automatic_arguments
 
-    template <class ... Arguments> struct view
+    template <class ... Arguments> struct forward_view
     : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::view, meta::vector <Arguments ...>>::type {};
+        automatic_arguments::forward_view, meta::vector <Arguments ...>>::type
+    {};
+
+    namespace view_detail {
+
+        template <class Type> struct remove_rvalue_reference;
+
+        template <class Type> struct remove_rvalue_reference <Type &&>
+        { typedef Type type; };
+
+        template <class ... Arguments> struct view_temporary {
+            typename remove_rvalue_reference <typename
+                std::result_of <forward_view <Arguments ...> (Arguments ...)
+            >::type>::type operator() (Arguments && ... arguments) const
+            {
+                return forward_view <Arguments ...>() (
+                    std::forward <Arguments> (arguments) ...);
+            }
+        };
+
+    } // namespace view_detail
+
+    template <class ... Arguments> struct view
+    : boost::mpl::if_ <
+        std::is_rvalue_reference <typename std::result_of <
+            forward_view <Arguments ...> (Arguments ...)>::type>,
+        view_detail::view_temporary <Arguments ...>,
+        forward_view <Arguments ...>
+    >::type {};
 
     template <class ... Arguments> struct view_once
     : automatic_arguments::categorise_arguments_default_direction <
@@ -400,7 +451,7 @@ namespace apply {
 
         template <template <class, class, class, class> class Apply>
             struct call_with_view
-        : call_with_view_implementation <Apply, callable::view> {};
+        : call_with_view_implementation <Apply, callable::forward_view> {};
 
         template <template <class, class, class, class> class Apply>
             struct call_with_view_once

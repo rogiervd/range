@@ -188,9 +188,23 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
     BOOST_MPL_ASSERT ((range::has <range::callable::view (
         weird_direction, weird_count)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <range::callable::view (
-        weird_direction, weird_count)>::type, weird_count &&>));
+        weird_direction, weird_count)>::type, weird_count>));
     BOOST_MPL_ASSERT ((std::is_same <
         decltype (range::view (weird_direction (7), c)), weird_count &>));
+
+    // forward_view.
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::forward_view (
+        weird_count)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::forward_view (
+        direction::front, weird_count)>));
+    BOOST_MPL_ASSERT ((range::has <range::callable::forward_view (
+        weird_direction, weird_count)>));
+    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        range::callable::forward_view (weird_direction, weird_count)>::type,
+        weird_count &&>));
+    BOOST_MPL_ASSERT ((std::is_same <
+        decltype (range::forward_view (weird_direction (7), c)),
+        weird_count &>));
 
     // view_once.
     BOOST_MPL_ASSERT_NOT ((range::has <

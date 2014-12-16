@@ -367,8 +367,9 @@ namespace apply {
         {
             typedef typename meta::first <Ranges>::type range_type;
 
-            typedef typename result_of_or <
-                callable::default_direction (range_type), void>::type direction;
+            typedef typename std::decay <typename result_of_or <
+                callable::default_direction (range_type), void>::type>::type
+                direction;
             typedef Apply <meta::vector <direction>, Other, Ranges, void>
                 implementation;
             typedef typename boost::mpl::if_ <boost::mpl::and_ <

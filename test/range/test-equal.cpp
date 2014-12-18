@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "range/std.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 BOOST_AUTO_TEST_SUITE(range_equal_test_suite)
 

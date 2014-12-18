@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <list>
 #include <tuple>
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_find)
 

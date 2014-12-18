@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <tuple>
 #include "range/std/tuple.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 #include "tuple-basic_tests.hpp"
 

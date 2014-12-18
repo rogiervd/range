@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 struct negate { int operator() (int i) const { return -i; } };
 

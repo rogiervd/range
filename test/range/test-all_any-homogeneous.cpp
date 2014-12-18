@@ -34,7 +34,7 @@ evaluated.
 #include "range/all.hpp"
 #include "range/any.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 #include <vector>
 #include <tuple>

@@ -36,7 +36,7 @@ by splitting it up, the compiler requires less memory.
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 struct negate { int operator() (int i) const { return -i; } };
 

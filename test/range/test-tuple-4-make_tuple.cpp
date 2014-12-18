@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 
 using range::tuple;
 using range::make_tuple;

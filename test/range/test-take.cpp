@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/count.hpp"
 #include "range/function_range.hpp"
 
-#include "check_equal.hpp"
+#include "rime/check/check_equal.hpp"
 #include "check_equal_behaviour.hpp"
 
 

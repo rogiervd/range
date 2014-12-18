@@ -30,9 +30,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpl/assert.hpp>
 
 #include "range/std.hpp"
+#include "range/for_each_macro.hpp"
 
 #include "rime/check/check_equal.hpp"
+
 #include "weird_count.hpp"
+#include "unique_range.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_transform)
 
@@ -45,7 +48,12 @@ using range::empty;
 using range::size;
 using range::first;
 using range::drop;
+using range::chop;
+using range::chop_in_place;
+
+using range::second;
 using range::at;
+
 using range::is_homogeneous;
 
 struct callable_twice {
@@ -74,6 +82,24 @@ struct callable_point {
 // \return Pointer to the argument.
 callable_point point;
 
+BOOST_AUTO_TEST_CASE (example) {
+    std::vector <int> v;
+    v.push_back (5);
+    v.push_back (7);
+    {
+        int count = 0;
+        RANGE_FOR_EACH (i, v)
+            count += i;
+        BOOST_CHECK_EQUAL (count, 12);
+    }
+    {
+        int count = 0;
+        RANGE_FOR_EACH (i, transform (twice, v))
+            count += i;
+        BOOST_CHECK_EQUAL (count, 24);
+    }
+}
+
 BOOST_AUTO_TEST_CASE (test_range_transform) {
     {
         std::tuple <> t;
@@ -90,6 +116,8 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
             range::has <range::callable::first (decltype (v))>));
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::drop (decltype (v))>));
+        BOOST_MPL_ASSERT_NOT ((
+            range::has <range::callable::chop (decltype (v))>));
     }
     {
         std::tuple <int> t (7);
@@ -106,10 +134,17 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
 
         auto f = range::first (v);
         BOOST_MPL_ASSERT ((std::is_same <decltype (f), std::tuple <int, int>>));
-        BOOST_CHECK_EQUAL (std::get <0> (f), 7);
-        BOOST_CHECK_EQUAL (std::get <1> (f), 7);
+        BOOST_CHECK_EQUAL (first (f), 7);
+        BOOST_CHECK_EQUAL (second (f), 7);
 
         RIME_CHECK_EQUAL (empty (drop (v)), rime::true_);
+
+        auto chopped = chop (v);
+        static_assert (std::is_same <decltype (chopped.first()),
+            std::tuple <int, int> const &>::value, "");
+        BOOST_CHECK_EQUAL (first (chopped.first()), 7);
+        BOOST_CHECK_EQUAL (second (chopped.first()), 7);
+        RIME_CHECK_EQUAL (empty (chopped.rest()), rime::true_);
     }
     {
         std::tuple <int, char, double> t (7, 'a', 9.25);
@@ -132,23 +167,45 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
             auto e1 = range::first (v);
             BOOST_MPL_ASSERT ((
                 std::is_same <decltype (e1), std::tuple <int, int>>));
-            BOOST_CHECK_EQUAL (std::get <0> (e1), 7);
-            BOOST_CHECK_EQUAL (std::get <1> (e1), 7);
+            BOOST_CHECK_EQUAL (first (e1), 7);
+            BOOST_CHECK_EQUAL (second (e1), 7);
 
             auto e2 = range::first (drop (v));
             BOOST_MPL_ASSERT ((
                 std::is_same <decltype (e2), std::tuple <char, char>>));
-            BOOST_CHECK_EQUAL (std::get <0> (e2), 'a');
-            BOOST_CHECK_EQUAL (std::get <1> (e2), 'a');
+            BOOST_CHECK_EQUAL (first (e2), 'a');
+            BOOST_CHECK_EQUAL (second (e2), 'a');
 
             auto e3 = range::first (drop (rime::size_t <2>(), v));
             BOOST_MPL_ASSERT ((
                 std::is_same <decltype (e3), std::tuple <double, double>>));
-            BOOST_CHECK_EQUAL (std::get <0> (e3), 9.25);
-            BOOST_CHECK_EQUAL (std::get <1> (e3), 9.25);
+            BOOST_CHECK_EQUAL (first (e3), 9.25);
+            BOOST_CHECK_EQUAL (second (e3), 9.25);
 
             RIME_CHECK_EQUAL (
                 empty (drop (rime::size_t <3>(), v)), rime::true_);
+
+            // Test chop.
+            auto chopped1 = chop (v);
+            static_assert (std::is_same <decltype (chopped1.first()),
+                std::tuple <int, int> const &>::value, "");
+            BOOST_CHECK_EQUAL (first (chopped1.first()), 7);
+            BOOST_CHECK_EQUAL (second (chopped1.first()), 7);
+            RIME_CHECK_EQUAL (empty (chopped1.rest()), rime::false_);
+
+            auto chopped2 = chop (chopped1.rest());
+            static_assert (std::is_same <decltype (chopped2.first()),
+                std::tuple <char, char> const &>::value, "");
+            BOOST_CHECK_EQUAL (first (chopped2.first()), 'a');
+            BOOST_CHECK_EQUAL (second (chopped2.first()), 'a');
+            RIME_CHECK_EQUAL (empty (chopped2.rest()), rime::false_);
+
+            auto chopped3 = chop (chopped2.rest());
+            static_assert (std::is_same <decltype (chopped3.first()),
+                std::tuple <double, double> const &>::value, "");
+            BOOST_CHECK_EQUAL (first (chopped3.first()), 9.25);
+            BOOST_CHECK_EQUAL (second (chopped3.first()), 9.25);
+            RIME_CHECK_EQUAL (empty (chopped3.rest()), rime::true_);
         }
         {
             /*
@@ -156,7 +213,7 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
             Not that this is pretty neat.
             Conceptually, just because "point" is defined to return pointers,
             suddently v has a type equivalent to
-                tuple <int &, char &, double &>
+                tuple <int *, char *, double *>
             but then on-the-fly.
             */
             auto v = transform (point, t);
@@ -203,6 +260,14 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_CHECK_EQUAL (first (back, v), -16.);
             BOOST_CHECK_EQUAL (at (back, 1, v), 21.);
             BOOST_CHECK_EQUAL (at (back, 2, v), 12.);
+
+            auto chopped1 = chop (v);
+            BOOST_CHECK_EQUAL (chopped1.first(), 12);
+            auto chopped2 = chop (chopped1.rest());
+            BOOST_CHECK_EQUAL (chopped2.first(), 21);
+            auto chopped3 = chop (chopped2.rest());
+            BOOST_CHECK_EQUAL (chopped3.first(), -16);
+            BOOST_CHECK (empty (chopped3.rest()));
 
             // Check that the transform view is assignable.
             v = drop (v);
@@ -271,6 +336,14 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
         BOOST_CHECK (first (v) == std::make_tuple (12., 12.));
         BOOST_CHECK (first (drop (v)) == std::make_tuple (21., 21.));
         BOOST_CHECK (first (back, v) == std::make_tuple (-16., -16.));
+
+        auto chopped1 = chop (v);
+        BOOST_CHECK (chopped1.first() == std::make_tuple (12., 12.));
+        auto chopped2 = chop (chopped1.rest());
+        BOOST_CHECK (chopped2.first() == std::make_tuple (21., 21.));
+        auto chopped3 = chop (chopped2.rest());
+        BOOST_CHECK (chopped3.first() == std::make_tuple (-16., -16.));
+        BOOST_CHECK (empty (chopped3.rest()));
     }
 }
 
@@ -309,5 +382,49 @@ BOOST_AUTO_TEST_CASE (test_range_transform_weird_count) {
     }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+template <class Type> struct show_type;
 
+BOOST_AUTO_TEST_CASE (unique_underlying) {
+    std::vector <int> v;
+    v.push_back (6);
+    v.push_back (20);
+    v.push_back (-5);
+
+    {
+        auto t = transform (twice, unique_view (v));
+
+        static_assert (!std::is_same <
+            range::tag_of <decltype (t) const &>::type,
+            range::tag_of <decltype (t) &&>::type>::value, "");
+
+        BOOST_CHECK_EQUAL (first (t), 12);
+        t = drop (std::move (t));
+        BOOST_CHECK_EQUAL (first (t), 40);
+        t = drop (std::move (t));
+        BOOST_CHECK_EQUAL (first (t), -10);
+        t = drop (std::move (t));
+        BOOST_CHECK (empty (t));
+    }
+    {
+        auto t = transform (twice, one_time_view (v));
+
+        static_assert (!std::is_same <
+            range::tag_of <decltype (t) const &>::type,
+            range::tag_of <decltype (t) &&>::type>::value, "");
+
+        // Chop only available for rvalue references.
+        static_assert (range::has <range::callable::chop (decltype (t))
+            >::value, "");
+        static_assert (!range::has <range::callable::chop (decltype (t) const &)
+            >::value, "");
+
+        auto chopped1 = chop (std::move (t));
+        BOOST_CHECK_EQUAL (chopped1.first(), 12);
+        auto chopped2 = chop (chopped1.move_rest());
+        BOOST_CHECK_EQUAL (chopped2.first(), 40);
+        // first() is available as long as it is the last call.
+        BOOST_CHECK_EQUAL (first (chopped2.move_rest()), -10);
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END()

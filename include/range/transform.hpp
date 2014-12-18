@@ -37,9 +37,14 @@ template <class UnderlyingTag> struct transform_view_tag;
 template <class Function, class Underlying>
     struct tag_of_qualified <transform_view <Function, Underlying>>
 {
-    typedef transform_view_tag <typename
-        tag_of_qualified <Underlying>::type> type;
+    typedef transform_view_tag <typename tag_of <Underlying const &>::type>
+        type;
 };
+
+// Temporary: use rvalue reference to underlying range.
+template <class Function, class Underlying>
+    struct tag_of_qualified <transform_view <Function, Underlying>, temporary>
+{ typedef transform_view_tag <typename tag_of <Underlying &&>::type> type; };
 
 template <class Function, class Underlying> struct transform_view {
 public:
@@ -48,7 +53,7 @@ public:
     : function_ (std::forward <Function_> (function_)),
         underlying_ (std::forward <Underlying_> (underlying_)) {}
 
-    typedef Underlying const underlying_type;
+    typedef Underlying underlying_type;
 
     Function const & function() const { return function_; }
 
@@ -157,9 +162,9 @@ namespace operation {
                 >::type>
     {
         template <class Range> auto operator() (
-            Direction const & direction, Range const & range) const
-        RETURNS (range.function() (
-            range::first (direction, range::detail::get_underlying (range))));
+            Direction const & direction, Range && range) const
+        RETURNS (range.function() (range::first (direction,
+            range::detail::get_underlying (std::forward <Range> (range)))));
     };
 
     // drop: forward to underlying and re-wrap.
@@ -168,21 +173,69 @@ namespace operation {
             typename boost::enable_if <is_implemented <
                 drop <UnderlyingTag, Direction, Increment>>>::type>
     {
-        template <class Function, class Underlying> struct result {
-            typedef transform_view <Function, typename
-                range::decayed_result_of <range::callable::drop (
-                    Direction, Increment, Underlying)>::type> type;
+        template <class Range>
+            auto operator() (Direction const & direction,
+                Increment const & increment, Range && range) const
+        RETURNS (range::transform (direction, range.function(),
+            range::drop (direction, increment,
+                range::detail::get_underlying (std::forward <Range> (range)))));
+    };
+
+    // chop: forward to underlying and re-wrap.
+    // Note that this is only implemented if chop<> is implemented natively for
+    // the underlying range, not if it is synthesised.
+    template <class UnderlyingTag, class Direction>
+        struct chop <transform_view_tag <UnderlyingTag>, Direction,
+            typename boost::enable_if <is_implemented <
+                chop <UnderlyingTag, Direction>>>::type>
+    {
+        template <class Function, class Underlying, class Enable = typename
+                boost::enable_if <has <callable::chop (Direction, Underlying)>
+            >::type>
+        struct result {
+            typedef typename decayed_result_of <
+                    callable::chop (Direction, Underlying)
+                >::type underlying_chopped;
+
+            typedef typename underlying_chopped::first_type underlying_first;
+            typedef typename std::decay <
+                typename underlying_chopped::rest_type>::type underlying_rest;
+
+            typedef typename std::result_of <Function const & (
+                underlying_first)>::type first_type;
+            typedef transform_view <Function, underlying_rest> rest_type;
+
+            typedef chopped <first_type, rest_type> type;
         };
 
-        // Compute drop (n, underlying) and then re-wrap it in a transform_view.
+        template <class Result, class TransformView>
+            static typename Result::type
+            compute (Direction const & direction, TransformView && range)
+        {
+            auto chopped = range::chop (range::detail::get_underlying (
+                std::forward <TransformView> (range)));
+            return typename Result::type (
+                range.function() (chopped.move_first()),
+                typename Result::rest_type (range.function(),
+                    chopped.move_rest()));
+        }
+
+        // Compute chop (n, underlying) and then re-wrap it in a transform_view.
         template <class Function, class Underlying>
-            typename result <Function, Underlying>::type
-        operator() (Direction const & direction, Increment const & increment,
+            typename result <Function, Underlying &&>::type
+        operator() (Direction const & direction,
+            transform_view <Function, Underlying> && range) const
+        {
+            return compute <result <Function, Underlying &&>> (
+                direction, std::move (range));
+        }
+        template <class Function, class Underlying>
+            typename result <Function, Underlying const &>::type
+        operator() (Direction const & direction,
             transform_view <Function, Underlying> const & range) const
         {
-            return typename result <Function, Underlying>::type (
-                range.function(), range::drop (direction, increment,
-                    range::detail::get_underlying (range)));
+            return compute <result <Function, Underlying const &>> (
+                direction, range);
         }
     };
 

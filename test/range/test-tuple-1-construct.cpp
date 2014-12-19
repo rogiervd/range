@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rime/check/check_equal.hpp"
 
+#include "unique_range.hpp"
+
 BOOST_AUTO_TEST_SUITE(test_range_tuple_construct)
 
 using range::tuple;
@@ -48,6 +50,7 @@ using range::size;
 using range::first;
 using range::drop;
 using range::at_c;
+using range::second;
 
 using range::size_mismatch;
 using range::never_empty;
@@ -967,6 +970,44 @@ BOOST_AUTO_TEST_CASE (range_to_tuple_conversion_two) {
 
         v.push_back (10.1);
         BOOST_CHECK_THROW ((tuple <float, double> (v)), size_mismatch);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (unique) {
+    // Construct from a unique heterogeneous range.
+    {
+        range::tuple <int, double> t (6, 6.25);
+
+        range::tuple <int, double> copy (unique_view (std::move (t)));
+        BOOST_CHECK_EQUAL (first (copy), 6);
+        BOOST_CHECK_EQUAL (second (copy), 6.25);
+    }
+    {
+        range::tuple <int, double> t (6, 6.25);
+
+        range::tuple <int, double> copy (one_time_view (std::move (t)));
+        BOOST_CHECK_EQUAL (first (copy), 6);
+        BOOST_CHECK_EQUAL (second (copy), 6.25);
+    }
+
+    // Construct from a unique homogeneous range.
+    {
+        std::vector <int> v;
+        v.push_back (4);
+        v.push_back (7);
+
+        range::tuple <int, double> copy (unique_view (std::move (v)));
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7);
+    }
+    {
+        std::vector <int> v;
+        v.push_back (4);
+        v.push_back (7);
+
+        range::tuple <int, double> copy (one_time_view (std::move (v)));
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7);
     }
 }
 

@@ -74,10 +74,6 @@ Connected with this is the layout
 \todo Implement tuple_cat? Probably rather make_tuple_from (concatenate (...)).
 \todo uses_allocator
 \todo Comparison between tuples.
-\todo Using delegate constructors, it is probably possible to allow
-initialisation from input ranges, by recursively delegating to constructors with
-a longer and longer list of arguments (all temporaries) until the correct number
-have been extracted.
 
 \todo no_except specification.
 \todo constexpr specification.
@@ -257,35 +253,6 @@ namespace tuple_detail {
     template <class Type> struct is_default_constructible <Type &>
     : std::integral_constant <bool, false> {};
 
-    /**
-    Return <c>first (direction, range)</c> after testing that the range is not
-    empty.
-    \throw size_mismatch if the range is empty.
-    */
-    template <class Direction, class Range> inline
-        auto first_if_size_matches (
-            Direction const & direction, Range const & range)
-    -> decltype (range::first (direction, range))
-    {
-        if (empty (direction, range))
-            throw size_mismatch();
-        return range::first (direction, range);
-    }
-
-    /**
-    Return <c>drop (direction, range)</c> after testing that the range is not
-    empty.
-    \throw size_mismatch if the range is empty.
-    */
-    template <class Direction, class Range> inline
-        auto drop_if_size_matches (Direction const & direction, Range && range)
-    -> decltype (range::drop (direction, std::forward <Range> (range)))
-    {
-        if (empty (direction, range))
-            throw size_mismatch();
-        return range::drop (direction, std::forward <Range> (range));
-    }
-
     struct from_elements {};
     struct from_range {};
 
@@ -351,10 +318,16 @@ namespace tuple_detail {
 
         explicit elements (from_elements) {}
 
-        template <class Range> explicit elements (from_range, Range && range) {
+        /**
+        \throw size_mismatch if the range is not empty.
+        */
+        template <class Range> static Range && maybe_chop (Range && range) {
             if (!empty (front, range))
                 throw size_mismatch();
+            return static_cast <Range &&> (range);
         }
+
+        template <class Range> explicit elements (from_range, Range &&) {}
 
         template <class Range> elements & operator= (Range && range) {
             if (!empty (front, range))
@@ -414,7 +387,7 @@ namespace tuple_detail {
         template <class Range> struct range_is_convertible <Range, true>
         : boost::mpl::and_ <
             std::is_convertible <typename result_of <
-                    callable::first (direction::front, Range const &)>::type,
+                    callable::first (direction::front, Range)>::type,
                 first_stored_type>,
             typename rest_type::template range_is_convertible <typename
                 result_of <callable::drop (direction::front, Range)>::type>
@@ -435,7 +408,7 @@ namespace tuple_detail {
         template <class Range> struct range_is_constructible <Range, false>
         : boost::mpl::and_ <
             std::is_constructible <first_stored_type, typename result_of <
-                    callable::first (direction::front, Range const &)>::type>,
+                    callable::first (direction::front, Range)>::type>,
             typename rest_type::template range_is_constructible <typename
                 result_of <callable::drop (direction::front, Range)>::type>
         > {};
@@ -455,7 +428,7 @@ namespace tuple_detail {
         : boost::mpl::and_ <
             utility::is_assignable <
                 First &, typename result_of <
-                    callable::first (direction::front, Range const &)>::type>,
+                    callable::first (direction::front, Range)>::type>,
             typename rest_type::template range_is_assignable <typename
                 result_of <callable::drop (direction::front, Range)>::type>
         > {};
@@ -470,6 +443,9 @@ namespace tuple_detail {
     public:
         elements() : contain_type(), rest_type() {}
 
+        /**
+        Construct from elements, given as separate arguments.
+        */
         template <class FirstArgument, class ... OtherArguments>
             explicit elements (from_elements, FirstArgument && first_argument,
                 OtherArguments && ... other_arguments)
@@ -477,11 +453,64 @@ namespace tuple_detail {
             rest_type (from_elements(),
                 std::forward <OtherArguments> (other_arguments) ...) {}
 
+        /*
+        Construct from a range.
+        This works around delegate constructors, for compilers that do support
+        those.
+        Construct this type with
+            elements <...> (from_range(), elements <...>::maybe_chop (range))
+        where "range" may be an rvalue reference.
+        "maybe_chop" will either return the range itself, if first() and drop()
+        can be applied apart from each other, or return a chopped <...> if not.
+        The actual constructor will then use either the range, or the
+        chopped <...> to construct itself.
+        */
+        // Range that allows first (Range const &) and drop (Range)
+        /**
+        Forward the range...
+        \throw size_mismatch if the range is not empty.
+        */
+        template <class Range> static
+        typename boost::enable_if <boost::mpl::and_ <
+                has <callable::first (direction::front, Range const &)>,
+                has <callable::drop (direction::front, Range)>>,
+            Range &&>::type
+        maybe_chop (Range && range) {
+            if (empty (front, range))
+                throw size_mismatch();
+            return static_cast <Range &&> (range);
+        }
+
+        // ... to be used by the corresponding constructor.
         template <class Range>
         elements (from_range, Range && range)
-        : contain_type (first_if_size_matches (front, range)),
-            rest_type (from_range(),
-                drop_if_size_matches (front, std::forward <Range> (range))) {}
+        :   contain_type (range::first (front, range)),
+            rest_type (from_range(), rest_type::maybe_chop (
+                    range::drop (front, std::forward <Range> (range))))
+        {}
+
+        // Range that does not allow first (Range const &) and drop (Range).
+        /**
+        Actually apply "chop" on the range...
+        \throw size_mismatch if the range is not empty.
+        */
+        template <class Range> static
+        typename boost::lazy_disable_if <boost::mpl::and_ <
+                has <callable::first (direction::front, Range const &)>,
+                has <callable::drop (direction::front, Range)>>,
+            std::result_of <callable::chop (direction::front, Range)>>::type
+        maybe_chop (Range && range)
+        {
+            if (empty (front, range))
+                throw size_mismatch();
+            return range::chop (range::front, std::forward <Range> (range));
+        }
+
+        // ... to be used by the corresponding constructor.
+        template <class FirstInput, class RestInput>
+            elements (from_range, chopped <FirstInput, RestInput> && c)
+        : contain_type (c.move_first()),
+            rest_type (from_range(), rest_type::maybe_chop (c.move_rest())) {}
 
         // This could be faster than the generic constructors.
         elements (elements const & that)
@@ -495,9 +524,11 @@ namespace tuple_detail {
         elements & operator= (elements &&) = default;
 
         template <class Range> elements & operator= (Range && range) {
-            this->first_element() = first_if_size_matches (front, range);
-            *static_cast <rest_type *> (this) =
-                drop_if_size_matches (front, range);
+            if (empty (front, range))
+                throw size_mismatch();
+            auto chopped = range::chop (front, std::forward <Range> (range));
+            this->first_element() = chopped.move_first();
+            *static_cast <rest_type *> (this) = chopped.move_rest();
             return *this;
         }
 
@@ -596,8 +627,8 @@ public:
             range_is_convertible <typename range::result_of <
                 callable::view_once (direction::front, Range)>::type>>::type>
     tuple (Range && range, dummy_type = dummy_type())
-    : elements_ (tuple_detail::from_range(),
-        view_once (front, std::forward <Range> (range)))
+    : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
+        view_once (front, std::forward <Range> (range))))
     {}
 
     /**
@@ -617,8 +648,8 @@ public:
             typename range::result_of <
                 callable::view_once (direction::front, Range)>::type>>::type>
     explicit tuple (Range && range)
-    : elements_ (tuple_detail::from_range(),
-        view_once (front, std::forward <Range> (range)))
+    : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
+        view_once (front, std::forward <Range> (range))))
     {}
 
     /**

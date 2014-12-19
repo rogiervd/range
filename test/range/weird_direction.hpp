@@ -46,7 +46,10 @@ struct weird_direction {
 
     weird_direction (weird_reverse_direction const & other);
 
-    ~weird_direction() { assert_invariant(); }
+    ~weird_direction() {
+        assert_invariant();
+        n = 1234;
+    }
 
     void assert_invariant() { assert (n == 7); }
 };
@@ -63,7 +66,10 @@ struct weird_reverse_direction {
     weird_reverse_direction (weird_direction const & other)
     : n (other.n) { assert_invariant(); }
 
-    ~weird_reverse_direction() { assert_invariant(); }
+    ~weird_reverse_direction() {
+        assert_invariant();
+        n = 1234;
+    }
 
     void assert_invariant() { assert (n == 7); }
 };
@@ -71,6 +77,12 @@ struct weird_reverse_direction {
 inline weird_direction::weird_direction (weird_reverse_direction const & other)
 : n (other.n) { assert_invariant(); }
 
+rime::true_type operator== (weird_direction const &, weird_direction const &)
+{ return rime::true_; }
+
+rime::true_type operator== (
+    weird_reverse_direction const &, weird_reverse_direction const &)
+{ return rime::true_; }
 
 namespace direction {
 

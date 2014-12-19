@@ -682,13 +682,14 @@ namespace make_tuple_from_detail {
         typedef typename std::result_of <callable::view_once (Range)>::type
             view_type;
         static_assert (!is_homogeneous <direction::front, view_type>::value,
-            "The range pased in is homogeneous and potentially infinite. "
+            "The range passed in is homogeneous and potentially infinite. "
             "Unable to convert it into a tuple.");
         typedef typename tuple_from_types <Transform,
             typename element_types <view_type>::type>::type type;
     };
 
     template <class Type> struct add_reference { typedef Type & type; };
+    template <class Type> struct identity { typedef Type type; };
 
 } // namespace make_tuple_from_detail
 
@@ -703,8 +704,9 @@ template <class ... Types> inline
     tuple <Types ...> make_tuple (Types const & ... arguments)
 { return tuple <Types ...> (arguments ...); }
 
-/**
-Make a tuple from the range passed in.
+/** \brief
+Make a tuple from the range passed in, stripping the types of qualifications.
+
 The range is traversed in direction::front.
 The range must be known to end after a fixed number of elements.
 This could be a heterogeneous container, like std::tuple.
@@ -726,7 +728,7 @@ template <class Range> inline auto make_tuple_from (Range && range)
 RETURNS (typename make_tuple_from_detail::tuple_from <std::decay, Range>::type (
     std::forward <Range> (range)));
 
-/**
+/** \brief
 Make a tuple of references to each of the arguments.
 
 This is equivalent to \c std::tie except that it returns a \c range::tuple.
@@ -735,8 +737,9 @@ template <class ... Types> inline
     tuple <Types & ...> tie (Types & ... arguments)
 { return tuple <Types & ...> (arguments ...); }
 
-/**
+/** \brief
 Make a tuple of references to the elements of the range passed in.
+
 The range is traversed in direction::front.
 The range must be known to end after a fixed number of elements.
 This could be a heterogeneous container, like std::tuple.
@@ -759,14 +762,45 @@ RETURNS (typename make_tuple_from_detail::tuple_from <
     make_tuple_from_detail::add_reference, Range>::type (
         std::forward <Range> (range)));
 
-/**
+/** \brief
 Make a tuple of rvalue references to each of the arguments.
+
 This is equivalent to \c std::forward_as_tuple except that it returns a
 \c range::tuple.
 */
 template <class ... Types> inline
     tuple <Types && ...> forward_as_tuple (Types && ... arguments)
 { return tuple <Types && ...> (std::forward <Types> (arguments) ...); }
+
+/** \brief
+Make a tuple that is a copy of the range passed in, down to the exact element
+types that first() returns.
+
+The types will often be references.
+Notably, <c>copy_tuple_from</c> applied to a tuple will usually result in a
+tuple with a different type.
+
+The range is traversed in direction::front.
+The range must be known to end after a fixed number of elements.
+This could be a heterogeneous container, like std::tuple.
+It could also be an adapted heterogeneous container.
+
+For a variable-length range, the resulting tuple has the longest number of
+elements possible.
+If \a range is a standard homogeneous container, this is obviously impossible,
+and a compile error about recursive template instantiations will result.
+
+\throw size_mismatch
+    If the range turns out at compile time to finish sooner than it could.
+    In this case, the tuple type will have more elements than the range turns
+    out to have, so constructing the tuple type elicits the exception.
+\param range
+    The range to construct the range from.
+*/
+template <class Range> inline auto copy_tuple_from (Range && range)
+RETURNS (typename make_tuple_from_detail::tuple_from <
+    make_tuple_from_detail::identity, Range>::type (
+        std::forward <Range> (range)));
 
 namespace tuple_detail {
     /**

@@ -37,10 +37,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rime/check/check_equal.hpp"
 
+#include "unique_range.hpp"
+
 using range::tuple;
 using range::make_tuple;
 using range::make_tuple_from;
 using range::tie_from;
+using range::copy_tuple_from;
 using range::swap;
 using range::take;
 
@@ -468,6 +471,102 @@ BOOST_AUTO_TEST_CASE (test_range_forward_as_tuple) {
         d = 22.75;
         BOOST_CHECK_EQUAL (at_c <2> (t), 22.75);
     }
+}
+
+BOOST_AUTO_TEST_CASE (test_range_copy_tuple_from) {
+    int i = 4;
+    float f = 7.75;
+    bool b = true;
+    {
+        std::tuple <int, float> st (i, f);
+
+        auto copy = copy_tuple_from (st);
+        static_assert (std::is_same <
+            decltype (copy), tuple <int &, float &>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+
+        first (copy) = 67;
+        BOOST_CHECK_EQUAL (first (st), 67);
+        second (copy) = 42.25;
+        BOOST_CHECK_EQUAL (second (st), 42.25);
+    }
+    {
+        std::tuple <int &, float, bool &&> const st (i, f, std::move (b));
+
+        auto copy = copy_tuple_from (st);
+        static_assert (std::is_same <decltype (copy),
+            tuple <int &, float const &, bool &>>::value, "");
+
+        BOOST_CHECK_EQUAL (first (copy), 4);
+        BOOST_CHECK_EQUAL (second (copy), 7.75);
+        BOOST_CHECK_EQUAL (third (copy), true);
+
+        first (copy) = 14;
+        BOOST_CHECK_EQUAL (i, 14);
+        third (copy) = false;
+        BOOST_CHECK_EQUAL (b, false);
+    }
+    // From a list that is cut off at a point known at compile time.
+    {
+        std::list <int> l;
+
+        // The list can turn out to be too short at run time.
+        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (3);
+        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (4);
+        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+            range::size_mismatch);
+
+        l.push_back (6);
+        {
+            auto copy = copy_tuple_from (unique_view (take (rime::size_t <3>(), l)));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int &, int &, int &>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 3);
+            BOOST_CHECK_EQUAL (second (copy), 4);
+            BOOST_CHECK_EQUAL (third (copy), 6);
+
+            first (copy) += 10;
+            BOOST_CHECK_EQUAL (l.front(), 13);
+            second (copy) += 20;
+            BOOST_CHECK_EQUAL (second (l), 24);
+            third (copy) += 30;
+            BOOST_CHECK_EQUAL (second (drop (l)), 36);
+        }
+
+        l.push_back (9);
+        {
+            auto copy = copy_tuple_from (take (rime::size_t <3>(), l));
+
+            static_assert (std::is_same <decltype (copy),
+                tuple <int &, int &, int &>>::value, "");
+
+            BOOST_CHECK_EQUAL (first (copy), 13);
+            BOOST_CHECK_EQUAL (second (copy), 24);
+            BOOST_CHECK_EQUAL (third (copy), 36);
+
+            first (copy) += 10;
+            BOOST_CHECK_EQUAL (l.front(), 23);
+            second (copy) += 20;
+            BOOST_CHECK_EQUAL (second (l), 44);
+            third (copy) += 30;
+            BOOST_CHECK_EQUAL (second (drop (l)), 66);
+        }
+    }
+    // This fails to compile.
+    /*{
+        std::vector <int> l;
+        copy_tuple_from (l);
+    }*/
 }
 
 /** Check swap member function and free function. */

@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "range/core.hpp"
 #include "range/for_each_macro.hpp"
+#include "range/reverse.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -46,6 +47,7 @@ using range::front;
 using range::back;
 
 using range::is_homogeneous;
+using range::reverse;
 
 BOOST_AUTO_TEST_CASE (straightforward) {
     {
@@ -59,6 +61,57 @@ BOOST_AUTO_TEST_CASE (straightforward) {
         RANGE_FOR_EACH (n, count (5, 8))
             total += n;
         BOOST_CHECK_EQUAL (total, 18);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (example_decrement_unsigned) {
+    // The Google style guide gives an example of looping through a sequence of
+    // values from the end to the beginning.
+    // If you use an unsigned type and are not careful, this goes wrong.
+    // http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml
+    // #Integer%5FTypes
+
+    std::vector <int> values;
+    values.push_back (339);
+    values.push_back (17);
+    values.push_back (6);
+    values.push_back (24);
+
+    // This is a correct implementation.
+    {
+        int current = 4;
+        for (int i = values.size() - 1; i >= 0; -- i) {
+            current = values [i] / current;
+        }
+        BOOST_CHECK_EQUAL (current, 19);
+    }
+    // This uses "unsigned".
+    // This is an incorrect implementation, because "--i" when i == 0 will fail
+    // to do what is intended.
+    /*{
+        int current = 4;
+        for (unsigned i = values.size() - 1; i >= 0; -- i) {
+            current = values [i] / current;
+        }
+        BOOST_CHECK_EQUAL (current, 19);
+    }*/
+    // The correct version using "unsigned" offsets i by one and then says "i-1"
+    // every time:
+    {
+        int current = 4;
+        for (unsigned i = values.size(); i > 0; -- i) {
+            current = values [i-1] / current;
+        }
+        BOOST_CHECK_EQUAL (current, 19);
+    }
+    {
+        int current = 4;
+        RANGE_FOR_EACH (i, reverse (count (values.size()))) {
+            static_assert (std::is_same <decltype (i), std::size_t &&>::value,
+                "Should be the same type as values.size(), with &&.");
+            current = values [i] / current;
+        }
+        BOOST_CHECK_EQUAL (current, 19);
     }
 }
 

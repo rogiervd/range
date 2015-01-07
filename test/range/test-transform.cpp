@@ -427,4 +427,69 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
     }
 }
 
+/**
+Round numbers up to a step size referenced.
+Not considered or tested on negative numbers.
+*/
+class round_up {
+    int const & step;
+public:
+    round_up (int const & step) : step (step) {}
+
+    int operator() (int n) const {
+        return ((n + (step - 1)) / step) * step;
+    }
+};
+
+BOOST_AUTO_TEST_CASE (function_with_reference) {
+    int step = 5;
+    round_up round (step);
+
+    // Test "round_up".
+    BOOST_CHECK_EQUAL (round (0), 0);
+    BOOST_CHECK_EQUAL (round (1), 5);
+    BOOST_CHECK_EQUAL (round (4), 5);
+    BOOST_CHECK_EQUAL (round (5), 5);
+    BOOST_CHECK_EQUAL (round (23), 25);
+
+    // Change step size.
+    step = 3;
+    BOOST_CHECK_EQUAL (round (7), 9);
+
+    std::vector <int> v;
+    v.push_back (1);
+    v.push_back (5);
+    v.push_back (10);
+    v.push_back (27);
+
+    {
+        auto rounded = transform (round, v);
+
+        BOOST_CHECK_EQUAL (first (rounded), 3);
+        rounded = drop (rounded);
+        BOOST_CHECK_EQUAL (first (rounded), 6);
+        rounded = drop (rounded);
+
+        step = 7;
+        int fourteen = chop_in_place (rounded);
+        BOOST_CHECK_EQUAL (fourteen, 14);
+
+        auto chopped = chop (rounded);
+        BOOST_CHECK_EQUAL (chopped.first(), 28);
+        BOOST_CHECK (empty (chopped.rest()));
+    }
+    {
+        // With one_time_view.
+        auto rounded = transform (round, one_time_view (v));
+
+        step = 4;
+
+        auto four = chop_in_place (rounded);
+        BOOST_CHECK_EQUAL (four, 4);
+
+        auto chopped = chop (std::move (rounded));
+        BOOST_CHECK_EQUAL (chopped.first(), 8);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

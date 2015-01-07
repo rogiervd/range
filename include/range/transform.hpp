@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/utility/enable_if.hpp>
 
 #include "utility/returns.hpp"
+#include "utility/assignable.hpp"
+#include "utility/storage.hpp"
 
 #include "core.hpp"
 #include "detail/underlying.hpp"
@@ -53,13 +55,38 @@ public:
     : function_ (std::forward <Function_> (function_)),
         underlying_ (std::forward <Underlying_> (underlying_)) {}
 
+    transform_view (transform_view const & that)
+    : function_ (that.function()), underlying_ (that.underlying_) {}
+
+    transform_view (transform_view && that)
+    : function_ (utility::storage::get <Function, transform_view &&>() (
+            that.function_.content())),
+        underlying_ (std::move (that.underlying_)) {}
+
     typedef Underlying underlying_type;
 
-    Function const & function() const { return function_; }
+    typename utility::storage::get <Function, transform_view const &>::type
+        function() const { return function_.content(); }
+
+    transform_view & operator= (transform_view const & that) {
+        function_ = that.function();
+        underlying_ = that.underlying_;
+        return *this;
+    }
+
+    transform_view & operator= (transform_view && that) {
+        function_ = utility::storage::get <Function, transform_view &&>() (
+            that.function_.content());
+        underlying_ = std::move (that.underlying_);
+        return *this;
+    }
 
 private:
     friend class ::range::detail::callable::get_underlying;
-    Function function_;
+    // The function is not necessarily assignable.
+    utility::assignable <typename utility::storage::store <Function>::type>
+        function_;
+    // Underlying should be assignable already.
     Underlying underlying_;
 };
 

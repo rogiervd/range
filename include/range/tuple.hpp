@@ -623,9 +623,12 @@ public:
     constructed is not defined.
     */
     template <class Range, class Enable = typename
-        boost::enable_if <typename elements_type::template
-            range_is_convertible <typename range::result_of <
-                callable::view_once (direction::front, Range)>::type>>::type>
+        boost::enable_if <boost::mpl::and_<
+            is_range <Range>,
+            typename elements_type::template
+                range_is_convertible <typename range::result_of <
+                    callable::view_once (direction::front, Range)>::type>
+        >>::type>
     tuple (Range && range, dummy_type = dummy_type())
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
         view_once (front, std::forward <Range> (range))))
@@ -644,9 +647,12 @@ public:
     this.
     */
     template <class Range, class Enable = typename
-        boost::enable_if <range_is_constructible_but_not_convertible <
-            typename range::result_of <
-                callable::view_once (direction::front, Range)>::type>>::type>
+        boost::enable_if <boost::mpl::and_<
+            is_range <Range>,
+            range_is_constructible_but_not_convertible <
+                typename range::result_of <
+                    callable::view_once (direction::front, Range)>::type>
+        >>::type>
     explicit tuple (Range && range)
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
         view_once (front, std::forward <Range> (range))))
@@ -663,10 +669,12 @@ public:
     this.
     */
     template <class Range,
-        class Enable = typename boost::enable_if <typename
-            elements_type::template range_is_assignable <typename
-                range::result_of <callable::view_once (direction::front, Range)
-            >::type>>::type,
+        class Enable = typename boost::enable_if <boost::mpl::and_<
+            is_range <Range>,
+            typename elements_type::template range_is_assignable <typename
+                range::result_of <
+                    callable::view_once (direction::front, Range)>::type>
+        >>::type,
         class Enable2 = typename
             utility::disable_if_same_or_derived <tuple, Range>::type>
     tuple & operator= (Range && range) {

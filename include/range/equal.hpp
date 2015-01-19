@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -31,10 +31,12 @@ namespace range {
 
 namespace operation {
 
+    // Repeated from core_declarations.hpp.
     template <class Range1Tag, class Range2Tag, class Direction,
-        class Predicate, class Enable = void>
-    struct equal
-    {
+        class Predicate, class Range1, class Range2, class Enable /*= void*/>
+    struct equal;
+
+    template <class Direction, class Predicate> struct equal_default {
     private:
         // Homogeneous implementation.
         struct when_homogeneous {
@@ -121,7 +123,7 @@ namespace operation {
             template <class Range1, class Range2> auto operator() (
                 Direction const & direction, Predicate && predicate,
                 Range1 && range1, Range2 && range2) const
-            RETURNS (equal() (direction, predicate,
+            RETURNS (equal_default() (direction, predicate,
                 range::drop (direction, std::forward <Range1> (range1)),
                 range::drop (direction, std::forward <Range2> (range2))));
         };
@@ -137,6 +139,11 @@ namespace operation {
             std::forward <Range1> (range1),
             std::forward <Range2> (range2)));
     };
+
+    template <class Range1Tag, class Range2Tag, class Direction,
+        class Predicate, class Range1, class Range2, class Enable /*= void*/>
+    struct equal
+    : equal_default <Direction, Predicate> {};
 
 } // namespace operation
 
@@ -190,7 +197,9 @@ namespace apply {
             struct equal <meta::vector <Direction>, meta::vector <Predicate>,
                 meta::vector <Range1, Range2>>
         : operation::equal <typename range::tag_of <Range1>::type,
-            typename range::tag_of <Range2>::type, Direction, Predicate const &>
+            typename range::tag_of <Range2>::type,
+            typename std::decay <Direction>::type, Predicate const &,
+            Range1 &&, Range2 &&>
         {};
 
         template <class Direction, class Range1, class Range2>
@@ -199,8 +208,9 @@ namespace apply {
         {
             typedef operation::equal <
                 typename range::tag_of <Range1>::type,
-                typename range::tag_of <Range2>::type, Direction,
-                equal_detail::element_equal const &>
+                typename range::tag_of <Range2>::type,
+                typename std::decay <Direction>::type,
+                equal_detail::element_equal const &, Range1 &&, Range2 &&>
                 implementation;
 
             auto operator() (Direction const & direction,

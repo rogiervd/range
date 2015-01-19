@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -36,7 +36,8 @@ namespace range {
 
 namespace operation {
 
-    template <class RangeTag, class Direction, class Index, class Enable = void>
+    template <class RangeTag, class Direction, class Index, class Range,
+            class Enable = void>
         struct at_constant;
 
     /**
@@ -44,47 +45,79 @@ namespace operation {
     Can be specialised if "at" is only available for indices known at compile
     time.
     */
-    template <class RangeTag, class Direction, class Index, class Enable>
+    template <class RangeTag, class Direction, class Index, class Range,
+            class Enable>
         struct at_constant
     : unimplemented
     {/*
-        template <class Range>
-            ... operator() (Direction const & direction,
-                Index const & index, Range && range) const;
+        ... operator() (Direction const & direction,
+            Index const & index, Range && range) const;
     */};
+
+    template <class RangeTag, class Direction, class Index, class Range,
+            class Enable = void>
+        struct at_by_at_constant
+    : unimplemented {};
+
+    template <class RangeTag, class Direction, class Index, class Range>
+        struct at_by_at_constant <RangeTag, Direction, Index, Range,
+            typename boost::enable_if <rime::is_constant <Index>>::type>
+    : at_constant <RangeTag, Direction, Index, Range> {};
+
+    /**
+    Synthesise an implementation for "at" that uses \c drop and \c first.
+    If those are not available, then derive from operation::unimplemented.
+    */
+    template <class RangeTag, class Direction, class Index, class Range,
+        class Enable = void>
+    struct at_by_drop_first
+    : operation::unimplemented {};
+
+    template <class RangeTag, class Direction, class Index, class Range>
+        struct at_by_drop_first <RangeTag, Direction, Index, Range, typename
+            boost::enable_if <range::has <callable::first (Direction,
+                range::callable::drop (Direction, Index, Range))>>::type>
+    {
+        auto operator() (Direction const & direction,
+            Index const & index, Range && range) const
+        RETURNS (range::first (direction, range::drop (
+            direction, index, std::forward <Range> (range))));
+    };
 
     /**
     Return the element at \a Index in the range, starting from \a Direction.
 
     There is normally no need to specialise this: an implementation will
     automatically be synthesised using drop() and first().
-    Sometimes, however, a better implementation can be provided; in that case,
-    this should be specialised.
+    This happens in \c at_automatic.
+    If for some reason this needs to be switched off, then \c at_automatic
+    can be implemented as deriving from \c unimplemented.
+
+    Sometimes, however, a better implementation than the automatic one can be
+    provided; in that case, this should be specialised.
 
     To specialise this only for constant indices, specialise at_constant.
 
-    \internal
-    The automatic implementation is provided in namespace apply, because it
-    is impossible to give it here.
-    Given just a range tag and not the type of the actual range, it is not
-    possible to find the return type of drop().
-    That return type may have a different range tag (indeed, for heterogeneous
-    ranges this is expected).
-    It is therefore impossible to know whether first() is implemented for the
-    range.
-    The operation can be defined in namespace "apply", because there the range
-    type is known.
+    \tparam RangeTag The range tag.
+    \tparam Direction The decayed direction type.
+    \tparam Index The decayed type for the index.
+    \tparam Range The range itself, qualified (as an rvalue reference if an
+        rvalue).
     */
-    template <class RangeTag, class Direction, class Index, class Enable>
+    template <class RangeTag, class Direction, class Index, class Range,
+            class Enable>
         struct at
-    : boost::mpl::if_ <rime::is_constant <Index>,
-        at_constant <RangeTag, Direction, Index>, unimplemented
-    >::type
+    : at_by_at_constant <RangeTag, Direction, Index, Range>
     {/*
         template <class Range>
             ... operator() (Direction const & direction,
                 Index const & index, Range && range) const;
     */};
+
+    template <class RangeTag, class Direction, class Index, class Range>
+        struct at_automatic
+    : try_all <at <RangeTag, Direction, Index, Range>,
+        at_by_drop_first <RangeTag, Direction, Index, Range>> {};
 
 } // namespace operation
 
@@ -248,46 +281,6 @@ namespace apply {
 
     /* at. */
 
-    namespace detail {
-
-        /**
-        Forward to operation::at.
-        */
-        template <class Direction, class Index, class Range>
-            struct at_specialised
-        : operation::at <typename tag_of <Range>::type,
-            Direction, typename std::decay <Index>::type> {};
-
-        /**
-        Synthesise an implementation for "at" that uses \c drop and \c first.
-        If those are not available, then derive from operation::unimplemented.
-        */
-        template <class Direction, class Index, class Range,
-            class Enable = void>
-        struct at_synthesise
-        : operation::unimplemented {};
-
-        template <class Direction, class Index, class Range>
-            struct at_synthesise <Direction, Index, Range, typename
-                boost::enable_if <range::has <callable::first (Direction,
-                    range::callable::drop (Direction, Index, Range))>>::type>
-        {
-            auto operator() (Direction const & direction,
-                Index const & index, Range && range) const
-            RETURNS (range::first (direction, range::drop (
-                direction, index, std::forward <Range> (range))));
-        };
-
-        template <class Direction, class Index, class Range>
-            struct at
-        : boost::mpl::if_ <operation::is_implemented <
-                at_specialised <Direction, Index, Range>>,
-            at_specialised <Direction, Index, Range>,
-            at_synthesise <Direction, Index, Range>
-        >::type {};
-
-    } // namespace detail
-
     namespace automatic_arguments {
 
         template <class Directions, class Indexes, class Ranges,
@@ -297,7 +290,9 @@ namespace apply {
         template <class Direction, class Index, class Range>
             struct at <meta::vector <Direction>, meta::vector <Index>,
                 meta::vector <Range>>
-        : apply::detail::at <Direction, Index, Range> {};
+        : operation::at_automatic <typename tag_of <Range>::type,
+            typename std::decay <Direction>::type,
+            typename std::decay <Index>::type, Range &&> {};
 
     } // namespace automatic_arguments
 

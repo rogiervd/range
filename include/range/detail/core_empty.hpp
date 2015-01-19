@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -37,33 +37,44 @@ namespace range {
 
 namespace operation {
 
-    /**
-    Return true if there are no elements in the range.
+    /// Turn Direction into the forward direction and apply "empty".
+    template <class RangeTag, class Direction, class Range, class Enable = void>
+        struct empty_by_forward
+    : unimplemented {};
 
-    This only needs to be defined for the forward direction, because under the
-    following conditions "empty (make_forward (direction), range)" is called:
-    \li make_forward (direction) is defined.
-    \li empty (make_forward (direction), range) is defined.
-    An earlier version used to check whether "first (direction, range)" is
-    defined as a proxy for whether "direction" is a sensible direction for
-    range.
-    However, then compile-time empty ranges do not work.
+    template <class RangeTag, class Direction, class Range>
+        struct empty_by_forward <RangeTag, Direction, Range, typename
+            boost::enable_if <boost::mpl::and_ <
+                has <direction::callable::make_forward (Direction)>,
+                range_detail::is_implemented_forward <empty,
+                    RangeTag, Direction, Range>
+            >>::type>
+    : range_detail::forward_operation <empty, RangeTag, Direction, Range> {};
 
-    Direction is a decayed type.
-    The range is forwarded as is.
+    /** \brief
+    Return \c true if there are no elements in the range.
+
+    The standard implementation forwards to the <c>.empty (Direction)</c>
+    member function.
+    If that is not available, it will forward to the forward direction, that is,
+    <c>empty (make_forward (direction), range)</c>, if that is defined.
+
+    This needs to be implemented (by providing the member function or by
+    specialising this) for any range, but only for the forward direction.
+    For example, by defining it for \c direction::front, it will automatically
+    also be defined for \c direction::back.
+
+    \tparam RangeTag The range tag.
+    \tparam Direction The decayed direction type.
+    \tparam Range The range itself, qualified (as an rvalue reference if an
+        rvalue).
     */
-    template <class RangeTag, class Direction, class Enable> struct empty
-    // Forward to the forward direction if it is available.
-    : boost::mpl::if_ <
-        boost::mpl::and_ <
-            has <direction::callable::make_forward (Direction)>,
-            range_detail::is_implemented_forward <empty, RangeTag, Direction>
-        >,
-        range_detail::forward_operation <empty, RangeTag, Direction>,
-        unimplemented
-    >::type {/*
-        template <class Range>
-            ... operator() (Direction const & direction, Range && range) const;
+    template <class RangeTag, class Direction, class Range, class Enable>
+        struct empty
+    : try_all <member_access::empty <Direction, Range>,
+        empty_by_forward <RangeTag, Direction, Range>>
+    {/*
+        ... operator() (Direction const & direction, Range && range) const;
     */};
 
 } // namespace operation
@@ -89,7 +100,8 @@ namespace apply {
         template <class Direction, class Range>
             struct empty <meta::vector <Direction>, meta::vector<>,
                 meta::vector <Range>>
-        : operation::empty <typename range::tag_of <Range>::type, Direction> {};
+        : operation::empty <typename range::tag_of <Range>::type,
+            typename std::decay <Direction>::type, Range &&> {};
 
     } // namespace automatic_arguments
 

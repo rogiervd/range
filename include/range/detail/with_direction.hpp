@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -44,6 +44,22 @@ public:
         rime::assert_ (this->direction() == that_direction);
         return that_direction;
     }
+};
+
+/**
+Hold a \a Direction object (and optimise space if it is empty).
+Additionally, implement default_direction to return that direction.
+
+To implement a range that holds its default direction, simply derive from this
+class.
+*/
+template <class Direction> class with_default_direction
+: public with_direction <Direction> {
+public:
+    with_default_direction (Direction const & direction)
+    : with_direction <Direction> (direction) {}
+
+    Direction const & default_direction() const { return this->direction(); }
 };
 
 } // namespace detail

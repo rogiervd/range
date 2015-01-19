@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -36,7 +36,7 @@ namespace operation {
 
     // Reminder.
     // The general implementation is given at the bottom of this file.
-    template <class RangeTag, class Direction, class Function,
+    template <class RangeTag, class Direction, class Function, class Range,
         class Enable /* = void*/>
     struct for_each;
 
@@ -55,7 +55,7 @@ namespace apply {
             struct for_each <meta::vector <Direction>,
                 meta::vector <Function>, meta::vector <Range>>
         : operation::for_each <typename range::tag_of <Range>::type,
-            Direction, Function> {};
+            Direction, Function, Range &&> {};
 
     } // namespace automatic_arguments
 
@@ -126,7 +126,7 @@ namespace operation {
             {
                 static_assert (range::is_view <Direction, Range>::value,
                     "Internal error: the range must be a view here.");
-                for_each_detail::function_wrapper <Function> function_wrapper (
+                function_wrapper <Function> function_wrapper (
                     std::forward <Function> (function));
                 range::fold (direction, function_wrapper,
                     for_each_detail::none(), std::forward <Range> (range));
@@ -136,10 +136,12 @@ namespace operation {
     } // namespace for_each_detail
 
     // Implemented if "fold" is implemented.
-    template <class RangeTag, class Direction, class Function, class Enable>
+    template <class RangeTag, class Direction, class Function, class Range,
+            class Enable>
         struct for_each
     : boost::mpl::if_ <is_implemented <fold <
-        RangeTag, Direction, Function, for_each_detail::none>>,
+        RangeTag, Direction, for_each_detail::function_wrapper <Function>,
+            for_each_detail::none, Range>>,
         for_each_detail::use_fold, unimplemented>::type {};
 
 } // namespace operation

@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -59,8 +59,34 @@ public:
     typedef typename std::conditional <std::is_const <Optional>::value,
         decayed_value_type const, decayed_value_type>::type value_type;
 
+private:
+    friend class operation::member_access;
+
     bool empty() const { return !this->optional_; }
-    value_type & first() const { return this->optional_.get(); }
+    bool empty (direction::front) const { return empty(); }
+
+    unsigned size (direction::front) const
+    { return this->optional_ ? 1 : 0; }
+
+    // first.
+    value_type & first (direction::front) const {
+        assert (!empty());
+        return this->optional_.get();
+    }
+    value_type & first (direction::back) const {
+        assert (!empty());
+        return this->optional_.get();
+    }
+
+    // drop_one.
+    empty_view drop_one (direction::front) const {
+        assert (!empty());
+        return empty_view();
+    }
+    empty_view drop_one (direction::back) const {
+        assert (!empty());
+        return empty_view();
+    }
 };
 
 namespace apply {
@@ -88,56 +114,6 @@ View an "optional" as a range containing zero or one elements.
     This should not be an rvalue, since a reference to the optional is stored.
 */
 static auto const view_optional = callable::view_optional();
-
-namespace operation {
-
-    // empty. (Automatically implemented for "back" too.)
-    template <> struct empty <optional_view_tag, direction::front> {
-        template <class OptionalView> bool operator() (
-            direction::front, OptionalView const & v) const
-        { return v.empty(); }
-    };
-
-    // size. (Automatically implemented for "back" too.)
-    template <> struct size <optional_view_tag, direction::front> {
-        template <class OptionalView> std::size_t operator() (
-            direction::front,  OptionalView const & v) const
-        {
-            if (v.empty())
-                return 0u;
-            else
-                return 1u;
-        }
-    };
-
-    // first.
-    template <class Direction>
-        struct first <optional_view_tag, Direction, typename
-            detail::enable_if_front_back <meta::vector <Direction>>::type>
-    {
-        template <class OptionalView>
-            typename OptionalView::value_type & operator() (
-                Direction, OptionalView const & v) const
-        {
-            assert (!v.empty());
-            return v.first();
-        }
-    };
-
-    // drop_one. Always results in an empty range.
-    template <class Direction>
-        struct drop_one <optional_view_tag, Direction, typename
-            detail::enable_if_front_back <meta::vector <Direction>>::type>
-    {
-        template <class Increment, class OptionalView> empty_view operator() (
-            Direction, Increment, OptionalView const & v) const
-        {
-            assert (!v.empty());
-            return empty_view();
-        }
-    };
-
-} // namespace operation
 
 } // namespace range
 

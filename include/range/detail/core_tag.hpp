@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2014 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -28,57 +28,21 @@ namespace range {
 struct not_a_range_tag;
 
 /**
-Relevant categories of qualification of ranges.
-*/
-enum qualification { any_qualification, temporary, reference, const_reference };
-
-/**
 Helper for tag_of.
-Specialise this for a range type, and optionally a qualification, to assign
-tags to the range with various const and reference qualification.
-By default, this forwards to itself with the same \a Range and
-\c any_qualification, and then to itself with \c void and \c any_qualification,
-resulting in not_a_range_tag.
-
-Therefore, if it does not depend on const or reference qualification whether
-operations are defined, specialise tag_of_qualified giving only the Range.
-If this does make a difference, then additionally provide a specialisation with
-a second template argument (probably \c temporary).
+Specialise this for an unqualified range to assign it a tag.
 */
-template <class Range, qualification qualifier = any_qualification>
-    struct tag_of_qualified
-: std::conditional <(qualifier == any_qualification),
-    tag_of_qualified <void>,
-    tag_of_qualified <Range>>::type {};
-
-template <> struct tag_of_qualified <void>
+template <class Range> struct tag_of_qualified
 { typedef not_a_range_tag type; };
 
 /**
 Evaluate the range tag of the type Range.
-The tag usually does not depend on the qualifier, but it may.
-By default, this forwards to tag_of_qualified.
+The tag should not depend on the qualifier.
 
-tag_of should usually be used to retrieve the range tag for a type.
-To assign tags to ranges, it is usually easiest to specialise tag_of_qualified.
+tag_of should be used to retrieve the range tag for a type.
+To assign tags to ranges, it is easiest to specialise tag_of_qualified.
 */
 template <class Range> struct tag_of
-: tag_of_qualified <Range, temporary> {};
-
-template <class Range> struct tag_of <Range &>
-: tag_of_qualified <Range, reference> {};
-
-template <class Range> struct tag_of <Range &&>
-: tag_of_qualified <Range, temporary> {};
-
-template <class Range> struct tag_of <Range const>
-: tag_of_qualified <Range, const_reference> {};
-
-template <class Range> struct tag_of <Range const &>
-: tag_of_qualified <Range, const_reference> {};
-
-template <class Range> struct tag_of <Range const &&>
-: tag_of_qualified <Range, const_reference> {};
+: tag_of_qualified <typename std::decay <Range>::type> {};
 
 /**
 Evaluate to true if Range is a range type.

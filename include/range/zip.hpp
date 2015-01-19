@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -199,9 +199,10 @@ The underlying ranges are kept in a tuple.
 The type returned is also tuple.
 */
 template <class Direction, class ... Ranges> class zip_range
-: public detail::with_direction <Direction>
+: public detail::with_default_direction <Direction>
 {
 public:
+    typedef meta::vector <Ranges ...> range_types;
     typedef range::tuple <Ranges ...> underlying_type;
 
     static_assert (meta::all <meta::vector <
@@ -214,9 +215,10 @@ public:
 
     static_assert (
         meta::all <meta::vector <is_view <Direction, Ranges> ...>>::value,
-        "All ranges must be views.");
+        "All ranges must be views in Direction.");
 
 private:
+    typedef detail::with_default_direction <Direction> with_direction_type;
     range::tuple <Ranges ...> underlying_;
     friend class detail::callable::get_underlying;
 
@@ -225,107 +227,131 @@ public:
         utility::disable_if_variadic_same_or_derived <
             zip_range, Direction, Arguments ...>::type>
     zip_range (Direction const & direction, Arguments && ... arguments)
-    : detail::with_direction <Direction> (direction),
+    : detail::with_default_direction <Direction> (direction),
         underlying_ (std::forward <Arguments> (arguments) ...) {}
 
     range::tuple <Ranges ...> const & underlying() const { return underlying_; }
     range::tuple <Ranges ...> & underlying() { return underlying_; }
+
+private:
+    friend class operation::member_access;
+
+    // Makes decltype complain.
+    auto empty (Direction const & direction) const
+    -> decltype (range::any (range::transform (
+        curry::empty (std::declval <Direction>()),
+        std::declval <underlying_type>())))
+    {
+        return range::any (range::transform (
+            curry::empty (this->direction_must_be_equal (direction)),
+            underlying_));
+    }
+
+    // size.
+    /*
+    Summarise the range by applying a binary function to elements of the
+    range recursively until there is only one left.
+    Maybe there should be a general version of this.
+    */
+    struct reduce {
+        template <class Function, class Range> auto
+            operator() (Function && function, Range && range) const
+        RETURNS (range::fold (std::forward <Function> (function),
+            range::first (range),
+            range::drop (std::forward <Range> (range))));
+    };
+
+    /*
+    We need the size of the shortest of the ranges.
+    Take the size of each (using range::transform), and reduce it with the
+    "min" function.
+
+    Only enable this when all ranges implement "size".
+    If not, keep the compiler from figuring out the return type, by pretending
+    there is a type Direction2 which is different from Direction.
+    */
+    template <class Direction2,
+        class Enable1 = typename boost::enable_if <
+            std::is_same <Direction2, Direction>>::type,
+        class Enable2 = typename boost::enable_if <meta::all <meta::vector <
+            has <callable::size (Direction2, Ranges)> ...>>>::type>
+    auto size (Direction2 const & direction) const
+    RETURNS (reduce() (rime::min,
+        range::transform (curry::size (direction), underlying_)));
 };
 
-template <class Direction, class ... Tags> struct zip_range_tag;
+template <class Direction> struct zip_range_tag;
 
 template <class Direction, class ... Ranges>
     struct tag_of_qualified <zip_range <Direction, Ranges ...>>
-{
-    typedef zip_range_tag <Direction,
-        typename tag_of <Ranges const &>::type ...> type;
-};
-
-// Potentially provide a different tag for rvalues.
-template <class Direction, class ... Ranges>
-    struct tag_of_qualified <zip_range <Direction, Ranges ...>, temporary>
-{
-    typedef zip_range_tag <Direction, typename tag_of <Ranges &&>::type ...>
-        type;
-};
+{ typedef zip_range_tag <Direction> type; };
 
 namespace operation {
 
-    template <class Direction, class ... Tags>
-        struct default_direction <zip_range_tag <Direction, Tags ...>>
-    {
-        template <class ZipRange> auto operator() (ZipRange const & r) const
-        RETURNS (r.direction());
-    };
-
-    template <class Direction, class ... Tags>
-        struct empty <zip_range_tag <Direction, Tags ...>, Direction>
-    {
-        template <class ZipRange> struct result {
-            typedef decltype (range::any (range::transform (
-                curry::empty (std::declval <Direction>()),
-                    std::declval <ZipRange>().underlying())))
-                type;
-        };
-        template <class ZipRange> typename result <ZipRange>::type
-            operator() (Direction const & direction, ZipRange const & r) const
-        {
-            return (range::any (range::transform (
-                curry::empty (r.direction_must_be_equal (direction)),
-                r.underlying())));
-        }
-    };
-
-    // size.
-    template <class Direction, class ... Tags>
-        struct size <zip_range_tag <Direction, Tags ...>, Direction>
-    {
-        /*
-        Summarise the range by applying a binary function to elements of the
-        range recursively until there is only one left.
-        Maybe there should be a general version of this.
-        */
-        struct reduce {
-            template <class Function, class Range> auto
-                operator() (Function && function, Range && range) const
-            RETURNS (range::fold (std::forward <Function> (function),
-                range::first (range),
-                range::drop (std::forward <Range> (range))));
-        };
-
-        template <class ZipRange> auto operator() (
-            Direction const & direction, ZipRange const & r) const
-        /*
-        We need the size of the shortest of the ranges.
-        Take the size of each (using range::transform), and reduce it with the
-        "min" function.
-        */
-        RETURNS (reduce() (rime::min,
-            range::transform (curry::size (direction), r.underlying())));
-    };
-
     // first.
-    template <class Direction, class ... Tags>
-        struct first <zip_range_tag <Direction, Tags ...>, Direction>
+    template <class Direction, class ZipRange>
+        struct first <zip_range_tag <Direction>, Direction, ZipRange>
     {
-        template <class ZipRange>
-            auto operator() (Direction const & direction, ZipRange && r) const
+        auto operator() (Direction const & direction, ZipRange && r) const
         RETURNS (range::copy_tuple_from (range::transform (
             curry::first (r.direction_must_be_equal (direction)),
             range::view_once (range::detail::get_underlying (
                 std::forward <ZipRange> (r))))));
     };
 
+    namespace zip_detail {
+
+        /* drop_implemented_all. */
+        template <class Direction, class Increment, class ZipRange, class Ranges
+                = typename std::decay <ZipRange>::type::range_types>
+            struct drop_implemented_all;
+
+        // Lvalue.
+        template <class Direction, class Increment, class ZipRange,
+                class ... Ranges>
+            struct drop_implemented_all <Direction, Increment, ZipRange &,
+                meta::vector <Ranges ...>>
+        : meta::all <meta::vector <has <
+            callable::drop (Direction, Increment, Ranges const &)> ...>> {};
+
+        // Rvalue.
+        template <class Direction, class Increment, class ZipRange,
+                class ... Ranges>
+            struct drop_implemented_all <Direction, Increment, ZipRange &&,
+                meta::vector <Ranges ...>>
+        : meta::all <meta::vector <has <
+            callable::drop (Direction, Increment, Ranges &&)> ...>> {};
+
+        /* chop_implemented_all. */
+        template <class Direction, class ZipRange, class Ranges
+                = typename std::decay <ZipRange>::type::range_types>
+            struct chop_implemented_all;
+
+        // Lvalue.
+        template <class Direction, class ZipRange, class ... Ranges>
+            struct chop_implemented_all <Direction, ZipRange &,
+                meta::vector <Ranges ...>>
+        : meta::all <meta::vector <has <
+            callable::chop (Direction, Ranges const &)> ...>> {};
+
+        // Rvalue.
+        template <class Direction, class ZipRange, class ... Ranges>
+            struct chop_implemented_all <Direction, ZipRange &&,
+                meta::vector <Ranges ...>>
+        : meta::all <meta::vector <has <
+            callable::chop (Direction, Ranges &&)> ...>> {};
+
+    } // namespace zip_detail
+
     // drop.
-    template <class Direction, class Increment, class ... Tags>
-        struct drop <zip_range_tag <Direction, Tags ...>,
-            Direction, Increment, typename boost::enable_if <
-                meta::all <meta::vector <is_implemented <
-                    drop <Tags, Direction, Increment>> ...>>>::type>
+    template <class Direction, class Increment, class ZipRange>
+        struct drop <zip_range_tag <Direction>,
+            Direction, Increment, ZipRange, typename boost::enable_if <
+                zip_detail::drop_implemented_all <
+                    Direction, Increment, ZipRange>>::type>
     {
-        template <class ZipRange>
-            auto operator() (Direction const & direction,
-                Increment const & increment, ZipRange && r) const
+        auto operator() (Direction const & direction,
+            Increment const & increment, ZipRange && r) const
         RETURNS (range::zip_from (direction, range::transform (
             curry::drop (direction, increment),
             range::view_once (range::detail::get_underlying (
@@ -333,44 +359,32 @@ namespace operation {
     };
 
     // chop.
-    // Implemented if for each underlying range, either "chop" is implemented,
-    // or "drop" and "first".
-    // Note that the one might be implemented for one range, and the other
-    // for another range, but the other will be synthesised where appropriate.
-    template <class Direction, class ... Tags>
-        struct chop <zip_range_tag <Direction, Tags ...>,
-            Direction, typename boost::enable_if <
-                meta::all <meta::vector <
-                    boost::mpl::or_ <
-                        is_implemented <chop <Tags, Direction>>,
-                        boost::mpl::and_ <
-                            is_implemented <drop <Tags, Direction, one_type>>,
-                            is_implemented <first <Tags, Direction>>
-                        >
-                    > ...
-                >>
-            >::type>
+    // Lvalue.
+    template <class Direction, class ZipRange>
+        struct chop <zip_range_tag <Direction>,
+            Direction, ZipRange &, typename boost::enable_if <
+                zip_detail::chop_implemented_all <Direction, ZipRange &>>::type>
     {
-        /* Const reference. */
-        // Just use first() and drop(): this may be faster, and it is definitely
-        // easier.
-        struct when_const_reference {
-            template <class ... Ranges,
-                class ZipRange = zip_range <Direction, Ranges ...>,
-                class Result = chopped <
-                    typename range::result_of <range::callable::first (
-                        Direction, ZipRange const &)>::type,
-                    typename range::result_of <range::callable::drop (
-                        Direction, ZipRange const &)>::type>>
-            Result operator() (Direction const & direction,
-                zip_range <Direction, Ranges ...> const & r) const
-            {
-                return Result (range::first (direction, r),
-                    range::drop (direction, r));
-            }
-        };
+        // If chop is implemented for lvalues, so are first and drop.
+        // Using first and drop may be faster, and it is definitely easier.
+        typedef chopped <
+            typename range::result_of <range::callable::first (
+                Direction, ZipRange)>::type,
+            typename range::result_of <range::callable::drop (
+                Direction, ZipRange)>::type> result_type;
 
-        /* Rvalue reference. */
+        result_type operator() (Direction const & direction, ZipRange r) const {
+            return result_type (range::first (direction, r),
+                range::drop (direction, r));
+        }
+    };
+
+    // Rvalue.
+    template <class Direction, class ZipRange>
+        struct chop <zip_range_tag <Direction>, Direction, ZipRange &&,
+            typename boost::enable_if <zip_detail::chop_implemented_all <
+                Direction, ZipRange &&>>::type>
+    {
         struct move_first {
             template <class First, class Rest>
                 First && operator() (chopped <First, Rest> & c) const
@@ -383,45 +397,32 @@ namespace operation {
             { return c.move_rest(); }
         };
 
-        struct when_rvalue_reference {
-            template <class ... Ranges,
-                class NewRest = zip_range <Direction, typename
-                    std::decay <typename std::result_of <range::callable::drop (
-                        Direction, Ranges)>::type>::type ...>,
-                class Result = chopped <
-                    tuple <typename std::result_of <range::callable::first (
-                        Direction, Ranges)>::type ...>,
-                    NewRest>
-            >
-            Result operator() (Direction const & direction,
-                zip_range <Direction, Ranges ...> && r) const
-            {
-                // Apply "chop" to each of the ranges and store the result as
-                // tuple <chopped <first1, rest1>, chopped <first2, rest2>, ...>
-                auto chopped = make_tuple_from (
-                    range::transform (curry::chop (direction),
-                        range::view_once (std::move (r.underlying()))));
-                // Produce underlying with rvalue references to the "first"
-                // elements first1 &&, first2 &&, ...
-                auto first = range::transform (move_first(), chopped);
-                // ... and the "rest" elements
-                // rest1 &&, rest2 &&, ....
-                auto rest = range::transform (move_rest(), chopped);
+        template <class ... Ranges,
+            class NewFirst = tuple <typename std::result_of <
+                range::callable::first (Direction, Ranges)>::type ...>,
+            class NewRest = zip_range <Direction, typename
+                std::decay <typename std::result_of <range::callable::drop (
+                    Direction, Ranges)>::type>::type ...>,
+            class Result = chopped <NewFirst, NewRest>
+        >
+        Result operator() (Direction const & direction,
+            zip_range <Direction, Ranges ...> && r) const
+        {
+            // Apply "chop" to each of the ranges and store the result as
+            // tuple <chopped <first1, rest1>, chopped <first2, rest2>, ...>
+            auto chopped = make_tuple_from (
+                range::transform (curry::chop (direction),
+                    range::view_once (std::move (r.underlying()))));
+            // Produce underlying with rvalue references to the "first"
+            // elements first1 &&, first2 &&, ...
+            auto first = range::transform (move_first(), chopped);
+            // ... and the "rest" elements
+            // rest1 &&, rest2 &&, ....
+            auto rest = range::transform (move_rest(), chopped);
 
-                return Result (std::move (first),
-                    NewRest (direction, std::move (rest)));
-            }
-        };
-
-        template <class Range> struct implementation
-        : boost::mpl::if_ <
-            std::is_same <Range, typename std::decay <Range>::type>,
-            when_rvalue_reference, when_const_reference>::type {};
-
-        template <class Range>
-            auto operator() (Direction const & direction, Range && range) const
-        RETURNS (implementation <Range>() (
-                direction, std::forward <Range> (range)));
+            return Result (std::move (first),
+                NewRest (direction, std::move (rest)));
+        }
     };
 
 } // namespace operation

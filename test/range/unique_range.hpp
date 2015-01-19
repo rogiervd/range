@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -48,12 +48,14 @@ prefer not to hang on to parts in memory that have already been read, say.
     If this is \c true, then first is only defined on rvalue-reference ranges.
 */
 template <class Underlying, bool OneTime> class unique_range {
+public:
+    typedef Underlying underlying_type;
 private:
     bool valid_;
-    typedef Underlying underlying_type;
     Underlying underlying_;
 
     friend struct unique_range_detail::callable::get_underlying;
+    friend class range::detail::callable::get_underlying;
 
 public:
     explicit unique_range (Underlying const & underlying)
@@ -83,6 +85,10 @@ namespace unique_range_detail {
 
 namespace callable {
 
+    /**
+    Similar to range::detail::callable::underlying, but checks that the range is
+    still valid.
+    */
     struct get_underlying {
     public:
         template <class UniqueRange>
@@ -139,7 +145,7 @@ RETURNS (unique_range <typename range::decayed_result_of <
     range::callable::view (Range)>::type, true> (
         range::view (std::forward <Range> (range))));
 
-template <class UnderlyingTag, bool OneTime, bool RValue>
+template <class UnderlyingTag, bool OneTime>
     struct unique_range_tag;
 
 namespace range {
@@ -148,56 +154,44 @@ template <class Underlying, bool OneTime>
     struct tag_of_qualified <unique_range <Underlying, OneTime>>
 {
     typedef unique_range_tag <typename
-        tag_of <Underlying &>::type, OneTime, false> type;
-};
-
-template <class Underlying, bool OneTime>
-    struct tag_of_qualified <unique_range <Underlying, OneTime>, temporary>
-{
-    typedef unique_range_tag <typename
-        tag_of <Underlying &>::type, OneTime, true> type;
+        tag_of <Underlying &>::type, OneTime> type;
 };
 
 namespace operation {
 
-    template <class UnderlyingTag, bool OneTime, bool RValue>
+    template <class UnderlyingTag, bool OneTime, class Range>
         struct default_direction <
-            unique_range_tag <UnderlyingTag, OneTime, RValue>>
+            unique_range_tag <UnderlyingTag, OneTime>, Range>
     {
-        template <class UniqueRange>
-            typename result_of <callable::default_direction (
-                unique_range_detail::callable::get_underlying (UniqueRange))
-            >::type operator() (UniqueRange && range) const
+        typename result_of <callable::default_direction (
+            unique_range_detail::callable::get_underlying (Range))>::type
+                operator() (Range && range) const
         {
             return range::default_direction (
                 unique_range_detail::get_underlying (range));
         }
     };
 
-    template <class UnderlyingTag, bool OneTime, bool RValue, class Direction>
-        struct empty <unique_range_tag <UnderlyingTag, OneTime, RValue>,
-            Direction>
+    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
+        struct empty <unique_range_tag <UnderlyingTag, OneTime>,
+            Direction, Range>
     {
-        template <class UniqueRange>
-            typename result_of <callable::empty (Direction,
-                unique_range_detail::callable::get_underlying (UniqueRange))
-            >::type
-            operator() (Direction const & direction, UniqueRange && range) const
+        typename result_of <callable::empty (Direction,
+            unique_range_detail::callable::get_underlying (Range))>::type
+                operator() (Direction const & direction, Range && range) const
         {
             return range::empty (direction,
                 unique_range_detail::get_underlying (range));
         }
     };
 
-    template <class UnderlyingTag, bool OneTime, bool RValue, class Direction>
-        struct size <unique_range_tag <UnderlyingTag, OneTime, RValue>,
-            Direction>
+    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
+        struct size <unique_range_tag <UnderlyingTag, OneTime>,
+            Direction, Range>
     {
-        template <class UniqueRange>
-            typename result_of <callable::size (Direction,
-                unique_range_detail::callable::get_underlying (UniqueRange))
-            >::type
-            operator() (Direction const & direction, UniqueRange && range) const
+        typename result_of <callable::size (Direction,
+            unique_range_detail::callable::get_underlying (Range))>::type
+                operator() (Direction const & direction, Range && range) const
         {
             return range::size (direction,
                 unique_range_detail::get_underlying (range));
@@ -206,15 +200,13 @@ namespace operation {
 
     // first: only if OneTime = false.
     // Otherwise this is implementented automatically through "chop".
-    template <class UnderlyingTag, bool RValue, class Direction>
-        struct first <unique_range_tag <UnderlyingTag, false, RValue>,
-            Direction>
+    template <class UnderlyingTag, class Direction, class Range>
+        struct first <unique_range_tag <UnderlyingTag, false>,
+            Direction, Range>
     {
-        template <class UniqueRange>
-            typename result_of <callable::first (Direction,
-                unique_range_detail::callable::get_underlying (UniqueRange))
-            >::type
-            operator() (Direction const & direction, UniqueRange && range) const
+       typename result_of <callable::first (Direction,
+            unique_range_detail::callable::get_underlying (Range))>::type
+                operator() (Direction const & direction, Range && range) const
         {
             return range::first (direction,
                 unique_range_detail::get_underlying (range));
@@ -226,10 +218,11 @@ namespace operation {
     range.
     */
     template <class UnderlyingTag, bool OneTime, class Direction,
-            class Increment>
-        struct drop <unique_range_tag <UnderlyingTag, OneTime, true>, Direction,
-            Increment, typename boost::enable_if <is_implemented <
-                drop <UnderlyingTag, Direction, Increment>>>::type>
+            class Increment, class Range>
+        struct drop <unique_range_tag <UnderlyingTag, OneTime>, Direction,
+            Increment, Range &&, typename boost::enable_if <is_implemented <
+                drop <UnderlyingTag, Direction, Increment, typename
+                    std::decay <Range>::type::underlying_type &&>>>::type>
     {
         template <class Underlying>
             unique_range <typename result_of <
@@ -255,14 +248,17 @@ namespace operation {
     chop() only takes an rvalue range, pilfers it, and deactivates the original
     range.
 
-    This is enabled if "drop<...>" is implemented, since "chop" is usually
-    implemented automatically in "apply".
+    This is enabled if "drop<...>" is implemented, since "chop" is then usually
+    implemented automatically.
     */
-    template <class UnderlyingTag, bool OneTime, class Direction>
-        struct chop <unique_range_tag <UnderlyingTag, OneTime, true>, Direction,
+    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
+        struct chop <unique_range_tag <UnderlyingTag, OneTime>,
+            Direction, Range &&,
             typename boost::enable_if <boost::mpl::or_ <
-                is_implemented <drop <UnderlyingTag, Direction, one_type>>,
-                is_implemented <chop <UnderlyingTag, Direction>>
+                is_implemented <drop <UnderlyingTag, Direction, one_type,
+                    typename underlying <Range &&>::type>>,
+                is_implemented <chop <UnderlyingTag, Direction,
+                    typename underlying <Range &&>::type>>
             >>::type>
     {
         template <class Underlying,

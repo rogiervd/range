@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -65,7 +65,7 @@ namespace operation {
     // Reminder.
     // The general implementation is given at the bottom of this file.
     template <class RangeTag, class Direction, class Function, class State,
-        class Enable /* = void*/>
+        class Range, class Enable /* = void*/>
     struct fold;
 
 } // namespace operation
@@ -83,7 +83,7 @@ namespace apply {
             struct fold <meta::vector <Direction>,
                 meta::vector <Function, State>, meta::vector <Range>>
         : operation::fold <typename range::tag_of <Range>::type,
-            Direction, Function, State> {};
+            Direction, Function, State, Range &&> {};
 
     } // namespace automatic_arguments
 
@@ -346,24 +346,21 @@ namespace operation {
             }
         };
 
-        template <class Direction, class Function, class State>
-            struct default_implementation
+        template <class Direction, class Function, class State, class Range>
+            class default_implementation
         {
-            template <class Range> struct result {
-                typedef typename range::fold_detail::all_result_types <
-                    Direction, Function, State, Range>::type result_types;
-                typedef typename rime::make_variant_over <result_types,
-                    rime::merge_policy::collapse>::type type;
-            };
+            typedef typename range::fold_detail::all_result_types <
+                Direction, Function, State, Range>::type result_types;
+            typedef typename rime::make_variant_over <result_types,
+                rime::merge_policy::collapse>::type result_type;
 
-            template <class Range>
-                typename result <Range>::type
-                operator() (Direction const & direction,
-                    Function && function, State && state, Range && range) const
+        public:
+            result_type operator() (Direction const & direction,
+                Function && function, State && state, Range && range) const
             {
                 static_assert (range::is_view <Direction, Range>::value,
                     "Internal error: the range must be a view here.");
-                typedef typename result <Range>::type result_type;
+
                 fold <result_type, Direction, Function, State> implementation;
                 return implementation (direction,
                     std::forward <Function> (function),
@@ -375,11 +372,11 @@ namespace operation {
     } // namespace fold_detail
 
     template <class RangeTag, class Direction, class Function, class State,
-        class Enable>
+        class Range, class Enable>
     struct fold
     // Implemented if "empty" is implemented.
-    : boost::mpl::if_ <is_implemented <empty <RangeTag, Direction>>,
-        fold_detail::default_implementation <Direction, Function, State>,
+    : boost::mpl::if_ <is_implemented <empty <RangeTag, Direction, Range>>,
+        fold_detail::default_implementation <Direction, Function, State, Range>,
         unimplemented>::type {};
 
 } // namespace operation

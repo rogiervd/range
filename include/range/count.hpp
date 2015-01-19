@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -134,17 +134,21 @@ namespace operation {
     // default_direction just returns front.
 
     // empty.
-    template <> struct empty <count_range_tag <false>, direction::front> {
-        template <class CountRange>
-            auto operator() (direction::front, CountRange const & r) const
+    template <class CountRange>
+        struct empty <count_range_tag <false>, direction::front, CountRange>
+    {
+        auto operator() (direction::front, CountRange && r) const
         RETURNS (r.begin() == r.end());
     };
-    template <> struct empty <count_range_tag <true>, direction::front>
+    template <class CountRange>
+        struct empty <count_range_tag <true>, direction::front, CountRange>
     : rime::callable::always_default <rime::false_type> {};
 
     // size.
     // Not implemented for infinite_count_range.
-    template <> struct size <count_range_tag <false>, direction::front> {
+    template <class Range>
+        struct size <count_range_tag <false>, direction::front, Range>
+    {
         template <class Begin, class End>
             auto operator() (direction::front,
                 count_range <Begin, End> const & r) const
@@ -153,15 +157,15 @@ namespace operation {
 
     // first.
     // front: the same for finite and infinite.
-    template <bool Infinite>
-        struct first <count_range_tag <Infinite>, direction::front>
+    template <bool Infinite, class CountRange>
+        struct first <count_range_tag <Infinite>, direction::front, CountRange>
     {
-        template <class CountRange>
-            auto operator() (direction::front, CountRange const & r) const
+        auto operator() (direction::front, CountRange && r) const
         RETURNS (r.begin());
     };
     // back: only for finite count ranges.
-    template <> struct first <count_range_tag <false>, direction::back>
+    template <class Range>
+        struct first <count_range_tag <false>, direction::back, Range>
     {
         template <class Begin, class End>
             auto operator() (direction::back,
@@ -170,8 +174,8 @@ namespace operation {
     };
 
     // drop.
-    template <class Increment>
-        struct drop <count_range_tag <true>, direction::front, Increment>
+    template <class Increment, class Range>
+        struct drop <count_range_tag <true>, direction::front, Increment, Range>
     {
         // Constant: allow a change of type.
         template <class Begin>
@@ -181,8 +185,9 @@ namespace operation {
             rime::cast_value <Begin> (rime::plus (r.begin(), increment))));
     };
 
-    template <class Increment>
-        struct drop <count_range_tag <false>, direction::front, Increment>
+    template <class Increment, class Range>
+        struct drop <count_range_tag <false>,
+            direction::front, Increment, Range>
     {
         // Constant: allow a change of type.
         template <class Begin, class End>
@@ -192,8 +197,8 @@ namespace operation {
             rime::cast_value <Begin> (rime::plus (r.begin(), increment)),
             r.end()));
     };
-    template <class Increment>
-        struct drop <count_range_tag <false>, direction::back, Increment>
+    template <class Increment, class Range>
+        struct drop <count_range_tag <false>, direction::back, Increment, Range>
     {
         // Constant: allow a change of type.
         template <class Begin, class End>

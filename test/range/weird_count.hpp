@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -49,26 +49,31 @@ template<> struct tag_of_qualified <weird_count>
 
 namespace operation {
 
-    template<> struct default_direction <weird_count_tag>
+    template <class WeirdCount>
+        struct default_direction <weird_count_tag, WeirdCount>
     {
         forgotten_to_define_direction operator() (weird_count const &) const;
     };
 
-    template<> struct empty <weird_count_tag, weird_direction> {
+    template <class WeirdCount>
+        struct empty <weird_count_tag, weird_direction, WeirdCount>
+    {
         rime::bool_ <false>
             operator() (weird_direction, weird_count const &) const
         { return rime::false_; }
     };
 
-    // size is not defined
+    // size is not defined.
 
-    template<> struct first <weird_count_tag, weird_direction> {
+    template <class WeirdCount>
+        struct first <weird_count_tag, weird_direction, WeirdCount>
+    {
         int operator() (weird_direction, weird_count const & c) const
         { return c.current; }
     };
 
-    template <typename Increment>
-        struct drop <weird_count_tag, weird_direction, Increment>
+    template <class Increment, class WeirdCount>
+        struct drop <weird_count_tag, weird_direction, Increment, WeirdCount>
     {
         weird_count operator() (weird_direction, Increment const & increment,
             weird_count const & c) const
@@ -78,4 +83,3 @@ namespace operation {
 }} // namespace range::operation
 
 #endif  // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED
-

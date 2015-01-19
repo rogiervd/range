@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -68,32 +68,24 @@ BOOST_AUTO_TEST_CASE (test_range_function_range_reference) {
     f_range r (std::move (r_temp));
 
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range>::type,
-        range::function_range_tag <range::temporary>>));
+        range::tag_of <f_range>::type, range::function_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range &&>::type,
-        range::function_range_tag <range::temporary>>));
+        range::tag_of <f_range &&>::type, range::function_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range &>::type,
-        range::function_range_tag <range::reference>>));
+        range::tag_of <f_range &>::type, range::function_range_tag>));
 
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range const>::type,
-        range::function_range_tag <range::const_reference>>));
+        range::tag_of <f_range const>::type, range::function_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range const &&>::type,
-        range::function_range_tag <range::const_reference>>));
+        range::tag_of <f_range const &&>::type, range::function_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <f_range const &>::type,
-        range::function_range_tag <range::const_reference>>));
+        range::tag_of <f_range const &>::type, range::function_range_tag>));
 
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (f_range)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (f_range &&)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (f_range &)>));
 
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (f_range const)>));
-    BOOST_MPL_ASSERT_NOT ((
-        range::has <range::callable::chop (f_range const &&)>));
     BOOST_MPL_ASSERT_NOT ((
         range::has <range::callable::chop (f_range const &)>));
 

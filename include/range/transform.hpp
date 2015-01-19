@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -38,18 +38,13 @@ template <class UnderlyingTag> struct transform_view_tag;
 
 template <class Function, class Underlying>
     struct tag_of_qualified <transform_view <Function, Underlying>>
-{
-    typedef transform_view_tag <typename tag_of <Underlying const &>::type>
-        type;
-};
-
-// Temporary: use rvalue reference to underlying range.
-template <class Function, class Underlying>
-    struct tag_of_qualified <transform_view <Function, Underlying>, temporary>
-{ typedef transform_view_tag <typename tag_of <Underlying &&>::type> type; };
+{ typedef transform_view_tag <typename tag_of <Underlying>::type> type; };
 
 template <class Function, class Underlying> struct transform_view {
 public:
+    typedef Function function_type;
+    typedef Underlying underlying_type;
+
     template <class Function_, class Underlying_>
         transform_view (Function_ && function_, Underlying_ && underlying_)
     : function_ (std::forward <Function_> (function_)),
@@ -62,11 +57,6 @@ public:
     : function_ (utility::storage::get <Function, transform_view &&>() (
             that.function_.content())),
         underlying_ (std::move (that.underlying_)) {}
-
-    typedef Underlying underlying_type;
-
-    typename utility::storage::get <Function, transform_view const &>::type
-        function() const { return function_.content(); }
 
     transform_view & operator= (transform_view const & that) {
         function_ = that.function();
@@ -81,13 +71,39 @@ public:
         return *this;
     }
 
+    typename utility::storage::get <Function, transform_view const &>::type
+        function() const { return function_.content(); }
+
+    Underlying const & underlying() const { return underlying_; }
+
 private:
     friend class ::range::detail::callable::get_underlying;
+
     // The function is not necessarily assignable.
     utility::assignable <typename utility::storage::store <Function>::type>
         function_;
     // Underlying should be assignable already.
     Underlying underlying_;
+
+    friend class operation::member_access;
+
+    auto default_direction() const
+    RETURNS (range::default_direction (underlying_));
+
+    template <class Direction> typename result_of_or <
+        callable::empty (Direction, Underlying const &)>::type
+            empty (Direction const & direction) const
+    { return range::empty (direction, underlying_); }
+
+    template <class Direction> typename result_of_or <
+        callable::size (Direction, Underlying const &)>::type
+            size (Direction const & direction) const
+    { return range::size (direction, underlying_); }
+
+    template <class Direction> typename result_of_or <
+        callable::chop_in_place (Direction, Underlying const &)>::type
+            chop_in_place (Direction const & direction) const
+    { return function_ (range::chop_in_place (direction, underlying_)); }
 };
 
 namespace operation {
@@ -163,46 +179,31 @@ namespace apply {
 
 namespace operation {
 
-    /* Forward to underlying for default_direction, empty, size. */
-
-    // default_direction.
-    template <class UnderlyingTag>
-        struct default_direction <transform_view_tag <UnderlyingTag>>
-    : forward_to_underlying <default_direction <UnderlyingTag>> {};
-
-    // empty.
-    template <class UnderlyingTag, class Direction>
-        struct empty <transform_view_tag <UnderlyingTag>, Direction>
-    : forward_to_underlying <empty <UnderlyingTag, Direction>> {};
-
-    // size.
-    template <class UnderlyingTag, class Direction>
-        struct size <transform_view_tag <UnderlyingTag>, Direction>
-    : forward_to_underlying <size <UnderlyingTag, Direction>> {};
-
     /* Forward to underlying and then wrap: first, drop. */
 
     // first: transform first element of underlying.
-    template <class UnderlyingTag, class Direction>
-        struct first <transform_view_tag <UnderlyingTag>, Direction, typename
-            boost::enable_if <is_implemented <first <UnderlyingTag, Direction>>
-                >::type>
+    template <class UnderlyingTag, class Direction, class Range>
+        struct first <transform_view_tag <UnderlyingTag>, Direction, Range,
+            typename boost::enable_if <
+                is_implemented <first <UnderlyingTag, Direction,
+                    typename underlying <Range>::type>>>::type>
     {
-        template <class Range> auto operator() (
-            Direction const & direction, Range && range) const
+        auto operator() (Direction const & direction, Range && range) const
         RETURNS (range.function() (range::first (direction,
             range::detail::get_underlying (std::forward <Range> (range)))));
     };
 
     // drop: forward to underlying and re-wrap.
-    template <class UnderlyingTag, class Direction, class Increment>
-        struct drop <transform_view_tag <UnderlyingTag>, Direction, Increment,
+    template <class UnderlyingTag, class Direction, class Increment,
+            class Range>
+        struct drop <transform_view_tag <UnderlyingTag>,
+            Direction, Increment, Range,
             typename boost::enable_if <is_implemented <
-                drop <UnderlyingTag, Direction, Increment>>>::type>
+                drop <UnderlyingTag, Direction, Increment,
+                    typename underlying <Range>::type>>>::type>
     {
-        template <class Range>
-            auto operator() (Direction const & direction,
-                Increment const & increment, Range && range) const
+        auto operator() (Direction const & direction,
+            Increment const & increment, Range && range) const
         RETURNS (range::transform (direction, range.function(),
             range::drop (direction, increment,
                 range::detail::get_underlying (std::forward <Range> (range)))));
@@ -211,10 +212,11 @@ namespace operation {
     // chop: forward to underlying and re-wrap.
     // Note that this is only implemented if chop<> is implemented natively for
     // the underlying range, not if it is synthesised.
-    template <class UnderlyingTag, class Direction>
-        struct chop <transform_view_tag <UnderlyingTag>, Direction,
+    template <class UnderlyingTag, class Direction, class Range>
+        struct chop <transform_view_tag <UnderlyingTag>, Direction, Range,
             typename boost::enable_if <is_implemented <
-                chop <UnderlyingTag, Direction>>>::type>
+                chop <UnderlyingTag, Direction,
+                    typename underlying <Range>::type>>>::type>
     {
         template <class Function, class Underlying, class Enable = typename
                 boost::enable_if <has <callable::chop (Direction, Underlying)>

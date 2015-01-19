@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -59,15 +59,15 @@ BOOST_AUTO_TEST_CASE (vector) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <vector_view_tag, false, true>>));
+            unique_range_tag <vector_view_tag, false>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <vector_view_tag, false, false>>));
+            unique_range_tag <vector_view_tag, false>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <vector_view_tag, false, false>>));
+            unique_range_tag <vector_view_tag, false>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -177,15 +177,15 @@ BOOST_AUTO_TEST_CASE (vector) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <vector_view_tag, true, true>>));
+            unique_range_tag <vector_view_tag, true>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <vector_view_tag, true, false>>));
+            unique_range_tag <vector_view_tag, true>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <vector_view_tag, true, false>>));
+            unique_range_tag <vector_view_tag, true>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -290,15 +290,15 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <tuple_view_tag, false, true>>));
+            unique_range_tag <tuple_view_tag, false>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <tuple_view_tag, false, false>>));
+            unique_range_tag <tuple_view_tag, false>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <tuple_view_tag, false, false>>));
+            unique_range_tag <tuple_view_tag, false>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -394,15 +394,15 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <tuple_view_tag, true, true>>));
+            unique_range_tag <tuple_view_tag, true>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <tuple_view_tag, true, false>>));
+            unique_range_tag <tuple_view_tag, true>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <tuple_view_tag, true, false>>));
+            unique_range_tag <tuple_view_tag, true>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));

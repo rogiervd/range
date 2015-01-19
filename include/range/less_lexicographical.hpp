@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -32,7 +32,7 @@ namespace range {
 namespace operation {
 
     template <class Range1Tag, class Range2Tag, class Direction, class Less,
-        class Enable = void>
+        class Range1_, class Range2_, class Enable /* = void */>
     struct less_lexicographical
     {
     private:
@@ -209,7 +209,9 @@ namespace apply {
                 meta::vector <Less>, meta::vector <Range1, Range2>>
         : operation::less_lexicographical <
             typename range::tag_of <Range1>::type,
-            typename range::tag_of <Range2>::type, Direction, Less const &> {};
+            typename range::tag_of <Range2>::type,
+            typename std::decay <Direction>::type, Less const &,
+            Range1 &&, Range2 &&> {};
 
         template <class Direction, class Range1, class Range2>
             struct less_lexicographical <meta::vector <Direction>,
@@ -217,8 +219,9 @@ namespace apply {
         {
             typedef operation::less_lexicographical <
                 typename range::tag_of <Range1>::type,
-                typename range::tag_of <Range2>::type, Direction,
-                less_lexicographical_detail::less const &>
+                typename range::tag_of <Range2>::type,
+                typename std::decay <Direction>::type,
+                less_lexicographical_detail::less const &, Range1 &&, Range2&&>
                 implementation;
 
             auto operator() (Direction const & direction,

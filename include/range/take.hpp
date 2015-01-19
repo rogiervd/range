@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -86,8 +86,8 @@ template <class Direction, class Limit, class Underlying> inline
 auto make_take_range (
     Direction const & direction, Limit const & limit, Underlying && underlying)
 RETURNS (take_range <Direction, Limit, typename
-        decayed_result_of <callable::view (Underlying)>::type> (
-            direction, limit, std::forward <Underlying> (underlying)));
+    decayed_result_of <callable::view (Underlying)>::type> (
+        direction, limit, std::forward <Underlying> (underlying)));
 
 /* The actual operation "take". */
 
@@ -106,50 +106,51 @@ namespace operation {
 
     } // namespace take_detail
 
-    template <class RangeTag, class Direction, class Limit, class Enable = void>
+    template <class RangeTag, class Direction, class Limit, class Range,
+            class Enable = void>
         struct take
     {
     private:
         struct when_not_take_range {
             /* Implementation that just calls drop (back, ..., range). */
             // If size (range) <= limit: return range.
-            template <class Range,
-                class Size = typename result_of_or <
-                    callable::size (Direction, Range const &)>::type,
+            // Range2 is Range but with an rvalue reference removed.
+            template <class Range2, class Size = typename result_of_or <
+                    callable::size (Direction, Range2 const &)>::type,
                 class Enable2 = typename boost::enable_if <
                     rime::equal_constant <
                         decltype (rime::less_sign_safe (
                             std::declval <Limit>(), std::declval <Size>())),
                         boost::mpl::false_>>::type>
-            Range operator() (Direction const & direction,
-                Limit const & limit, Range && range,
+            Range2 operator() (Direction const & direction,
+                Limit const & limit, Range2 && range,
                 utility::overload_order <1> *)
-            { return std::forward <Range> (range); }
+            { return std::forward <Range2> (range); }
 
             // Otherwise: return drop (back, size - limit, range).
-            // (Well, unless size <= limit; then )
-            template <class Range,
-                class Size = typename
-                    result_of_or <callable::size (Range const &)>::type,
+            // (Unless size <= limit; then return drop (back, 0, range).)
+            // Range2 is necessary (for GCC 4.6 at least) to delay the
+            // evaluation of result_of_or.
+            template <class Range2, class Size = typename
+                    result_of_or <callable::size (Range2 const &)>::type,
                 class Difference = decltype (std::declval <Size>() -
                     take_detail::min() (
                         std::declval <Limit>(), std::declval <Size>())),
                 class Result = typename result_of_or <
                     callable::drop (direction::callable::reverse (Direction),
-                    Difference, Range)>::type>
+                    Difference, Range2)>::type>
             Result operator() (Direction const & direction,
-                Limit const & limit, Range && range,
+                Limit const & limit, Range2 && range,
                 utility::overload_order <2> *)
             {
                 auto size = range::size (direction, range);
                 return range::drop (direction::reverse (direction),
                     size - take_detail::min() (limit, size),
-                    std::forward <Range> (range));
+                    std::forward <Range2> (range));
             }
 
             /* Standard implementation. */
-            template <class Range> auto operator() (
-                Direction const & direction, Limit const & limit,
+            auto operator() (Direction const & direction, Limit const & limit,
                 Range && range, utility::overload_order <3> *)
             RETURNS (make_take_range (
                 direction, limit, std::forward <Range> (range)));
@@ -177,8 +178,8 @@ namespace operation {
         };
 
         struct is_take_range_with_same_direction {
-            template <class Range> rime::false_type operator() (
-                Direction const &, Range const &)
+            template <class Range2>
+            rime::false_type operator() (Direction const &, Range2 const &)
             { return rime::false_; }
 
             template <class OriginalLimit, class Underlying>
@@ -189,7 +190,7 @@ namespace operation {
 
     public:
         // Limit is unqualified; Range is a view.
-        template <class Range> auto operator() (Direction const & direction,
+        auto operator() (Direction const & direction,
             Limit const & limit, Range && range) const
         RETURNS (rime::call_if (
             is_take_range_with_same_direction() (direction, range),
@@ -212,7 +213,8 @@ namespace apply {
             struct take <meta::vector <Direction>, meta::vector <Limit>,
                 meta::vector <Range>>
         : operation::take <typename range::tag_of <Range>::type,
-            Direction, typename std::decay <Limit>::type> {};
+            typename std::decay <Direction>::type,
+            typename std::decay <Limit>::type, Range &&> {};
 
     } // namespace automatic_arguments
 
@@ -243,7 +245,7 @@ private:
 
     void decrement_limit() { -- limit_; }
 
-    template <class RangeTag, class Direction2, class Enable>
+    template <class RangeTag, class Direction2, class Range, class Enable>
         friend struct operation::chop_in_place;
 
 public:
@@ -256,137 +258,94 @@ public:
     Direction const & direction() const { return direction_; }
     // Return unqualified limit.
     Limit limit() const { return limit_; }
+
+private:
+    friend class operation::member_access;
+
+    auto default_direction() const
+    RETURNS (range::default_direction (underlying_));
+
+    auto empty (Direction const & direction) const
+    RETURNS (rime::or_ (
+        limit_ == rime::make_zero (limit_),
+        range::empty (direction, underlying_)));
 };
 
-template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
+template <class Direction, bool HomogeneousLimit>
     struct take_range_tag;
 
-// The underlying tag can depend on how the range is qualified.
-// Therefore, it must be forwarded.
 template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying>>
-{
-    typedef take_range_tag <typename tag_of <Underlying>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
-template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying> &>
-{
-    typedef take_range_tag <typename tag_of <Underlying &>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
-template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying> &&>
-{
-    typedef take_range_tag <typename tag_of <Underlying &&>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
-
-template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying> const>
-{
-    typedef take_range_tag <typename tag_of <Underlying const>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
-template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying> const &>
-{
-    typedef take_range_tag <typename tag_of <Underlying const &>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
-template <class Direction, class Limit, class Underlying>
-    struct tag_of <take_range <Direction, Limit, Underlying> const &&>
-{
-    typedef take_range_tag <typename tag_of <Underlying const &&>::type,
-        Direction, !rime::is_constant <Limit>::value> type;
-};
+    struct tag_of_qualified <take_range <Direction, Limit, Underlying>>
+{ typedef take_range_tag <Direction, !rime::is_constant <Limit>::value> type; };
 
 namespace operation {
 
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
-        struct default_direction <take_range_tag <
-            UnderlyingTag, Direction, HomogeneousLimit>>
-    : forward_to_underlying <default_direction <UnderlyingTag>> {};
-
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
-        struct empty <take_range_tag <
-            UnderlyingTag, Direction, HomogeneousLimit>, Direction>
+    template <class Direction, bool HomogeneousLimit,
+            class Range>
+        struct size <take_range_tag <Direction, HomogeneousLimit>,
+            Direction, Range, typename boost::enable_if <has <
+                callable::size (Direction,
+                    range::detail::callable::get_underlying (Range))>>::type>
     {
-        template <class TakeRange>
-            auto operator() (Direction const & direction, TakeRange const & r)
-                const
-        RETURNS (rime::or_ (r.limit() == rime::make_zero (r.limit()),
-            range::empty (direction, range::detail::get_underlying (r))));
+        auto operator() (Direction const & direction, Range && r) const
+        RETURNS (rime::min_ <take_detail::limit_merge_policy> (
+            r.limit(), range::size (direction,
+                range::detail::get_underlying (std::forward <Range> (r)))));
     };
 
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
-        struct size <take_range_tag <
-                UnderlyingTag, Direction, HomogeneousLimit>,
-            Direction, typename boost::enable_if <is_implemented <
-                size <UnderlyingTag, Direction>>>::type>
+    template <class Direction, bool HomogeneousLimit, class Range>
+        struct first <take_range_tag <Direction, HomogeneousLimit>,
+            Direction, Range, typename boost::enable_if <has <
+                callable::first (Direction,
+                    range::detail::callable::get_underlying (Range))>>::type>
     {
-        template <class TakeRange>
-            auto operator() (Direction const & direction, TakeRange const & r)
-                const
-        RETURNS (rime::min_ <take_detail::limit_merge_policy> (r.limit(),
-            range::size (direction, range::detail::get_underlying (r))));
-    };
-
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
-        struct first <take_range_tag <
-                UnderlyingTag, Direction, HomogeneousLimit>,
-            Direction, typename boost::enable_if <is_implemented <
-                first <UnderlyingTag, Direction>>>::type>
-    {
-        template <class TakeRange>
-            auto operator() (Direction const & direction, TakeRange && r)
-                const
+        auto operator() (Direction const & direction, Range && r) const
         -> typename result_of <callable::first (Direction,
-            range::detail::callable::get_underlying (TakeRange))>::type
+            range::detail::callable::get_underlying (Range))>::type
         {
             rime::assert_ (direction == r.direction());
             rime::assert_ (!range::empty (direction, r));
             return range::first (direction,
-                range::detail::get_underlying (std::forward <TakeRange> (r)));
+                range::detail::get_underlying (std::forward <Range> (r)));
         }
     };
 
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit,
-        class Increment>
-    struct drop <take_range_tag <UnderlyingTag, Direction, HomogeneousLimit>,
-        Direction, Increment, typename boost::enable_if <is_implemented <
-            drop <UnderlyingTag, Direction, Increment>>>::type>
+    template <class Direction, bool HomogeneousLimit,
+        class Increment, class Range>
+    struct drop <take_range_tag <Direction, HomogeneousLimit>,
+        Direction, Increment, Range, typename boost::enable_if <
+            has <callable::drop (Direction, Increment,
+                range::detail::callable::get_underlying (Range))>>::type>
     {
-        template <class TakeRange>
-            auto operator() (Direction const & direction,
-                Increment const & increment, TakeRange && r) const
+        auto operator() (Direction const & direction,
+            Increment const & increment, Range && r) const
         -> decltype (range::take (direction, rime::cast_value <typename
-            std::decay <TakeRange>::type::limit_type> (r.limit() - increment),
+            std::decay <Range>::type::limit_type> (r.limit() - increment),
             range::drop (direction, increment,
-                range::detail::get_underlying (std::declval <TakeRange>()))))
+                range::detail::get_underlying (std::declval <Range>()))))
         {
             rime::assert_ (direction == r.direction());
             rime::assert_ (!rime::less_sign_safe (
                 increment, rime::size_t <0>()));
             rime::assert_ (!rime::less_sign_safe (r.limit(), increment));
-            typedef typename std::decay <TakeRange>::type::limit_type
+            typedef typename std::decay <Range>::type::limit_type
                 limit_type;
             return range::take (direction,
                 rime::cast_value <limit_type> (r.limit() - increment),
                 range::drop (direction, increment,
-                    range::detail::get_underlying (
-                        std::forward <TakeRange> (r))));
+                    range::detail::get_underlying (std::forward <Range> (r))));
         }
     };
 
     // chop: enable only if this is implemented on the underlying range.
     // Otherwise, the generic implementation that uses "first" and "drop" should
     // work on the take_range, not on the underlying range.
-    template <class UnderlyingTag, class Direction, bool HomogeneousLimit>
+    template <class Direction, bool HomogeneousLimit, class Range>
         struct chop <
-            take_range_tag <UnderlyingTag, Direction, HomogeneousLimit>,
-            Direction, typename boost::enable_if <is_implemented <
-                chop <UnderlyingTag, Direction>>>::type>
+            take_range_tag <Direction, HomogeneousLimit>, Direction, Range,
+            typename boost::enable_if <has <
+                callable::chop (Direction,
+                    range::detail::callable::get_underlying (Range))>>::type>
     {
         /*
         To the reader: apologies for the following code.
@@ -396,25 +355,24 @@ namespace operation {
         The best way to take this in is to read the body of the function, and
         only then convince yourself that the types make sense.
         */
-        template <class TakeRange,
-            class Limit = typename std::decay <TakeRange>::type::limit_type,
+        template <class Limit = typename std::decay <Range>::type::limit_type,
             class NewLimit = decltype (
                 rime::cast_value <Limit> (Limit() - one_type())),
             class FirstAndUnderlyingRest = typename
                 std::result_of <callable::chop (Direction, decltype (
-                    range::detail::get_underlying (std::declval <TakeRange>())))
+                    range::detail::get_underlying (std::declval <Range>())))
                 >::type,
             class NewTakeRange = take_range <Direction, NewLimit,
                 typename FirstAndUnderlyingRest::rest_type>,
             class Result = chopped <
                 typename FirstAndUnderlyingRest::first_type, NewTakeRange>>
-        Result operator() (Direction const & direction, TakeRange && r) const
+        Result operator() (Direction const & direction, Range && r) const
         {
             one_type one;
             rime::assert_ (direction == r.direction());
             rime::assert_ (!rime::less_sign_safe (r.limit(), one));
             auto first_and_underlying_rest = range::chop (direction,
-                range::detail::get_underlying (std::forward <TakeRange> (r)));
+                range::detail::get_underlying (std::forward <Range> (r)));
             return Result (first_and_underlying_rest.forward_first(),
                 range::take (direction,
                     rime::cast_value <Limit> (r.limit() - one),
@@ -426,11 +384,12 @@ namespace operation {
     // range.
     // In that case, the underlying range tag should tell us whether the range
     // is an lvalue or not.
-    template <class UnderlyingTag, class Direction>
+    template <class Direction, class Range>
         struct chop_in_place <
-            take_range_tag <UnderlyingTag, Direction, true>, Direction,
-            typename boost::enable_if <is_implemented <
-                chop_in_place <UnderlyingTag, Direction>>>::type>
+            take_range_tag <Direction, true>, Direction, Range,
+            typename boost::enable_if <has <
+                callable::chop_in_place (Direction, typename
+                    range::detail::callable::get_underlying (Range))>>::type>
     {
         template <class TakeRange>
             typename result_of <callable::chop_in_place (

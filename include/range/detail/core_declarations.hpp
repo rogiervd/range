@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2014 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -39,18 +39,17 @@ namespace range { namespace operation {
     "fold.hpp".
     This is automatically marked as implemented if the range has "empty"
     defined in the correct direction.
-    ("drop" and "chop" doe not have to be defined, e.g. if the range is always
+    ("drop" and "chop" do not have to be defined, e.g. if the range is always
     empty.)
     Specialise this for a particular type of range if that makes it more
     efficient.
     */
     template <class RangeTag, class Direction, class Function, class State,
-        class Enable = void>
+        class Range, class Enable = void>
     struct fold;
     /*{
-        template <class Range>
-            ... operator() (Direction const &,
-                Function &&, State && state, Range && range) const;
+        ... operator() (Direction const &,
+            Function &&, State && state, Range && range) const;
     };*/
 
     /**
@@ -63,13 +62,44 @@ namespace range { namespace operation {
     any return types.
     Therefore, the number of template instantiations can be lower.
     */
-    template <class RangeTag, class Direction, class Function,
+    template <class RangeTag, class Direction, class Function, class Range,
         class Enable = void>
     struct for_each;
     /*{
-        template <class Range>
-            void operator() (Direction const &, Function &&, Range &&) const;
+        void operator() (Direction const &, Function &&, Range &&) const;
     };*/
+
+    /**
+    Return a lazy "prefix sum", i.e. all the intermediate step of an
+    accumulation.
+    This is implemented for general ranges in scan.hpp.
+    For some ranges, it might be more efficient to implement it specifically.
+    */
+    template <class RangeTag, class Direction, class Function, class State,
+            class Range, class Enable = void>
+        struct scan;
+
+    /**
+    Compare two ranges lexicographically.
+    This is implemented for general ranges in less_lexicographical.hpp.
+    For some combination of ranges, it might be more efficient to specialise
+    this to implement it.
+    */
+    template <class Range1Tag, class Range2Tag, class Direction, class Less,
+        class Range1, class Range2, class Enable = void>
+    struct less_lexicographical;
+
+    /**
+    Compare two ranges for equality.
+    This means that the number of elements is equal, and the elements compare
+    equal.
+    This is implemented for general ranges in equal.hpp.
+    For some combination of ranges, it might be more efficient to specialise
+    this to implement it.
+    */
+    template <class Range1Tag, class Range2Tag, class Direction,
+        class Predicate, class Range1, class Range2, class Enable = void>
+    struct equal;
 
 }} // namespace range::operation
 

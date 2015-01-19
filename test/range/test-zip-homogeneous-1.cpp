@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -60,6 +60,8 @@ using range::has;
 namespace callable = range::callable;
 
 BOOST_AUTO_TEST_SUITE(test_range_zip)
+
+template <class ...> struct show_types;
 
 BOOST_AUTO_TEST_CASE (example) {
     std::vector <int> vi;

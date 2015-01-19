@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -184,17 +184,18 @@ namespace range {
 
         // Enable make_view only if Directions is front, back, or a combination.
         // Specialisation for std::pair.
-        template <bool Move, class First, class Second, class Directions>
+        template <bool Move, class First, class Second, class Directions,
+                class Range>
             struct make_view <Move, heavyweight_tag <std::pair <First, Second>>,
-                Directions,
+                Directions, Range,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions,
             detail::make_view_std_pair <Move, First, Second>> {};
 
         // Specialisation for std::tuple.
-        template <bool Move, class ... Types, class Directions>
+        template <bool Move, class ... Types, class Directions, class Range>
             struct make_view <Move, heavyweight_tag <std::tuple <Types ...>>,
-                Directions,
+                Directions, Range,
                 typename detail::enable_if_front_back <Directions>::type>
         : helper::call_with_last <1, Directions,
             detail::make_view_std_tuple <Move, Types ...>> {};

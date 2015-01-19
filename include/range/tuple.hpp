@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -920,18 +920,21 @@ template <std::size_t Begin, std::size_t End, class TupleReference>
 namespace operation {
 
     // empty.
-    template <std::size_t Size>
-        struct empty <tuple_detail::tuple_view_tag <Size>, direction::front>
+    template <std::size_t Size, class Range>
+        struct empty <tuple_detail::tuple_view_tag <Size>,
+            direction::front, Range>
     : rime::callable::always_default <rime::bool_<(Size == 0)>> {};
 
     // size.
-    template <std::size_t Size>
-        struct size <tuple_detail::tuple_view_tag <Size>, direction::front>
+    template <std::size_t Size, class Range>
+        struct size <tuple_detail::tuple_view_tag <Size>,
+            direction::front, Range>
     : rime::callable::always_default <rime::size_t <Size>> {};
 
     // first.
-    template <std::size_t Size>
-        struct first <tuple_detail::tuple_view_tag <Size>, direction::front,
+    template <std::size_t Size, class Range>
+        struct first <tuple_detail::tuple_view_tag <Size>,
+            direction::front, Range,
             typename std::enable_if <(Size > 0)>::type>
     {
         template <class View> auto operator() (
@@ -939,8 +942,9 @@ namespace operation {
         RETURNS (range::tuple_detail::extract <
             (View::tuple_size - View::begin_position - 1)>() (view.tuple()));
     };
-    template <std::size_t Size>
-        struct first <tuple_detail::tuple_view_tag <Size>, direction::back,
+    template <std::size_t Size, class Range>
+        struct first <tuple_detail::tuple_view_tag <Size>,
+            direction::back, Range,
             typename std::enable_if <(Size > 0)>::type>
     {
         template <class View> auto operator() (
@@ -950,9 +954,9 @@ namespace operation {
     };
 
     // at.
-    template <std::size_t Size, class Index>
+    template <std::size_t Size, class Index, class Range>
         struct at_constant <tuple_detail::tuple_view_tag <Size>,
-            direction::front, Index,
+            direction::front, Index, Range,
             typename std::enable_if <(Index::value < Size)>::type>
     {
         template <class View> auto operator() (
@@ -961,9 +965,9 @@ namespace operation {
             (View::tuple_size - View::begin_position - Index::value - 1)>() (
                 view.tuple()));
     };
-    template <std::size_t Size, class Index>
+    template <std::size_t Size, class Index, class Range>
         struct at_constant <tuple_detail::tuple_view_tag <Size>,
-            direction::back, Index,
+            direction::back, Index, Range,
             typename std::enable_if <(Index::value < Size)>::type>
     {
         template <class View> auto operator() (
@@ -974,10 +978,10 @@ namespace operation {
     };
 
     // drop.
-    template <class Increment, std::size_t Size>
+    template <class Increment, std::size_t Size, class Range>
         struct drop_constant <
             tuple_detail::tuple_view_tag <Size>, direction::front, Increment,
-            typename std::enable_if <(Increment::value <= Size)>::type>
+            Range, typename std::enable_if <(Increment::value <= Size)>::type>
     {
         template <std::size_t Begin, std::size_t End, class TupleReference>
         tuple_detail::tuple_view <Begin + Increment::value, End, TupleReference>
@@ -989,10 +993,10 @@ namespace operation {
                 Begin + Increment::value, End, TupleReference> (v);
         }
     };
-    template <class Increment, std::size_t Size>
+    template <class Increment, std::size_t Size, class Range>
         struct drop_constant <
             tuple_detail::tuple_view_tag <Size>, direction::back, Increment,
-            typename std::enable_if <(Increment::value <= Size)>::type>
+            Range, typename std::enable_if <(Increment::value <= Size)>::type>
     {
         template <std::size_t Begin, std::size_t End, class TupleReference>
         tuple_detail::tuple_view <Begin, End - Increment::value, TupleReference>
@@ -1015,18 +1019,16 @@ namespace operation {
     // These specialisations are only for direction::front.
     // This is unrolled for up to 4 elements.
     // Then, a recursive call is made for every next 4 elements.
-    template <class Function> struct for_each <
-        tuple_detail::tuple_view_tag <0>, direction::front, Function>
+    template <class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <0>, direction::front, Function, Range>
     {
-        template <class View>
-        void operator() (direction::front, Function &&, View const &) const {}
+        void operator() (direction::front, Function &&, Range &&) const {}
     };
-    template <class Function> struct for_each <
-        tuple_detail::tuple_view_tag <1>, direction::front, Function>
+    template <class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <1>, direction::front, Function, Range>
     {
-        template <class View>
-        void operator() (direction::front, Function && function,
-            View const & view) const
+        template <class View> void operator() (
+            direction::front, Function && function, View const & view) const
         {
             static constexpr std::size_t begin_index =
                 View::tuple_size - View::begin_position - 1;
@@ -1034,12 +1036,11 @@ namespace operation {
                 (begin_index - 0)>() (view.tuple()));
         }
     };
-    template <class Function> struct for_each <
-        tuple_detail::tuple_view_tag <2>, direction::front, Function>
+    template <class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <2>, direction::front, Function, Range>
     {
-        template <class View>
-        void operator() (direction::front, Function && function,
-            View const & view) const
+        template <class View> void operator() (
+            direction::front, Function && function, View const & view) const
         {
             static constexpr std::size_t begin_index =
                 View::tuple_size - View::begin_position - 1;
@@ -1049,12 +1050,11 @@ namespace operation {
                 (begin_index - 1)>() (view.tuple()));
         }
     };
-    template <class Function> struct for_each <
-        tuple_detail::tuple_view_tag <3>, direction::front, Function>
+    template <class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <3>, direction::front, Function, Range>
     {
-        template <class View>
-        void operator() (direction::front, Function && function,
-            View const & view) const
+        template <class View> void operator() (
+            direction::front, Function && function, View const & view) const
         {
             static constexpr std::size_t begin_index =
                 View::tuple_size - View::begin_position - 1;
@@ -1067,8 +1067,8 @@ namespace operation {
         }
     };
     // Size >= 4
-    template <std::size_t Size, class Function> struct for_each <
-        tuple_detail::tuple_view_tag <Size>, direction::front, Function>
+    template <std::size_t Size, class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <Size>, direction::front, Function, Range>
     {
         template <std::size_t Begin, std::size_t End, class TupleReference>
         void operator() (direction::front const & direction,
@@ -1089,11 +1089,12 @@ namespace operation {
             function (range::tuple_detail::extract <
                 (begin_index - 3)>() (view.tuple()));
 
+            typedef tuple_detail::tuple_view <Begin + 4, End, TupleReference>
+                next_view_type;
             for_each <tuple_detail::tuple_view_tag <Size - 4>,
-                direction::front, Function> recursive;
+                direction::front, Function, next_view_type> recursive;
             recursive (direction, std::forward <Function> (function),
-                tuple_detail::tuple_view <Begin + 4, End, TupleReference> (
-                    view));
+                next_view_type (view));
         }
     };
 
@@ -1132,9 +1133,9 @@ namespace operation {
 
     } // namespace tuple_detail
 
-    template <bool Move, class ... Types, class Directions>
+    template <bool Move, class ... Types, class Directions, class Range>
         struct make_view <Move, heavyweight_tag <tuple <Types ...>>,
-            Directions,
+            Directions, Range,
             typename detail::enable_if_front_back <Directions>::type>
     : helper::call_with_last <1, Directions,
         tuple_detail::make_view_tuple <Move, Types ...>> {};

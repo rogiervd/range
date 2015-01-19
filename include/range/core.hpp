@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2014 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -21,12 +21,16 @@ along with this program.  If not, see "http://www.gnu.org/licenses/".
 #define RANGE_CORE_HPP_INCLUDED
 
 #include "detail/core_base.hpp"
+#include "detail/core_member_access.hpp"
+#include "detail/core_default_direction.hpp"
+#include "detail/core_automatic_arguments.hpp"
 #include "detail/core_empty.hpp"
 #include "detail/core_size.hpp"
 #include "detail/core_view.hpp"
 #include "detail/core_first.hpp"
 #include "detail/core_drop.hpp"
 #include "detail/core_chop.hpp"
+#include "detail/core_chop_in_place.hpp"
 #include "detail/core_at.hpp"
 #include "detail/core_is_homogeneous.hpp"
 #include "detail/core_declarations.hpp"

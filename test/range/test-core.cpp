@@ -1,5 +1,5 @@
 /*
-Copyright 2012-2014 Rogier van Dalen.
+Copyright 2012-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -41,22 +41,10 @@ Other aspects are tested on different types of ranges by
 struct fake_range_1;
 struct fake_range_1_tag;
 
-struct fake_range_2;
-struct fake_range_2_normal_tag;
-struct fake_range_2_rvalue_tag;
-struct fake_range_2_lvalue_reference_tag;
-
 namespace range {
 
     template <> struct tag_of_qualified <fake_range_1>
     { typedef fake_range_1_tag type; };
-
-    template <> struct tag_of_qualified <fake_range_2, const_reference>
-    { typedef fake_range_2_normal_tag type; };
-    template <> struct tag_of_qualified <fake_range_2, temporary>
-    { typedef fake_range_2_rvalue_tag type; };
-    template <> struct tag_of_qualified <fake_range_2, reference>
-    { typedef fake_range_2_lvalue_reference_tag type; };
 
 } // namespace range
 
@@ -75,19 +63,6 @@ BOOST_AUTO_TEST_CASE (test_range_tag) {
         fake_range_1 &&>::type, fake_range_1_tag>));
     BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
         fake_range_1 const &&>::type, fake_range_1_tag>));
-
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2>::type, fake_range_2_rvalue_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2 const>::type, fake_range_2_normal_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2 &>::type, fake_range_2_lvalue_reference_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2 const &>::type, fake_range_2_normal_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2 &&>::type, fake_range_2_rvalue_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <range::tag_of <
-        fake_range_2 const &&>::type, fake_range_2_normal_tag>));
 }
 
 BOOST_AUTO_TEST_CASE (test_range_core) {

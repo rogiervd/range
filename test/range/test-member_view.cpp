@@ -1,5 +1,5 @@
 /*
-Copyright 2012-2014 Rogier van Dalen.
+Copyright 2012-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -247,12 +247,8 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
             int_view_type)>::value, "");
         static_assert (range::has <range::callable::empty (
             direction::front, int_view_type)>::value, "");
-        BOOST_MPL_ASSERT ((std::is_same <
-            range::result_of <range::callable::empty (int_view_type)>::type,
-            rime::false_type>));
-        BOOST_MPL_ASSERT ((std::is_same <range::result_of <
-            range::callable::empty (direction::front, int_view_type)>::type,
-            rime::false_type>));
+        RIME_CHECK_EQUAL (range::empty (int_view), rime::false_);
+        RIME_CHECK_EQUAL (range::empty (front, int_view), rime::false_);
         BOOST_MPL_ASSERT ((
             range::never_empty <direction::front, int_view_type>));
         BOOST_MPL_ASSERT ((

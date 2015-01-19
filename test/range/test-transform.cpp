@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -393,10 +393,6 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
     {
         auto t = transform (twice, unique_view (v));
 
-        static_assert (!std::is_same <
-            range::tag_of <decltype (t) const &>::type,
-            range::tag_of <decltype (t) &&>::type>::value, "");
-
         BOOST_CHECK_EQUAL (first (t), 12);
         t = drop (std::move (t));
         BOOST_CHECK_EQUAL (first (t), 40);
@@ -407,10 +403,6 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
     }
     {
         auto t = transform (twice, one_time_view (v));
-
-        static_assert (!std::is_same <
-            range::tag_of <decltype (t) const &>::type,
-            range::tag_of <decltype (t) &&>::type>::value, "");
 
         // Chop only available for rvalue references.
         static_assert (range::has <range::callable::chop (decltype (t))

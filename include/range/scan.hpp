@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -70,25 +70,21 @@ The structure of this is the same as some of detail/core_*.hpp.
 
 namespace operation {
 
-    template <class RangeTag, class Direction, class Enable = void>
-        struct scan;
-
-    template <class RangeTag, class Direction, class Enable /* = void*/>
+    template <class RangeTag, class Direction, class Function, class State,
+            class Range, class Enable /* = void*/>
         struct scan
     {
         /**
         Return an type, constant false if empty (direction, range) is constant,
         or "bool" if it is not.
         */
-        template <class Range> struct not_empty
-        : boost::mpl::if_<rime::is_constant <typename
+        typedef typename boost::mpl::if_<rime::is_constant <typename
             std::result_of <range::callable::empty (Direction, Range)>::type>,
-            rime::false_type, bool> {};
+            rime::false_type, bool>::type empty;
 
-        template <class Function, class State, class Range>
         auto operator() (Direction const & direction, Function && function,
             State && state, Range && range) const
-        RETURNS (scan_range <Direction, typename not_empty <Range>::type,
+        RETURNS (scan_range <Direction, empty,
             Function, State, typename std::decay <Range>::type> (
                 direction, std::forward <Function> (function),
                 std::forward <State> (state), std::forward <Range> (range)));
@@ -108,11 +104,12 @@ namespace apply {
         template <class Direction, class Function, class State, class Range>
             struct scan <meta::vector <Direction>,
                 meta::vector <Function, State>, meta::vector <Range>>
-        : operation::scan <typename range::tag_of <Range>::type, Direction> {};
+        : operation::scan <typename range::tag_of <Range>::type,
+            Direction, Function, State, Range &&> {};
 
     } // namespace automatic_arguments
 
-    /** scan */
+    /* scan */
     template <class ... Arguments> struct scan
     : automatic_arguments::categorise_arguments_default_direction <
         automatic_arguments::call_with_view_once <
@@ -172,13 +169,16 @@ static const auto scan = callable::scan();
 template <class Direction, class Empty>
     class scan_range <Direction, Empty, typename
         rime::enable_if_constant_true <Empty>::type>
-: public detail::with_direction <Direction>
+: public detail::with_default_direction <Direction>
 {
 public:
     scan_range (Direction const & direction)
-    : detail::with_direction <Direction> (direction) {}
+    : detail::with_default_direction <Direction> (direction) {}
 
-    Empty empty() const { return Empty(); }
+    Empty empty (Direction const & direction) const {
+        this->direction_must_be_equal (direction);
+        return Empty();
+    }
 };
 
 // Case 2: known to be non-empty.
@@ -186,7 +186,7 @@ template <class Direction, class Empty,
         class Function, class State, class Underlying>
     class scan_range <Direction, Empty, Function, State, Underlying, typename
         rime::enable_if_constant_false <Empty>::type>
-: public detail::with_direction <Direction>
+: public detail::with_default_direction <Direction>
 {
 public:
     typedef Function function_type;
@@ -205,19 +205,19 @@ public:
     template <class QFunction, class QState, class QUnderlying>
     scan_range (Direction const & direction, QFunction function,
         QState && state, QUnderlying && underlying)
-    : detail::with_direction <Direction> (direction),
+    : detail::with_default_direction <Direction> (direction),
         function_ (std::forward <QFunction> (function)),
         state_ (std::forward <QState> (state)),
         underlying_ (std::forward <QUnderlying> (underlying)) {}
 
     // Copy-construction.
     scan_range (scan_range const & that)
-    : detail::with_direction <Direction> (that.direction()),
+    : detail::with_default_direction <Direction> (that.direction()),
         function_ (that.function_), state_ (that.state_),
         underlying_ (that.underlying_) {}
 
     scan_range (scan_range && that)
-    : detail::with_direction <Direction> (std::move (that.direction())),
+    : detail::with_default_direction <Direction> (std::move (that.direction())),
         function_ (std::move (that.function_)),
         state_ (utility::storage::get <State, scan_range &&>() (that.state_)),
         underlying_ (std::move (that.underlying_)) {}
@@ -237,7 +237,10 @@ public:
         return *this;
     }
 
-    Empty empty() const { return Empty(); }
+    Empty empty (Direction const & direction) const {
+        this->direction_must_be_equal (direction);
+        return Empty();
+    }
 
     Function const & function() const { return function_; }
     Function & function() { return function_; }
@@ -258,7 +261,7 @@ template <class Direction, class Empty,
         class Function, class State, class Underlying>
     class scan_range <Direction, Empty, Function, State, Underlying, typename
         rime::disable_if_constant <Empty>::type>
-: public detail::with_direction <Direction>
+: public detail::with_default_direction <Direction>
 {
 public:
     typedef Function function_type;
@@ -303,12 +306,12 @@ private:
 
 public:
     scan_range (Direction const & direction)
-    : detail::with_direction <Direction> (direction) {}
+    : detail::with_default_direction <Direction> (direction) {}
 
     template <class QFunction, class QState, class QUnderlying>
     scan_range (Direction const & direction,
         QFunction && function, QState && state, QUnderlying && underlying)
-    : detail::with_direction <Direction> (direction),
+    : detail::with_default_direction <Direction> (direction),
         content_ (content_type (
             std::forward <QFunction> (function), std::forward <QState> (state),
             std::forward <QUnderlying> (underlying)))
@@ -316,11 +319,11 @@ public:
 
     // Construction.
     scan_range (scan_range const & that)
-    : detail::with_direction <Direction> (that.direction()),
+    : detail::with_default_direction <Direction> (that.direction()),
         content_ (that.content_) {}
 
     scan_range (scan_range && that)
-    : detail::with_direction <Direction> (std::move (that.direction())),
+    : detail::with_default_direction <Direction> (std::move (that.direction())),
         content_ (std::move (that.content_)) {}
 
     // Assignment must be explicit because rime::variant could not do the right
@@ -335,7 +338,10 @@ public:
         return *this;
     }
 
-    bool empty() const { return content_.template contains <void>(); }
+    Empty empty (Direction const & direction) const {
+        this->direction_must_be_equal (direction);
+        return content_.template contains <void>();
+    }
 
     Function const & function() const
     { return rime::get <content_type> (content_).function_; }
@@ -362,107 +368,32 @@ Tag for scan_range.
     Whether the scan_range is known to be empty.
     This, of course, occurs one element after the underlying range becomes
     empty.
-\tparam Homogeneous
-    Whether the scan_range is homogeneous, i.e. whether the underlying range is
-    homogeneous and the function returns the same type.
-\tparam DropImplementable
-    Whether \a drop is implementable on the range as qualified.
-    (Either first and drop, or just chop, need to be implemented for the right
-    qualifications.)
-\tparam Reference
-    Whether the range is an lvalue reference (so that chop_in_place can be
-    implemented).
 */
-template <class Direction, bool KnownEmpty,
-    bool Homogeneous, bool DropImplementable, bool Reference>
-struct scan_tag;
-
-namespace scan_range_detail {
-
-    template <class Direction, class Function, class State, class Underlying>
-        struct function_homogeneous
-    : std::is_same <typename result_of <Function (
-            State, callable::first (Direction, Underlying))>::type,
-        State>
-    {};
-
-    template <class Direction, class Function, class State, class Underlying,
-        qualification qualifier>
-    struct tag_of_scan_range
-    {
-        template <class Underlying2> struct can_iterate
-        : boost::mpl::or_<
-            boost::mpl::and_<
-                has <callable::first (Direction, Underlying2)>,
-                has <callable::drop (Direction, Underlying2)>>,
-            has <callable::chop (Direction, Underlying2)>
-        > {};
-
-        static bool constexpr homogeneous = boost::mpl::and_<
-                ::range::is_homogeneous <Direction, Underlying>,
-                function_homogeneous <Direction, Function, State, Underlying>
-            >::value;
-
-        static bool constexpr drop_implementable =
-            boost::mpl::or_<
-                always_empty <Direction, Underlying>,
-                can_iterate <
-                    typename std::conditional <(qualifier == temporary),
-                        Underlying, Underlying const &>::type>
-            >::value;
-
-        typedef scan_tag <Direction, false, homogeneous, drop_implementable,
-            (qualifier == reference)> type;
-    };
-
-    template <class Direction, qualification qualifier>
-        struct tag_of_empty_scan_range
-    {
-        typedef scan_tag <
-            Direction, true, false, false, (qualifier == reference)> type;
-    };
-
-} // namespace scan_range_detail
+template <class Direction, bool KnownEmpty> struct scan_tag;
 
 template <class Direction, class Empty, class Function, class State,
-    class Underlying, qualification qualifier>
+    class Underlying>
 struct tag_of_qualified <scan_range <
-    Direction, Empty, Function, State, Underlying>, qualifier>
-: boost::mpl::eval_if <
-    boost::mpl::and_<rime::is_constant <Empty>, Empty>,
-    scan_range_detail::tag_of_empty_scan_range <Direction, qualifier>,
-    scan_range_detail::tag_of_scan_range <
-        Direction, Function, State, Underlying, qualifier>> {};
+    Direction, Empty, Function, State, Underlying>>
+{
+    typedef scan_tag <Direction,
+        boost::mpl::and_<rime::is_constant <Empty>, Empty>::value> type;
+};
 
 namespace operation {
 
-    template <class Direction, bool KnownEmpty,
-            bool Homogeneous, bool DropImplementable, bool IsReference>
-        struct empty <scan_tag <Direction, KnownEmpty,
-            Homogeneous, DropImplementable, IsReference>, Direction>
-    {
-        template <class ScanRange> auto operator() (
-            Direction const & direction, ScanRange const & r) const
-        -> decltype (r.empty())
-        {
-            r.direction_must_be_equal (direction);
-            return r.empty();
-        }
-    };
-
     // size.
     // Case where the scan_range is empty.
-    template <class Direction,
-            bool Homogeneous, bool DropImplementable, bool IsReference>
-        struct size <scan_tag <Direction, true,
-            Homogeneous, DropImplementable, IsReference>, Direction>
+    template <class Direction, class ScanRange>
+        struct size <scan_tag <Direction, true>, Direction, ScanRange>
     : rime::callable::always_default <rime::size_t <0>> {};
 
     // Case where the scan_range is non-empty.
-    template <class Direction,
-            bool Homogeneous, bool DropImplementable, bool IsReference>
-        struct size <scan_tag <Direction, false,
-            Homogeneous, DropImplementable, IsReference>, Direction>
+    template <class Direction, class ScanRange>
+        struct size <scan_tag <Direction, false>, Direction, ScanRange,
+        typename boost::enable_if <has <range::callable::size (
+            Direction, typename std::decay <ScanRange>::type::underlying_type)
+        >>::type>
     {
         // (This is a function class to prevent a compiler error on GCC 4.6.)
         struct next {
@@ -470,8 +401,7 @@ namespace operation {
             RETURNS (rime::cast_value <Type> (value + one_type()));
         };
 
-        template <class ScanRange> auto operator() (
-            Direction const & direction, ScanRange const & r) const
+        auto operator() (Direction const & direction, ScanRange && r) const
         -> decltype (next() (range::size (r.underlying())))
         {
             r.direction_must_be_equal (direction);
@@ -480,30 +410,55 @@ namespace operation {
     };
 
     // first.
-    template <class Direction, bool KnownEmpty,
-            bool Homogeneous, bool DropImplementable, bool IsReference>
-        struct first <scan_tag <Direction, KnownEmpty,
-            Homogeneous, DropImplementable, IsReference>,
-        Direction>
+    template <class Direction, class ScanRange>
+        struct first <scan_tag <Direction, false>, Direction, ScanRange>
     {
-        template <class ScanRange>
-            typename utility::storage::get <typename
-                std::decay <ScanRange>::type::state_type, ScanRange &&>::type
-        operator() (Direction const & direction, ScanRange && r) const
-        {
+        typename utility::storage::get <typename
+            std::decay <ScanRange>::type::state_type, ScanRange &&>::type
+        operator() (Direction const & direction, ScanRange && r) const {
             r.direction_must_be_equal (direction);
             return utility::storage::get <typename std::decay <ScanRange>::type
                 ::state_type, ScanRange &&>() (r.state());
         }
     };
 
+    namespace scan_detail {
+
+        template <class Direction, class Underlying> struct can_iterate
+        : boost::mpl::or_<
+            boost::mpl::and_<
+                has <callable::first (Direction, Underlying)>,
+                has <callable::drop (Direction, Underlying)>>,
+            has <callable::chop (Direction, Underlying)>
+        > {};
+
+        // Rvalue.
+        template <class Direction, class ScanRange, class Underlying
+                = typename std::decay <ScanRange>::type::underlying_type>
+            struct drop_implementable
+        : boost::mpl::or_<
+            always_empty <Direction, Underlying>,
+            can_iterate <Direction, Underlying>
+        > {};
+
+        // Lvalue.
+        template <class Direction, class ScanRange, class Underlying>
+            struct drop_implementable <Direction, ScanRange &, Underlying>
+        : boost::mpl::or_<
+            always_empty <Direction, Underlying const &>,
+            can_iterate <Direction, Underlying const &>
+        > {};
+
+    } // namespace scan_detail
+
     // drop_one.
-    template <class Direction, bool Homogeneous, bool IsReference>
-        struct drop_one <scan_tag <Direction, false,
-            Homogeneous, true, IsReference>, Direction>
+    template <class Direction, class ScanRange>
+        struct drop_one <scan_tag <Direction, false>, Direction, ScanRange,
+            typename boost::enable_if <
+                scan_detail::drop_implementable <Direction, ScanRange>>::type>
     {
         /* Compute the result type. */
-        // Case 1: the current range is not known to be empty.
+        // Case 1: the underlying range is not known to be empty.
         template <class Function, class State, class Underlying,
             class UnderlyingEmpty = typename std::result_of <
                 callable::empty (Direction, Underlying)>::type,
@@ -520,7 +475,7 @@ namespace operation {
                 Function, new_state, new_underlying> type;
         };
 
-        // Case 2: the current range is known to be empty.
+        // Case 2: the underlying range is known to be empty.
         template <class Function, class State, class Underlying,
             class UnderlyingEmpty>
         struct result_implementation <
@@ -528,8 +483,8 @@ namespace operation {
             typename rime::enable_if_constant_true <UnderlyingEmpty>::type>
         { typedef scan_range <Direction, UnderlyingEmpty> type; };
 
-        template <class ScanRange> struct result
-        : result <typename std::decay <ScanRange>::type> {};
+        template <class ScanRange2> struct result
+        : result <typename std::decay <ScanRange2>::type> {};
 
         template <class Empty, class Function, class State, class Underlying>
             struct result <
@@ -537,10 +492,10 @@ namespace operation {
         : result_implementation <Function, State, Underlying> {};
 
         struct when_underlying_empty {
-            template <class ScanRange,
-                class Result = typename result <ScanRange>::type>
-            Result operator() (Direction const & direction, ScanRange const & r)
-                const
+            template <class ScanRange2,
+                class Result = typename result <ScanRange2>::type>
+            Result operator() (Direction const & direction,
+                ScanRange2 const & r) const
             { return Result (direction); }
         };
 
@@ -578,9 +533,8 @@ namespace operation {
             }
         };
 
-        template <class One, class ScanRange, class Result =
-            typename result <ScanRange>::type> Result
-            operator() (Direction const & direction, One, ScanRange && range)
+        template <class One, class Result = typename result <ScanRange>::type>
+        Result operator() (Direction const & direction, One, ScanRange && range)
             const
         {
             range.direction_must_be_equal (direction);
@@ -591,47 +545,43 @@ namespace operation {
     };
 
     // chop.
-    // Must be implemented because "first" should not be a reference.
-    template <class Direction, bool Homogeneous, bool IsReference>
-        struct chop <scan_tag <Direction, false,
-            Homogeneous, true, IsReference>, Direction>
+    // This is implemented explicitly because "first" should not be a reference.
+    template <class Direction, class ScanRange>
+        struct chop <scan_tag <Direction, false>, Direction, ScanRange,
+            typename boost::enable_if <
+                scan_detail::drop_implementable <Direction, ScanRange>>::type>
     {
-        template <class ScanRange> struct result {
-            typedef typename std::decay <ScanRange>::type::state_type
-                first_type;
-            typedef typename decayed_result_of <
-                    callable::drop (Direction, one_type, ScanRange)>::type
-                rest_type;
 
-            typedef chopped <first_type, rest_type> type;
-        };
+        typedef typename std::decay <ScanRange>::type::state_type first_type;
+        typedef typename decayed_result_of <
+                callable::drop (Direction, one_type, ScanRange)>::type
+            rest_type;
 
-        template <class ScanRange,
-        class Result = typename result <ScanRange>::type,
-            class FirstType = typename result <ScanRange>::first_type>
-        Result operator() (Direction const & direction, ScanRange && range)
+        typedef chopped <first_type, rest_type> result_type;
+
+        result_type operator() (Direction const & direction, ScanRange && range)
             const
         {
-            FirstType first = range::first (direction, range);
-            return Result (std::forward <FirstType> (first),
+            first_type first = range::first (direction, range);
+            return result_type (std::forward <first_type> (first),
                 range::drop (direction, std::forward <ScanRange> (range)));
         }
     };
 
     // chop_in_place: must be implemented explicitly because it cannot return a
     // reference to the state.
-    template <class Direction, bool KnownEmpty, bool DropImplementable>
-        struct chop_in_place <scan_tag <Direction, KnownEmpty,
-            true, DropImplementable, true>, Direction>
+    template <class Direction, class ScanRange>
+        struct chop_in_place <scan_tag <Direction, false>, Direction,
+            ScanRange &, typename boost::enable_if <
+                scan_detail::drop_implementable <Direction, ScanRange>>::type>
     {
-        template <class ScanRange,
-            class Result = typename std::decay <ScanRange>::type::state_type>
-        Result operator() (Direction const & direction, ScanRange & range)
+        typedef typename std::decay <ScanRange>::type::state_type result_type;
+        result_type operator() (Direction const & direction, ScanRange & range)
             const
         {
-            Result first = range::first (direction, range);
+            result_type first = range::first (direction, range);
             range = ::range::drop (direction, std::move (range));
-            return std::forward <Result> (first);
+            return std::forward <result_type> (first);
         }
     };
 

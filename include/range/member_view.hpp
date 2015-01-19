@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -145,6 +145,8 @@ free to do with this with they please.
 template <class Structure, class Extractors> class member_view
 : public detail::member_view_base <Structure> {
     typedef detail::member_view_base <Structure> base;
+    static std::size_t constexpr extractor_num = meta::size <Extractors>::value;
+
 public:
     explicit member_view (Structure structure)
     : base (static_cast <Structure> (structure)) {}
@@ -159,74 +161,51 @@ public:
 
     typedef Structure structure_type;
     typedef Extractors extractors_type;
+
+private:
+    friend class operation::member_access;
+
+    auto empty (direction::front) const
+    RETURNS (rime::bool_<extractor_num == 0>());
+
+    auto size (direction::front) const
+    RETURNS (rime::size_t <extractor_num>());
+
+    // first.
+    template <class Direction> struct first_extractor
+    : meta::first <Direction, Extractors> {};
+
+    template <class Direction> struct first_type
+    : result_of <typename first_extractor <Direction>::type (Structure)> {};
+
+    template <class Direction>
+        typename boost::lazy_enable_if_c <
+            (extractor_num != 0), first_type <Direction>>::type
+        first (Direction) const
+    { return typename first_extractor <Direction>::type() (this->structure()); }
+
+    // drop.
+    template <class Direction, class Increment> struct drop_result {
+        typedef typename meta::drop <Direction, Increment, Extractors>::type
+            new_extractors;
+        typedef member_view <Structure, new_extractors> type;
+    };
+
+    template <class Direction, class Increment>
+        typename boost::lazy_enable_if_c <
+            (std::size_t (Increment::value) <= extractor_num),
+            drop_result <Direction, Increment>>::type
+    drop_constant (Direction const &, Increment const &) const
+    { return typename drop_result <Direction, Increment>::type (*this); }
 };
 
 template <std::size_t Size> struct member_view_tag;
 
 template <class Structure, class Extractors>
-    struct tag_of_qualified <member_view <Structure, Extractors> >
+    struct tag_of_qualified <member_view <Structure, Extractors>>
 {
     typedef member_view_tag <meta::size <Extractors>::type::value> type;
 };
-
-namespace operation {
-
-    // empty
-    template <std::size_t size>
-        struct empty <member_view_tag <size>, direction::front>
-    : helper::return_default_constructed <rime::false_type> {};
-
-    template <> struct empty <member_view_tag <0u>, direction::front>
-    : helper::return_default_constructed <rime::true_type> {};
-
-    // size
-    template <std::size_t Size>
-        struct size <member_view_tag <Size>, direction::front>
-    : helper::return_default_constructed <rime::size_t <Size>> {};
-
-    // first
-    template <std::size_t Size, class Direction>
-        struct first <member_view_tag <Size>, Direction,
-            typename boost::enable_if <boost::mpl::or_ <
-                std::is_same <Direction, direction::front>,
-                std::is_same <Direction, direction::back>
-        >>::type>
-    {
-        template <class Range> struct extractor
-        : meta::first <Direction, typename Range::extractors_type> {};
-
-        template <class Range> auto operator() (Direction const &,
-            Range const & range) const
-        RETURNS (typename extractor <Range>::type() (range.structure()));
-    };
-
-    template <> struct first <member_view_tag <0u>, direction::front>
-    : unimplemented {};
-    template <> struct first <member_view_tag <0u>, direction::back>
-    : unimplemented {};
-
-    // drop_constant (instantiated only if Increment is constant).
-    template <std::size_t size, class Direction, class Increment>
-        struct drop_constant <member_view_tag <size>, Direction, Increment,
-            // Only implement if Increment <= size.
-            typename std::enable_if <(std::size_t (Increment::value) <= size)
-        >::type>
-    {
-        template <class Range> struct result {
-            typedef typename std::decay <Range>::type range;
-            typedef typename meta::drop <Direction, Increment,
-                typename range::extractors_type>::type new_extractors;
-            typedef member_view <typename range::structure_type, new_extractors>
-                type;
-        };
-
-        template <class Range> auto
-            operator() (Direction const &, Increment const &,
-                Range const & range) const
-        RETURNS (typename result <Range>::type (range));
-    };
-
-} // namespace operation
 
 } // namespace range
 

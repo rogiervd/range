@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -40,16 +40,17 @@ namespace range {
     { typedef heavyweight_tag <weird_heavyweight_count> type; };
 
     namespace operation {
-        template <>
-            struct default_direction <heavyweight_tag <weird_heavyweight_count>>
+        template <class Range>
+            struct default_direction <heavyweight_tag <weird_heavyweight_count>,
+                Range>
         {
             // Should not be called.
             forgotten_to_define_direction operator() (weird_heavyweight_count);
         };
 
-        template <>
+        template <class Range>
             struct make_view <false, heavyweight_tag <weird_heavyweight_count>,
-                meta::vector <weird_direction>>
+                meta::vector <weird_direction>, Range>
         {
             weird_count operator() (
                 weird_direction const &, weird_heavyweight_count)
@@ -123,19 +124,19 @@ namespace range {
 
         } // namespace detail
 
-        template <bool Move, typename Type>
+        template <bool Move, typename Type, class Range>
             struct make_view <Move, heavyweight_tag <std::forward_list <Type>>,
-                meta::vector <direction::front>>
+                meta::vector <direction::front>, Range>
         : detail::view_stl_container <Move, std::forward_list <Type>> {};
 
-        template <bool Move, typename Type>
+        template <bool Move, typename Type, class Range>
             struct make_view <Move, heavyweight_tag <std::vector <Type>>,
-                meta::vector <direction::front>>
+                meta::vector <direction::front>, Range>
         : detail::view_stl_container <Move, std::vector <Type>> {};
 
-        template <bool Move, typename Type>
+        template <bool Move, typename Type, class Range>
             struct make_view <Move, heavyweight_tag <std::vector <Type>>,
-                meta::vector <direction::back>>
+                meta::vector <direction::back>, Range>
         : detail::view_stl_container <Move, std::vector <Type>> {};
 
     } // namespace operation

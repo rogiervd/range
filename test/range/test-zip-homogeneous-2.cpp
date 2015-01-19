@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -89,6 +89,12 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
             >::value, "");
         static_assert (!has <callable::drop (direction::back, decltype (z))
             >::value, "");
+
+        static_assert (has <callable::chop (decltype (z))>::value, "");
+        static_assert (has <callable::chop (direction::front, decltype (z))
+            >::value, "");
+        static_assert (!has <callable::chop (direction::back, decltype (z))
+            >::value, "");
     }
 
     vi.push_back (1);
@@ -150,6 +156,10 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
             auto first_element = first (z);
 
+            static_assert (range::has <
+                    range::callable::chop (decltype (drop (z)) const &)
+                >::value, "");
+
             BOOST_CHECK_EQUAL (first (first_element), 1);
             BOOST_CHECK_EQUAL (second (first_element), 2.5);
         }
@@ -163,6 +173,15 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
             BOOST_CHECK_EQUAL (second (first_element), 43.5);
 
             auto chopped = chop (drop (z));
+
+            static_assert (range::has <
+                    range::callable::chop (decltype (zip_from (t)))
+                >::value, "");
+            // show_types <decltype (z)> st;
+            // show_types <decltype (range::default_direction (z))> st2;
+            static_assert (range::has <
+                    range::callable::chop (decltype (zip_from (range::back, t)))
+                >::value, "");
 
             BOOST_CHECK_EQUAL (first (chopped.first()), 3);
             BOOST_CHECK_EQUAL (second (chopped.first()), 27.5);

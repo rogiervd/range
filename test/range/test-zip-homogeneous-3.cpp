@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -77,6 +77,8 @@ BOOST_AUTO_TEST_CASE (with_weird_count) {
 
     BOOST_CHECK_EQUAL (first (first (z)), 8);
     BOOST_CHECK_EQUAL (second (first (z)), 17);
+
+    static_assert (!has <callable::size (decltype (z))>::value, "");
 
     for (int count = 0; count != 10; ++ count) {
         BOOST_CHECK_EQUAL (first (first (z)), 8 + count);

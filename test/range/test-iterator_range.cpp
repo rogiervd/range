@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -187,6 +187,8 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
             direction::back, forward_type)>));
 
         // Only for rvalue ranges.
+        static_assert (
+            std::is_constructible <input_type, input_type &&>::value, "");
         BOOST_MPL_ASSERT ((range::has <range::callable::first (input_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
             direction::front, input_type &&)>));

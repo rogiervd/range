@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -70,12 +70,12 @@ namespace operation {
     empty (direction, view (direction, range)) is defined.
     Thus, view would need to be instantiated inside its instantiation.
     */
-    template <class Container, class Directions>
-        struct view <heavyweight_tag <Container>, Directions>
-    : make_view <false, heavyweight_tag <Container>, Directions> {};
-    template <class Container, class Directions>
-        struct view_once <heavyweight_tag <Container>, Directions>
-    : make_view <true, heavyweight_tag <Container>, Directions> {};
+    template <class Container, class Directions, class Range>
+        struct view <heavyweight_tag <Container>, Directions, Range>
+    : make_view <false, heavyweight_tag <Container>, Directions, Range> {};
+    template <class Container, class Directions, class Range>
+        struct view_once <heavyweight_tag <Container>, Directions, Range>
+    : make_view <true, heavyweight_tag <Container>, Directions, Range> {};
 
     /*
     Operations on heavyweight ranges forward to the same operation applied to
@@ -85,78 +85,78 @@ namespace operation {
     */
 
     // empty.
-    template <class Container, class Direction>
-        struct empty <heavyweight_tag <Container>, Direction,
+    template <class Container, class Direction, class CVContainer>
+        struct empty <heavyweight_tag <Container>, Direction, CVContainer,
             typename boost::enable_if <has <callable::empty (
-                Direction, callable::view (Direction, Container))>>::type>
+                Direction, callable::view (Direction, CVContainer))>>::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, CVContainer && container) const
+        auto operator() (Direction const & direction, CVContainer && container)
+            const
         RETURNS (::range::empty (direction, ::range::view (
             direction, std::forward <CVContainer> (container))));
     };
 
     // size.
-    template <class Container, class Direction>
-        struct size <heavyweight_tag <Container>, Direction,
+    template <class Container, class Direction, class CVContainer>
+        struct size <heavyweight_tag <Container>, Direction, CVContainer,
             typename boost::enable_if <has <callable::size (
                 Direction, callable::view (Direction, Container))>>::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, CVContainer && container) const
+        auto operator() (Direction const & direction, CVContainer && container)
+            const
         RETURNS (::range::size (direction, ::range::view (
             direction, std::forward <CVContainer> (container))));
     };
 
     // first.
-    template <class Container, class Direction>
-        struct first <heavyweight_tag <Container>, Direction,
+    template <class Container, class Direction, class CVContainer>
+        struct first <heavyweight_tag <Container>, Direction, CVContainer,
             typename boost::enable_if <has <callable::first (
                 Direction, callable::view_once (Direction, Container))>>::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, CVContainer && container) const
+        auto operator() (Direction const & direction, CVContainer && container)
+            const
         // Use view_once in case the container is a temporary.
         RETURNS (::range::first (direction, ::range::view_once (
             direction, std::forward <CVContainer> (container))));
     };
 
     // at.
-    template <class Container, class Direction, class Index>
-        struct at <heavyweight_tag <Container>, Direction, Index,
+    template <class Container, class Direction, class Index, class CVContainer>
+        struct at <heavyweight_tag <Container>, Direction, Index, CVContainer,
             typename boost::enable_if <has <callable::at (Direction, Index,
                 callable::view_once (Direction, Container))>>::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, Index const & index,
+        auto operator() (Direction const & direction, Index const & index,
             CVContainer && container) const
         RETURNS (::range::at (direction, index, ::range::view_once (
             direction, std::forward <CVContainer> (container))));
     };
 
     // drop.
-    template <class Container, class Direction, class Increment>
+    template <class Container, class Direction, class Increment,
+            class CVContainer>
         struct drop <heavyweight_tag <Container>, Direction, Increment,
+            CVContainer,
             typename boost::enable_if <has <callable::drop (
                 Direction, Increment, callable::view (Direction, Container))>
             >::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, Increment const & increment,
-            CVContainer && container) const
+        auto operator() (Direction const & direction,
+            Increment const & increment, CVContainer && container) const
         RETURNS (::range::drop (direction, increment, ::range::view (
             direction, std::forward <CVContainer> (container))));
     };
 
     // chop.
-    template <class Container, class Direction>
-        struct chop <heavyweight_tag <Container>, Direction,
+    template <class Container, class Direction, class CVContainer>
+        struct chop <heavyweight_tag <Container>, Direction, CVContainer,
             typename boost::enable_if <has <callable::chop (
                 Direction, callable::view (Direction, Container))>
             >::type>
     {
-        template <class CVContainer> auto
-        operator() (Direction const & direction, CVContainer && container) const
+        auto operator() (Direction const & direction, CVContainer && container)
+            const
         RETURNS (::range::chop (direction, ::range::view (
             direction, std::forward <CVContainer> (container))));
     };

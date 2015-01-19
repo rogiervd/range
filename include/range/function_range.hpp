@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -56,30 +56,31 @@ public:
 
 private:
     function_type function_;
+
+private:
+    friend class operation::member_access;
+
+    auto empty (direction::front) const RETURNS (rime::false_);
+
+    auto chop_in_place (direction::front) RETURNS (function_());
 };
 
-template <qualification qualifier> struct function_range_tag;
+struct function_range_tag;
+
+template <class Function> struct tag_of_qualified <function_range <Function>>
+{ typedef function_range_tag type; };
 
 template <class Function> function_range <Function>
     make_function_range (Function const & function)
 { return function_range <Function> (function); }
 
-template <class Function, qualification qualifier>
-    struct tag_of_qualified <function_range <Function>, qualifier>
-{ typedef function_range_tag <qualifier> type; };
-
 namespace operation {
 
-    /* Forward to underlying for default_direction, empty, size. */
+    // first and drop are defined automatically for rvalues.
 
-    template <qualification qualifier>
-        struct empty <function_range_tag <qualifier>, direction::front>
-    : rime::callable::always_default <rime::false_type> {};
-
-    // size is unimplemented.
-    // first drop are defined automatically for rvalues.
-
-    template <> struct chop <function_range_tag <temporary>, direction::front> {
+    template <class Range>
+        struct chop <function_range_tag, direction::front, Range &&>
+    {
         template <class Function>
             auto operator() (
                 direction::front, function_range <Function> && range) const
@@ -89,16 +90,6 @@ namespace operation {
                 function_range <Function>> (
                     range.function()(), std::move (range));
         }
-    };
-
-    template <>
-        struct chop_in_place <function_range_tag <reference>, direction::front>
-    {
-        template <class Function>
-            auto operator() (
-                direction::front, function_range <Function> & range) const
-        -> decltype (range.function()())
-        { return range.function()(); }
     };
 
 } // namespace operation

@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -203,6 +203,8 @@ BOOST_AUTO_TEST_CASE (test_range_take_list_runtime) {
         auto first = take (3, l);
         BOOST_MPL_ASSERT_NOT ((
             std::is_same <decltype (view), decltype (first)>));
+        static_assert (
+            range::has <range::callable::first (decltype (first))>::value, "");
         RIME_CHECK_EQUAL (empty (first), true);
 
         // Second take: the type does not change.
@@ -223,8 +225,6 @@ BOOST_AUTO_TEST_CASE (test_range_take_list_runtime) {
         auto take_back = take (back, std::size_t (0), l);
         BOOST_CHECK (default_direction (take_back) == front);
         typedef range::tag_of <decltype (take_back)>::type tag;
-        range::operation::empty <tag, direction::back> callable;
-        callable (back, take_back);
         RIME_CHECK_EQUAL (empty (back, take_back), true);
     }
     {

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2014 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -73,17 +73,26 @@ namespace operation {
     It can therefore derive from the specialisation with <c>Move=false</c> and
     say <c>using make_view \<false, ...>::operator();</c>.
     The additional overload can then be added.
+
+    \tparam Move Iff \c true, assume that each element in the view will be seen
+        only once, and it is possible to pilfer the underlying container.
+    \tparam RangeTag The range tag.
+    \tparam Direction The decayed direction type.
+    \tparam Range The range itself, qualified (as an rvalue reference if an
+        rvalue).
     */
-    template <bool Move, class RangeTag, class Directions, class Enable = void>
+    template <bool Move, class RangeTag, class Directions, class Range,
+            class Enable = void>
         struct make_view
     : std::conditional <Move,
-        make_view <false, RangeTag, Directions>, unimplemented>::type {};
+        make_view <false, RangeTag, Directions, Range>, unimplemented>::type {};
 
     /**
     Call make_view, or, if that is not defined, return the range as is.
     Do not specialise this; merely specialise make_view for heavyweight ranges.
     */
-    template <class RangeTag, class Directions, class Enable = void>
+    template <class RangeTag, class Directions, class Range,
+            class Enable = void>
         struct view;
 
     /**
@@ -109,7 +118,8 @@ namespace operation {
     Only specialise this if make_view is also defined, otherwise "is_view" is
     not defined sensibly.
     */
-    template <class RangeTag, class Directions, class Enable = void>
+    template <class RangeTag, class Directions, class Range,
+            class Enable = void>
         struct view_once;
 
     namespace detail {
@@ -119,35 +129,38 @@ namespace operation {
         which is: if empty (direction, range) is defined for all directions),
         then the range is returned unchanged.
         */
-        template <class RangeTag, class Directions, class Enable = void>
+        template <class RangeTag, class Directions, class Range,
+                class Enable = void>
             struct passthrough_view : unimplemented {};
 
-        template <class RangeTag, class Directions>
-            struct passthrough_view <RangeTag, Directions,
+        template <class RangeTag, class Directions, class Range>
+            struct passthrough_view <RangeTag, Directions, Range,
                 typename boost::enable_if <
                     meta::all <meta::transform <boost::mpl::and_ <
                         is_direction <boost::mpl::_1>,
                         is_implemented <operation::empty <
-                            RangeTag, boost::mpl::_1>>>,
+                            RangeTag, boost::mpl::_1, Range &&>>>,
                     Directions>>>::type>
         : helper::call_with_last <1,
             Directions, helper::return_rvalue_reference>
         {};
     } // namespace detail
 
-    template <class RangeTag, class Directions, class Enable> struct view
+    template <class RangeTag, class Directions, class Range, class Enable>
+        struct view
     : boost::mpl::if_ <
         // First argument ("Move") to make_view is "false".
-        is_implemented <make_view <false, RangeTag, Directions>>,
-        make_view <false, RangeTag, Directions>,
-        detail::passthrough_view <RangeTag, Directions>>::type {};
+        is_implemented <make_view <false, RangeTag, Directions, Range>>,
+        make_view <false, RangeTag, Directions, Range>,
+        detail::passthrough_view <RangeTag, Directions, Range>>::type {};
 
-    template <class RangeTag, class Directions, class Enable> struct view_once
+    template <class RangeTag, class Directions, class Range, class Enable>
+        struct view_once
     : boost::mpl::if_ <
         // First argument ("Move") to make_view is "true".
-        is_implemented <make_view <true, RangeTag, Directions>>,
-        make_view <true, RangeTag, Directions>,
-        detail::passthrough_view <RangeTag, Directions>>::type {};
+        is_implemented <make_view <true, RangeTag, Directions, Range>>,
+        make_view <true, RangeTag, Directions, Range>,
+        detail::passthrough_view <RangeTag, Directions, Range>>::type {};
 
 } // namespace operation
 
@@ -215,20 +228,24 @@ namespace apply {
             class Enable = void>
         struct forward_view : operation::unimplemented {};
 
-        template <class Directions, class Range>
-            struct forward_view <
-                Directions, meta::vector<>, meta::vector <Range>>
-        : operation::view <typename range::tag_of <Range>::type, Directions> {};
+        template <class ... Directions, class Range>
+            struct forward_view <meta::vector <Directions ...>, meta::vector<>,
+                meta::vector <Range>>
+        : operation::view <typename range::tag_of <Range>::type,
+            meta::vector <typename std::decay <Directions>::type ...>, Range &&>
+        {};
 
         /* view_once. */
         template <class Directions, class Other, class Ranges,
             class Enable = void>
         struct view_once : operation::unimplemented {};
 
-        template <class Directions, class Range>
-            struct view_once <Directions, meta::vector<>, meta::vector <Range>>
-        : operation::view_once <
-            typename range::tag_of <Range>::type, Directions> {};
+        template <class ... Directions, class Range>
+            struct view_once <meta::vector <Directions ...>, meta::vector<>,
+                meta::vector <Range>>
+        : operation::view_once <typename range::tag_of <Range>::type,
+            meta::vector <typename std::decay <Directions>::type ...>, Range &&>
+        {};
 
     } // namespace automatic_arguments
 

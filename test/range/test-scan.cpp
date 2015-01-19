@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/scan.hpp"
 
 #include <vector>
+#include <list>
 #include <tuple>
 
 #include <boost/optional.hpp>
@@ -111,6 +112,30 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
         BOOST_CHECK_EQUAL (size (acc), 2);
         BOOST_CHECK_EQUAL (first (acc), 1);
     }
+    // The same, but from the back.
+    {
+        auto acc = scan (range::back, plus(), 0, v);
+        RIME_CHECK_EQUAL (range::default_direction (acc) == range::back,
+            rime::true_);
+
+        RIME_CHECK_EQUAL (empty (acc), false);
+        BOOST_CHECK_EQUAL (size (acc), 3);
+        BOOST_CHECK_EQUAL (first (acc), 0);
+
+        auto chopped2 = chop (acc);
+        BOOST_CHECK (!empty (chopped2.rest()));
+        BOOST_CHECK_EQUAL (first (chopped2.rest()), 2);
+
+        auto acc3 = drop (chopped2.rest());
+        BOOST_CHECK (!empty (acc3));
+        BOOST_CHECK_EQUAL (first (acc3), 3);
+        BOOST_CHECK (empty (drop (acc3)));
+
+        // chop_in_place.
+        chop_in_place (acc);
+        BOOST_CHECK_EQUAL (size (acc), 2);
+        BOOST_CHECK_EQUAL (first (acc), 2);
+    }
 
     // Reference return type.
     {
@@ -153,6 +178,13 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
         int & element2 = chop_in_place (acc);
         BOOST_CHECK_EQUAL (&element2, &v[1]);
         BOOST_CHECK (empty (acc));
+    }
+
+    std::list <int> l;
+    {
+        auto acc = scan (plus(), 0, l);
+        static_assert (!has <callable::size (decltype (acc))>::value,
+            "Scan over forward range cannot implement size.");
     }
 }
 

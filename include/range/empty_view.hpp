@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -40,19 +40,16 @@ struct empty_view_tag;
 template <> struct tag_of_qualified <empty_view>
 { typedef empty_view_tag type; };
 
-class empty_view {};
+class empty_view {
+private:
+    friend class operation::member_access;
 
-namespace operation {
+    template <class Direction> rime::true_type empty (Direction const &) const
+    { return rime::true_; }
 
-    // empty.
-    template <class Direction> struct empty <empty_view_tag, Direction>
-    : rime::callable::always_default <rime::true_type> {};
-
-    // size.
-    template <class Direction> struct size <empty_view_tag, Direction>
-    : rime::callable::always_default <rime::size_t <0>> {};
-
-} // namespace operation
+    template <class Direction> rime::size_t <0> size (Direction const &) const
+    { return rime::size_t <0>(); }
+};
 
 } // namespace range
 

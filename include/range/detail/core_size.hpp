@@ -1,5 +1,5 @@
 /*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -36,30 +36,44 @@ namespace range {
 
 namespace operation {
 
-    /**
+    /// Turn Direction into the forward direction and apply "size".
+    template <class RangeTag, class Direction, class Range, class Enable = void>
+        struct size_by_forward
+    : unimplemented {};
+
+    template <class RangeTag, class Direction, class Range>
+        struct size_by_forward <RangeTag, Direction, Range, typename
+            boost::enable_if <boost::mpl::and_ <
+                has <direction::callable::make_forward (Direction)>,
+                range_detail::is_implemented_forward <size,
+                    RangeTag, Direction, Range>
+            >>::type>
+    : range_detail::forward_operation <size, RangeTag, Direction, Range> {};
+
+    /** \brief
     Return the number of elements in the range.
 
-    This only needs to be defined for the forward direction, because under the
-    following conditions "size (make_forward (direction), range)" is called:
-    \li make_forward (direction) is defined.
-    \li size (make_forward (direction), range) is defined.
+    The standard implementation forwards to the <c>.size (Direction)</c>
+    member function.
+    If that is not available, it will forward to the forward direction, that is,
+    <c>size (make_forward (direction), range)</c>, if that is defined.
 
-    Direction is a decayed type.
-    The range is forwarded as is.
+    This needs to be implemented (by providing the member function or by
+    specialising this) for any range, but only for the forward direction.
+    For example, by defining it for \c direction::front, it will automatically
+    also be defined for \c direction::back.
+
+    \tparam RangeTag The range tag.
+    \tparam Direction The decayed direction type.
+    \tparam Range The range itself, qualified (as an rvalue reference if an
+        rvalue).
     */
-    template <class RangeTag, class Direction, class Enable>
+    template <class RangeTag, class Direction, class Range, class Enable>
         struct size
-    // Forward to the forward direction if it is available.
-    : boost::mpl::if_ <
-        boost::mpl::and_ <
-            has <direction::callable::make_forward (Direction)>,
-            range_detail::is_implemented_forward <size, RangeTag, Direction>
-        >,
-        range_detail::forward_operation <size, RangeTag, Direction>,
-        unimplemented
-    >::type {/*
-        template <class Range>
-            ... operator() (Direction const & direction, Range && range) const;
+    : try_all <member_access::size <Direction, Range>,
+        size_by_forward <RangeTag, Direction, Range>>
+    {/*
+        ... operator() (Direction const & direction, Range && range) const;
     */};
 
 } // namespace operation
@@ -85,7 +99,8 @@ namespace apply {
         template <class Direction, class Range>
             struct size <meta::vector <Direction>, meta::vector<>,
                 meta::vector <Range>>
-        : operation::size <typename range::tag_of <Range>::type, Direction> {};
+        : operation::size <typename range::tag_of <Range>::type,
+            typename std::decay <Direction>::type, Range &&> {};
 
     } // namespace automatic_arguments
 

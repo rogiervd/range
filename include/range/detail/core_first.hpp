@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2014 Rogier van Dalen.
+Copyright 2011-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -32,30 +32,61 @@ namespace range {
 
 namespace operation {
 
-    namespace first_detail {
 
-        template <class RangeTag, class Direction> struct forward_to_chop {
-            template <class Range> auto
-                operator() (Direction const & direction, Range && range) const
-            RETURNS (chop <RangeTag, Direction>() (
-                direction, std::forward <Range> (range)).forward_first());
-        };
+    /// Implement "first" by calling "chop".
+    template <class RangeTag, class Direction, class Range, class Enable = void>
+        struct first_by_chop
+    : unimplemented {};
 
-    } // namespace first_detail
+    template <class RangeTag, class Direction, class Range>
+        struct first_by_chop <RangeTag, Direction, Range, typename
+            boost::enable_if <
+                is_implemented <chop <RangeTag, Direction, Range>>>::type>
+    {
+        auto operator() (Direction const & direction, Range && range) const
+        RETURNS (chop <RangeTag, Direction, Range>() (
+            direction, std::forward <Range> (range)).forward_first());
+    };
 
-    /**
+    /** \brief
     Return the first element in the range.
 
-    If operation::chop is implemented, this is automatically implemented in
-    terms of it.
+    The standard implementation forwards to the <c>.first (Direction)</c>
+    member function, if that is available.
+
+    This normally should be implemented (by providing the member function or by
+    specialising this) for any range.
+
+    If this is not implemented, but operation::chop is implemented, then this is
+    automatically implemented in terms of \c chop.
+    This only works for the qualification that \c chop is implemented for.
+    This happens in \c first_automatic.
+    If for some reason this needs to be switched off, then \c first_automatic
+    can be implemented as deriving from \c unimplemented.
+
+    \tparam RangeTag The range tag.
+    \tparam Direction The decayed direction type.
+    \tparam Range The range itself, qualified (as an rvalue reference if an
+        rvalue).
     */
-    template <class RangeTag, class Direction, class Enable> struct first
-    : boost::mpl::if_ <is_implemented <chop <RangeTag, Direction>>,
-        first_detail::forward_to_chop <RangeTag, Direction>, unimplemented
-    >::type {/*
-        template <class Range>
-            ... operator() (Direction const & direction, Range && range) const;
+    template <class RangeTag, class Direction, class Range, class Enable>
+        struct first
+    : member_access::first <Direction, Range>
+    {/*
+        ... operator() (Direction const & direction, Range && range) const;
     */};
+
+    /** \brief
+    Return the first element in the range, using \c chop if necessary and
+    possible.
+
+    The only reason to specialise this would be disable this and derive it from
+    \c unimplemented even when \c chop is implemented.
+    */
+    template <class RangeTag, class Direction, class Range>
+        struct first_automatic
+    : try_all <first <RangeTag, Direction, Range>,
+        first_by_chop <RangeTag, Direction, Range>> {};
 
 } // namespace operation
 
@@ -80,7 +111,8 @@ namespace apply {
         template <class Direction, class Range>
             struct first <meta::vector <Direction>, meta::vector<>,
                 meta::vector <Range>>
-        : operation::first <typename range::tag_of <Range>::type, Direction> {};
+        : operation::first_automatic <typename range::tag_of <Range>::type,
+            typename std::decay <Direction>::type, Range &&> {};
 
     } // namespace automatic_arguments
 
@@ -93,4 +125,3 @@ namespace apply {
 } // namespace range
 
 #endif  // RANGE_DETAIL_CORE_FIRST_HPP_INCLUDED
-

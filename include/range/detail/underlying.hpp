@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -34,17 +34,25 @@ namespace callable {
 
     class get_underlying {
     public:
-        template <class Wrapper> typename Wrapper::underlying_type const &
-            operator() (Wrapper const & wrapper) const
-        { return wrapper.underlying_; }
+        template <class ... Arguments> struct apply;
 
-        template <class Wrapper> typename Wrapper::underlying_type &
-            operator() (Wrapper & wrapper) const
-        { return wrapper.underlying_; }
+        template <class Wrapper2> struct apply <Wrapper2> {
+            template <class Wrapper> typename Wrapper::underlying_type const &
+                operator() (Wrapper const & wrapper) const
+            { return wrapper.underlying_; }
 
-        template <class Wrapper> typename Wrapper::underlying_type &&
-            operator() (Wrapper && wrapper) const
-        { return std::move (wrapper.underlying_); }
+            template <class Wrapper> typename Wrapper::underlying_type &
+                operator() (Wrapper & wrapper) const
+            { return wrapper.underlying_; }
+
+            template <class Wrapper> typename Wrapper::underlying_type &&
+                operator() (Wrapper && wrapper) const
+            { return std::move (wrapper.underlying_); }
+        };
+
+        template <class Wrapper> auto operator() (Wrapper && wrapper) const
+        -> typename std::result_of <apply <Wrapper> (Wrapper)>::type
+        { return apply <Wrapper>() (std::forward <Wrapper> (wrapper)); }
     };
 
 } // namespace callable
@@ -59,6 +67,14 @@ static const auto get_underlying = callable::get_underlying();
 } // namespace detail
 
 namespace operation {
+
+    /**
+    Evaluate to the type that \c get_underlying returns for the qualified type
+    \a Wrapper.
+    */
+    template <class Wrapper> struct underlying
+    : std::result_of < ::range::detail::callable::get_underlying (Wrapper &&)>
+    {};
 
     /**
     Forward operation to the implementation for the underlying range.
@@ -92,4 +108,3 @@ namespace operation {
 } // namespace range
 
 #endif  // RANGE_RANGE_DETAIL_UNDERLYING_HPP_INCLUDED
-

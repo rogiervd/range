@@ -49,8 +49,11 @@ template <class Underlying> struct reverse_view {
     Underlying underlying_;
 
 public:
-    template <class Argument> explicit reverse_view (Argument && argument)
-    : underlying_ (std::forward <Argument> (argument)) {}
+    explicit reverse_view (Underlying && underlying)
+    : underlying_ (std::forward <Underlying> (underlying)) {}
+
+    explicit reverse_view (Underlying const & underlying)
+    : underlying_ (underlying) {}
 
     typedef Underlying underlying_type;
 

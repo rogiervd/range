@@ -224,7 +224,6 @@ BOOST_AUTO_TEST_CASE (test_range_take_list_runtime) {
     {
         auto take_back = take (back, std::size_t (0), l);
         BOOST_CHECK (default_direction (take_back) == front);
-        typedef range::tag_of <decltype (take_back)>::type tag;
         RIME_CHECK_EQUAL (empty (back, take_back), true);
     }
     {

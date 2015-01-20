@@ -105,7 +105,8 @@ namespace apply {
             struct scan <meta::vector <Direction>,
                 meta::vector <Function, State>, meta::vector <Range>>
         : operation::scan <typename range::tag_of <Range>::type,
-            Direction, Function, State, Range &&> {};
+            typename std::decay <Direction>::type, Function, State, Range &&>
+            {};
 
     } // namespace automatic_arguments
 

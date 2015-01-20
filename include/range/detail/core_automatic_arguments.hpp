@@ -56,32 +56,126 @@ namespace range { namespace apply {
     */
     namespace automatic_arguments {
 
+        namespace categorise_arguments_detail {
+
+            template <bool ... Values> struct bools;
+
+            /**
+            Categorise arguments into directions, other, and ranges.
+            General implementation.
+            */
+            template <class Arguments> struct categorise_general;
+
+            /**
+            Categorise arguments into directions, other, and ranges.
+            Specialised for a few, extremely common, cases.
+            \tparam Arguments meta::vector of arguments.
+            \tparam AreDirections \c bools of \c direction::is_direction applied
+                to each of the arguments.
+            \tparam AreRanges \c bools of \c is_range applied to each of the
+                arguments.
+            */
+            template <class Arguments, class AreDirections, class AreRanges>
+                struct categorise_specific
+            : categorise_general <Arguments> {};
+
+
+            template <class Arguments> struct categorise_general {
+                typedef typename detail::split <
+                        meta::front, is_direction <boost::mpl::_>, Arguments
+                    >::type directions_rest;
+
+                typedef typename directions_rest::first directions;
+
+                typedef typename detail::split <
+                        meta::back, is_range <boost::mpl::_>,
+                        typename directions_rest::second
+                    >::type rest_ranges;
+
+                // Here first and second are counted from the back!
+                typedef typename rest_ranges::second other;
+                typedef typename rest_ranges::first ranges;
+
+                typedef meta::vector <directions, other, ranges> type;
+            };
+
+            /* The few common cases that it is worth optimising for. */
+
+            // Range.
+            template <class Argument1>
+                struct categorise_specific <meta::vector <Argument1>,
+                    bools <false>, bools <true>>
+            {
+                typedef meta::vector <meta::vector<>, meta::vector<>,
+                    meta::vector <Argument1>> type;
+            };
+
+            // Range, range.
+            template <class Argument1, class Argument2>
+                struct categorise_specific <meta::vector <Argument1, Argument2>,
+                    bools <false, false>, bools <true, true>>
+            {
+                typedef meta::vector <meta::vector<>, meta::vector<>,
+                    meta::vector <Argument1, Argument2>> type;
+            };
+
+            // Direction, range.
+            template <class Argument1, class Argument2>
+                struct categorise_specific <meta::vector <Argument1, Argument2>,
+                    bools <true, false>, bools <false, true>>
+            {
+                typedef meta::vector <meta::vector <Argument1>, meta::vector<>,
+                    meta::vector <Argument2>> type;
+            };
+
+            // Other, range.
+            template <class Argument1, class Argument2>
+                struct categorise_specific <meta::vector <Argument1, Argument2>,
+                    bools <false, false>, bools <false, true>>
+            {
+                typedef meta::vector <meta::vector<>, meta::vector <Argument1>,
+                    meta::vector <Argument2>> type;
+            };
+
+            // Direction, other, range.
+            template <class Argument1, class Argument2, class Argument3>
+                struct categorise_specific <
+                    meta::vector <Argument1, Argument2, Argument3>,
+                    bools <true, false, false>,
+                    bools <false, false, true>>
+            {
+                typedef meta::vector <meta::vector <Argument1>,
+                    meta::vector <Argument2>, meta::vector <Argument3>> type;
+            };
+
+            // Other, range, range.
+            template <class Argument1, class Argument2, class Argument3>
+                struct categorise_specific <
+                    meta::vector <Argument1, Argument2, Argument3>,
+                    bools <false, false, false>,
+                    bools <false, true, true>>
+            {
+                typedef meta::vector <meta::vector <>, meta::vector <Argument1>,
+                    meta::vector <Argument2, Argument3>> type;
+            };
+
+        } // namespace categorise_arguments_detail
+
         /**
         Categorise arguments into directions, other, and ranges.
         "type" is set to Apply <meta::vector <Directions ...>,
         meta::vector <Other...>, meta::vector <Ranges ...>, void>.
-        The types in Directions are decayed.
         */
-        template <class Arguments> struct categorise_arguments {
-            typedef typename detail::split <
-                    meta::front, is_direction <boost::mpl::_>, Arguments>::type
-                directions_rest;
+        template <class Arguments> struct categorise_arguments;
 
-            typedef typename meta::as_vector <meta::transform <
-                std::decay <boost::mpl::_>,
-                typename directions_rest::first>>::type directions;
-
-            typedef typename detail::split <
-                    meta::back, is_range <boost::mpl::_>,
-                    typename directions_rest::second
-                >::type rest_ranges;
-
-            // Here first and second are counted from the back!
-            typedef typename rest_ranges::second other;
-            typedef typename rest_ranges::first ranges;
-
-            typedef meta::vector <directions, other, ranges> type;
-        };
+        template <class ... Arguments>
+            struct categorise_arguments <meta::vector <Arguments ...>>
+        : categorise_arguments_detail::categorise_specific <
+            meta::vector <Arguments ...>,
+            categorise_arguments_detail::bools <
+                direction::is_direction <Arguments>::value ...>,
+            categorise_arguments_detail::bools <
+                is_range <Arguments>::value ...>> {};
 
         /**
         Categorise Arguments into Directions, Other, and Ranges.

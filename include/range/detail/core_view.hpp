@@ -33,7 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/utility/enable_if.hpp>
 
 #include "meta/vector.hpp"
-#include "meta/all.hpp"
+#include "meta/all_of.hpp"
+#include "meta/all_of_c.hpp"
 #include "meta/transform.hpp"
 
 #include "rime/core.hpp"
@@ -136,7 +137,7 @@ namespace operation {
         template <class RangeTag, class Directions, class Range>
             struct passthrough_view <RangeTag, Directions, Range,
                 typename boost::enable_if <
-                    meta::all <meta::transform <boost::mpl::and_ <
+                    meta::all_of <meta::transform <boost::mpl::and_ <
                         is_direction <boost::mpl::_1>,
                         is_implemented <operation::empty <
                             RangeTag, boost::mpl::_1, Range &&>>>,
@@ -354,8 +355,8 @@ namespace apply {
             : apply_implementation <
                 // AllViews: whether all ranges are already views in all
                 // directions.
-                meta::all <meta::vector <is_view_in <
-                    meta::vector <Directions ...>, Ranges> ...>>::value,
+                meta::all_of_c <is_view_in <
+                    meta::vector <Directions ...>, Ranges>::value ...>::value,
                 meta::vector <Directions ...>, Others,
                 meta::vector <Ranges ...>,
                 // Implementation: take views of ranges.

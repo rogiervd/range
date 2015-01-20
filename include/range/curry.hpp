@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "meta/vector.hpp"
 #include "meta/count.hpp"
+#include "meta/all_of_c.hpp"
+#include "meta/any_of_c.hpp"
 
 #include "utility/disable_if_same.hpp"
 #include "utility/returns.hpp"
@@ -56,10 +58,10 @@ namespace callable {
         The arguments stored so far.
     */
     template <class Callable, class ... StoredArguments> class curried {
-        static_assert (meta::all <meta::vector <
+        static_assert (meta::all_of_c <
                 std::is_same <StoredArguments,
-                    typename std::decay <StoredArguments>::type> ...
-            >>::value,
+                    typename std::decay <StoredArguments>::type>::value ...
+            >::value,
             "Only unqualified types can be stored.");
 
         range::tuple <StoredArguments ...> stored_arguments_;
@@ -131,7 +133,7 @@ namespace callable {
         */
         template <class ... NewArguments>
             typename boost::lazy_enable_if <
-                meta::any <meta::vector <is_range <NewArguments> ...>>,
+                meta::any_of_c <is_range <NewArguments>::value ...>,
             call_result <NewArguments ...>>::type
         operator() (NewArguments && ... new_arguments) const
         {
@@ -146,8 +148,8 @@ namespace callable {
             The arguments to be appended to the currently stored arguments.
         */
         template <class ... NewArguments>
-            typename boost::lazy_disable_if <meta::any <meta::vector <
-                is_range <NewArguments> ...>>,
+            typename boost::lazy_disable_if <meta::any_of_c <
+                is_range <NewArguments>::value ...>,
             next_type <NewArguments ...>>::type
         operator() (NewArguments && ... new_arguments) const {
             return add_arguments (stored_indices_type(),

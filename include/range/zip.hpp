@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/and.hpp>
 
-#include "meta/all.hpp"
+#include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"
 
 #include "utility/disable_if_same.hpp"
@@ -205,16 +205,16 @@ public:
     typedef meta::vector <Ranges ...> range_types;
     typedef range::tuple <Ranges ...> underlying_type;
 
-    static_assert (meta::all <meta::vector <
-            std::is_same <Ranges, typename std::decay <Ranges>::type> ...
-        >>::value,
+    static_assert (meta::all_of_c <
+            std::is_same <Ranges, typename std::decay <Ranges>::type>::value ...
+        >::value,
         "All range types must be unqualified.");
 
-    static_assert (meta::all <meta::vector <is_range <Ranges> ...>>::value,
+    static_assert (meta::all_of_c <is_range <Ranges>::value ...>::value,
         "All ranges must actually be ranges.");
 
     static_assert (
-        meta::all <meta::vector <is_view <Direction, Ranges> ...>>::value,
+        meta::all_of_c <is_view <Direction, Ranges>::value ...>::value,
         "All ranges must be views in Direction.");
 
 private:
@@ -273,8 +273,8 @@ private:
     template <class Direction2,
         class Enable1 = typename boost::enable_if <
             std::is_same <Direction2, Direction>>::type,
-        class Enable2 = typename boost::enable_if <meta::all <meta::vector <
-            has <callable::size (Direction2, Ranges)> ...>>>::type>
+        class Enable2 = typename boost::enable_if <meta::all_of_c <
+            has <callable::size (Direction2, Ranges)>::value ...>>::type>
     auto size (Direction2 const & direction) const
     RETURNS (reduce() (rime::min,
         range::transform (curry::size (direction), underlying_)));
@@ -311,16 +311,17 @@ namespace operation {
                 class ... Ranges>
             struct drop_implemented_all <Direction, Increment, ZipRange &,
                 meta::vector <Ranges ...>>
-        : meta::all <meta::vector <has <
-            callable::drop (Direction, Increment, Ranges const &)> ...>> {};
+        : meta::all_of_c <has <
+            callable::drop (Direction, Increment, Ranges const &)>::value ...>
+        {};
 
         // Rvalue.
         template <class Direction, class Increment, class ZipRange,
                 class ... Ranges>
             struct drop_implemented_all <Direction, Increment, ZipRange &&,
                 meta::vector <Ranges ...>>
-        : meta::all <meta::vector <has <
-            callable::drop (Direction, Increment, Ranges &&)> ...>> {};
+        : meta::all_of_c <has <
+            callable::drop (Direction, Increment, Ranges &&)>::value ...> {};
 
         /* chop_implemented_all. */
         template <class Direction, class ZipRange, class Ranges
@@ -331,15 +332,15 @@ namespace operation {
         template <class Direction, class ZipRange, class ... Ranges>
             struct chop_implemented_all <Direction, ZipRange &,
                 meta::vector <Ranges ...>>
-        : meta::all <meta::vector <has <
-            callable::chop (Direction, Ranges const &)> ...>> {};
+        : meta::all_of_c <has <
+            callable::chop (Direction, Ranges const &)>::value ...> {};
 
         // Rvalue.
         template <class Direction, class ZipRange, class ... Ranges>
             struct chop_implemented_all <Direction, ZipRange &&,
                 meta::vector <Ranges ...>>
-        : meta::all <meta::vector <has <
-            callable::chop (Direction, Ranges &&)> ...>> {};
+        : meta::all_of_c <has <
+            callable::chop (Direction, Ranges &&)>::value ...> {};
 
     } // namespace zip_detail
 

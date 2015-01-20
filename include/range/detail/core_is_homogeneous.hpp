@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/utility/enable_if.hpp>
 
 #include "meta/vector.hpp"
-#include "meta/all.hpp"
+#include "meta/all_of_c.hpp"
 
 #include "rime/core.hpp"
 
@@ -77,7 +77,7 @@ namespace detail {
 
     template <class ... Directions, class Range>
         struct is_homogeneous <meta::vector <Directions ...>, Range>
-    : meta::all <meta::vector <is_homogeneous_in <Directions, Range>...>> {};
+    : meta::all_of_c <is_homogeneous_in <Directions, Range>::value ...> {};
 
 } // namespace detail
 

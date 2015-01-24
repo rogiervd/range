@@ -100,10 +100,18 @@ private:
             size (Direction const & direction) const
     { return range::size (direction, underlying_); }
 
-    template <class Direction> typename result_of_or <
-        callable::chop_in_place (Direction, Underlying const &)>::type
-            chop_in_place (Direction const & direction) const
-    { return function_ (range::chop_in_place (direction, underlying_)); }
+    template <class Direction> struct chop_in_place_result
+    : std::result_of <Function (typename result_of <
+        callable::chop_in_place (Direction, Underlying &)>::type)> {};
+
+    template <class Direction> typename boost::lazy_enable_if <
+        has <callable::chop_in_place (Direction, Underlying &)>,
+        chop_in_place_result <Direction>
+    >::type chop_in_place (Direction const & direction)
+    {
+        return function_.content() (
+            range::chop_in_place (direction, underlying_));
+    }
 };
 
 namespace operation {

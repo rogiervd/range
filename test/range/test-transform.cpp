@@ -37,6 +37,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "weird_count.hpp"
 #include "unique_range.hpp"
 
+/**
+Range of natural numbers starting at 1.
+Only provides chop_in_place.
+*/
+struct simple_count {
+    int i;
+
+    simple_count() : i (0) {}
+
+    rime::false_type empty (direction::front) const { return rime::false_; }
+
+    int chop_in_place (direction::front) { return i ++; }
+};
+
+struct simple_count_tag;
+
+namespace range {
+
+    template <> struct tag_of_qualified <simple_count>
+    { typedef simple_count_tag type; };
+
+} // namespace range
+
 BOOST_AUTO_TEST_SUITE(test_range_transform)
 
 using range::transform;
@@ -416,6 +439,27 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
         BOOST_CHECK_EQUAL (chopped2.first(), 40);
         // first() is available as long as it is the last call.
         BOOST_CHECK_EQUAL (first (chopped2.move_rest()), -10);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (only_chop_in_place) {
+    {
+        simple_count c;
+        int zero = chop_in_place (c);
+        BOOST_CHECK_EQUAL (zero, 0);
+        int one = chop_in_place (c);
+        BOOST_CHECK_EQUAL (one, 1);
+    }
+    {
+        auto even = transform (twice, simple_count());
+        int zero = chop_in_place (even);
+        BOOST_CHECK_EQUAL (zero, 0);
+        int two = chop_in_place (even);
+        BOOST_CHECK_EQUAL (two, 2);
+        int four = chop_in_place (even);
+        BOOST_CHECK_EQUAL (four, 4);
+        int six = chop_in_place (even);
+        BOOST_CHECK_EQUAL (six, 6);
     }
 }
 

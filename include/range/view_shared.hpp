@@ -202,14 +202,23 @@ namespace operation {
 namespace callable {
 
     struct view_shared {
+    private:
+        template <class MakeView, class Heavyweight, class Enable = void>
+            struct make_view_if_range {};
+
+        template <class MakeView, class Heavyweight>
+            struct make_view_if_range <MakeView, Heavyweight, typename
+                boost::enable_if <is_range <Heavyweight>>::type>
+        : std::decay <typename std::result_of <MakeView (Heavyweight &)>::type>
+        {};
+
+    public:
 
         /* With MakeView. */
 
         template <class Heavyweight, class MakeView,
-            class View = typename std::decay <typename std::result_of <
-                MakeView (Heavyweight &)>::type>::type,
-            class Enable = typename boost::enable_if <is_range <Heavyweight>
-                >::type>
+            class View = typename
+                make_view_if_range <MakeView, Heavyweight>::type>
         view_of_shared <Heavyweight, View>
             operator() (std::shared_ptr <Heavyweight> heavyweight,
                 MakeView const & make_view) const
@@ -220,10 +229,8 @@ namespace callable {
         }
 
         template <class Heavyweight, class MakeView,
-            class View = typename std::decay <typename std::result_of <
-                MakeView (Heavyweight &)>::type>::type,
-            class Enable = typename boost::enable_if <is_range <Heavyweight>
-                >::type>
+            class View = typename
+                make_view_if_range <MakeView, Heavyweight>::type>
         view_of_shared <typename std::decay <Heavyweight>::type, View>
             operator() (Heavyweight && heavyweight, MakeView const & make_view)
             const

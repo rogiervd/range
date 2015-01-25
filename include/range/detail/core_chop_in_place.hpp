@@ -50,13 +50,24 @@ namespace operation {
         struct chop_in_place_by_first_drop
     : unimplemented {};
 
+    namespace chop_detail {
+
+        template <class Type, class Expression> struct result_is_same
+        : std::is_same <Type, typename result_of <Expression>::type> {};
+
+        template <class Type, class Expression> struct rest_type_is_same
+        : std::is_same <Type, typename result_of <Expression>::type::rest_type>
+        {};
+
+    } // namespace chop_detail
+
     template <class RangeTag, class Direction, class Range>
         class chop_in_place_by_first_drop <RangeTag, Direction, Range &,
             typename boost::enable_if <boost::mpl::and_ <
                 is_implemented <first <RangeTag, Direction, Range &>>,
                 is_implemented <drop <RangeTag, Direction, one_type, Range &&>>,
-                std::is_same <Range, typename result_of <
-                    callable::drop (Direction, Range)>::type>
+                chop_detail::result_is_same <Range,
+                    callable::drop (Direction, Range)>
             >>::type>
     {
     public:
@@ -80,8 +91,8 @@ namespace operation {
         struct chop_in_place_by_chop <RangeTag, Direction, Range &, typename
         boost::enable_if <boost::mpl::and_ <
             is_implemented <chop <RangeTag, Direction, Range &&>>,
-            std::is_same <Range, typename result_of <
-                callable::chop (Direction, Range)>::type::rest_type>
+            chop_detail::rest_type_is_same <Range,
+                callable::chop (Direction, Range)>
         >>::type>
     {
         typename result_of <callable::chop (Direction, Range)>::type::first_type

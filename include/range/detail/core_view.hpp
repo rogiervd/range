@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/preprocessor/repetition/repeat.hpp>
 
 #include <boost/mpl/if.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/placeholders.hpp>
 
@@ -257,6 +258,20 @@ namespace apply {
 
     namespace view_detail {
 
+        template <class ... Arguments>
+            struct forward_view_returns_rvalue_reference_impl
+        : std::is_rvalue_reference <typename std::result_of <
+            forward_view <Arguments ...> (Arguments ...)>::type> {};
+
+        /// Evaluate to \c true iff forward_view is implemented and returns
+        /// an rvalue reference.
+        template <class ... Arguments>
+            struct forward_view_returns_rvalue_reference
+        : boost::mpl::if_ <
+            operation::is_implemented <forward_view <Arguments ...>>,
+            forward_view_returns_rvalue_reference_impl <Arguments ...>,
+            std::false_type>::type {};
+
         template <class Type> struct remove_rvalue_reference;
 
         template <class Type> struct remove_rvalue_reference <Type &&>
@@ -276,8 +291,7 @@ namespace apply {
 
     template <class ... Arguments> struct view
     : boost::mpl::if_ <
-        std::is_rvalue_reference <typename std::result_of <
-            forward_view <Arguments ...> (Arguments ...)>::type>,
+        view_detail::forward_view_returns_rvalue_reference <Arguments ...>,
         view_detail::view_temporary <Arguments ...>,
         forward_view <Arguments ...>
     >::type {};
@@ -290,6 +304,19 @@ namespace apply {
 
 /* is_view */
 
+namespace is_view_detail {
+
+    template <class ... Arguments> struct is_view_impl
+    : rime::as_rime_constant <typename std::is_same <
+            typename std::decay <typename
+                // Last argument is the range.
+                meta::first <meta::back, meta::vector <Arguments...>>::type
+                >::type,
+            typename decayed_result_of <callable::view (Arguments...)>::type
+        >::type>::type {};
+
+} // namespace is_view_detail
+
 /**
 Metafunction that returns true iff Range is a view.
 That is, view (directions..., range) returns range itself.
@@ -299,14 +326,9 @@ The arguments before it form Directions.
 If only one argument is given, it is Range, and its default direction is used.
 */
 template <class ... Arguments> struct is_view
-: rime::as_rime_constant <typename std::is_same <
-        typename std::decay <
-            // Last argument is the range.
-            typename meta::first <meta::back, meta::vector <Arguments...>>::type
-            >::type,
-        typename decayed_result_of <callable::view (Arguments...)>::type
-    >::type>::type {};
-
+: boost::mpl::and_ <
+    has <callable::view (Arguments...)>,
+    is_view_detail::is_view_impl <Arguments ...>> {};
 
 namespace apply {
 
@@ -346,12 +368,14 @@ namespace apply {
 
             template <class Directions, class Other, class Ranges,
                 class Enable = void>
-            struct apply;
+            struct apply : operation::unimplemented {};
 
             // Forward to apply_implementation
             template <class ... Directions, class Others, class ... Ranges>
                 struct apply <meta::vector <Directions ...>, Others,
-                    meta::vector <Ranges ...>>
+                    meta::vector <Ranges ...>,
+                    typename boost::enable_if <meta::all_of_c <
+                        has <View (Directions ..., Ranges)>::value ...>>::type>
             : apply_implementation <
                 // AllViews: whether all ranges are already views in all
                 // directions.

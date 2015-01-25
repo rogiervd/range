@@ -27,7 +27,6 @@ Define a general heterogeneous container.
 #include <boost/utility/enable_if.hpp>
 
 #include <boost/mpl/if.hpp>
-#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
 
@@ -559,11 +558,38 @@ template <class ... Types> class tuple {
     typedef meta::vector <typename utility::storage::store <Types>::type ...>
         stored_types;
 
-    template <class View> struct range_is_constructible_but_not_convertible
-    : rime::bool_ <
-        elements_type::template range_is_constructible <View>::value
-        && !elements_type::template range_is_convertible <View>::value>
+    template <class Range> struct range_is_convertible_impl
+    : elements_type::template range_is_convertible <typename
+        range::result_of <callable::view_once (direction::front, Range)>::type>
     {};
+    template <class Range> struct range_is_convertible
+    : boost::mpl::and_ <
+        has <callable::view_once (direction::front, Range)>,
+        range_is_convertible_impl <Range>> {};
+
+    template <class Range> struct range_is_constructible_impl
+    : elements_type::template range_is_constructible <typename
+        range::result_of <callable::view_once (direction::front, Range)>::type>
+    {};
+    template <class Range> struct range_is_constructible
+    : boost::mpl::and_ <
+        has <callable::view_once (direction::front, Range)>,
+        range_is_constructible_impl <Range>> {};
+
+    template <class Range> struct range_is_constructible_but_not_convertible
+    : boost::mpl::and_ <
+        range_is_constructible <Range>,
+        boost::mpl::not_ <range_is_convertible <Range>>
+    > {};
+
+    template <class Range> struct range_is_assignable_impl
+    : elements_type::template range_is_assignable <typename
+        range::result_of <callable::view_once (direction::front, Range)>::type>
+    {};
+    template <class Range> struct range_is_assignable
+    : boost::mpl::and_ <
+        has <callable::view_once (direction::front, Range)>,
+        range_is_assignable_impl <Range>> {};
 
     struct dummy_type {};
 
@@ -624,11 +650,7 @@ public:
     */
     template <class Range, class Enable = typename
         boost::enable_if <boost::mpl::and_<
-            is_range <Range>,
-            typename elements_type::template
-                range_is_convertible <typename range::result_of <
-                    callable::view_once (direction::front, Range)>::type>
-        >>::type>
+            is_range <Range>, range_is_convertible <Range>>>::type>
     tuple (Range && range, dummy_type = dummy_type())
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
         view_once (front, std::forward <Range> (range))))
@@ -649,9 +671,7 @@ public:
     template <class Range, class Enable = typename
         boost::enable_if <boost::mpl::and_<
             is_range <Range>,
-            range_is_constructible_but_not_convertible <
-                typename range::result_of <
-                    callable::view_once (direction::front, Range)>::type>
+            range_is_constructible_but_not_convertible <Range>
         >>::type>
     explicit tuple (Range && range)
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
@@ -669,11 +689,8 @@ public:
     this.
     */
     template <class Range,
-        class Enable = typename boost::enable_if <boost::mpl::and_<
-            is_range <Range>,
-            typename elements_type::template range_is_assignable <typename
-                range::result_of <
-                    callable::view_once (direction::front, Range)>::type>
+        class Enable = typename boost::enable_if <
+            boost::mpl::and_<is_range <Range>, range_is_assignable <Range>
         >>::type,
         class Enable2 = typename
             utility::disable_if_same_or_derived <tuple, Range>::type>

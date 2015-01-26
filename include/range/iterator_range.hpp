@@ -281,39 +281,94 @@ template <class Iterator>
 
 /* make_iterator_range */
 
+namespace callable {
+
+    /// Start a new namespace so "using std::begin" does not pollute the
+    /// namespace.
+    namespace make_iterator_range_detail {
+
+        using std::begin;
+        using std::end;
+
+        // From two iterators or a container.
+        struct make_iterator_range {
+            // Two iterators.
+            template <class Begin, class End, class Enable = void>
+                struct apply_two_iterators : operation::unimplemented {};
+
+            template <class Iterator>
+                struct apply_two_iterators <Iterator, Iterator, typename
+                    operation::enable_if_member <typename
+                        std::iterator_traits <Iterator>::iterator_category
+                    >::type>
+            {
+                iterator_range <Iterator> operator() (
+                    Iterator const & begin, Iterator const & end) const
+                { return iterator_range <Iterator> (begin, end); }
+            };
+
+            // One container.
+            template <class Container, class Enable = void>
+                struct apply_container : operation::unimplemented {};
+
+            template <class Container>
+                struct apply_container <Container,
+                    typename operation::enable_if_member <decltype (
+                        begin (std::declval <Container &&>()))>::type>
+            {
+                typedef decltype (begin (std::declval <Container &&>()))
+                    Iterator;
+
+                iterator_range <Iterator> operator() (Container && container)
+                    const
+                {
+                    return iterator_range <Iterator> (
+                        begin (container), end (container));
+                }
+            };
+
+            // apply.
+            template <class ... Arguments> struct apply
+            : operation::unimplemented {};
+
+            template <class Begin, class End> struct apply <Begin, End>
+            : apply_two_iterators <typename std::decay <Begin>::type,
+                typename std::decay <End>::type> {};
+
+            template <class Container> struct apply <Container>
+            : apply_container <Container> {};
+
+            // Two iterators.
+            template <class Begin, class End>
+                auto operator() (Begin && begin, End && end) const
+            RETURNS (apply <Begin, End>() (
+                std::forward <Begin> (begin), std::forward <End> (end)));
+
+            template <class Container>
+                auto operator() (Container && container) const
+            RETURNS (apply <Container>() (
+                std::forward <Container> (container)));
+        };
+
+    } // namespace make_iterator_range_detail
+
+    using make_iterator_range_detail::make_iterator_range;
+
+} // namespace callable
+
 /**
-Make an iterator_range from begin and end iterators.
+Make an iterator_range from begin and end iterators or from a container.
+Give either \a begin and \a end, or \a container.
+
 \param begin The begin iterator.
 \param end The past-the-end iterator.
-*/
-template <class Iterator, class Enable
-    = typename std::iterator_traits <Iterator>::iterator_category>
-inline iterator_range <Iterator> make_iterator_range (
-    Iterator const & begin, Iterator const & end)
-{ return iterator_range <Iterator> (begin, end); }
 
-namespace make_iterator_range_detail {
-
-    using std::begin;
-    using std::end;
-
-    template <class Container, class Iterator
-        = decltype (begin (std::declval <Container &&>()))> inline
-    iterator_range <Iterator> implementation (Container && container)
-    { return iterator_range <Iterator> (begin (container), end (container)); }
-
-} // namespace make_iterator_range_detail
-
-/**
-Make an iterator_range from a container.
 \param container
     The container to iterate.
     Begin and end iterators are found with unqualified calls to \c begin
     and \c end, after <c>using std::begin</c> and <c>using std::end</c>.
 */
-template <class Container>
-    inline auto make_iterator_range (Container && container)
-RETURNS (make_iterator_range_detail::implementation (container));
+static constexpr auto make_iterator_range = callable::make_iterator_range();
 
 namespace operation {
 

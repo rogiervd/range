@@ -923,7 +923,34 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     using range::first;
     using range::at;
 
+    // Silly arguments.
+    static_assert (!range::has <
+        range::callable::make_iterator_range (int)>::value, "");
+    static_assert (!range::has <
+        range::callable::make_iterator_range (int, int)>::value, "");
+    static_assert (!range::has <
+        range::callable::make_iterator_range (double, int)>::value, "");
+    static_assert (!range::has <
+        range::callable::make_iterator_range (double, int, int)>::value, "");
+
     std::vector <int> v;
+
+    // Pass in a container.
+    static_assert (range::has <
+        range::callable::make_iterator_range (decltype (v))>::value, "");
+    static_assert (std::is_same <std::result_of <
+        range::callable::make_iterator_range (decltype ((v)))>::type,
+        random_access_type>::value, "");
+
+    // Pass in two iterators.
+    static_assert (range::has <
+        range::callable::make_iterator_range (
+            decltype (v.begin()), decltype (v.end()))>::value, "");
+    static_assert (std::is_same <std::result_of <
+        range::callable::make_iterator_range (
+            decltype (v.begin()), decltype (v.end()))>::type,
+        random_access_type>::value, "");
+
     auto ir = range::make_iterator_range (v);
     static_assert (std::is_same <decltype (ir), random_access_type>::value, "");
 

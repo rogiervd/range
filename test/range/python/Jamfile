@@ -10,3 +10,7 @@ local rule run-test ( test-name : sources + )
     import testing ;
     testing.make-test run-pyd : $(sources) : : $(test-name) ;
 }
+
+python-extension python_range_example : python_range_example.cpp ;
+run-test test-python_range :
+    python_range_example test-python_range.py ;

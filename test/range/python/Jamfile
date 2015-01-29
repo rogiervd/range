@@ -1,0 +1,12 @@
+import python ;
+
+project
+    : requirements
+      <library>/boost//python
+    ;
+
+local rule run-test ( test-name : sources + )
+{
+    import testing ;
+    testing.make-test run-pyd : $(sources) : : $(test-name) ;
+}

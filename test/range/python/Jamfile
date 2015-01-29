@@ -14,3 +14,7 @@ local rule run-test ( test-name : sources + )
 python-extension python_range_example : python_range_example.cpp ;
 run-test test-python_range :
     python_range_example test-python_range.py ;
+
+python-extension iterator_example : iterator_example.cpp ;
+run-test test-iterator :
+    iterator_example test-iterator.py ;

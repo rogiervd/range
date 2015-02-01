@@ -19,6 +19,10 @@ python-extension iterator_example : iterator_example.cpp ;
 run-test test-iterator :
     iterator_example test-iterator.py ;
 
+python-extension tuple_example : tuple_example.cpp ;
+run-test test-tuple :
+    tuple_example test-tuple.py ;
+
 python-extension return_view_example : return_view_example.cpp ;
 run-test test-return_view :
     return_view_example test-return_view.py ;

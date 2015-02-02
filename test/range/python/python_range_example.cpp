@@ -228,7 +228,7 @@ void check_17_None_hi (python_range<> r) {
 
 boost::python::handle<> test_return_something() {
     boost::python::object o (1);
-    return boost::python::handle<> (o.ptr());
+    return boost::python::handle<> (boost::python::incref (o.ptr()));
 }
 
 BOOST_PYTHON_MODULE (python_range_example) {

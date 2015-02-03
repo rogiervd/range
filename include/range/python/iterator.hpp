@@ -37,19 +37,46 @@ Expose views as Python iterators.
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/errors.hpp>
 
+#include "utility/disable_if_same.hpp"
+
 #include "range/core.hpp"
+#include "range/any_range.hpp"
+#include "range/transform.hpp"
 
 namespace range { namespace python {
 
     /** \brief
-    Base class for wrapping views in something that can act like a Python
+    Present a view of a range as something that can act like a Python
     iterator.
-    */
-    class any_python_iterator {
-    public:
-        any_python_iterator() {}
 
-        virtual ~any_python_iterator() {}
+    The underlying range must implement \c empty() and \c chop_in_place().
+
+    If you want to use a full-fledged container, instead of using this, see
+    http://www.boost.org/doc/libs/release/libs/python/doc/v2/indexing.html
+    */
+    class python_iterator {
+        any_range <boost::python::object, capability::unique_capabilities>
+            range;
+
+        // Convert any object to Python.
+        struct to_python_object {
+            template <class Type>
+                boost::python::object operator() (Type && o) const
+            { return boost::python::object (std::forward <Type> (o)); }
+        };
+
+        void stop_iteration() {
+            PyErr_SetString (PyExc_StopIteration,
+                "No more elements in C++ range.");
+            boost::python::throw_error_already_set();
+        }
+
+    public:
+        template <class Range2, class Enable = typename
+            utility::disable_if_same_or_derived <python_iterator, Range2>::type>
+        python_iterator (Range2 && range)
+        : range (range::transform (to_python_object(),
+            std::forward <Range2> (range))) {}
 
         /** \brief
         Return the next element of the view, as a boost::python::object, and
@@ -57,48 +84,13 @@ namespace range { namespace python {
 
         This is the behaviour of a Python iterator.
         */
-        virtual boost::python::object next() = 0;
-
-        any_python_iterator & iter() { return *this; }
-
-    protected:
-        void stop_iteration() {
-            PyErr_SetString (PyExc_StopIteration,
-                "No more elements in C++ range.");
-            boost::python::throw_error_already_set();
-        }
-    };
-
-    /** \brief
-    Present a view of a range as a Python iterator.
-
-    The underlying range must implement \c empty() and \c chop_in_place().
-
-    If you want to use a full-fledged container, instead of using this, see
-    http://www.boost.org/doc/libs/release/libs/python/doc/v2/indexing.html
-
-    \todo Use any_range to allow heterogeneous ranges.
-    */
-    template <class Range> class python_iterator : public any_python_iterator {
-        static_assert (range::is_view <Range>::value,
-            "Range must be a view to be used as a Python iterator.");
-        static_assert (range::is_homogeneous <Range>::value,
-            "Range must be homogeneous to be used as a Python iterator.");
-
-        typedef typename decayed_result_of <callable::first (Range)>::type
-            first_type;
-
-        Range range;
-
-    public:
-        template <class Range2> python_iterator (Range2 && range)
-        : range (view (std::forward <Range2> (range))) {}
-
         boost::python::object next() {
             if (empty (range))
                 stop_iteration();
             return boost::python::object (chop_in_place (range));
         }
+
+        python_iterator & iter() { return *this; }
     };
 
     namespace detail {
@@ -118,16 +110,14 @@ namespace range { namespace python {
                     "Boost.Python should call this with a possibly "
                     "differently-qualified version of Range.");
 
-                typedef typename std::decay <decltype (
-                    range::view (std::declval <QRange>()))>::type view_type;
                 // Make a typed iterator. On the heap!
-                any_python_iterator * iterator =
-                    new python_iterator <view_type> (
+                python_iterator * iterator =
+                    new python_iterator (
                         range::view (std::forward <QRange> (range)));
 
                 // Make converter that takes ownership of the new object.
                 boost::python::manage_new_object
-                    ::apply <any_python_iterator *>::type iterator_converter;
+                    ::apply <python_iterator *>::type iterator_converter;
 
                 return iterator_converter (iterator);
             }
@@ -150,9 +140,8 @@ namespace range { namespace python {
     This must be called once in your \c BOOST_PYTHON_MODULE.
     */
     inline void initialise_iterator() {
-        typedef any_python_iterator python_iterator;
-
         using namespace boost::python;
+
         class_ <python_iterator, boost::noncopyable> (
             "CppRangeIterator", no_init)
             // If it quacks like a duck...
@@ -174,6 +163,8 @@ namespace range { namespace python {
 
     The element type of the view must be convertible to
     \c boost::python::object.
+    The view will be traversed in direction \ref front, which must be the
+    default direction.
     */
     template <class View> inline void register_view() {
         static_assert (is_view <View>::value,
@@ -181,6 +172,11 @@ namespace range { namespace python {
 
         static_assert (std::is_same <View, typename std::decay <View>::type
             >::value, "register_view requires an unqualied type.");
+
+        static_assert (std::is_same <typename
+                decayed_result_of <callable::default_direction (View)>::type,
+                direction::front
+            >::value, "The default direction must be direction::front.");
 
         boost::python::to_python_converter <View,
             detail::convert_iterator <View>>();

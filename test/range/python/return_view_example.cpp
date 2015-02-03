@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Range library for C++.
 
@@ -34,6 +34,7 @@ test-python_range.py.
 #include "range/count.hpp"
 #include "range/function_range.hpp"
 #include "range/std/container.hpp"
+#include "range/tuple.hpp"
 
 auto count (int size) RETURNS (range::count (size));
 
@@ -49,13 +50,20 @@ range::function_range <int()> count2() {
 class container_container {
     std::vector <int> v;
 
+    range::tuple <double, std::string, bool> t;
+
 public:
-    container_container() {
+    container_container()
+    : t (13.5, "Great!", false)
+    {
         v.push_back (17);
         v.push_back (19);
     }
 
     std::vector <int> const & get_17_19() const { return v; }
+
+    range::tuple <double, std::string, bool> const & get_tuple() const
+    { return t; }
 };
 
 int test();
@@ -72,5 +80,7 @@ BOOST_PYTHON_MODULE (return_view_example) {
 
     class_ <container_container> ("ContainerContainer")
         .def ("get_17_19", &container_container::get_17_19,
+            range::python::return_view_of_internal_reference <1>())
+        .def ("get_tuple", &container_container::get_tuple,
             range::python::return_view_of_internal_reference <1>());
 }

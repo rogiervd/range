@@ -30,7 +30,11 @@ test-python_range.py.
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 
+#include <boost/optional.hpp>
+
 #include "range/std/container.hpp"
+#include "range/std/view_optional.hpp"
+#include "range/tuple.hpp"
 
 std::list <double> doubles;
 
@@ -40,15 +44,31 @@ void set_first_to_doubles (boost::python::object & object) {
     object [0] = range::view (doubles);
 }
 
-BOOST_PYTHON_MODULE (iterator_example) {
-    using namespace boost::python;
+range::tuple <int, std::string, float> tuple;
 
+auto get_tuple() RETURNS (range::view (tuple));
+
+boost::optional <bool> optional;
+
+auto get_optional() RETURNS (range::view_optional (optional));
+
+BOOST_PYTHON_MODULE (iterator_example) {
     doubles.push_back (3.5);
     doubles.push_back (7.25);
 
+    tuple = range::make_tuple (6, "hello", 17.5f);
+
+    optional = true;
+
     range::python::initialise_iterator();
     range::python::register_view <decltype (get_doubles())>();
+    range::python::register_view <decltype (get_tuple())>();
+    range::python::register_view <decltype (get_optional())>();
+
+    using namespace boost::python;
 
     def ("getDoubles", &get_doubles);
     def ("setFirstToDoubles", &set_first_to_doubles);
+    def ("getTuple", &get_tuple);
+    def ("getOptional", &get_optional);
 }

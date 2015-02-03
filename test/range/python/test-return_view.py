@@ -42,6 +42,10 @@ def test_return_internal_reference_1():
     print (l)
     assert (l == [17, 19])
 
+    t = tuple (c.get_tuple())
+    print (t)
+    assert (t == (13.5, "Great!", False))
+
     # The iterator should remain alive until after the reference to the object
     # that contains the actual elements has gone.
     iterator = c.get_17_19()

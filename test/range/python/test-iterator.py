@@ -26,3 +26,11 @@ assert (l == [3.5, 7.25])
 l = [None]
 setFirstToDoubles (l)
 assert (list (l[0]) == [3.5, 7.25])
+
+l = list (getTuple())
+print (l)
+assert (l == [6, "hello", 17.5])
+
+l = list (getOptional())
+print (l)
+assert (l == [True])

@@ -41,8 +41,8 @@ namespace range { namespace python {
     A call policy for Boost.Python to return a view as a Python iterator.
 
     Use this call policy for a function that returns a view.
-    The Python iterator that the view is converted to will be traversed in its
-    default_direction.
+    The Python iterator that the view is converted to will be traversed in
+    direction \ref front, which must be the default direction.
     The view must be homogeneous.
 
     The view can be movable but not copyable.
@@ -82,8 +82,8 @@ namespace range { namespace python {
     This assumes that the range that the return value references is contained
     in argument \a owner_argument_index of the function.
     After the function is called, range::view will called on the range.
-    The Python iterator that the view is converted to will be traversed in its
-    default_direction.
+    The Python iterator that the view is converted to will be traversed in
+    direction \ref front, which must be the default direction.
     The view must be homogeneous.
 
     This is similar to the standard

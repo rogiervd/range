@@ -33,6 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utility/returns.hpp"
 
+#include "detail/meta_is_linear_subset.hpp"
+
 namespace range {
 
 /**
@@ -153,10 +155,12 @@ public:
 
     /**
     Generalised copy constructor.
-    It is not checked whether Extractors2 is a superset of Extractors.
+    Extractors2 must be a superset of Extractors.
     */
     template <class Extractors2>
-        member_view (member_view <Structure, Extractors2> const & that)
+        member_view (member_view <Structure, Extractors2> const & that,
+            typename boost::enable_if <
+                detail::is_linear_subset <Extractors, Extractors2>>::type * = 0)
     : base (that) {}
 
     typedef Structure structure_type;

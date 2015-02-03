@@ -619,6 +619,30 @@ BOOST_AUTO_TEST_CASE (test_range_member_view) {
         BOOST_CHECK_EQUAL (at_c <1> (three_view), 98.7);
         BOOST_CHECK_EQUAL (at_c <2> (three_view), 'a');
     }
+    {
+        // Check that member_view can be constructed only from member_view's
+        // with a superset of extractors.
+        typedef range::member_view <structure &, meta::vector<>>
+            empty_view_type;
+        typedef range::member_view <structure &, meta::vector <member_i>>
+            int_view_type;
+        typedef range::member_view <structure &,
+            meta::vector <member_i, member_d, member_c>> three_view_type;
+
+        BOOST_MPL_ASSERT ((
+            std::is_convertible <int_view_type, empty_view_type>));
+        BOOST_MPL_ASSERT ((
+            std::is_convertible <three_view_type, empty_view_type>));
+        BOOST_MPL_ASSERT ((
+            std::is_convertible <three_view_type, int_view_type>));
+
+        BOOST_MPL_ASSERT_NOT ((
+            std::is_convertible <empty_view_type, int_view_type>));
+        BOOST_MPL_ASSERT_NOT ((
+            std::is_convertible <empty_view_type, three_view_type>));
+        BOOST_MPL_ASSERT_NOT ((
+            std::is_convertible <int_view_type, three_view_type>));
+    }
 }
 
 BOOST_AUTO_TEST_CASE (test_range_functions) {

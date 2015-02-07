@@ -41,9 +41,9 @@ the same structure.
 #ifndef RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 #define RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 
-#include <cassert>
 #include <type_traits>
 #include <memory>
+#include <stdexcept>
 
 #include <boost/mpl/placeholders.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -180,10 +180,7 @@ namespace range { namespace any_range_interface {
             interface_ptr_without <capability::copy_construct>::type
                 lose_capability (capability::type <capability::copy_construct>)
                 const
-        {
-            assert (false);
-            return nullptr;
-        }
+        { throw std::logic_error ("Bug in any_range."); }
 
         virtual typename Base::interface_ptr copy() const = 0;
     };
@@ -212,35 +209,25 @@ namespace range { namespace any_range_interface {
         */
         virtual typename Base::template interface_ptr_without <Direction>::type
             lose_capability (capability::type <Direction>) const
-        {
-            assert (false);
-            return nullptr;
-        }
+        { throw std::logic_error ("Bug in any_range."); }
 
         /** \brief
         Return the result of applying \c empty to the underlying range.
         */
-        virtual bool empty (Direction const &) const {
-            assert (false);
-            return false;
-        }
+        virtual bool empty (Direction const &) const
+        { throw std::logic_error ("Bug in any_range."); }
 
         /** \brief
         Return the result of applying \c size to the underlying range.
         */
-        virtual std::size_t size (Direction const &) const {
-            assert (false);
-            return 0;
-        }
+        virtual std::size_t size (Direction const &) const
+        { throw std::logic_error ("Bug in any_range."); }
 
         /** \brief
         Return the result of applying \c first to the underlying range.
         */
-        virtual Element first (Direction const &) const {
-            assert (false);
-            return * static_cast <
-                typename std::add_pointer <Element>::type> (nullptr);
-        }
+        virtual Element first (Direction const &) const
+        { throw std::logic_error ("Bug in any_range."); }
 
         typedef typename Base::interface_ptr interface_ptr;
 
@@ -248,19 +235,15 @@ namespace range { namespace any_range_interface {
         Return a pointer to a newly constructed object that represents the
         result of calling \c drop on the underlying range.
         */
-        virtual interface_ptr drop_one (Direction const &) const {
-            assert (false);
-            return nullptr;
-        }
+        virtual interface_ptr drop_one (Direction const &) const
+        { throw std::logic_error ("Bug in any_range."); }
 
         /** \brief
         Return a pointer to a newly constructed object that represents the
         result of calling \c drop with an increment on the underlying range.
         */
-        virtual interface_ptr drop_n (Direction const &, std::size_t) const {
-            assert (false);
-            return nullptr;
-        }
+        virtual interface_ptr drop_n (Direction const &, std::size_t) const
+        { throw std::logic_error ("Bug in any_range."); }
 
         /**
         Return the first element of the range, and make this object start at the
@@ -273,12 +256,7 @@ namespace range { namespace any_range_interface {
         */
         virtual chopped <Element, interface_ptr>
             chop_destructive (Direction const &, interface_ptr & this_)
-        {
-            assert (false);
-            return chopped <Element, interface_ptr> (* static_cast <
-                    typename std::add_pointer <Element>::type> (nullptr),
-                nullptr);
-        }
+        { throw std::logic_error ("Bug in any_range."); }
     };
 
     template <class Element, class CapabilityKeys, class DefaultDirection>

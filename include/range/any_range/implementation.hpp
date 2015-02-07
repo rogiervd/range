@@ -34,6 +34,7 @@ implementation linearly inherits from all of them.
 #define RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
 
 #include <utility>
+#include <stdexcept>
 
 #include <boost/mpl/placeholders.hpp>
 
@@ -173,11 +174,8 @@ namespace range { namespace any_range_implementation {
 
         // Sometimes this overrides something, but if the default direction
         // is default-constructible, the method is not virtual in the interface.
-        virtual Direction default_direction() const {
-            // Should not be used for default-constructible directions.
-            assert (false);
-            return range::default_direction (this->underlying());
-        }
+        virtual Direction default_direction() const
+        { throw std::logic_error ("Bug in any_range."); }
     };
 
     template <class Element, class Capability, class Direction, class Base>
@@ -245,11 +243,8 @@ namespace range { namespace any_range_implementation {
             Direction const & direction, rime::false_type) const
         { return range::first (direction, this->underlying()); }
 
-        Element implementation (Direction const &, rime::true_type) const {
-            assert (false);
-            return * static_cast <
-                typename std::add_pointer <Element>::type> (nullptr);
-        }
+        Element implementation (Direction const &, rime::true_type) const
+        { throw std::logic_error ("Bug in any_range."); }
 
     public:
         virtual Element first (Direction const & direction) const {
@@ -289,10 +284,7 @@ namespace range { namespace any_range_implementation {
         }
 
         interface_ptr implementation (Direction const &, rime::true_type) const
-        {
-            assert (false);
-            return nullptr;
-        }
+        { throw std::logic_error ("Bug in any_range."); }
 
     public:
         virtual interface_ptr drop_one (
@@ -332,10 +324,7 @@ namespace range { namespace any_range_implementation {
 
         interface_ptr implementation (
             Direction const &, std::size_t, rime::true_type) const
-        {
-            assert (false);
-            return nullptr;
-        }
+        { throw std::logic_error ("Bug in any_range."); }
 
     public:
         virtual interface_ptr drop_n (
@@ -395,12 +384,7 @@ namespace range { namespace any_range_implementation {
         template <class Bool>
             chop_destructive_result implementation (
                 Direction const &, interface_ptr &, Bool, rime::true_type)
-        {
-            assert (false);
-            return chop_destructive_result (* static_cast <
-                    typename std::add_pointer <Element>::type> (nullptr),
-                nullptr);
-        }
+        { throw std::logic_error ("Bug in any_range."); }
 
     public:
         virtual chop_destructive_result chop_destructive (

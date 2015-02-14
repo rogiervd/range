@@ -55,7 +55,7 @@ namespace apply {
             struct for_each <meta::vector <Direction>,
                 meta::vector <Function>, meta::vector <Range>>
         : operation::for_each <typename range::tag_of <Range>::type,
-            Direction, Function, Range &&> {};
+            typename std::decay <Direction>::type, Function, Range &&> {};
 
     } // namespace automatic_arguments
 

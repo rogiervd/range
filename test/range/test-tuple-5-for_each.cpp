@@ -146,19 +146,19 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     }
     // Tuple with 3 elements.
     {
-        tuple <double, short, bool> t (87.5, 43, true);
+        tuple <double, short, bool> const t (87.5, 43, true);
         collect_any c;
-        for_each (c, t);
+        for_each (range::back, c, t);
         BOOST_CHECK_EQUAL (c.elements.size(), 3);
-        BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
+        BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [0]), true);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
-        BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [2]), true);
+        BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [2]), 87.5);
     }
     // Tuple with 4 elements.
     {
         tuple <double, short, bool, int> t (87.5, 43, true, -5);
         collect_any c;
-        for_each (c, t);
+        for_each (range::front, c, t);
         BOOST_CHECK_EQUAL (c.elements.size(), 4);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);

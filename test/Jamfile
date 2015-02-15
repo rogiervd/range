@@ -2,7 +2,7 @@ import testing ;
 
 project
     : requirements
-      <library>/boost/test//boost_unit_test_framework
+      <library>/boost//unit_test_framework
       <library>/range//range
       <warnings-as-errors>on
       <c++-template-depth>512
@@ -24,4 +24,5 @@ project
 
     ;
 
-alias "range-tests" : range ;
+# Always build the project in ./range/
+build-project range ;

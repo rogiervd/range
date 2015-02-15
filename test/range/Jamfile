@@ -1,19 +1,13 @@
-# Include Python tests, but make them optional.
-alias python : ./python ;
-explicit python ;
+run_glob *.cpp ;
 
-alias "range" :
-    # Run all .cpp files in this directory as tests.
-    [ run_glob *.cpp detail/*.cpp std/*.cpp ]
+build-project detail ;
+build-project std ;
 
-    # Switch on iterator debugging for GCC.
-    # (On CLang with libstdc++ this can cause compilation problems.)
-    [ run test-iterator_range.cpp : :
-        : <toolset>gcc:<define>_GLIBCXX_DEBUG
-        : test-iterator_range-iterator_debug
-    ]
-
-    # Uncomment this to run Python tests.
-    # This requires Boost.Python to be set up, so it is disabled by default.
-#    python
+# Switch on iterator debugging for GCC.
+# (On CLang with libstdc++ this can cause compilation problems.)
+run test-iterator_range.cpp : :
+    : <toolset>gcc:<define>_GLIBCXX_DEBUG
+    : test-iterator_range-iterator_debug
     ;
+
+build-project python ;

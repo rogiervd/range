@@ -1031,87 +1031,50 @@ namespace operation {
     // not be great.
 
     // for_each.
-    // This does not need to be specialised, but this gives a constant-time
-    // improvement in compile time.
-    // These specialisations are only for direction::front.
-    // This is unrolled for up to 4 elements.
-    // Then, a recursive call is made for every next 4 elements.
     template <class Function, class Range> struct for_each <
         tuple_detail::tuple_view_tag <0>, direction::front, Function, Range>
-    {
-        void operator() (direction::front, Function &&, Range &&) const {}
-    };
-    template <class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <1>, direction::front, Function, Range>
-    {
-        template <class View> void operator() (
-            direction::front, Function && function, View const & view) const
-        {
-            static constexpr std::size_t begin_index =
-                View::tuple_size - View::begin_position - 1;
-            function (range::tuple_detail::extract <
-                (begin_index - 0)>() (view.tuple()));
-        }
-    };
-    template <class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <2>, direction::front, Function, Range>
-    {
-        template <class View> void operator() (
-            direction::front, Function && function, View const & view) const
-        {
-            static constexpr std::size_t begin_index =
-                View::tuple_size - View::begin_position - 1;
-            function (range::tuple_detail::extract <
-                (begin_index - 0)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 1)>() (view.tuple()));
-        }
-    };
-    template <class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <3>, direction::front, Function, Range>
-    {
-        template <class View> void operator() (
-            direction::front, Function && function, View const & view) const
-        {
-            static constexpr std::size_t begin_index =
-                View::tuple_size - View::begin_position - 1;
-            function (range::tuple_detail::extract <
-                (begin_index - 0)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 1)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 2)>() (view.tuple()));
-        }
-    };
-    // Size >= 4
-    template <std::size_t Size, class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <Size>, direction::front, Function, Range>
-    {
-        template <std::size_t Begin, std::size_t End, class TupleReference>
-        void operator() (direction::front const & direction,
-            Function && function,
-            tuple_detail::tuple_view <Begin, End, TupleReference> const & view)
-        const
-        {
-            typedef tuple_detail::tuple_view <Begin, End, TupleReference>
-                view_type;
-            static constexpr std::size_t begin_index =
-                view_type::tuple_size - view_type::begin_position - 1;
-            function (range::tuple_detail::extract <
-                (begin_index - 0)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 1)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 2)>() (view.tuple()));
-            function (range::tuple_detail::extract <
-                (begin_index - 3)>() (view.tuple()));
+    { void operator() (direction::front, Function &&, Range &&) const {} };
 
-            typedef tuple_detail::tuple_view <Begin + 4, End, TupleReference>
-                next_view_type;
-            for_each <tuple_detail::tuple_view_tag <Size - 4>,
-                direction::front, Function, next_view_type> recursive;
-            recursive (direction, std::forward <Function> (function),
-                next_view_type (view));
+    // By putting all the function calls in an initialiser list, they
+    template <std::size_t size, class Function, class Range> struct for_each <
+        tuple_detail::tuple_view_tag <size>, direction::front, Function, Range>
+    {
+        /// Call a function, and return an int.
+        /// This is just to homogenise the return value of the actual function.
+        struct call_function {
+            Function && function_;
+            call_function (Function && function)
+            : function_ (std::forward <Function> (function)) {}
+
+            template <class Element> int operator() (Element && element) const {
+                function_ (element);
+                return 0;
+            }
+        };
+
+        /**
+        Use a trick: expand a template pack into an initialiser list.
+        By using "Indices::value...", this calls the function with the correct
+        elements.
+        */
+        template <class View, class ... Indices>
+            static void apply (Function && function, View const & view,
+                meta::vector <Indices ...>)
+        {
+            static constexpr std::size_t begin_index =
+                View::tuple_size - View::begin_position - 1;
+            call_function call (std::forward <Function> (function));
+            int dummy [] = { call (
+                range::tuple_detail::extract <(begin_index - Indices::value)>()
+                    (view.tuple())) ...};
+            (void) dummy;
+        }
+
+        template <class View> void operator() (
+            direction::front, Function && function, View const & view) const
+        {
+            apply (std::forward <Function> (function), view,
+                typename meta::count <size>::type());
         }
     };
 

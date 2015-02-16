@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
     }
 
     {
-        std::tuple <double, std::string> t (10.4, "hello");
+        range::tuple <double, std::string> const t (10.4, "hello");
 
         {
             std::size_t reference_seed = 0;

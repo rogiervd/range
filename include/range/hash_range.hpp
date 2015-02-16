@@ -58,7 +58,7 @@ template <class Direction, class Range> inline
     hash_range (Direction const & direction, Range && range)
 {
     hash_range_detail::accumulate_hash accumulate (0);
-    range::for_each (direction, accumulate, std::forward <Range> (range));
+    for_each (direction, accumulate, view_once (std::forward <Range> (range)));
     return accumulate.seed();
 }
 
@@ -90,7 +90,7 @@ template <class Direction, class Range> inline
     hash_range (Direction const & direction, std::size_t & seed, Range && range)
 {
     hash_range_detail::accumulate_hash accumulate (seed);
-    range::for_each (direction, accumulate, std::forward <Range> (range));
+    for_each (direction, accumulate, view_once (std::forward <Range> (range)));
     seed = accumulate.seed();
 }
 

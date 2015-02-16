@@ -43,7 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "tuple.hpp"
 #include "element_types.hpp"
 #include "curry.hpp"
-#include "any.hpp"
+#include "any_of.hpp"
 #include "transform.hpp"
 #include "fold.hpp"
 
@@ -238,11 +238,11 @@ private:
 
     // Makes decltype complain.
     auto empty (Direction const & direction) const
-    -> decltype (range::any (range::transform (
+    -> decltype (range::any_of (range::transform (
         curry::empty (std::declval <Direction>()),
         std::declval <underlying_type>())))
     {
-        return range::any (range::transform (
+        return range::any_of (range::transform (
             curry::empty (this->direction_must_be_equal (direction)),
             underlying_));
     }

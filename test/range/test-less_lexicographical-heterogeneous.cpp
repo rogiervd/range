@@ -86,43 +86,6 @@ BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_heterogeneous) {
         std::make_tuple (1, 2, 3), std::make_tuple (1, 2), false);
     CHECK_range_less_lexicographical (
         std::make_tuple (1, 2), std::make_tuple (1, 2, 3), true);
-
-    // The same lengths: the result depends on the actual values.
-    /*CHECK_range_less_lexicographical (
-        std::make_tuple (5), std::make_tuple (5), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (3), std::make_tuple (7), true);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (7), std::make_tuple (3), false);
-
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple (1, 2), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple (1, 3), true);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 3), std::make_tuple (1, 2), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (5, 2), std::make_tuple (1, 2), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple (5, 2), true);
-
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2, 3), std::make_tuple (1, 2, 3), false);
-
-    CHECK_range_less_lexicographical (
-        std::make_tuple (6, 2, 3), std::make_tuple (5, 2, 3), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (5, 2, 3), std::make_tuple (6, 2, 3), true);
-
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 7, 3), std::make_tuple (1, 8, 3), true);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 8, 3), std::make_tuple (1, 7, 3), false);
-
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2, 3), std::make_tuple (1, 2, 4), true);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2, 4), std::make_tuple (1, 2, 3), false);*/
 }
 
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_types) {

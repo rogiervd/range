@@ -42,6 +42,8 @@ Define a general heterogeneous container.
 #include "core.hpp"
 #include "heavyweight.hpp"
 #include "element_types.hpp"
+#include "equal.hpp"
+#include "less_lexicographical.hpp"
 
 #include "detail/enable_if_front_back.hpp"
 
@@ -66,6 +68,12 @@ The implementation aims to instantiate as few template classes as possible.
 
 Unlike for \c std::tuple, there is no \c get function; its functionality is
 provided by \c range::at and \c range::at_c.
+
+Tuples can be compared for equality and order.
+They are equal if the number of elements is equal and the elements compare equal
+in parallel.
+The ordering operators perform lexicographical comparison.
+Views on tuples do not define comparison operators.
 
 The layout of the elements in memory is undefined.
 Connected with this is the layout
@@ -748,6 +756,54 @@ namespace make_tuple_from_detail {
     template <class Type> struct identity { typedef Type type; };
 
 } // namespace make_tuple_from_detail
+
+/** \brief
+Compare two tuples for equality.
+*/
+template <class ... Types1, class ... Types2> inline
+    auto operator== (
+        tuple <Types1 ...> const & t1, tuple <Types2 ...> const & t2)
+RETURNS (equal (t1, t2));
+
+/** \brief
+Compare two tuples for inequality.
+*/
+template <class ... Left, class ... Right> inline
+    auto operator!= (
+        tuple <Left ...> const & left, tuple <Right ...> const & right)
+RETURNS (!equal (left, right));
+
+/** \brief
+Compare two tuples lexicographically.
+*/
+template <class ... Left, class ... Right> inline
+    auto operator< (
+        tuple <Left ...> const & left, tuple <Right ...> const & right)
+RETURNS (less_lexicographical (left, right));
+
+/** \brief
+Compare two tuples lexicographically.
+*/
+template <class ... Left, class ... Right> inline
+    auto operator<= (
+        tuple <Left ...> const & left, tuple <Right ...> const & right)
+RETURNS (!less_lexicographical (right, left));
+
+/** \brief
+Compare two tuples lexicographically.
+*/
+template <class ... Left, class ... Right> inline
+    auto operator> (
+        tuple <Left ...> const & left, tuple <Right ...> const & right)
+RETURNS (less_lexicographical (right, left));
+
+/** \brief
+Compare two tuples lexicographically.
+*/
+template <class ... Left, class ... Right> inline
+    auto operator>= (
+        tuple <Left ...> const & left, tuple <Right ...> const & right)
+RETURNS (!less_lexicographical (left, right));
 
 /**
 Make a tuple from the arguments passed in.

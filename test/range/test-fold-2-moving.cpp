@@ -22,7 +22,7 @@ limitations under the License.
 #include <tuple>
 #include <vector>
 
-#include "utility/make_unique.hpp"
+#include "utility/unique_ptr.hpp"
 
 #include "range/std.hpp"
 #include "range/tuple.hpp"

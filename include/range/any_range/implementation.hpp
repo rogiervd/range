@@ -35,7 +35,7 @@ implementation linearly inherits from all of them.
 
 #include <boost/mpl/placeholders.hpp>
 
-#include "utility/make_unique.hpp"
+#include "utility/unique_ptr.hpp"
 
 #include "meta/range.hpp"
 #include "meta/fold.hpp"

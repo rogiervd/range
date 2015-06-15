@@ -34,7 +34,7 @@ the fly.
 
 #include "core.hpp"
 
-#include "detail/underlying.hpp"
+#include "helper/underlying.hpp"
 
 namespace range {
 
@@ -42,7 +42,7 @@ template <class Underlying> struct reverse_view {
     static_assert (is_view <Underlying>::value,
         "reverse_view only works with a view.");
 
-    friend class ::range::detail::callable::get_underlying;
+    template <class Wrapper> friend class helper::callable::get_underlying;
     Underlying underlying_;
 
 public:
@@ -58,131 +58,90 @@ public:
     Underlying const & underlying() const { return underlying_; }
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     auto default_direction() const
     RETURNS (range::default_direction (underlying_));
 
     template <class Direction>
-        typename result_of_or <callable::empty (
-            direction::callable::reverse (Direction), Underlying const &)
-    >::type empty (Direction const & direction) const
-    { return range::empty (direction::reverse (direction), underlying_); }
+        decltype (range::empty (
+            std::declval <Underlying const &>(),
+            direction::opposite (std::declval <Direction>())))
+    empty (Direction const & direction) const
+    { return range::empty (underlying_, direction::opposite (direction)); }
 
     template <class Direction>
-        typename result_of_or <callable::size (
-            direction::callable::reverse (Direction), Underlying const &)
-    >::type size (Direction const & direction) const
-    { return range::size (direction::reverse (direction), underlying_); }
+        decltype (range::size (
+            std::declval <Underlying const &>(),
+            direction::opposite (std::declval <Direction>())))
+    size (Direction const & direction) const
+    { return range::size (underlying_, direction::opposite (direction)); }
 
     // first and drop are implemented in namespace operation (below) where it is
     // easier to distinguish between qualifications.
 };
 
-struct reverse_view_tag;
-
-template <class Underlying> struct tag_of_qualified <reverse_view <Underlying>>
-{ typedef reverse_view_tag type; };
-
 namespace operation {
-
-    namespace reverse_detail {
-
-        struct make_reverse_view {
-            template <class Range> auto operator() (Range && range) const
-            RETURNS (range::reverse_view <typename std::decay <Range>::type>
-                (std::forward <Range> (range)));
-        };
-
-    } // namespace reverse_detail
-
-    template <class RangeTag, class Directions, class Range,
-            class Enable = void>
-        struct reverse
-    : helper::call_with_last <1, Directions, reverse_detail::make_reverse_view>
-    {};
-
+    struct reverse_view_tag {};
 } // namespace operation
 
-namespace apply {
-
-    namespace automatic_arguments {
-
-        template <class Directions, class Other, class Ranges,
-            class Enable = void>
-        struct reverse : operation::unimplemented {};
-
-        template <class Directions, class Range>
-            struct reverse <Directions, meta::vector<>, meta::vector <Range>>
-        : operation::reverse <
-            typename range::tag_of <Range>::type, Directions, Range &&>
-        {};
-
-    } // namespace automatic_arguments
-
-    template <class ... Arguments> struct reverse
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::call_with_view <automatic_arguments::reverse
-            >::apply,
-        meta::vector <Arguments ...>>::type {};
-
-} // namespace apply
+template <class Underlying> struct tag_of_qualified <reverse_view <Underlying>>
+{ typedef operation::reverse_view_tag type; };
 
 namespace callable {
-    struct reverse : generic <apply::reverse> {};
+
+    struct reverse {
+    private:
+        struct make_reverse_view {
+            template <class View> auto operator() (View && view) const
+            RETURNS (range::reverse_view <typename std::decay <View>::type>
+                (std::forward <View> (view)));
+        };
+
+    public:
+        // Turn the range into a view, and then wrap it in a reverse_view.
+        template <class Range, class ... Directions>
+            auto operator() (Range && range, Directions const & ... directions)
+            const
+        RETURNS (make_reverse_view() (
+            range::view (std::forward <Range> (range), directions ...)));
+    };
+
 } // namespace callable
 
-/**
+/** \brief
+
 Return a view of the range with the elements reversed.
 This works for any direction that the range is used in that has a reverse.
-For example, first (front, reverse (r)) is equivalent to first (back, r).
+For example, first (reverse (r), front) is equivalent to first (r, back).
 This simply wraps the range so that the directions for all operations are
-converted on the fly by direction::reverse().
-\param directions
-    The directions that the view should be in.
-    If no directions are given, the default direction is used.
+converted on the fly by direction::opposite().
 \param range
     The range to be reversed.
     It is turned into a view before it is stored inside the return type.
+\param directions
+    The directions that the view should be in.
+    If no directions are given, the default direction is used.
 */
 static auto const reverse = callable::reverse();
 
 namespace operation {
 
-    template <class Direction, class ReverseView>
-        struct first <reverse_view_tag, Direction, ReverseView,
-            typename boost::enable_if <has <
-                callable::first (direction::callable::reverse (Direction),
-                    range::detail::callable::get_underlying (ReverseView))
-                >>::type>
-    {
-        auto operator() (Direction const & direction,
-            ReverseView && reverse_view) const
-        RETURNS (range::first (direction::reverse (direction),
-            range::detail::get_underlying (
-                std::forward <ReverseView> (reverse_view))));
-    };
+    template <class ReverseView, class Direction> inline
+        auto implement_first (reverse_view_tag, ReverseView && r,
+            Direction const & direction)
+    RETURNS (range::first (helper::get_underlying <ReverseView> (r),
+        direction::opposite (direction)));
 
-    /**
-    Implement "drop".
-    There is no need for specific implementations for drop_one or for different
-    types for Increment: passing them through to the underlying range works.
-    */
-    template <class Direction, class Increment, class ReverseView>
-        struct drop <reverse_view_tag, Direction, Increment, ReverseView,
-            typename boost::enable_if <has <
-                callable::drop (direction::callable::reverse (Direction),
-                    Increment,
-                    range::detail::callable::get_underlying (ReverseView))
-                >>::type>
-    {
-        auto operator() (Direction const & direction,
-            Increment const & increment, ReverseView && reverse_view) const
-        RETURNS (range::reverse (range::drop (direction::reverse (direction),
-            increment, range::detail::get_underlying (
-                std::forward <ReverseView> (reverse_view)))));
-    };
+    template <class ReverseView, class Increment, class Direction> inline
+        auto implement_drop (reverse_view_tag, ReverseView && r,
+            Increment const & increment, Direction const & direction)
+    RETURNS (range::reverse (range::drop (
+        helper::get_underlying <ReverseView> (r),
+        increment, direction::opposite (direction))));
 
-}} // namespace range::operation
+} // namespace operation
+
+} // namespace range
 
 #endif  // RANGE_REVERSE_HPP_INCLUDED

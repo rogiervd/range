@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ BOOST_AUTO_TEST_CASE (test_range_empty_view) {
     typedef decltype (range::empty (v)) is_empty;
     static_assert (is_empty::value, "");
 
-    typedef decltype (range::empty (range::back, v)) is_empty_back;
+    typedef decltype (range::empty (v, range::back)) is_empty_back;
     static_assert (is_empty_back::value, "");
 
     typedef decltype (range::size (v)) size;
     static_assert (size::value == 0u, "");
 
-    typedef decltype (range::size (range::back, v)) size_back;
+    typedef decltype (range::size (v, range::back)) size_back;
     static_assert (size_back::value == 0u, "");
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 #define BOOST_TEST_MODULE test_container_std_adaptor
 #include "utility/test/boost_unit_test.hpp"
 
-#include "range/std.hpp"
+#include "range/std/container.hpp"
 
 #include <vector>
 #include <string>
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
 
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (v))>));
-        BOOST_MPL_ASSERT_NOT ((always_empty <direction::front, decltype (v)>));
-        BOOST_MPL_ASSERT_NOT ((never_empty <direction::front, decltype (v)>));
+        BOOST_MPL_ASSERT_NOT ((always_empty <decltype (v), direction::front>));
+        BOOST_MPL_ASSERT_NOT ((never_empty <decltype (v), direction::front>));
 
         BOOST_CHECK (empty (v));
         BOOST_CHECK_EQUAL (size (v), 0);
@@ -104,19 +104,19 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK_EQUAL (size (v), 1);
 
         BOOST_CHECK_EQUAL (first (v), 5);
-        BOOST_CHECK_EQUAL (first (front, v), 5);
-        BOOST_CHECK_EQUAL (first (back, v), 5);
+        BOOST_CHECK_EQUAL (first (v, front), 5);
+        BOOST_CHECK_EQUAL (first (v, back), 5);
 
-        BOOST_CHECK_EQUAL (at (0, v), 5);
-        BOOST_CHECK_EQUAL (at (front, 0, v), 5);
-        BOOST_CHECK_EQUAL (at (back, 0, v), 5);
-        BOOST_CHECK_EQUAL (at (zero, v), 5);
-        BOOST_CHECK_EQUAL (at (front, zero, v), 5);
-        BOOST_CHECK_EQUAL (at (back, zero, v), 5);
+        BOOST_CHECK_EQUAL (at (v, 0), 5);
+        BOOST_CHECK_EQUAL (at (v, 0, front), 5);
+        BOOST_CHECK_EQUAL (at (v, 0, back), 5);
+        BOOST_CHECK_EQUAL (at (v, zero), 5);
+        BOOST_CHECK_EQUAL (at (v, zero, front), 5);
+        BOOST_CHECK_EQUAL (at (v, zero, back), 5);
 
         BOOST_CHECK (empty (drop (v)));
-        BOOST_CHECK (empty (drop (1, v)));
-        BOOST_CHECK (empty (drop (one, v)));
+        BOOST_CHECK (empty (drop (v, 1)));
+        BOOST_CHECK (empty (drop (v, one)));
 
         auto first_and_empty = chop (v);
         BOOST_CHECK_EQUAL (first_and_empty.first(), 5);
@@ -136,48 +136,48 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_CHECK_EQUAL (size (v), 3);
         BOOST_CHECK_EQUAL (first (v), 5);
         BOOST_CHECK (!empty (drop (v)));
-        BOOST_CHECK (empty (drop (3, v)));
-        BOOST_CHECK (empty (drop (back, 3, v)));
-        BOOST_CHECK (empty (drop (front, 1, drop (back, 2, v))));
-        BOOST_CHECK_EQUAL (first (front, drop (front, v)), 6);
-        BOOST_CHECK_EQUAL (first (back, v), 7);
+        BOOST_CHECK (empty (drop (v, 3)));
+        BOOST_CHECK (empty (drop (v, 3, back)));
+        BOOST_CHECK (empty (drop (drop (v, 2, back), 1, front)));
+        BOOST_CHECK_EQUAL (first (drop (v, front), front), 6);
+        BOOST_CHECK_EQUAL (first (v, back), 7);
 
-        BOOST_CHECK_EQUAL (at (0, v), 5);
-        BOOST_CHECK_EQUAL (at (1, v), 6);
-        BOOST_CHECK_EQUAL (at (2, v), 7);
-        BOOST_CHECK_EQUAL (at (front, 0, v), 5);
-        BOOST_CHECK_EQUAL (at (front, 1, v), 6);
-        BOOST_CHECK_EQUAL (at (front, 2, v), 7);
-        BOOST_CHECK_EQUAL (at (back, 0, v), 7);
-        BOOST_CHECK_EQUAL (at (back, 1, v), 6);
-        BOOST_CHECK_EQUAL (at (back, 2, v), 5);
+        BOOST_CHECK_EQUAL (at (v, 0), 5);
+        BOOST_CHECK_EQUAL (at (v, 1), 6);
+        BOOST_CHECK_EQUAL (at (v, 2), 7);
+        BOOST_CHECK_EQUAL (at (v, 0, front), 5);
+        BOOST_CHECK_EQUAL (at (v, 1, front), 6);
+        BOOST_CHECK_EQUAL (at (v, 2, front), 7);
+        BOOST_CHECK_EQUAL (at (v, 0, back), 7);
+        BOOST_CHECK_EQUAL (at (v, 1, back), 6);
+        BOOST_CHECK_EQUAL (at (v, 2, back), 5);
 
         BOOST_CHECK_EQUAL (at_c <0> (v), 5);
         BOOST_CHECK_EQUAL (at_c <1> (v), 6);
         BOOST_CHECK_EQUAL (at_c <2> (v), 7);
-        BOOST_CHECK_EQUAL (at_c <0> (front, v), 5);
-        BOOST_CHECK_EQUAL (at_c <1> (front, v), 6);
-        BOOST_CHECK_EQUAL (at_c <2> (front, v), 7);
-        BOOST_CHECK_EQUAL (at_c <0> (back, v), 7);
-        BOOST_CHECK_EQUAL (at_c <1> (back, v), 6);
-        BOOST_CHECK_EQUAL (at_c <2> (back, v), 5);
+        BOOST_CHECK_EQUAL (at_c <0> (v, front), 5);
+        BOOST_CHECK_EQUAL (at_c <1> (v, front), 6);
+        BOOST_CHECK_EQUAL (at_c <2> (v, front), 7);
+        BOOST_CHECK_EQUAL (at_c <0> (v, back), 7);
+        BOOST_CHECK_EQUAL (at_c <1> (v, back), 6);
+        BOOST_CHECK_EQUAL (at_c <2> (v, back), 5);
 
         BOOST_CHECK_EQUAL (second (v), 6);
         BOOST_CHECK_EQUAL (third (v), 7);
-        BOOST_CHECK_EQUAL (second (front, v), 6);
-        BOOST_CHECK_EQUAL (third (front, v), 7);
-        BOOST_CHECK_EQUAL (second (back, v), 6);
-        BOOST_CHECK_EQUAL (third (back, v), 5);
+        BOOST_CHECK_EQUAL (second (v, front), 6);
+        BOOST_CHECK_EQUAL (third (v, front), 7);
+        BOOST_CHECK_EQUAL (second (v, back), 6);
+        BOOST_CHECK_EQUAL (third (v, back), 5);
 
-        BOOST_CHECK_EQUAL (at (two, v), 7);
+        BOOST_CHECK_EQUAL (at (v, two), 7);
 
         auto first_and_empty = chop (v);
         BOOST_CHECK_EQUAL (first_and_empty.first(), 5);
         BOOST_CHECK_EQUAL (first (first_and_empty.rest()), 6);
 
-        auto last_and_empty = chop (back, v);
+        auto last_and_empty = chop (v, back);
         BOOST_CHECK_EQUAL (last_and_empty.first(), 7);
-        BOOST_CHECK_EQUAL (first (back, last_and_empty.rest()), 6);
+        BOOST_CHECK_EQUAL (first (last_and_empty.rest(), back), 6);
 
         auto mutated = view (v);
         BOOST_CHECK (!empty (mutated));
@@ -199,21 +199,20 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
 
         // Check the status quo.
         RIME_CHECK_EQUAL (first (c).content(), 7);
-        RIME_CHECK_EQUAL (first (back, c).content(), 45);
+        RIME_CHECK_EQUAL (first (c, back).content(), 45);
         r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
-
         auto v = view_once (std::move (c));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (first (v)), tracked <int> &&>));
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (first (back, v)), tracked <int> &&>));
+            decltype (first (v, back)), tracked <int> &&>));
 
         // The elements should be moved out.
-        tracked <int> i = at (0, v);
+        tracked <int> i = at (v, 0);
         BOOST_CHECK_EQUAL (i.content(), 7);
         r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
 
-        tracked <int> d = at (1, v);
+        tracked <int> d = at (v, 1);
         BOOST_CHECK_EQUAL (d.content(), 45);
         r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
     }

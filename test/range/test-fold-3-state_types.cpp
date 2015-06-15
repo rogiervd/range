@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ limitations under the License.
 #include <boost/mpl/assert.hpp>
 
 #include "range/std.hpp"
-#include "range/tuple.hpp"
 
 using range::fold;
 using range::at_c;
@@ -52,23 +51,16 @@ BOOST_AUTO_TEST_CASE (test_fold_const_state) {
         v.push_back (2);
         v.push_back (3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), int_holder(), v)),
+            decltype (fold (int_holder(), v, add_return_const())),
             int_holder const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
+        BOOST_CHECK_EQUAL (fold (int_holder(), v, add_return_const()).i, 6);
     }
     {
         std::tuple <int, short, int> v (1,2,3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), int_holder(), v)),
+            decltype (fold (int_holder(), v, add_return_const())),
             int_holder const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
-    }
-    {
-        range::tuple <int, short, int> v (1,2,3);
-        BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (add_return_const(), int_holder(), v)),
-            int_holder const>));
-        BOOST_CHECK_EQUAL (fold (add_return_const(), int_holder(), v).i, 6);
+        BOOST_CHECK_EQUAL (fold (int_holder(), v, add_return_const()).i, 6);
     }
 }
 
@@ -100,15 +92,11 @@ BOOST_AUTO_TEST_CASE (test_fold_unassignable_state) {
         v.push_back (1);
         v.push_back (2);
         v.push_back (3);
-        BOOST_CHECK (fold (add_unassignable(), unassignable (0), v).value == 6);
+        BOOST_CHECK (fold (unassignable (0), v, add_unassignable()).value == 6);
     }
     {
         std::tuple <int, short, int> v (1,2,3);
-        BOOST_CHECK (fold (add_unassignable(), unassignable (0), v).value == 6);
-    }
-    {
-        range::tuple <int, short, int> v (1,2,3);
-        BOOST_CHECK (fold (add_unassignable(), unassignable (0), v).value == 6);
+        BOOST_CHECK (fold (unassignable (0), v, add_unassignable()).value == 6);
     }
 }
 
@@ -126,8 +114,8 @@ BOOST_AUTO_TEST_CASE (test_fold_lvalue_state) {
         v.push_back (2);
         v.push_back (3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), i, v)), int &>));
-        BOOST_CHECK_EQUAL (&fold (return_right(), i, v), &at_c <2> (v));
+            decltype (fold (i, v, return_right())), int &>));
+        BOOST_CHECK_EQUAL (&fold (i, v, return_right()), &at_c <2> (v));
 
         // Check that nothing has changed.
         BOOST_CHECK_EQUAL (i, 7);
@@ -138,20 +126,8 @@ BOOST_AUTO_TEST_CASE (test_fold_lvalue_state) {
     {
         std::tuple <int, short, int> v (1,2,3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), i, v)), int &>));
-        BOOST_CHECK_EQUAL (&fold (return_right(), i, v), &at_c <2> (v));
-
-        // Check that nothing has changed.
-        BOOST_CHECK_EQUAL (i, 7);
-        BOOST_CHECK_EQUAL (at_c <0> (v), 1);
-        BOOST_CHECK_EQUAL (at_c <1> (v), 2);
-        BOOST_CHECK_EQUAL (at_c <2> (v), 3);
-    }
-    {
-        range::tuple <int, short, int> v (1,2,3);
-        BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), i, v)), int &>));
-        BOOST_CHECK_EQUAL (&fold (return_right(), i, v), &at_c <2> (v));
+            decltype (fold (i, v, return_right())), int &>));
+        BOOST_CHECK_EQUAL (&fold (i, v, return_right()), &at_c <2> (v));
 
         // Check that nothing has changed.
         BOOST_CHECK_EQUAL (i, 7);
@@ -172,7 +148,7 @@ BOOST_AUTO_TEST_CASE (test_fold_rvalue_state) {
         // But it doesn't, because rvalue references are (sensibly) stripped
         // from the state argument.
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), 5.5, std::move (v))),
+            decltype (fold (5.5, std::move (v), return_right())),
             rime::variant <double, int &&>>));
         // BOOST_CHECK_EQUAL (
         //     &fold (return_right(), std::move (i), std::move (v)),
@@ -187,21 +163,8 @@ BOOST_AUTO_TEST_CASE (test_fold_rvalue_state) {
     {
         std::tuple <int, short, int> v (1,2,3);
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), i, std::move (v))), int &&>));
-        auto && result = fold (return_right(), i, std::move (v));
-        BOOST_CHECK_EQUAL (&result, &at_c <2> (v));
-
-        // Check that nothing has changed.
-        BOOST_CHECK_EQUAL (i, 7);
-        BOOST_CHECK_EQUAL (at_c <0> (v), 1);
-        BOOST_CHECK_EQUAL (at_c <1> (v), 2);
-        BOOST_CHECK_EQUAL (at_c <2> (v), 3);
-    }
-    {
-        range::tuple <int, short, int> v (1,2,3);
-        BOOST_MPL_ASSERT ((std::is_same <
-            decltype (fold (return_right(), i, std::move (v))), int &&>));
-        auto && result = fold (return_right(), i, std::move (v));
+            decltype (fold (i, std::move (v), return_right())), int &&>));
+        auto && result = fold (i, std::move (v), return_right());
         BOOST_CHECK_EQUAL (&result, &at_c <2> (v));
 
         // Check that nothing has changed.
@@ -231,23 +194,16 @@ BOOST_AUTO_TEST_CASE (test_fold_function_lvalue_rvalue) {
         std::vector <int> v;
         v.push_back (1);
 
-        BOOST_CHECK_EQUAL (fold (f, true, v), false);
-        BOOST_CHECK_EQUAL (fold (std::move (f), true, v), false);
-        BOOST_CHECK_EQUAL (fold (f_const, true, v), true);
+        BOOST_CHECK_EQUAL (fold (true, v, f), false);
+        BOOST_CHECK_EQUAL (fold (true, v, std::move (f)), false);
+        BOOST_CHECK_EQUAL (fold (true, v, f_const), true);
     }
     {
         std::tuple <int> v (1);
 
-        BOOST_CHECK_EQUAL (fold (f, true, v), false);
-        BOOST_CHECK_EQUAL (fold (std::move (f), true, v), false);
-        BOOST_CHECK_EQUAL (fold (f_const, true, v), true);
-    }
-    {
-        range::tuple <int> v (1);
-
-        BOOST_CHECK_EQUAL (fold (f, true, v), false);
-        BOOST_CHECK_EQUAL (fold (std::move (f), true, v), false);
-        BOOST_CHECK_EQUAL (fold (f_const, true, v), true);
+        BOOST_CHECK_EQUAL (fold (true, v, f), false);
+        BOOST_CHECK_EQUAL (fold (true, v, std::move (f)), false);
+        BOOST_CHECK_EQUAL (fold (true, v, f_const), true);
     }
 }
 

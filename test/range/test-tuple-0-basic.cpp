@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE (tuple_basic) {
     check_two_elements (view (tuple <int, char> (5, 'A')), 5, 'A');
     check_two_elements (view_once (tuple <int, char> (5, 'A')), 5, 'A');
 
-    // Checks on three element is in the other file.
+    // Checks on three element are in the other file.
     // Otherwise, compilers start using more than 1GB of memory.
 }
 

@@ -62,42 +62,43 @@ namespace callable {
             static std::size_t compute_element_hash (Element const & element)
         { return boost::hash <Element>() (element); }
 
-        template <class Direction, class Range>
+        template <class Range, class Direction>
             static std::size_t
-            compute_hash (Direction const & direction, Range && range,
-                rime::true_type empty, utility::overload_order <1> *)
+            compute_hash (Range && range, Direction const & direction,
+                rime::true_type empty, overload_order <1> *)
         { return empty_hash; }
 
-        template <class Direction, class Range>
+        template <class Range, class Direction>
             static std::size_t
-            compute_hash (Direction const & direction, Range && range,
-                bool empty, utility::overload_order <2> *)
+            compute_hash (Range && range, Direction const & direction,
+                bool empty, overload_order <2> *)
         {
             if (empty)
                 return empty_hash;
             // Compute the hash value for the first element.
             hash_range_detail::accumulate_hash accumulate (
-                compute_element_hash (range::first (direction, range)));
+                compute_element_hash (range::first (range, direction)));
             // Combine with the hash value of the rest of the elements.
-            range::for_each (direction, accumulate,
-                range::drop (std::forward <Range> (range)));
+            range::for_each (
+                range::drop (std::forward <Range> (range), direction),
+                direction, accumulate);
             return accumulate.seed();
         }
 
     public:
-        template <class Direction, class Range> typename
+        template <class Range, class Direction> typename
             std::enable_if <is_direction <Direction>::value, std::size_t>::type
-            operator() (Direction const & direction, Range && range) const
+            operator() (Range && range, Direction const & direction) const
         {
             auto empty = range::empty (range);
-            return compute_hash (direction,
-                range::view_once (std::forward <Range> (range)), empty,
-                utility::pick_overload());
+            return compute_hash (
+                range::view_once (std::forward <Range> (range), direction),
+                direction, empty, pick_overload());
         }
 
         template <class Range> std::size_t operator() (Range && range) const {
-            return operator() (range::default_direction (range),
-                std::forward <Range> (range));
+            return operator() (std::forward <Range> (range),
+                range::default_direction (range));
         }
     };
 
@@ -107,22 +108,23 @@ namespace callable {
     */
     struct hash_range_combine {
 
-        template <class Direction, class Range>
+        template <class Range, class Direction>
             typename std::enable_if <is_direction <Direction>::value>::type
-            operator() (Direction const & direction, std::size_t & seed,
-                Range && range) const
+            operator() (Range && range, Direction const & direction,
+                std::size_t & seed) const
         {
             hash_range_detail::accumulate_hash accumulate (seed);
-            range::for_each (direction, accumulate,
-                range::view_once (std::forward <Range> (range)));
+            range::for_each (
+                range::view_once (std::forward <Range> (range), direction),
+                direction, accumulate);
             seed = accumulate.seed();
         }
 
         template <class Range>
-            void operator() (std::size_t & seed, Range && range) const
+            void operator() (Range && range, std::size_t & seed) const
         {
-            operator() (range::default_direction (range), seed,
-                std::forward <Range> (range));
+            operator() (std::forward <Range> (range),
+                range::default_direction (range), seed);
         }
 
     };
@@ -146,10 +148,10 @@ If the range has a length of 1, then the hash value of its element is returned.
 (Note that Boost.Hash is an identity function for POD elements with fewer bits
 than std::size_t.)
 
+\param range The range of elements to compute the hash for.
 \param direction (optional)
     The direction to traverse the range in.
     If this is not given the range will be traversed in the default direction.
-\param Range The range of elements to compute the hash for.
 */
 static auto constexpr hash_range = callable::hash_range();
 
@@ -164,10 +166,13 @@ boost/functional/hash.hpp must be included to use this.
 This returns a different value from \ref hash_range with seed \c 0, just like
 boost::hash returns a different value from boost::hash_combine.
 
+\param range The range of elements to compute the hash for.
 \param direction (optional)
     The direction to traverse the range in.
     If this is not given the range will be traversed in the default direction.
-\param Range The range of elements to compute the hash for.
+\param seed
+    The seed value for computing the hash, which will be updated to include the
+    elements of the range.
 */
 static auto constexpr hash_range_combine = callable::hash_range_combine();
 

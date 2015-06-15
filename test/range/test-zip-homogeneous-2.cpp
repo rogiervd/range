@@ -72,25 +72,25 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
         static_assert (range::is_range <decltype (z)>::value, "");
         static_assert (range::is_homogeneous <
-            direction::front, decltype (z)>::value, "");
+            decltype (z), direction::front>::value, "");
         BOOST_CHECK (range::default_direction (z) == range::front);
 
         BOOST_CHECK (range::empty (z));
-        BOOST_CHECK (range::empty (range::front, z));
+        BOOST_CHECK (range::empty (z, range::front));
 
         BOOST_CHECK_EQUAL (range::size (z), 0);
-        BOOST_CHECK_EQUAL (range::size (range::front, z), 0);
+        BOOST_CHECK_EQUAL (range::size (z, range::front), 0);
 
         static_assert (has <callable::drop (decltype (z))>::value, "");
-        static_assert (has <callable::drop (direction::front, decltype (z))
+        static_assert (has <callable::drop (decltype (z), direction::front)
             >::value, "");
-        static_assert (!has <callable::drop (direction::back, decltype (z))
+        static_assert (!has <callable::drop (decltype (z), direction::back)
             >::value, "");
 
         static_assert (has <callable::chop (decltype (z))>::value, "");
-        static_assert (has <callable::chop (direction::front, decltype (z))
+        static_assert (has <callable::chop (decltype (z), direction::front)
             >::value, "");
-        static_assert (!has <callable::chop (direction::back, decltype (z))
+        static_assert (!has <callable::chop (decltype (z), direction::back)
             >::value, "");
     }
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
         BOOST_CHECK (empty (z2));
 
-        auto z3 = drop (1, z);
+        auto z3 = drop (z, 1);
         BOOST_CHECK (empty (first (z3.underlying())));
         BOOST_CHECK (empty (second (z3.underlying())));
 
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         }
         // front explicitly specified.
         {
-            auto z = zip_from (range::front, t);
+            auto z = zip_from (t, range::front);
 
             auto first_element = first (z);
 
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         }
         // From the back.
         {
-            auto z = zip_from (range::back, t);
+            auto z = zip_from (t, range::back);
 
             auto first_element = first (z);
 
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
             // show_types <decltype (z)> st;
             // show_types <decltype (range::default_direction (z))> st2;
             static_assert (range::has <
-                    range::callable::chop (decltype (zip_from (range::back, t)))
+                    range::callable::chop (decltype (zip_from (t, range::back)))
                 >::value, "");
 
             BOOST_CHECK_EQUAL (first (chopped.first()), 3);
@@ -206,11 +206,11 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         BOOST_CHECK_EQUAL (first (third (z)), 27);
         BOOST_CHECK_EQUAL (second (third (z)), 27.5);
 
-        auto z2 = drop (2, z);
+        auto z2 = drop (z, 2);
         BOOST_CHECK_EQUAL (first (first (z2)), 27);
         BOOST_CHECK_EQUAL (second (first (z2)), 27.5);
 
-        BOOST_CHECK (empty (drop (3, z)));
+        BOOST_CHECK (empty (drop (z, 3)));
     }
 }
 

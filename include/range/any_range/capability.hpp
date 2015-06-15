@@ -231,26 +231,26 @@ namespace capability {
         // instantiations and user sanity.)
         typedef typename boost::mpl::if_ <
                 boost::mpl::or_ <
-                    range::has <callable::chop (Direction, Range &&)>,
-                    range::has <callable::chop_in_place (Direction, Range &)>
+                    range::has <callable::chop (Range &&, Direction)>,
+                    range::has <callable::chop_in_place (Range &, Direction)>
                 >,
                 meta::set <chop_destructive>, meta::set<>
             >::type capabilities1;
 
         typedef typename boost::mpl::eval_if <
                 range::has <callable::drop (
-                    Direction, std::size_t, Range const &)>,
+                    Range const &, std::size_t, Direction)>,
                 meta::push <drop_n, capabilities1>, capabilities1
             >::type capabilities2;
 
         typedef typename boost::mpl::eval_if <
-            range::has <callable::drop (Direction, Range const &)>,
+            range::has <callable::drop (Range const &, Direction)>,
                 meta::push <drop_one, capabilities2>, capabilities2
             >::type capabilities3;
 
     public:
         typedef typename boost::mpl::eval_if <
-            range::has <callable::first (Direction, Range const &)>,
+            range::has <callable::first (Range const &, Direction)>,
                 meta::push <first, capabilities3>, capabilities3
             >::type type;
     };
@@ -269,18 +269,18 @@ namespace capability {
             std::is_same <Range, typename std::decay <Range>::type>::value,
             "Internal: Range must be unqualified.");
 
-        typedef typename boost::mpl::eval_if <always_empty <Direction, Range>,
+        typedef typename boost::mpl::eval_if <always_empty <Range, Direction>,
             detect_capabilities_for_key_always_empty <Range, Direction>,
             detect_capabilities_for_key_not_always_empty <
                 Range, Direction>>::type capabilities1;
 
         typedef typename boost::mpl::eval_if <
-            range::has <callable::size (Direction, Range const &)>,
+            range::has <callable::size (Range const &, Direction)>,
                 meta::insert <size, capabilities1>, capabilities1
             >::type capabilities2;
 
         typedef typename boost::mpl::eval_if <
-            range::has <callable::empty (Direction, Range const &)>,
+            range::has <callable::empty (Range const &, Direction)>,
                 meta::insert <empty, capabilities2>, capabilities2
             >::type capabilities3;
 
@@ -314,35 +314,34 @@ namespace capability {
     /** \brief
     Detect directions for a range.
 
-    This merely takes the Range's default direction and its reverse direction,
+    This merely takes the Range's default direction and its opposite direction,
     and checks whether they make sense.
     */
     template <class Range> class detect_capability_keys {
-        typedef typename detect_default_direction <Range>::type
-            default_direction;
-        typedef typename result_of_or <
-                ::direction::callable::reverse (default_direction), void>::type
-            reverse;
+        template <class Direction1
+                = typename detect_default_direction <Range>::type,
+                class Enable = void>
+            struct detect_directions
+        : meta::vector <Direction1> {};
 
-        typedef typename boost::mpl::if_ <
-                std::is_same <reverse, void>,
-                meta::vector <default_direction>,
-                meta::vector <default_direction, reverse>>::type
-            potential_directions;
+        template <class Direction1>
+            struct detect_directions <Direction1, typename make_void <decltype (
+                ::direction::opposite (std::declval <Direction1>()))>::type>
+        : meta::vector <Direction1, typename decayed_result_of <
+            ::direction::callable::opposite (Direction1)>::type> {};
+
+        typedef typename detect_directions<>::type potential_directions;
 
         template <class Direction> struct uses_direction
         : boost::mpl::or_ <
-            always_empty <Direction, Range>,
-            has <callable::first (Direction, Range &&)>> {};
+            always_empty <Range, Direction>,
+            has <callable::first (Range &&, Direction)>> {};
 
         typedef typename meta::as_set <meta::filter <
                 uses_direction <boost::mpl::_1>, potential_directions>>::type
             directions;
 
     public:
-        /*typedef typename boost::mpl::eval_if <
-            std::is_constructible <Range, Range const &>,
-            meta::push <copy_construct, directions>, directions>::type type;*/
         typedef typename detect_copy_construct_key <Range, directions>::type
             type;
     };
@@ -355,7 +354,7 @@ namespace capability {
         (optional)
         The capability keys to include, as a meta::set.
         If this is not given, it is detected as the default direction and
-        potentially its reverse.
+        potentially its opposite.
     */
     template <class Range, class CapabilityKeys =
             typename detect_capability_keys <Range>::type>
@@ -401,4 +400,3 @@ namespace capability {
 }} // namespace range::capability
 
 #endif // RANGE_ANY_RANGE_CAPABILITY_HPP_INCLUDED
-

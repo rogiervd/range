@@ -47,31 +47,31 @@ using range::transform;
 #define CHECK_tuple_view_less(r1, r2, value) \
     RIME_CHECK_EQUAL (less_lexicographical (r1, r2), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        front, r1, r2), value); \
+        r1, r2, front), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        back, make_tuple_from (reverse (r1)), make_tuple_from (reverse (r2))), \
+        make_tuple_from (reverse (r1)), make_tuple_from (reverse (r2)), back), \
         value); \
     \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        std::less <double>(), r1, r2), value); \
+        r1, r2, std::less <double>()), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        front, std::less <double>(), r1, r2), value); \
+        r1, r2, front, std::less <double>()), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        back, std::less <double>(), \
-        make_tuple_from (reverse (r1)), make_tuple_from (reverse (r2))), \
+        make_tuple_from (reverse (r1)), make_tuple_from (reverse (r2)), \
+        back, std::less <double>()), \
         value); \
     \
     RIME_CHECK_EQUAL (less_lexicographical (std::greater <double>(), \
-        make_tuple_from (range::transform (negate(), r1)), \
-        make_tuple_from (range::transform (negate(), r2))), value); \
+        make_tuple_from (range::transform (r1, negate())), \
+        make_tuple_from (range::transform (r2, negate()))), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        front, std::greater <double>(), \
-        make_tuple_from (range::transform (negate(), r1)), \
-        make_tuple_from (range::transform (negate(), r2))), value); \
+        make_tuple_from (range::transform (r1, negate())), \
+        make_tuple_from (range::transform (r2, negate())), \
+        front, std::greater <double>()), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        back, std::greater <double>(), \
-        make_tuple_from (range::transform (negate(), reverse (r1))), \
-        make_tuple_from (range::transform (negate(), reverse (r2)))), value)
+        make_tuple_from (range::transform (reverse (r1), negate())), \
+        make_tuple_from (range::transform (reverse (r2), negate())), \
+        back, std::greater <double>()), value)
 
 #define CHECK_tuple_less(r1, r2, value) \
     CHECK_tuple_view_less (r1, r2, value); \

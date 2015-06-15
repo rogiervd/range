@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE (test_range_view_optional_empty) {
         auto empty_view = range::view_optional (empty);
 
         // Also test direction "back" every once in a while (throughout).
-        BOOST_CHECK (range::empty (range::back, empty_view));
+        BOOST_CHECK (range::empty (empty_view, range::back));
         BOOST_CHECK_EQUAL (range::size (empty_view), 0u);
     }
     {
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE (test_range_view_optional_empty) {
 
         auto empty_view = range::view_optional (empty);
 
-        BOOST_CHECK (range::empty (range::back, empty_view));
+        BOOST_CHECK (range::empty (empty_view, range::back));
         BOOST_CHECK_EQUAL (range::size (empty_view), 0u);
     }
 }
@@ -104,12 +104,12 @@ BOOST_AUTO_TEST_CASE (test_range_view_optional_not_empty) {
 
         auto five_view = range::view_optional (five);
 
-        BOOST_CHECK (!range::empty (range::back, five_view));
+        BOOST_CHECK (!range::empty (five_view, range::back));
         BOOST_CHECK_EQUAL (range::size (five_view), 1u);
 
-        BOOST_CHECK_EQUAL (range::first (range::back, five_view), 5);
+        BOOST_CHECK_EQUAL (range::first (five_view, range::back), 5);
 
-        auto empty = range::drop (range::back, five_view);
+        auto empty = range::drop (five_view, range::back);
         BOOST_CHECK (range::empty (empty));
     }
     {
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE (test_range_view_optional_not_empty) {
 
         auto five_view = range::view_optional (five);
 
-        BOOST_CHECK (!range::empty (range::back, five_view));
-        BOOST_CHECK_EQUAL (range::size (range::back, five_view), 1u);
+        BOOST_CHECK (!range::empty (five_view, range::back));
+        BOOST_CHECK_EQUAL (range::size (five_view, range::back), 1u);
 
         BOOST_CHECK_EQUAL (range::first (five_view), 5);
 
@@ -131,9 +131,9 @@ BOOST_AUTO_TEST_CASE (test_range_view_optional_not_empty) {
         auto five_view = range::view_optional (five);
 
         BOOST_CHECK (!range::empty (five_view));
-        BOOST_CHECK_EQUAL (range::size (range::back, five_view), 1u);
+        BOOST_CHECK_EQUAL (range::size (five_view, range::back), 1u);
 
-        BOOST_CHECK_EQUAL (range::first (range::back, five_view), 5);
+        BOOST_CHECK_EQUAL (range::first (five_view, range::back), 5);
 
         auto empty = range::drop (five_view);
         BOOST_CHECK (range::empty (empty));

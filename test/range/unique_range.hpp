@@ -26,9 +26,7 @@ Provide a range wrapper for testing the Range library.
 #include "rime/assert.hpp"
 
 #include "range/core.hpp"
-#include "range/detail/underlying.hpp"
-
-namespace unique_range_detail { namespace callable { struct get_underlying; }}
+#include "range/helper/underlying.hpp"
 
 /**
 Wrapper range that cannot be copied, only moved, even when the underlying range
@@ -51,8 +49,8 @@ private:
     bool valid_;
     Underlying underlying_;
 
-    friend struct unique_range_detail::callable::get_underlying;
-    friend class range::detail::callable::get_underlying;
+    template <class Wrapper>
+        friend class range::helper::callable::get_underlying;
 
 public:
     explicit unique_range (Underlying const & underlying)
@@ -78,46 +76,6 @@ public:
     void invalidate() { valid_ = false; }
 };
 
-namespace unique_range_detail {
-
-namespace callable {
-
-    /**
-    Similar to range::detail::callable::underlying, but checks that the range is
-    still valid.
-    */
-    struct get_underlying {
-    public:
-        template <class UniqueRange>
-            typename UniqueRange::underlying_type const &
-            operator() (UniqueRange const & range) const
-        {
-            assert (range.valid());
-            return range.underlying_;
-        }
-
-        template <class UniqueRange> typename UniqueRange::underlying_type &
-            operator() (UniqueRange & range) const
-        {
-            assert (range.valid());
-            return range.underlying_;
-        }
-
-        template <class UniqueRange> typename UniqueRange::underlying_type &&
-            operator() (UniqueRange && range) const
-        {
-            assert (range.valid());
-            range.invalidate();
-            return std::move (range.underlying_);
-        }
-    };
-
-} // namespace unique_range_detail
-
-static const auto get_underlying = callable::get_underlying();
-
-} // namespace callable
-
 /**
 Produce a view on the range that cannot be copied, only moved.
 drop() must therefore move its argument.
@@ -142,139 +100,74 @@ RETURNS (unique_range <typename range::decayed_result_of <
     range::callable::view (Range)>::type, true> (
         range::view (std::forward <Range> (range))));
 
-template <class UnderlyingTag, bool OneTime>
-    struct unique_range_tag;
+template <bool OneTime> struct unique_range_tag {};
 
 namespace range {
+    template <class Underlying, bool OneTime>
+        struct tag_of_qualified <unique_range <Underlying, OneTime>>
+    { typedef unique_range_tag <OneTime> type; };
+} // namespace range
 
-template <class Underlying, bool OneTime>
-    struct tag_of_qualified <unique_range <Underlying, OneTime>>
+template <bool OneTime, class Range> inline
+    auto implement_default_direction (
+        unique_range_tag <OneTime> const &, Range && range)
+RETURNS (range::default_direction (
+    range::helper::get_underlying <Range> (range)));
+
+template <bool OneTime, class Range, class Direction>
+    auto implement_empty (unique_range_tag <OneTime> const &,
+        Range && range, Direction const & direction)
+RETURNS (range::empty (
+    range::helper::get_underlying <Range> (range), direction));
+
+template <bool OneTime, class Range, class Direction>
+    auto implement_size (unique_range_tag <OneTime> const &,
+        Range && range, Direction const & direction)
+RETURNS (range::size (
+    range::helper::get_underlying <Range> (range), direction));
+
+// first: only if OneTime = false.
+// Otherwise this is implementented automatically through "chop".
+template <class Range, class Direction>
+    auto implement_first (unique_range_tag <false> const &,
+        Range && range, Direction const & direction)
+RETURNS (range::first (
+    range::helper::get_underlying <Range> (range), direction));
+
+// drop() only takes an rvalue range, pilfers it, and deactivates the original
+// range.
+template <bool OneTime, class Underlying, class Increment, class Direction,
+    class Result = unique_range <typename std::decay <
+        decltype (range::drop (std::declval <Underlying>(),
+            std::declval <Increment>(), std::declval <Direction>()))>::type,
+        OneTime>>
+Result implement_drop (unique_range_tag <OneTime> const &,
+    unique_range <Underlying, OneTime> && r,
+    Increment const & increment, Direction const & direction)
 {
-    typedef unique_range_tag <typename
-        tag_of <Underlying &>::type, OneTime> type;
-};
+    return Result (range::drop (range::helper::get_underlying <
+        unique_range <Underlying, OneTime>> (r), increment, direction));
+}
 
-namespace operation {
-
-    template <class UnderlyingTag, bool OneTime, class Range>
-        struct default_direction <
-            unique_range_tag <UnderlyingTag, OneTime>, Range>
-    {
-        typename result_of <callable::default_direction (
-            unique_range_detail::callable::get_underlying (Range))>::type
-                operator() (Range && range) const
-        {
-            return range::default_direction (
-                unique_range_detail::get_underlying (range));
-        }
-    };
-
-    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
-        struct empty <unique_range_tag <UnderlyingTag, OneTime>,
-            Direction, Range>
-    {
-        typename result_of <callable::empty (Direction,
-            unique_range_detail::callable::get_underlying (Range))>::type
-                operator() (Direction const & direction, Range && range) const
-        {
-            return range::empty (direction,
-                unique_range_detail::get_underlying (range));
-        }
-    };
-
-    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
-        struct size <unique_range_tag <UnderlyingTag, OneTime>,
-            Direction, Range>
-    {
-        typename result_of <callable::size (Direction,
-            unique_range_detail::callable::get_underlying (Range))>::type
-                operator() (Direction const & direction, Range && range) const
-        {
-            return range::size (direction,
-                unique_range_detail::get_underlying (range));
-        }
-    };
-
-    // first: only if OneTime = false.
-    // Otherwise this is implementented automatically through "chop".
-    template <class UnderlyingTag, class Direction, class Range>
-        struct first <unique_range_tag <UnderlyingTag, false>,
-            Direction, Range>
-    {
-       typename result_of <callable::first (Direction,
-            unique_range_detail::callable::get_underlying (Range))>::type
-                operator() (Direction const & direction, Range && range) const
-        {
-            return range::first (direction,
-                unique_range_detail::get_underlying (range));
-        }
-    };
-
-    /**
-    drop() only takes an rvalue range, pilfers it, and deactivates the original
-    range.
-    */
-    template <class UnderlyingTag, bool OneTime, class Direction,
-            class Increment, class Range>
-        struct drop <unique_range_tag <UnderlyingTag, OneTime>, Direction,
-            Increment, Range &&, typename boost::enable_if <is_implemented <
-                drop <UnderlyingTag, Direction, Increment, typename
-                    std::decay <Range>::type::underlying_type &&>>>::type>
-    {
-        template <class Underlying>
-            unique_range <typename result_of <
-                    callable::drop (Direction, Increment, Underlying)>::type,
-                OneTime>
-            operator() (Direction const & direction,
-                Increment const & increment,
-                unique_range <Underlying, OneTime> && r) const
-        {
-            typedef unique_range <typename result_of <
-                    callable::drop (Direction, Increment, Underlying)>::type,
-                OneTime>
-                result_type;
-
-            return result_type (
-                range::drop (direction, increment,
-                    unique_range_detail::get_underlying (std::move (r))));
-
-        }
-    };
-
-    /**
-    chop() only takes an rvalue range, pilfers it, and deactivates the original
-    range.
-
-    This is enabled if "drop<...>" is implemented, since "chop" is then usually
-    implemented automatically.
-    */
-    template <class UnderlyingTag, bool OneTime, class Direction, class Range>
-        struct chop <unique_range_tag <UnderlyingTag, OneTime>,
-            Direction, Range &&,
-            typename boost::enable_if <boost::mpl::or_ <
-                is_implemented <drop <UnderlyingTag, Direction, one_type,
-                    typename underlying <Range &&>::type>>,
-                is_implemented <chop <UnderlyingTag, Direction,
-                    typename underlying <Range &&>::type>>
-            >>::type>
-    {
-        template <class Underlying,
-            class UnderlyingChopped = typename range::result_of <
-                range::callable::chop (Direction, Underlying)>::type,
-            class First = typename UnderlyingChopped::first_type,
-            class UnderlyingRest = typename UnderlyingChopped::rest_type,
-            class ResultRange = unique_range <UnderlyingRest, OneTime>,
-            class Result = chopped <First, ResultRange>>
-        Result operator() (Direction const & direction,
-            unique_range <Underlying, OneTime> && r) const
-        {
-            UnderlyingChopped underlying_chopped = range::chop (
-                direction, unique_range_detail::get_underlying (std::move (r)));
-            return Result (underlying_chopped.move_first(),
-                ResultRange (underlying_chopped.move_rest()));
-        }
-    };
-
-}} // namespace range::operation
+// chop() only takes an rvalue range, pilfers it, and deactivates the original
+// range.
+// It is only implemented if chop is implemented for the underlying range.
+template <bool OneTime, class Underlying, class Direction,
+    class UnderlyingChopped = decltype (
+        range::chop (std::declval <Underlying>(), std::declval <Direction>())),
+    class First = typename UnderlyingChopped::first_type,
+    class UnderlyingRest = typename UnderlyingChopped::rest_type,
+    class ResultRange = unique_range <UnderlyingRest, OneTime>,
+    class Result = range::chopped <First, ResultRange>>
+Result implement_chop (unique_range_tag <OneTime> const &,
+    unique_range <Underlying, OneTime> && r, Direction const & direction)
+{
+    UnderlyingChopped underlying_chopped = range::chop (
+        range::helper::get_underlying <
+            unique_range <Underlying, OneTime>> (r),
+        direction);
+    return Result (underlying_chopped.move_first(),
+        ResultRange (underlying_chopped.move_rest()));
+}
 
 #endif  // RANGE_TEST_UNIQUE_RANGE_HPP_INCLUDED

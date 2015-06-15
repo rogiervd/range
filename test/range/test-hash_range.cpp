@@ -41,22 +41,22 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
     boost::hash <float> hash_float;
 
     {
-        BOOST_CHECK (hash_range (range::front, v) != 0);
+        BOOST_CHECK (hash_range (v, range::front) != 0);
         BOOST_CHECK (hash_range (v) != 0);
 
         std::size_t seed = 27;
 
-        hash_range_combine (range::front, seed, v);
+        hash_range_combine (v, range::front, seed);
         BOOST_CHECK_EQUAL (seed, 27);
 
-        hash_range_combine (seed, v);
+        hash_range_combine (v, seed);
         BOOST_CHECK_EQUAL (seed, 27);
     }
 
     v.push_back (7.5);
 
     {
-        BOOST_CHECK_EQUAL (hash_range (range::front, v), hash_float (7.5));
+        BOOST_CHECK_EQUAL (hash_range (v, range::front), hash_float (7.5));
         BOOST_CHECK_EQUAL (hash_range (v), hash_float (7.5));
 
         {
@@ -65,11 +65,11 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
 
             boost::hash_range (reference_seed, v.begin(), v.end());
 
-            hash_range_combine (range::front, seed, v);
+            hash_range_combine (v, range::front, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
 
             seed = 27;
-            hash_range_combine (seed, v);
+            hash_range_combine (v, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
         }
     }
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
     {
         std::size_t reference = hash_float (7.5);
         boost::hash_combine (reference, float (-17));
-        BOOST_CHECK_EQUAL (hash_range (range::front, v), reference);
+        BOOST_CHECK_EQUAL (hash_range (v, range::front), reference);
         BOOST_CHECK_EQUAL (hash_range (v), reference);
 
         {
@@ -89,11 +89,11 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
             // boost::hash_range has strictly defined behaviour.
             boost::hash_range (reference_seed, v.begin(), v.end());
 
-            hash_range_combine (range::front, seed, v);
+            hash_range_combine (v, range::front, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
 
             seed = 27;
-            hash_range_combine (seed, v);
+            hash_range_combine (v, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
         }
     }
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
         std::size_t reference = hash_float (7.5);
         boost::hash_combine (reference, float (-17));
         boost::hash_combine (reference, float (35.25));
-        BOOST_CHECK_EQUAL (hash_range (range::front, v), reference);
+        BOOST_CHECK_EQUAL (hash_range (v, range::front), reference);
         BOOST_CHECK_EQUAL (hash_range (v), reference);
     }
 }
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
     {
         std::tuple <> t;
 
-        BOOST_CHECK (hash_range (range::front, t) != 0);
+        BOOST_CHECK (hash_range (t, range::front) != 0);
         BOOST_CHECK (hash_range (t) != 0);
     }
 
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
         std::tuple <double> t (6.3);
 
         {
-            BOOST_CHECK_EQUAL (hash_range (range::front, t), hash_double (6.3));
+            BOOST_CHECK_EQUAL (hash_range (t, range::front), hash_double (6.3));
             BOOST_CHECK_EQUAL (hash_range (t), hash_double (6.3));
         }
 
@@ -131,11 +131,11 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
             boost::hash_combine (reference_seed, double (6.3));
 
             std::size_t seed = 81;
-            hash_range_combine (range::front, seed, t);
+            hash_range_combine (t, range::front, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
 
             seed = 81;
-            hash_range_combine (seed, t);
+            hash_range_combine (t, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
         }
     }
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
             std::size_t reference_seed = hash_double (10.4);
             boost::hash_combine (reference_seed, std::string ("hello"));
 
-            BOOST_CHECK_EQUAL (hash_range (range::front, t),
+            BOOST_CHECK_EQUAL (hash_range (t, range::front),
                 reference_seed);
             BOOST_CHECK_EQUAL (hash_range (t), reference_seed);
         }
@@ -158,11 +158,11 @@ BOOST_AUTO_TEST_CASE (test_range_hash_heterogeneous) {
             boost::hash_combine (reference_seed, std::string ("hello"));
 
             std::size_t seed = 81;
-            hash_range_combine (range::front, seed, t);
+            hash_range_combine (t, range::front, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
 
             seed = 81;
-            hash_range_combine (seed, t);
+            hash_range_combine (t, seed);
             BOOST_CHECK_EQUAL (seed, reference_seed);
         }
     }

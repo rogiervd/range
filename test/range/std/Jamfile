@@ -1,1 +1,8 @@
-run_glob *.cpp ;
+# run_glob *.cpp ;
+
+run test-std_container.cpp ;
+run test-std_tuple.cpp ;
+run test-view_optional.cpp ;
+
+# Example.
+run example-std_adaptor.cpp ;

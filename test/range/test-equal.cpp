@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,23 +34,23 @@ bool approximately_equal (int i, int j)
 #define CHECK_range_equal(r1, r2, value, approximately_value) \
     RIME_CHECK_EQUAL (range::equal (r1, r2), value); \
     RIME_CHECK_EQUAL (range::equal (r2, r1), value); \
-    RIME_CHECK_EQUAL (range::equal (range::front, r1, r2), value); \
-    RIME_CHECK_EQUAL (range::equal (range::front, r2, r1), value); \
-    RIME_CHECK_EQUAL (range::equal (range::back, r1, r2), value); \
-    RIME_CHECK_EQUAL (range::equal (range::back, r2, r1), value); \
+    RIME_CHECK_EQUAL (range::equal (r1, r2, range::front), value); \
+    RIME_CHECK_EQUAL (range::equal (r2, r1, range::front), value); \
+    RIME_CHECK_EQUAL (range::equal (r1, r2, range::back), value); \
+    RIME_CHECK_EQUAL (range::equal (r2, r1, range::back), value); \
     \
     RIME_CHECK_EQUAL (range::equal ( \
-        approximately_equal, r1, r2), approximately_value); \
+        r1, r2, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (range::equal ( \
-        approximately_equal, r2, r1), approximately_value); \
+        r2, r1, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (range::equal ( \
-        range::front, approximately_equal, r1, r2), approximately_value); \
+        r1, r2, range::front, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (range::equal ( \
-        range::front, approximately_equal, r2, r1), approximately_value); \
+        r2, r1, range::front, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (range::equal ( \
-        range::back, approximately_equal, r1, r2), approximately_value); \
+        r1, r2, range::back, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (range::equal ( \
-        range::back, approximately_equal, r2, r1), approximately_value)
+        r2, r1, range::back, approximately_equal), approximately_value)
 
 BOOST_AUTO_TEST_CASE (test_range_equal_homogeneous) {
     std::vector <int> v1, v2;

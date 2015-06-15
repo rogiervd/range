@@ -19,54 +19,137 @@ limitations under the License.
 
 #include <boost/mpl/if.hpp>
 
+#include "rime/nothing.hpp"
+
 #include "core.hpp"
 #include "fold.hpp"
 
 namespace range {
 
-/*
-Interface.
-The structure of this is the same as some of detail/core_*.hpp.
-*/
+/* Implementation */
 
-namespace operation {
+namespace for_each_detail {
 
-    // Reminder.
-    // The general implementation is given at the bottom of this file.
-    template <class RangeTag, class Direction, class Function, class Range,
-        class Enable /* = void*/>
-    struct for_each;
+    /**
+    Pretend result type to implement "for_each" using "fold".
+    (In a fold, the result of the function gets passed to the next function,
+    so "void" would not work.)
+    */
+    struct none {};
 
-} // namespace operation
+    /**
+    A function for "fold" accepts a state, but for "for_each" it doesn't.
+    Therefore, forward to the function, leaving out "none".
+    */
+    template <class Function> struct function_wrapper {
+        Function function;
 
-namespace apply {
+        function_wrapper (Function && function)
+        : function (std::forward <Function> (function)) {}
 
-    namespace automatic_arguments {
+        template <class Element>
+            none operator() (none, Element && element) const
+        {
+            function (std::forward <Element> (element));
+            return none();
+        }
+    };
 
-        // for_each.
-        template <class Directions, class Other, class Ranges,
-            class Enable = void>
-        struct for_each : operation::unimplemented {};
+    struct use_fold {
+        // This uses "auto" merely to enable SFINAE; the return type is always
+        // void.
+        template <class Range, class Direction, class Function>
+            auto operator() (Range && range, Direction const & direction,
+                Function && function) const
+        RETURNS (rime::nothing (range::fold (
+            none(), std::forward <Range> (range), direction,
+            function_wrapper <Function> (std::forward <Function> (function)))));
+    };
 
-        template <class Direction, class Function, class Range>
-            struct for_each <meta::vector <Direction>,
-                meta::vector <Function>, meta::vector <Range>>
-        : operation::for_each <typename range::tag_of <Range>::type,
-            typename std::decay <Direction>::type, Function, Range &&> {};
+} // namespace for_each_detail
 
-    } // namespace automatic_arguments
+/* Interface. */
 
-    /** for_each */
-    template <class ... Arguments> struct for_each
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::call_with_view_once <
-            automatic_arguments::for_each>::apply,
-        meta::vector <Arguments ...>>::type {};
+namespace helper {
 
-} // namespace apply
+    /** \brief
+    Hook for implementing for() for a type of range.
+
+    This does normally not have to be implemented, unless the default
+    implementation (which uses fold()) does not suffice.
+
+    To provide an implementation of for_each() specific to a range, implement
+    either member function for_each() on the range, or free function
+    implement_for_each().
+    If both of these are defined, then the free function will be preferred.
+
+    \param tag The range tag.
+    \param range The range to get the elements from.
+    \param direction The direction in which the range is traversed.
+    \param function The function to be called on each element.
+    */
+    void implement_for_each (unusable);
+
+} // namespace helper
 
 namespace callable {
-    struct for_each : generic <apply::for_each> {};
+
+    namespace implementation {
+
+        using helper::implement_for_each;
+
+        class for_each {
+            struct dispatch {
+                // Use implement_for_each, if it is implemented.
+                template <class Range, class Direction, class Function>
+                    auto operator() (Range && range,
+                        Direction const & direction, Function && function,
+                        overload_order <1> *) const
+                RETURNS (implement_for_each (tag_of <Range>::type(),
+                    std::forward <Range> (range),
+                    direction, std::forward <Function> (function)));
+
+                // Use member function .for_each, if it is implemented.
+                template <class Range, class Direction, class Function>
+                    auto operator() (Range && range,
+                        Direction const & direction, Function && function,
+                        overload_order <2> *) const
+                RETURNS (helper::member_access::for_each (
+                    std::forward <Range> (range), direction,
+                    std::forward <Function> (function)));
+
+                // Use default implementation.
+                template <class Range, class Direction, class Function>
+                    auto operator() (Range && range,
+                        Direction const & direction, Function && function,
+                        overload_order <3> *) const
+                RETURNS (for_each_detail::use_fold() (
+                        std::forward <Range> (range), direction,
+                    std::forward <Function> (function)));
+            };
+
+        public:
+            template <class Range, class Direction, class Function>
+            auto operator() (Range && range, Direction const & direction,
+                Function && function) const
+            RETURNS (dispatch() (
+                range::view_once (std::forward <Range> (range), direction),
+                direction,
+                std::forward <Function> (function), pick_overload()));
+
+            // Without direction: use default_direction.
+            template <class Range, class Function>
+                auto operator() (Range && range, Function && function) const
+            RETURNS (dispatch() (
+                range::view_once (std::forward <Range> (range)),
+                range::default_direction (range),
+                std::forward <Function> (function), pick_overload()));
+        };
+
+    } // namespace implementation
+
+    using implementation::for_each;
+
 } // namespace callable
 
 /**
@@ -75,73 +158,15 @@ Call a unary function for each element of a range, traversing it along
 
 Any result from the functions is ignored.
 
+\param range
+    The range to get the elements from.
 \param direction
     (optional) The direction in which the range is traversed.
     If it is not given, then the default direction of the range is used.
 \param function
     The function to be called on each element.
-\param range
-    The range to get the elements from.
 */
 static const auto for_each = callable::for_each();
-
-/* Implementation */
-
-namespace operation {
-
-    namespace for_each_detail {
-
-        /**
-        Pretend function result type to implement "for_each" using "fold".
-        (In a fold, the result of the function gets passed to the next function,
-        so "void" would not work.)
-        */
-        struct none {};
-
-        /**
-        A function for "fold" accepts a state, but for "for_each" it doesn't.
-        Therefore, forward to the function, leaving out "none".
-        */
-        template <class Function> struct function_wrapper {
-            Function function;
-
-            function_wrapper (Function && function)
-            : function (std::forward <Function> (function)) {}
-
-            template <class Element>
-                none operator() (none, Element && element) const
-            {
-                function (std::forward <Element> (element));
-                return none();
-            }
-        };
-
-        struct use_fold {
-            template <class Direction, class Function, class Range>
-                void operator() (Direction const & direction,
-                    Function && function, Range && range) const
-            {
-                static_assert (range::is_view <Direction, Range>::value,
-                    "Internal error: the range must be a view here.");
-                function_wrapper <Function> function_wrapper (
-                    std::forward <Function> (function));
-                range::fold (direction, function_wrapper,
-                    for_each_detail::none(), std::forward <Range> (range));
-            }
-        };
-
-    } // namespace for_each_detail
-
-    // Implemented if "fold" is implemented.
-    template <class RangeTag, class Direction, class Function, class Range,
-            class Enable>
-        struct for_each
-    : boost::mpl::if_ <is_implemented <fold <
-        RangeTag, Direction, for_each_detail::function_wrapper <Function>,
-            for_each_detail::none, Range>>,
-        for_each_detail::use_fold, unimplemented>::type {};
-
-} // namespace operation
 
 } // namespace range
 

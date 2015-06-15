@@ -1,7 +1,15 @@
-run_glob *.cpp ;
+# The dependencies in this file spell out the dependencies between both
+# implementations, and tests.
+# E.g. it usually makes no sense to run test-count if test-reverse fails,
+# because test-count uses reverse.
 
-build-project detail ;
-build-project std ;
+run test-direction.cpp ;
+run test-core.cpp ;
+
+# Test the core of the library:
+run test-member_view.cpp : : : <dependency>test-core ;
+
+run test-iterator_range.cpp : : : <dependency>test-core ;
 
 # Switch on iterator debugging for GCC.
 # (On CLang with libstdc++ this can cause compilation problems.)
@@ -10,4 +18,97 @@ run test-iterator_range.cpp : :
     : test-iterator_range-iterator_debug
     ;
 
+run test-heavyweight.cpp : : : <dependency>test-core ;
+run test-function_range.cpp : : : <dependency>test-core ;
+
+run test-empty_view.cpp : : : <dependency>test-core ;
+
+build-project std ;
+
+build-project detail ;
+
+# Python tests are mostly separate from other things.
 build-project python ;
+
+run test-for_each_macro.cpp : : :
+    <dependency>test-core <dependency>std <dependency>test-function_range ;
+
+run test-unique_range.cpp : : : <dependency>test-core <dependency>std ;
+
+run test-take.cpp : : : <dependency>test-core <dependency>std ;
+run test-reverse.cpp : : : <dependency>test-core <dependency>std ;
+run test-count.cpp : : : <dependency>test-core <dependency>test-reverse ;
+
+run test-element_types.cpp : : : <dependency>test-core <dependency>test-take ;
+run test-walk_size.cpp : : : <dependency>test-core ;
+run test-transform.cpp : : : <dependency>test-core <dependency>std ;
+
+run test-view_shared.cpp : : :
+    <dependency>test-core <dependency>std
+    <dependency>test-reverse <dependency>test-transform ;
+
+run test-fold-1.cpp : : : <dependency>test-core <dependency>std ;
+run test-fold-2-moving.cpp : : : <dependency>test-fold-1 ;
+run test-fold-3-state_types.cpp : : : <dependency>test-fold-1 ;
+run test-fold-4-large.cpp : : : <dependency>test-fold-1 ;
+run test-for_each.cpp : : : <dependency>test-fold-1 ;
+
+run test-find.cpp : : : <dependency>test-core <dependency>std ;
+
+run test-all_of_any_of-heterogeneous.cpp : : : <dependency>test-find ;
+run test-all_of_any_of-homogeneous.cpp : : : <dependency>test-find ;
+
+run test-equal.cpp : : : <dependency>test-core <dependency>std ;
+run test-less_lexicographical-constant.cpp : : :
+    <dependency>std <dependency>test-reverse <dependency>test-transform ;
+run test-less_lexicographical-homogeneous.cpp : : :
+    <dependency>std <dependency>test-reverse <dependency>test-transform ;
+run test-less_lexicographical-heterogeneous.cpp : : :
+    <dependency>std <dependency>test-reverse <dependency>test-transform ;
+run test-less_lexicographical-heterogeneous-2.cpp : : :
+    <dependency>std <dependency>test-reverse <dependency>test-transform ;
+run test-less_lexicographical-mixed.cpp : : :
+    <dependency>std <dependency>test-reverse <dependency>test-transform ;
+
+run test-tuple-0-basic.cpp : : : <dependency>test-core <dependency>std ;
+run test-tuple-0-basic-2.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-1-construct.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-2-assign.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-3-types.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-4-make_tuple.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-equal-constant.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-equal.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-equal-types.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-fold-state_types.cpp : : :
+    <dependency>test-tuple-0-basic <dependency>test-fold-1 ;
+run test-tuple-5-for_each.cpp : : :
+    <dependency>test-tuple-0-basic <dependency>test-for_each ;
+run test-tuple-5-less-constant.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-less-heterogeneous.cpp : : : <dependency>test-tuple-0-basic ;
+run test-tuple-5-less-types.cpp : : : <dependency>test-tuple-0-basic ;
+
+run test-hash_range.cpp : : :
+    <dependency>test-for_each <dependency>test-tuple-0-basic ;
+
+run test-scan.cpp : : : <dependency>std <dependency>test-tuple-0-basic ;
+
+run test-any_range-capability.cpp : : : <dependency>test-core <dependency>std ;
+run test-any_range.cpp : : : <dependency>test-any_range-capability ;
+run test-any_range-make.cpp : : : <dependency>test-any_range ;
+
+run test-call_unpack.cpp : : : <dependency>test-core <dependency>std ;
+run test-call_unpack-integration.cpp : : :
+    <dependency>test-call_unpack <dependency>test-zip-homogeneous-1 ;
+
+run test-lazy.cpp : : : <dependency>std <dependency>test-tuple-0-basic ;
+
+run test-zip-heterogeneous-1.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-heterogeneous-2.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-heterogeneous-3.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-homogeneous-1.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-homogeneous-2.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-homogeneous-3.cpp : : : <dependency>test-core <dependency>std ;
+run test-zip-homogeneous-4.cpp : : : <dependency>test-core <dependency>std ;
+
+# Example.
+run example-fibonacci.cpp ;

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_SUITE(test_range_zip)
 BOOST_AUTO_TEST_CASE (single) {
     std::vector <int> v;
     auto z = zip (v);
-    static_assert (range::is_homogeneous <direction::front, decltype (z)
+    static_assert (range::is_homogeneous <decltype (z), direction::front
         >::value, "");
 
     RIME_CHECK_EQUAL (empty (z), true);
@@ -70,7 +70,10 @@ BOOST_AUTO_TEST_CASE (single) {
 BOOST_AUTO_TEST_CASE (with_weird_count) {
     weird_count w1 (8);
     weird_count w2 (17);
-    auto z = zip (weird_direction (7), w1, w2);
+    auto z = zip_from (make_tuple (w1, w2), weird_direction (7));
+
+    auto d = range::default_direction (z);
+    static_assert (std::is_same <decltype (d), weird_direction>::value, "");
 
     BOOST_CHECK_EQUAL (first (first (z)), 8);
     BOOST_CHECK_EQUAL (second (first (z)), 17);
@@ -82,9 +85,9 @@ BOOST_AUTO_TEST_CASE (with_weird_count) {
         BOOST_CHECK_EQUAL (second (first (z)), 17 + count);
 
         if ((count % 2) == 0)
-            z = drop (weird_direction (7), z);
+            z = drop (z, weird_direction (7));
         else
-            z = chop (weird_direction (7), z).rest();
+            z = chop (z, weird_direction (7)).rest();
     }
 }
 

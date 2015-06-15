@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ limitations under the License.
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std.hpp"
+#include "range/std/container.hpp"
+#include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -58,104 +59,104 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_homogeneous) {
         BOOST_CHECK (default_direction (reverse (v)) == default_direction (v));
 
         BOOST_CHECK (empty (reverse (v)));
-        BOOST_CHECK (empty (front, reverse (v)));
-        BOOST_CHECK (empty (back, reverse (v)));
+        BOOST_CHECK (empty (reverse (v), front));
+        BOOST_CHECK (empty (reverse (v), back));
 
         BOOST_CHECK_EQUAL (size (reverse (v)), 0u);
-        BOOST_CHECK_EQUAL (size (front, reverse (v)), 0u);
-        BOOST_CHECK_EQUAL (size (back, reverse (v)), 0u);
+        BOOST_CHECK_EQUAL (size (reverse (v), front), 0u);
+        BOOST_CHECK_EQUAL (size (reverse (v), back), 0u);
 
 
         v.push_back (7);
         // v == reverse (v) == { 7 }.
 
         BOOST_CHECK (!empty (reverse (v)));
-        BOOST_CHECK (!empty (front, reverse (v)));
-        BOOST_CHECK (!empty (back, reverse (v)));
+        BOOST_CHECK (!empty (reverse (v), front));
+        BOOST_CHECK (!empty (reverse (v), back));
 
         BOOST_CHECK_EQUAL (size (reverse (v)), 1u);
-        BOOST_CHECK_EQUAL (size (front, reverse (v)), 1u);
-        BOOST_CHECK_EQUAL (size (back, reverse (v)), 1u);
+        BOOST_CHECK_EQUAL (size (reverse (v), front), 1u);
+        BOOST_CHECK_EQUAL (size (reverse (v), back), 1u);
 
         BOOST_CHECK_EQUAL (first (reverse (v)), 7);
-        BOOST_CHECK_EQUAL (first (front, reverse (v)), 7);
-        BOOST_CHECK_EQUAL (first (back, reverse (v)), 7);
+        BOOST_CHECK_EQUAL (first (reverse (v), front), 7);
+        BOOST_CHECK_EQUAL (first (reverse (v), back), 7);
 
         BOOST_CHECK (empty (drop (reverse (v))));
-        BOOST_CHECK (empty (drop (front, reverse (v))));
-        BOOST_CHECK (empty (drop (back, reverse (v))));
+        BOOST_CHECK (empty (drop (reverse (v), front)));
+        BOOST_CHECK (empty (drop (reverse (v), back)));
 
         v.push_back (18);
         // v == {7, 18}; reverse (v) == { 18, 7 }.
 
         BOOST_CHECK (!empty (reverse (v)));
-        BOOST_CHECK (!empty (front, reverse (v)));
-        BOOST_CHECK (!empty (back, reverse (v)));
+        BOOST_CHECK (!empty (reverse (v), front));
+        BOOST_CHECK (!empty (reverse (v), back));
 
         BOOST_CHECK_EQUAL (size (reverse (v)), 2u);
-        BOOST_CHECK_EQUAL (size (front, reverse (v)), 2u);
-        BOOST_CHECK_EQUAL (size (back, reverse (v)), 2u);
+        BOOST_CHECK_EQUAL (size (reverse (v), front), 2u);
+        BOOST_CHECK_EQUAL (size (reverse (v), back), 2u);
 
         BOOST_CHECK_EQUAL (first (reverse (v)), 18);
-        BOOST_CHECK_EQUAL (first (front, reverse (v)), 18);
-        BOOST_CHECK_EQUAL (first (back, reverse (v)), 7);
+        BOOST_CHECK_EQUAL (first (reverse (v), front), 18);
+        BOOST_CHECK_EQUAL (first (reverse (v), back), 7);
 
         BOOST_CHECK (!empty (drop (reverse (v))));
-        BOOST_CHECK (!empty (drop (front, reverse (v))));
-        BOOST_CHECK (!empty (drop (back, reverse (v))));
+        BOOST_CHECK (!empty (drop (reverse (v), front)));
+        BOOST_CHECK (!empty (drop (reverse (v), back)));
 
         BOOST_CHECK_EQUAL (first (drop (reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (front, drop (front, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (front, drop (back, reverse (v))), 18);
-        BOOST_CHECK_EQUAL (first (back, drop (front, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, reverse (v))), 18);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), front), front), 7);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), back), front), 18);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), front), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), back), back), 18);
 
-        BOOST_CHECK_EQUAL (first (drop (1, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (front, drop (front, 1, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (front, drop (back, 1, reverse (v))), 18);
-        BOOST_CHECK_EQUAL (first (back, drop (front, 1, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 1, reverse (v))), 18);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1)), 7);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1, front), front), 7);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1, back), front), 18);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1, front), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1, back), back), 18);
 
-        BOOST_CHECK (empty (drop (2, reverse (v))));
-        BOOST_CHECK (empty (drop (front, 2, reverse (v))));
-        BOOST_CHECK (empty (drop (back, 2, reverse (v))));
+        BOOST_CHECK (empty (drop (reverse (v), 2)));
+        BOOST_CHECK (empty (drop (reverse (v), 2, front)));
+        BOOST_CHECK (empty (drop (reverse (v), 2, back)));
 
         v.push_back (29);
         // v == {7, 18, 29}; reverse (v) == { 29, 18, 7 }.
 
         BOOST_CHECK (!empty (reverse (v)));
-        BOOST_CHECK (!empty (front, reverse (v)));
-        BOOST_CHECK (!empty (back, reverse (v)));
+        BOOST_CHECK (!empty (reverse (v), front));
+        BOOST_CHECK (!empty (reverse (v), back));
 
         BOOST_CHECK_EQUAL (size (reverse (v)), 3u);
-        BOOST_CHECK_EQUAL (size (front, reverse (v)), 3u);
-        BOOST_CHECK_EQUAL (size (back, reverse (v)), 3u);
+        BOOST_CHECK_EQUAL (size (reverse (v), front), 3u);
+        BOOST_CHECK_EQUAL (size (reverse (v), back), 3u);
 
         BOOST_CHECK_EQUAL (first (reverse (v)), 29);
-        BOOST_CHECK_EQUAL (first (front, reverse (v)), 29);
-        BOOST_CHECK_EQUAL (first (back, reverse (v)), 7);
+        BOOST_CHECK_EQUAL (first (reverse (v), front), 29);
+        BOOST_CHECK_EQUAL (first (reverse (v), back), 7);
 
         BOOST_CHECK (!empty (drop (reverse (v))));
-        BOOST_CHECK (!empty (drop (front, reverse (v))));
-        BOOST_CHECK (!empty (drop (back, reverse (v))));
+        BOOST_CHECK (!empty (drop (reverse (v), front)));
+        BOOST_CHECK (!empty (drop (reverse (v), back)));
 
         BOOST_CHECK_EQUAL (size (drop (reverse (v))), 2u);
         BOOST_CHECK_EQUAL (first (drop (reverse (v))), 18);
-        BOOST_CHECK_EQUAL (size (drop (1, reverse (v))), 2u);
-        BOOST_CHECK_EQUAL (first (drop (1, reverse (v))), 18);
-        BOOST_CHECK_EQUAL (size (drop (2, reverse (v))), 1u);
-        BOOST_CHECK_EQUAL (first (drop (2, reverse (v))), 7);
-        BOOST_CHECK_EQUAL (size (drop (3, reverse (v))), 0u);
-        BOOST_CHECK (empty (drop (3, reverse (v))));
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 1)), 2u);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1)), 18);
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 2)), 1u);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 2)), 7);
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 3)), 0u);
+        BOOST_CHECK (empty (drop (reverse (v), 3)));
 
-        BOOST_CHECK_EQUAL (size (back, drop (back, reverse (v))), 2u);
-        BOOST_CHECK_EQUAL (first (back, drop (back, reverse (v))), 18);
-        BOOST_CHECK_EQUAL (size (back, drop (back, 1, reverse (v))), 2u);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 1, reverse (v))), 18);
-        BOOST_CHECK_EQUAL (size (back, drop (back, 2, reverse (v))), 1u);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 2, reverse (v))), 29);
-        BOOST_CHECK_EQUAL (size (back, drop (back, 3, reverse (v))), 0u);
-        BOOST_CHECK (empty (back, drop (back, 3, reverse (v))));
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), back), back), 2u);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), back), back), 18);
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 1, back), back), 2u);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 1, back), back), 18);
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 2, back), back), 1u);
+        BOOST_CHECK_EQUAL (first (drop (reverse (v), 2, back), back), 29);
+        BOOST_CHECK_EQUAL (size (drop (reverse (v), 3, back), back), 0u);
+        BOOST_CHECK (empty (drop (reverse (v), 3, back), back));
 
         // Mutability.
         first (reverse (v)) = 40;
@@ -192,9 +193,9 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_homogeneous) {
         BOOST_CHECK_EQUAL (first (drop (r)), 'H');
         BOOST_CHECK (empty (drop (drop (r))));
 
-        BOOST_CHECK_EQUAL (first (back, r), 'H');
-        BOOST_CHECK_EQUAL (first (back, drop (back, r)), 'e');
-        BOOST_CHECK (empty (drop (back, drop (back, r))));
+        BOOST_CHECK_EQUAL (first (r, back), 'H');
+        BOOST_CHECK_EQUAL (first (drop (r, back), back), 'e');
+        BOOST_CHECK (empty (drop (drop (r, back), back)));
 
 
         l.push_back ('l');
@@ -206,10 +207,10 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_homogeneous) {
         BOOST_CHECK_EQUAL (first (drop (drop (r))), 'H');
         BOOST_CHECK (empty (drop (drop (drop (r)))));
 
-        BOOST_CHECK_EQUAL (first (back, r), 'H');
-        BOOST_CHECK_EQUAL (first (back, drop (back, r)), 'e');
-        BOOST_CHECK_EQUAL (first (back, drop (back, drop (back, r))), 'l');
-        BOOST_CHECK (empty (drop (back, drop (back, drop (back, r)))));
+        BOOST_CHECK_EQUAL (first (r, back), 'H');
+        BOOST_CHECK_EQUAL (first (drop (r, back), back), 'e');
+        BOOST_CHECK_EQUAL (first (drop (drop (r, back), back), back), 'l');
+        BOOST_CHECK (empty (drop (drop (drop (r, back), back)), back));
     }
 }
 
@@ -232,7 +233,7 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_heterogeneous) {
         first (r) += 5;
         BOOST_CHECK_EQUAL (first (t), 9);
 
-        RIME_CHECK_EQUAL (empty (drop (rime::size_t <1u>(), r)), rime::true_);
+        RIME_CHECK_EQUAL (empty (drop (r, rime::size_t <1u>())), rime::true_);
     }
 
     {
@@ -247,9 +248,9 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_heterogeneous) {
         RIME_CHECK_EQUAL (first (drop (t)), 12.25);
         RIME_CHECK_EQUAL (first (drop (r)), 4);
 
-        RIME_CHECK_EQUAL (first (back, drop (back, rime::size_t <1u>(), r)),
+        RIME_CHECK_EQUAL (first (drop (r, rime::size_t <1u>(), back), back),
             12.25);
-        RIME_CHECK_EQUAL (empty (drop (rime::size_t <2u>(), r)), rime::true_);
+        RIME_CHECK_EQUAL (empty (drop (r, rime::size_t <2u>())), rime::true_);
     }
 
     {
@@ -261,14 +262,14 @@ BOOST_AUTO_TEST_CASE (test_range_reverse_heterogeneous) {
 
         RIME_CHECK_EQUAL (first (r), false);
         RIME_CHECK_EQUAL (first (drop (r)), 7.25);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <2u>(), r)), 4);
-        first (drop (rime::size_t <2u>(), r)) -= 3;
+        RIME_CHECK_EQUAL (first (drop (r, rime::size_t <2u>())), 4);
+        first (drop (r, rime::size_t <2u>())) -= 3;
         BOOST_CHECK_EQUAL (first (t), 1);
 
-        RIME_CHECK_EQUAL (first (back, drop (back, rime::size_t <2u>(), r)),
+        RIME_CHECK_EQUAL (first (drop (r, rime::size_t <2u>(), back), back),
             false);
 
-        RIME_CHECK_EQUAL (empty (drop (rime::size_t <3u>(), r)), rime::true_);
+        RIME_CHECK_EQUAL (empty (drop (r, rime::size_t <3u>())), rime::true_);
     }
 
 }

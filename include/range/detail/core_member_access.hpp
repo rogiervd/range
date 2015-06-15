@@ -17,412 +17,254 @@ limitations under the License.
 #ifndef RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
 
-#include <type_traits>
+namespace range { namespace helper {
 
-#include "callable_traits.hpp"
-
-#include "core_tag.hpp"
-#include "core_base.hpp"
-
-namespace range { namespace operation {
-
-    /**
-    Class through which access to members is channeled.
-    Ranges which define operations through member functions can make them
-    private and make friends with this class.
-
-    All member structs derived from \c unimplemented unless the appropriate
-    member function can be called.
-    */
     class member_access {
     public:
 
-#if !defined (__GNUC__) || __GNUC__ > 4 || \
+#if defined (__clang__) || !defined (__GNUC__) || __GNUC__ > 4 || \
     (__GNUC__ == 4 && __GNUC_MINOR__ > 6)
 
-        // Normal implementation.
+        // default_direction.
         template <class Range>
-            static auto default_direction_member (Range && range)
+            static auto default_direction (Range && range)
         RETURNS (std::forward <Range> (range).default_direction());
 
-        template <class Direction, class Range>
-            static auto empty_member (
-                Direction const & direction, Range && range)
+        // empty.
+        template <class Range, class Direction>
+            static auto empty (Range && range, Direction const & direction)
         RETURNS (std::forward <Range> (range).empty (direction));
 
-        template <class Direction, class Range>
-            static auto first_member (
-                Direction const & direction, Range && range)
-        RETURNS (std::forward <Range> (range).first (direction));
-
-        template <class Direction, class Range>
-            static auto size_member (
-                Direction const & direction, Range && range)
+        // size.
+        template <class Range, class Direction>
+            static auto size (Range && range, Direction const & direction)
         RETURNS (std::forward <Range> (range).size (direction));
 
-        template <class Direction, class Range>
-            static auto drop_one_member (
-                Direction const & direction, Range && range)
+        // first.
+        template <class Range, class Direction>
+            static auto first (Range && range, Direction const & direction)
+        RETURNS (std::forward <Range> (range).first (direction));
+
+        // at.
+        template <class Range, class Position, class Direction>
+            static auto at_constant (Range && range,
+                Position const & position, Direction const & direction)
+        RETURNS (std::forward <Range> (range)
+            .at_constant (position, direction));
+
+        template <class Range, class Position, class Direction>
+            static auto at (Range && range,
+                Position const & position, Direction const & direction)
+        RETURNS (std::forward <Range> (range).at (position, direction));
+
+        // drop.
+        template <class Range, class Direction>
+            static auto drop_one (Range && range, Direction const & direction)
         RETURNS (std::forward <Range> (range).drop_one (direction));
 
-        template <class Direction, class Increment, class Range>
-            static auto drop_constant_member (Direction const & direction,
-                Increment const & increment, Range && range)
+        template <class Range, class Increment, class Direction>
+            static auto drop_constant (Range && range,
+                Increment const & increment, Direction const & direction)
         RETURNS (std::forward <Range> (range)
-            .drop_constant (direction, increment));
+            .drop_constant (increment, direction));
 
-        template <class Direction, class Increment, class Range>
-            static auto drop_member (Direction const & direction,
-                Increment const & increment, Range && range)
+        template <class Range, class Increment, class Direction>
+            static auto drop (Range && range,
+                Increment const & increment, Direction const & direction)
         RETURNS (std::forward <Range> (range)
-            .drop (direction, increment));
+            .drop (increment, direction));
 
-        template <class Direction, class Range>
-            static auto chop_member (
-                Direction const & direction, Range && range)
+        // chop.
+        template <class Range, class Direction>
+            static auto chop (Range && range, Direction const & direction)
         RETURNS (std::forward <Range> (range).chop (direction));
 
-        template <class Direction, class Range>
-            static auto chop_in_place_member (
-                Direction const & direction, Range && range)
+        // chop_in_place.
+        template <class Range, class Direction>
+            static auto chop_in_place (
+                Range && range, Direction const & direction)
         RETURNS (std::forward <Range> (range).chop_in_place (direction));
 
-        /**
-        Implement "default_direction" by calling the <c>.default_direction()</c>
-        member function.
-        */
-        template <class Range, class Enable = void> struct default_direction
-        : unimplemented {};
+        // fold.
+        template <class State, class Range, class Direction, class Function>
+            static auto fold (State && state, Range && range,
+                Direction const & direction, Function && function)
+        RETURNS (std::forward <Range> (range).fold (
+            std::forward <State> (state), direction,
+            std::forward <Function> (function)));
 
-        template <class Range>
-            struct default_direction <Range, typename enable_if_member <
-                    decltype (default_direction_member (std::declval <Range>()))
-                >::type>
-        {
-            auto operator() (Range && range) const
-            RETURNS (default_direction_member (std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "empty" by calling the <c>.empty (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct empty
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct empty <Direction, Range, typename enable_if_member <
-                decltype (empty_member (std::declval <Direction const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (empty_member (direction, std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "size" by calling the <c>.size (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct size
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct size <Direction, Range, typename enable_if_member <
-                decltype (size_member (std::declval <Direction const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (size_member (direction, std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "first" by calling the <c>.first (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct first
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct first <Direction, Range, typename enable_if_member <
-                decltype (first_member (std::declval <Direction const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (first_member (direction, std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "drop_one" by calling the <c>.drop_one (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct drop_one
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct drop_one <Direction, Range, typename enable_if_member <
-                decltype (drop_one_member (std::declval <Direction const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            template <class One>
-                auto operator() (Direction const & direction, One const &,
-                    Range && range) const
-            RETURNS (drop_one_member (direction, std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "drop_constant" by calling the
-        <c>.drop_constant (Direction, Increment)</c> member function.
-        */
-        template <class Direction, class Increment, class Range,
-                class Enable = void>
-            struct drop_constant
-        : unimplemented {};
-
-        template <class Direction, class Increment, class Range>
-            struct drop_constant <Direction, Increment, Range,
-                typename enable_if_member <decltype (drop_constant_member (
-                    std::declval <Direction const &>(),
-                    std::declval <Increment const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            auto operator() (Direction const & direction,
-                Increment const & increment, Range && range) const
-            RETURNS (drop_constant_member (direction, increment,
-                std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "drop" by calling the <c>.drop (Direction, Increment)</c>
-        member function.
-        */
-        template <class Direction, class Increment, class Range,
-                class Enable = void>
-            struct drop
-        : unimplemented {};
-
-        template <class Direction, class Increment, class Range>
-            struct drop <Direction, Increment, Range,
-                typename enable_if_member <decltype (drop_member (
-                    std::declval <Direction const &>(),
-                    std::declval <Increment const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            auto operator() (Direction const & direction,
-                Increment const & increment, Range && range) const
-            RETURNS (drop_member (direction, increment,
-                std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "chop" by calling the <c>.chop (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void> struct chop
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct chop <Direction, Range, typename enable_if_member <
-                decltype (chop_member (std::declval <Direction const &>(),
-                    std::declval <Range>()))>::type>
-        {
-            template <class One> auto operator() (
-                Direction const & direction, One const &, Range && range) const
-            RETURNS (chop_member (direction, std::forward <Range> (range)));
-        };
-
-        /**
-        Implement "chop" by calling the <c>.chop (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct chop_in_place
-        : unimplemented {};
-
-        // Only for lvalue reference ranges.
-        // (They can be const references, though.)
-        template <class Direction, class Range>
-            struct chop_in_place <Direction, Range &, typename
-                enable_if_member <decltype (chop_in_place_member (
-                    std::declval <Direction const &>(),
-                    std::declval <Range &>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range & range) const
-            RETURNS (chop_in_place_member (direction, range));
-        };
+        // for_each.
+        template <class Range, class Direction, class Function>
+            static auto for_each (Range && range,
+                Direction const & direction, Function && function)
+        RETURNS (std::forward <Range> (range).for_each (
+            direction, std::forward <Function> (function)));
+    };
 
 #else
-        // Implementation for GCC 4.6 and below, which cannot mangle the member
-        // functions' return types, but does allow nested classes access to
-        // their parents' friends (unlike GCC 4.8).
 
-        /**
-        Implement "default_direction" by calling the <c>.default_direction()</c>
-        member function.
-        */
-        template <class Range, class Enable = void> struct default_direction
-        : unimplemented {};
+        // Implementation for GCC 4.6, which refuses to mangle the above
+        // static member functions.
 
-        template <class Range>
-            struct default_direction <Range, typename enable_if_member <
-                decltype (std::declval <Range>().default_direction())>::type>
-        {
-            auto operator() (Range && range) const
+        struct callable_default_direction {
+            template <class Range> auto operator() (Range && range) const
             RETURNS (std::forward <Range> (range).default_direction());
         };
 
-        /**
-        Implement "empty" by calling the <c>.empty (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct empty
-        : unimplemented {};
+        static callable_default_direction const default_direction;
 
-        template <class Direction, class Range>
-            struct empty <Direction, Range, typename enable_if_member <
-                decltype (std::declval <Range>().empty (
-                    std::declval <Direction const &>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
+        struct callable_empty {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
             RETURNS (std::forward <Range> (range).empty (direction));
         };
 
-        /**
-        Implement "first" by calling the <c>.first (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct first
-        : unimplemented {};
+        static callable_empty const empty;
 
-        template <class Direction, class Range>
-            struct first <Direction, Range, typename enable_if_member <
-                decltype (std::declval <Range>().first (
-                    std::declval <Direction const &>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (std::forward <Range> (range).first (direction));
-        };
-
-        /**
-        Implement "size" by calling the <c>.size (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct size
-        : unimplemented {};
-
-        template <class Direction, class Range>
-            struct size <Direction, Range, typename enable_if_member <
-                decltype (std::declval <Range>().size (
-                    std::declval <Direction const &>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range && range) const
+        struct callable_size {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
             RETURNS (std::forward <Range> (range).size (direction));
         };
 
-        /**
-        Implement "drop_one" by calling the <c>.drop_one (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct drop_one
-        : unimplemented {};
+        static callable_size const size;
 
-        template <class Direction, class Range>
-            struct drop_one <Direction, Range, typename enable_if_member <
-                decltype (std::declval <Range>().drop_one (
-                    std::declval <Direction const &>()))>::type>
-        {
-            template <class One>
-                auto operator() (Direction const & direction, One const &,
-                    Range && range) const
+        struct callable_first {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
+            RETURNS (std::forward <Range> (range).first (direction));
+        };
+
+        static callable_first const first;
+
+        // at.
+        struct callable_at_constant {
+            template <class Range, class Position, class Direction>
+                auto operator() (Range && range, Position const & position,
+                    Direction const & direction) const
+            RETURNS (std::forward <Range> (range)
+                .at_constant (position, direction));
+        };
+
+        static callable_at_constant const at_constant;
+
+        struct callable_at {
+            template <class Range, class Position, class Direction>
+                auto operator() (Range && range, Position const & position,
+                    Direction const & direction) const
+            RETURNS (std::forward <Range> (range).at (position, direction));
+        };
+
+        static callable_at const at;
+
+        // drop.
+        struct callable_drop_one {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
             RETURNS (std::forward <Range> (range).drop_one (direction));
         };
 
-        /**
-        Implement "drop_constant" by calling the
-        <c>.drop_constant (Direction, Increment)</c> member function.
-        */
-        template <class Direction, class Increment, class Range,
-                class Enable = void>
-            struct drop_constant
-        : unimplemented {};
+        static callable_drop_one const drop_one;
 
-        template <class Direction, class Increment, class Range>
-            struct drop_constant <Direction, Increment, Range,
-                typename enable_if_member <decltype (std::declval <Range>()
-                    .drop_constant (std::declval <Direction const &>(),
-                        std::declval <Increment const &>()))>::type>
-        {
-            auto operator() (Direction const & direction,
-                Increment const & increment, Range && range) const
+        struct callable_drop_constant {
+            template <class Range, class Increment, class Direction>
+                auto operator() (Range && range, Increment const & increment,
+                    Direction const & direction) const
             RETURNS (std::forward <Range> (range)
-                .drop_constant (direction, increment));
+                .drop_constant (increment, direction));
         };
 
-        /**
-        Implement "drop" by calling the <c>.drop (Direction, Increment)</c>
-        member function.
-        */
-        template <class Direction, class Increment, class Range,
-                class Enable = void>
-            struct drop
-        : unimplemented {};
+        static callable_drop_constant const drop_constant;
 
-        template <class Direction, class Increment, class Range>
-            struct drop <Direction, Increment, Range,
-                typename enable_if_member <decltype (std::declval <Range>()
-                    .drop (std::declval <Direction const &>(),
-                        std::declval <Increment const &>()))>::type>
-        {
-            auto operator() (Direction const & direction,
-                Increment const & increment, Range && range) const
-            RETURNS (std::forward <Range> (range).drop (direction, increment));
+        struct callable_drop {
+            template <class Range, class Increment, class Direction>
+                auto operator() (Range && range, Increment const & increment,
+                    Direction const & direction) const
+            RETURNS (std::forward <Range> (range).drop (increment, direction));
         };
 
-        /**
-        Implement "chop" by calling the <c>.chop (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void> struct chop
-        : unimplemented {};
+        static callable_drop const drop;
 
-        template <class Direction, class Range>
-            struct chop <Direction, Range, typename enable_if_member <
-                decltype (std::declval <Range>().chop (
-                    std::declval <Direction const &>()))>::type>
-        {
-            template <class One> auto operator() (
-                Direction const & direction, One const &, Range && range) const
+        // chop.
+        struct callable_chop {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
             RETURNS (std::forward <Range> (range).chop (direction));
         };
 
-        /**
-        Implement "chop" by calling the <c>.chop (Direction)</c> member
-        function.
-        */
-        template <class Direction, class Range, class Enable = void>
-            struct chop_in_place
-        : unimplemented {};
+        static callable_chop const chop;
 
-        // Only for lvalue reference ranges.
-        // (They can be const references, though.)
-        template <class Direction, class Range>
-            struct chop_in_place <Direction, Range &, typename
-                enable_if_member <decltype (std::declval <Range>()
-                    .chop_in_place (std::declval <Direction const &>()))>::type>
-        {
-            auto operator() (Direction const & direction, Range & range) const
-            RETURNS (range.chop_in_place (direction));
+        // chop_in_place
+        struct callable_chop_in_place {
+            template <class Range, class Direction>
+                auto operator() (Range && range, Direction const & direction)
+                const
+            RETURNS (std::forward <Range> (range).chop_in_place (direction));
         };
-#endif
+
+        static callable_chop_in_place const chop_in_place;
+
+        // fold.
+        struct callable_fold {
+            template <class State, class Range, class Direction, class Function>
+                auto operator() (State && state,
+                    Range && range, Direction const & direction,
+                    Function && function) const
+            RETURNS (std::forward <Range> (range).fold (
+                std::forward <State> (state), direction,
+                std::forward <Function> (function)));
+        };
+
+        static callable_fold const fold;
+
+        // for_each.
+        struct callable_for_each {
+            template <class Range, class Direction, class Function>
+                auto operator() (Range && range, Direction const & direction,
+                    Function && function) const
+            RETURNS (std::forward <Range> (range).for_each (
+                direction, std::forward <Function> (function)));
+        };
+
+        static callable_for_each const for_each;
     };
 
-}} // namespace range::operation
+    member_access::callable_default_direction const
+        member_access::default_direction
+        = member_access::callable_default_direction();
 
-#endif  // RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
+    member_access::callable_empty const member_access::empty
+        = member_access::callable_empty();
+    member_access::callable_size const member_access::size
+        = member_access::callable_size();
+    member_access::callable_first const member_access::first
+        = member_access::callable_first();
+    member_access::callable_at const member_access::at_constant
+        = member_access::callable_at_constant();
+    member_access::callable_at const member_access::at
+        = member_access::callable_at();
+    member_access::callable_drop_one const member_access::drop_one
+        = member_access::callable_drop_one();
+    member_access::callable_drop_constant const member_access::drop_constant
+        = member_access::callable_drop_constant();
+    member_access::callable_drop const member_access::drop
+        = member_access::callable_drop();
+    member_access::callable_chop const member_access::chop
+        = member_access::callable_chop();
+    member_access::callable_chop_in_place const member_access::chop_in_place
+        = member_access::callable_chop_in_place();
+    member_access::callable_fold const member_access::fold
+        = member_access::callable_fold();
+    member_access::callable_for_each const member_access::for_each
+        = member_access::callable_for_each();
+
+#endif
+
+}} // namespace range::helper
+
+#endif // RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED

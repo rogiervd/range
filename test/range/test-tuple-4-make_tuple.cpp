@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE (test_range_make_tuple) {
         BOOST_MPL_ASSERT ((
             std::is_same <decltype (t), range::tuple <int, char>>));
         BOOST_CHECK_EQUAL (first (t), 6);
-        BOOST_CHECK_EQUAL (first (back, t), 'a');
+        BOOST_CHECK_EQUAL (first (t, back), 'a');
     }
     {
         int i = 7;
@@ -149,20 +149,20 @@ BOOST_AUTO_TEST_CASE (test_range_make_tuple_from) {
         std::list <int> l;
 
         // The list can turn out to be too short at run time.
-        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (make_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (3);
-        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (make_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (4);
-        BOOST_CHECK_THROW (make_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (make_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (6);
         {
-            auto copy = make_tuple_from (take (rime::size_t <3>(), l));
+            auto copy = make_tuple_from (take (l, rime::size_t <3>()));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int, int, int>>::value, "");
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE (test_range_make_tuple_from) {
 
         l.push_back (9);
         {
-            auto copy = make_tuple_from (take (rime::size_t <3>(), l));
+            auto copy = make_tuple_from (take (l, rime::size_t <3>()));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int, int, int>>::value, "");
@@ -333,20 +333,20 @@ BOOST_AUTO_TEST_CASE (test_range_tie_from) {
         std::list <int> l;
 
         // The list can turn out to be too short at run time.
-        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (tie_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (3);
-        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (tie_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (4);
-        BOOST_CHECK_THROW (tie_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (tie_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (6);
         {
-            auto copy = tie_from (take (rime::size_t <3>(), l));
+            auto copy = tie_from (take (l, rime::size_t <3>()));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int &, int &, int &>>::value, "");
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE (test_range_tie_from) {
 
         l.push_back (9);
         {
-            auto copy = tie_from (take (rime::size_t <3>(), l));
+            auto copy = tie_from (take (l, rime::size_t <3>()));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int &, int &, int &>>::value, "");
@@ -510,20 +510,21 @@ BOOST_AUTO_TEST_CASE (test_range_copy_tuple_from) {
         std::list <int> l;
 
         // The list can turn out to be too short at run time.
-        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (copy_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (3);
-        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (copy_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (4);
-        BOOST_CHECK_THROW (copy_tuple_from (take (rime::size_t <3>(), l)),
+        BOOST_CHECK_THROW (copy_tuple_from (take (l, rime::size_t <3>())),
             range::size_mismatch);
 
         l.push_back (6);
         {
-            auto copy = copy_tuple_from (unique_view (take (rime::size_t <3>(), l)));
+            auto copy = copy_tuple_from (
+                unique_view (take (l, rime::size_t <3>())));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int &, int &, int &>>::value, "");
@@ -542,7 +543,7 @@ BOOST_AUTO_TEST_CASE (test_range_copy_tuple_from) {
 
         l.push_back (9);
         {
-            auto copy = copy_tuple_from (take (rime::size_t <3>(), l));
+            auto copy = copy_tuple_from (take (l, rime::size_t <3>()));
 
             static_assert (std::is_same <decltype (copy),
                 tuple <int &, int &, int &>>::value, "");

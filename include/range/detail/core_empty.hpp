@@ -19,12 +19,7 @@ limitations under the License.
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
-
-#include <boost/utility/enable_if.hpp>
-
-#include "meta/vector.hpp"
+#include "utility/overload_order.hpp"
 
 #include "rime/core.hpp"
 
@@ -32,106 +27,125 @@ limitations under the License.
 
 namespace range {
 
-namespace operation {
-
-    /// Turn Direction into the forward direction and apply "empty".
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct empty_by_forward
-    : unimplemented {};
-
-    template <class RangeTag, class Direction, class Range>
-        struct empty_by_forward <RangeTag, Direction, Range, typename
-            boost::enable_if <boost::mpl::and_ <
-                has <direction::callable::make_forward (Direction)>,
-                range_detail::is_implemented_forward <empty,
-                    RangeTag, Direction, Range>
-            >>::type>
-    : range_detail::forward_operation <empty, RangeTag, Direction, Range> {};
+namespace helper {
 
     /** \brief
     Return \c true if there are no elements in the range.
 
-    The standard implementation forwards to the <c>.empty (Direction)</c>
-    member function.
-    If that is not available, it will forward to the forward direction, that is,
-    <c>empty (make_forward (direction), range)</c>, if that is defined.
-
     This needs to be implemented (by providing the member function or by
-    specialising this) for any range, but only for the forward direction.
+    implementing this free function) for any range, but only for the forward
+    direction.
     For example, by defining it for \c direction::front, it will automatically
     also be defined for \c direction::back.
 
-    \tparam RangeTag The range tag.
-    \tparam Direction The decayed direction type.
-    \tparam Range The range itself, qualified (as an rvalue reference if an
-        rvalue).
+    \param tag The range tag.
+    \param range
+        The range itself, qualified (as an rvalue reference if an rvalue).
+    \param direction The direction.
     */
-    template <class RangeTag, class Direction, class Range, class Enable>
-        struct empty
-    : try_all <member_access::empty <Direction, Range>,
-        empty_by_forward <RangeTag, Direction, Range>>
-    {/*
-        ... operator() (Direction const & direction, Range && range) const;
-    */};
+    void implement_empty (unusable);
 
-} // namespace operation
-
-namespace apply {
-    template <class ... Arguments> struct empty;
-} // namespace apply
+} // namespace helper
 
 namespace callable {
-    struct empty : generic <apply::empty> {};
+
+    namespace implementation {
+
+        using helper::implement_empty;
+
+        struct empty {
+        private:
+            struct dispatch {
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <1> *) const
+                RETURNS (implement_empty (typename tag_of <Range>::type(),
+                    range, direction));
+
+                // Forward to member if possible.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <2> *) const
+                RETURNS (helper::member_access::empty (
+                    range, direction));
+
+                // Use direction::make_forward in case "implement_empty" is only
+                // provided for the forward direction.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <3> *) const
+                RETURNS (implement_empty (typename tag_of <Range>::type(),
+                    range, direction::make_forward (direction)));
+
+                // Member with make_forward.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <4> *) const
+                RETURNS (helper::member_access::empty (
+                    range, direction::make_forward (direction)));
+            };
+
+        public:
+            // With direction.
+            template <class Range, class Direction, class Enable = typename
+                std::enable_if <is_range <Range>::value
+                    && is_direction <Direction>::value>::type>
+            auto operator() (Range const & range, Direction const & direction)
+                const
+            RETURNS (dispatch() (range, direction, pick_overload()));
+
+            // Without direction: use default direction.
+            template <class Range, class Enable =
+                typename std::enable_if <is_range <Range>::value>::type>
+            auto operator() (Range const & range) const
+            RETURNS (dispatch() (
+                range, range::default_direction (range), pick_overload()));
+        };
+
+    } // namespace implementation
+
+    using implementation::empty;
+
 } // namespace callable
 
+/** \brief
+Return whether the range is empty in a direction.
+
+\param range
+    The range to operate on.
+\param direction
+    (optional) The direction.
+*/
 static const auto empty = callable::empty();
-
-namespace apply {
-
-    namespace automatic_arguments {
-
-        template <class Directions, class Other, class Ranges,
-            class Enable = void>
-        struct empty : operation::unimplemented {};
-
-        template <class Direction, class Range>
-            struct empty <meta::vector <Direction>, meta::vector<>,
-                meta::vector <Range>>
-        : operation::empty <typename range::tag_of <Range>::type,
-            typename std::decay <Direction>::type, Range &&> {};
-
-    } // namespace automatic_arguments
-
-    template <class ... Arguments> struct empty
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::empty, meta::vector <Arguments ...>>::type {};
-
-} // namespace apply
 
 /**
 Evaluate to \c true iff the range is known at compile time to be empty.
-This happens when <c>empty (direction, range)</c> returns a compile-time
+This happens when <c>empty (range, direction)</c> returns a compile-time
 constant with value true.
 
 If this evaluates to \c false, it is still possible for the range to be empty at
 run time.
 */
-template <class Direction, class Range> struct always_empty
+template <class Range, class Direction> struct always_empty
 : rime::equal_constant <
-    typename result_of <callable::empty (Direction, Range)>::type,
+    decltype (empty (std::declval <Range>(), std::declval <Direction>())),
     rime::true_type> {};
 
 /**
 Evaluate to \c true iff the range is known at compile time to be not empty.
-This happens when <c>empty (direction, range)</c> returns a compile-time
+This happens when <c>empty (range, direction)</c> returns a compile-time
 constant with value false.
 
 If this evaluates to \c false, it is still possible for the range to be
 non-empty at run time.
 */
-template <class Direction, class Range> struct never_empty
+template <class Range, class Direction> struct never_empty
 : rime::equal_constant <
-    typename result_of <callable::empty (Direction, Range)>::type,
+    decltype (empty (std::declval <Range>(), std::declval <Direction>())),
     rime::false_type> {};
 
 } // namespace range

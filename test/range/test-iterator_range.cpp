@@ -65,21 +65,17 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
     // is_homogeneous
     BOOST_MPL_ASSERT ((range::is_homogeneous <random_access_type>));
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::front, random_access_type>));
+        random_access_type, direction::front>));
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::back, random_access_type const>));
-    BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::front, direction::back, random_access_type>));
+        random_access_type const, direction::back>));
 
     BOOST_MPL_ASSERT ((range::is_homogeneous <bidirectional_type &>));
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::front, forward_type>));
+        forward_type, direction::front>));
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::front, input_type>));
+        input_type, direction::front>));
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::back, const_bidirectional_type>));
-    BOOST_MPL_ASSERT ((range::is_homogeneous <
-        direction::front, direction::back, random_access_type const &>));
+        const_bidirectional_type, direction::back>));
 
     // has::
     {
@@ -87,13 +83,11 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
         BOOST_MPL_ASSERT ((
             range::has <range::callable::view (random_access_type)>));
         BOOST_MPL_ASSERT_NOT ((
-            range::has <range::callable::view (int, random_access_type)>));
+            range::has <range::callable::view (random_access_type, int)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::view (
-            direction::front, random_access_type const &)>));
+            random_access_type const &, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::view (
-            direction::back &, random_access_type)>));
-        BOOST_MPL_ASSERT ((range::has <range::callable::view (
-            direction::front const, direction::back &, random_access_type)>));
+            random_access_type, direction::back &)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::view (forward_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::view (input_type)>));
@@ -102,262 +96,262 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
         BOOST_MPL_ASSERT ((
             range::has <range::callable::empty (random_access_type)>));
         BOOST_MPL_ASSERT_NOT ((
-            range::has <range::callable::empty (int, random_access_type)>));
+            range::has <range::callable::empty (random_access_type, int)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-            direction::front, random_access_type const &)>));
+            random_access_type const &, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-            direction::back, random_access_type)>));
+            random_access_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((
             range::has <range::callable::empty (bidirectional_type)>));
         BOOST_MPL_ASSERT ((
             range::has <range::callable::empty (const_bidirectional_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-            direction::front, bidirectional_type)>));
+            bidirectional_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-            direction::back, bidirectional_type)>));
+            bidirectional_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((
             range::has <range::callable::empty (forward_type &)>));
         BOOST_MPL_ASSERT ((range::has <
-            range::callable::empty (direction::front, forward_type)>));
+            range::callable::empty (forward_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <
-            range::callable::empty (direction::back, forward_type)>));
+            range::callable::empty (forward_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <
             range::callable::empty (input_type)>));
         BOOST_MPL_ASSERT ((range::has <
-            range::callable::empty (direction::front, input_type const &)>));
+            range::callable::empty (input_type const &, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <
-            range::callable::empty (direction::back, input_type &&)>));
+            range::callable::empty (input_type &&, direction::back)>));
 
         // size
         BOOST_MPL_ASSERT ((
             range::has <range::callable::size (random_access_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::size (
-            direction::front, random_access_type)>));
+            random_access_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::size (
-            direction::back, random_access_type)>));
+            random_access_type, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::size (bidirectional_type)>));
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::size (const_bidirectional_type)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::front, bidirectional_type)>));
+            bidirectional_type, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::back, bidirectional_type const &)>));
+            bidirectional_type const &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::size (forward_type const)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::front, forward_type)>));
+            forward_type, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::back, forward_type)>));
+            forward_type, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((
             range::has <range::callable::size (input_type const)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::front, input_type &)>));
+            input_type &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            direction::back, input_type)>));
+            input_type, direction::back)>));
 
         // first
         BOOST_MPL_ASSERT ((
             range::has <range::callable::first (random_access_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::front, random_access_type)>));
+            random_access_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::back, random_access_type)>));
+            random_access_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((
             range::has <range::callable::first (bidirectional_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::front, bidirectional_type)>));
+            bidirectional_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::back, bidirectional_type)>));
+            bidirectional_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::first (forward_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::front, forward_type)>));
+            forward_type, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-            direction::back, forward_type)>));
+            forward_type, direction::back)>));
 
         // Only for rvalue ranges.
         static_assert (
             std::is_constructible <input_type, input_type &&>::value, "");
         BOOST_MPL_ASSERT ((range::has <range::callable::first (input_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            direction::front, input_type &&)>));
+            input_type &&, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-            direction::back, input_type)>));
+            input_type, direction::back)>));
 
         // Not for lvalue ranges.
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
             input_type &)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-            direction::front, input_type const &)>));
+            input_type const &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-            direction::back, input_type &)>));
+            input_type &, direction::back)>));
 
         // drop without increment
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
             random_access_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, random_access_type)>));
+            random_access_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, random_access_type)>));
+            random_access_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
             bidirectional_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, bidirectional_type)>));
+            bidirectional_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, bidirectional_type)>));
+            bidirectional_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
             forward_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, forward_type)>));
+            forward_type, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, forward_type)>));
+            forward_type, direction::back)>));
 
         // Only for rvalue input.
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (input_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, input_type &&)>));
+            input_type &&, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, input_type)>));
+            input_type, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
             input_type &)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, input_type &)>));
+            input_type &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, input_type &)>));
+            input_type &, direction::back)>));
 
         // drop with increment of 1
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            rime::int_ <1>, random_access_type)>));
+            random_access_type, rime::int_ <1>)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <1>, random_access_type)>));
+            random_access_type, rime::int_ <1>, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <1>, random_access_type)>));
+            random_access_type, rime::int_ <1>, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            rime::int_ <1>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <1>)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <1>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <1>, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <1>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <1>, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            rime::int_ <1>, forward_type)>));
+            forward_type, rime::int_ <1>)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <1>, forward_type)>));
+            forward_type, rime::int_ <1>, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <1>, forward_type)>));
+            forward_type, rime::int_ <1>, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            rime::int_ <1>, input_type)>));
+            input_type, rime::int_ <1>)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <1>, input_type)>));
+            input_type, rime::int_ <1>, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <1>, input_type)>));
+            input_type, rime::int_ <1>, direction::back)>));
 
         // drop with increment of 2
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            rime::int_ <2>, random_access_type)>));
+            random_access_type, rime::int_ <2>)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <2>, random_access_type)>));
+            random_access_type, rime::int_ <2>, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <2>, random_access_type)>));
+            random_access_type, rime::int_ <2>, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            rime::int_ <2>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <2>)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <2>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <2>, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <2>, bidirectional_type)>));
+            bidirectional_type, rime::int_ <2>, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            rime::int_ <2>, forward_type)>));
+            forward_type, rime::int_ <2>)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <2>, forward_type)>));
+            forward_type, rime::int_ <2>, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <2>, forward_type)>));
+            forward_type, rime::int_ <2>, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            rime::int_ <2>, input_type)>));
+            input_type, rime::int_ <2>)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, rime::int_ <2>, input_type)>));
+            input_type, rime::int_ <2>, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, rime::int_ <2>, input_type)>));
+            input_type, rime::int_ <2>, direction::back)>));
 
         // drop with increment of int
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            int, random_access_type)>));
+            random_access_type, int)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::front, int, random_access_type)>));
+            random_access_type, int, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            direction::back, int, random_access_type)>));
+            random_access_type, int, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            int, bidirectional_type)>));
+            bidirectional_type, int)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, int, bidirectional_type)>));
+            bidirectional_type, int, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, int, bidirectional_type)>));
+            bidirectional_type, int, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            int, forward_type)>));
+            forward_type, int)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, int, forward_type)>));
+            forward_type, int, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, int, forward_type)>));
+            forward_type, int, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            int, input_type)>));
+            input_type, int)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::front, int, input_type)>));
+            input_type, int, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-            direction::back, int, input_type)>));
+            input_type, int, direction::back)>));
 
         // chop.
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
             random_access_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::front, random_access_type)>));
+            random_access_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::back, random_access_type)>));
+            random_access_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
             bidirectional_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::front, bidirectional_type)>));
+            bidirectional_type, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::back, bidirectional_type)>));
+            bidirectional_type, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
             forward_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::front, forward_type)>));
+            forward_type, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-            direction::back, forward_type)>));
+            forward_type, direction::back)>));
 
         // Only for rvalue input.
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (input_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            direction::front, input_type &&)>));
+            input_type &&, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-            direction::back, input_type)>));
+            input_type, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
             input_type &)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-            direction::front, input_type &)>));
+            input_type &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-            direction::back, input_type &)>));
+            input_type &, direction::back)>));
 
         // chop_in_place: only for lvalue references.
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
@@ -365,36 +359,36 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
             random_access_type &)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::front, random_access_type &)>));
+            random_access_type &, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::back, random_access_type &)>));
+            random_access_type &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
             bidirectional_type &&)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
             bidirectional_type &)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::front, bidirectional_type &)>));
+            bidirectional_type &, direction::front)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::back, bidirectional_type &)>));
+            bidirectional_type &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
             forward_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
             forward_type &)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::front, forward_type &)>));
+            forward_type &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-            direction::back, forward_type &)>));
+            forward_type &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
             input_type)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
             input_type &)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-            direction::front, input_type &)>));
+            input_type &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-            direction::back, input_type &)>));
+            input_type &, direction::back)>));
     }
 
     // Spot check result_of::
@@ -404,40 +398,45 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
             range::result_of <range::callable::view (random_access_type)>::type,
             random_access_type>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::view (direction::back,
-            bidirectional_type &)>::type, bidirectional_type &>));
+            range::result_of <range::callable::view (
+            bidirectional_type &, direction::back)>::type,
+            bidirectional_type &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::view (direction::front &,
-                forward_type const &)>::type, forward_type const &>));
+            range::result_of <range::callable::view (
+                forward_type const &, direction::front &)>::type,
+            forward_type const &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::view (direction::front &,
-                input_type)>::type, input_type>));
+            range::result_of <range::callable::view (
+                input_type, direction::front &)>::type,
+            input_type>));
 
         // forward_view.
         BOOST_MPL_ASSERT ((std::is_same <typename
             range::result_of <range::callable::forward_view (
                 random_access_type)>::type, random_access_type &&>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::forward_view (direction::back,
-                bidirectional_type &)>::type, bidirectional_type &>));
+            range::result_of <range::callable::forward_view (
+                bidirectional_type &, direction::back)>::type,
+            bidirectional_type &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::forward_view (direction::front &,
-                forward_type const &)>::type, forward_type const &>));
+            range::result_of <range::callable::forward_view (
+                forward_type const &, direction::front &)>::type,
+            forward_type const &>));
         BOOST_MPL_ASSERT ((std::is_same <typename
-            range::result_of <range::callable::forward_view (direction::front &,
-                input_type)>::type, input_type &&>));
+            range::result_of <range::callable::forward_view (
+                input_type, direction::front &)>::type, input_type &&>));
 
         // empty
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::empty (random_access_type)>::type, bool>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::empty (direction::back, bidirectional_type)>::type,
+            range::callable::empty (bidirectional_type, direction::back)>::type,
             bool>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::empty (direction::front, forward_type)>::type,
+            range::callable::empty (forward_type, direction::front)>::type,
             bool>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::empty (direction::front, input_type)>::type,
+            range::callable::empty (input_type, direction::front)>::type,
             bool>));
 
         // size returns an unsigned integer.
@@ -448,17 +447,17 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::first (random_access_type)>::type, int &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::first (direction::back, bidirectional_type)>::type,
+            range::callable::first (bidirectional_type, direction::back)>::type,
             double &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::first (direction::back, const_bidirectional_type
+            range::callable::first (const_bidirectional_type, direction::back
             )>::type, double const &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::first (direction::front, forward_type)>::type,
+            range::callable::first (forward_type, direction::front)>::type,
             char &>));
         // For input ranges, "first" should return the value_type.
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::first (direction::front, input_type)>::type,
+            range::callable::first (input_type, direction::front)>::type,
             float>));
 
         // drop
@@ -466,7 +465,7 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
             range::callable::drop (random_access_type)>::type,
             random_access_type>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::drop (direction::back, bidirectional_type &
+            range::callable::drop (bidirectional_type &, direction::back
             )>::type, bidirectional_type>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::drop (forward_type)>::type,
@@ -480,11 +479,11 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
             range::callable::chop (random_access_type)>::type,
             range::chopped <int &, random_access_type>>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::chop (direction::back, bidirectional_type &
+            range::callable::chop (bidirectional_type &, direction::back
             )>::type,
             range::chopped <double &, bidirectional_type>>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-            range::callable::chop (direction::back, const_bidirectional_type &
+            range::callable::chop (const_bidirectional_type &, direction::back
             )>::type,
             range::chopped <double const &, const_bidirectional_type>>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
@@ -501,20 +500,20 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_static) {
             int &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::chop_in_place (
-                direction::back, bidirectional_type &)>::type,
+                bidirectional_type &, direction::back)>::type,
             double &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::chop_in_place (
-                direction::back, const_bidirectional_type &
+                const_bidirectional_type &, direction::back
             )>::type, double const &>));
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::chop_in_place (
-                direction::front, forward_type &)>::type,
+                forward_type &, direction::front)>::type,
             char &>));
         // For input ranges, "chop_in_place" should return the value_type.
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
             range::callable::chop_in_place (
-                direction::front, input_type &)>::type,
+                input_type &, direction::front)>::type,
             float>));
     }
 }
@@ -607,36 +606,36 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
         BOOST_CHECK (!empty (r));
         BOOST_CHECK_EQUAL (size (r), 1u);
         BOOST_CHECK_EQUAL (first (r), 3);
-        BOOST_CHECK_EQUAL (first (back, r), 3);
+        BOOST_CHECK_EQUAL (first (r, back), 3);
         BOOST_CHECK (empty (drop (r)));
-        BOOST_CHECK (empty (drop (front, r)));
-        BOOST_CHECK (empty (drop (back, r)));
-        BOOST_CHECK (empty (drop (front, 1, r)));
-        BOOST_CHECK (empty (drop (back, 1, r)));
+        BOOST_CHECK (empty (drop (r, front)));
+        BOOST_CHECK (empty (drop (r, back)));
+        BOOST_CHECK (empty (drop (r, 1, front)));
+        BOOST_CHECK (empty (drop (r, 1, back)));
         {
             auto chopped = range::chop (r);
             BOOST_CHECK_EQUAL (chopped.first(), 3);
             BOOST_CHECK (empty (chopped.rest()));
         }
         {
-            auto chopped = range::chop (back, r);
+            auto chopped = range::chop (r, back);
             BOOST_CHECK_EQUAL (chopped.first(), 3);
             BOOST_CHECK (empty (chopped.rest()));
         }
         {
-            auto first = chop_in_place (back, r);
+            auto first = chop_in_place (r, back);
             BOOST_CHECK_EQUAL (first, 3);
             BOOST_CHECK (empty (r));
         }
 
         BOOST_CHECK (!empty (b));
-        BOOST_CHECK_EQUAL (first (view (front, b)), 4.3);
-        BOOST_CHECK_EQUAL (first (back, b), 4.3);
+        BOOST_CHECK_EQUAL (first (view (b, front)), 4.3);
+        BOOST_CHECK_EQUAL (first (b, back), 4.3);
         BOOST_CHECK (empty (drop (b)));
-        BOOST_CHECK (empty (drop (front, b)));
-        BOOST_CHECK (empty (drop (back, b)));
+        BOOST_CHECK (empty (drop (b, front)));
+        BOOST_CHECK (empty (drop (b, back)));
         {
-            auto chopped = range::chop (back, b);
+            auto chopped = range::chop (b, back);
             BOOST_CHECK_EQUAL (chopped.first(), 4.3);
             BOOST_CHECK (empty (chopped.rest()));
         }
@@ -653,12 +652,12 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
 
         BOOST_CHECK (!empty (cb));
         BOOST_CHECK_EQUAL (first (cb), 4.3);
-        BOOST_CHECK_EQUAL (first (back, cb), 4.3);
+        BOOST_CHECK_EQUAL (first (cb, back), 4.3);
         BOOST_CHECK (empty (drop (cb)));
-        BOOST_CHECK (empty (drop (front, cb)));
-        BOOST_CHECK (empty (drop (back, cb)));
+        BOOST_CHECK (empty (drop (cb, front)));
+        BOOST_CHECK (empty (drop (cb, back)));
         {
-            auto chopped = range::chop (back, cb);
+            auto chopped = range::chop (cb, back);
             BOOST_CHECK_EQUAL (chopped.first(), 4.3);
             BOOST_CHECK (empty (chopped.rest()));
         }
@@ -675,8 +674,8 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
 
         BOOST_CHECK (!empty (f));
         BOOST_CHECK_EQUAL (first (f), '9');
-        BOOST_CHECK (empty (drop (view (back, f))));
-        BOOST_CHECK (empty (drop (front, f)));
+        BOOST_CHECK (empty (drop (view (f, back))));
+        BOOST_CHECK (empty (drop (f, front)));
         {
             auto chopped = range::chop (f);
             BOOST_CHECK_EQUAL (chopped.first(), '9');
@@ -742,58 +741,58 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
         BOOST_CHECK (!empty (r));
         BOOST_CHECK_EQUAL (size (r), 4u);
         BOOST_CHECK_EQUAL (first (r), 3);
-        BOOST_CHECK_EQUAL (first (back, r), 9);
+        BOOST_CHECK_EQUAL (first (r, back), 9);
         BOOST_CHECK (!empty (drop (r)));
-        BOOST_CHECK (!empty (drop (back, r)));
-        BOOST_CHECK (empty (drop (4, r)));
-        BOOST_CHECK (empty (drop (back, 4, r)));
+        BOOST_CHECK (!empty (drop (r, back)));
+        BOOST_CHECK (empty (drop (r, 4)));
+        BOOST_CHECK (empty (drop (r, 4, back)));
 
         BOOST_CHECK_EQUAL (first (drop (r)), 5);
         BOOST_CHECK_EQUAL (first (drop (drop (r))), 7);
         BOOST_CHECK_EQUAL (first (drop (drop (drop (r)))), 9);
-        BOOST_CHECK_EQUAL (first (drop (1, r)), 5);
-        BOOST_CHECK_EQUAL (first (drop (rime::int_ <1>(), r)), 5);
-        BOOST_CHECK_EQUAL (first (drop (2, r)), 7);
-        BOOST_CHECK_EQUAL (first (drop (rime::int_ <2>(), r)), 7);
-        BOOST_CHECK_EQUAL (first (drop (3, r)), 9);
-        BOOST_CHECK_EQUAL (first (drop (rime::int_ <3>(), r)), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, 1)), 5);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <1>())), 5);
+        BOOST_CHECK_EQUAL (first (drop (r, 2)), 7);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <2>())), 7);
+        BOOST_CHECK_EQUAL (first (drop (r, 3)), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <3>())), 9);
 
-        BOOST_CHECK_EQUAL (first (back, drop (r)), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (drop (r))), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (drop (drop (r)))), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (1, view (back, r))), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (rime::int_ <1>(), r)), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (2, r)), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (rime::int_ <2>(), r)), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (3, r)), 9);
-        BOOST_CHECK_EQUAL (first (back, drop (rime::int_ <3>(), r)), 9);
+        BOOST_CHECK_EQUAL (first (drop (r), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (drop (r)), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (drop (drop (r))), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (view (r, back), 1), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <1>()), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, 2), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <2>()), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, 3), back), 9);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <3>()), back), 9);
 
-        BOOST_CHECK_EQUAL (first (back, drop (back, r)), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (drop (back, r))), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (drop (drop (back, r)))), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 1, r)), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, rime::int_ <1>(), r)), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 2, r)), 5);
-        BOOST_CHECK_EQUAL (first (back, drop (back, rime::int_ <2>(), r)), 5);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 3, r)), 3);
-        BOOST_CHECK_EQUAL (first (back, drop (back, rime::int_ <3>(), r)), 3);
+        BOOST_CHECK_EQUAL (first (drop (r, back), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (drop (r, back)), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (drop (drop (r, back))), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (r, 1, back), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <1>(), back), back), 7);
+        BOOST_CHECK_EQUAL (first (drop (r, 2, back), back), 5);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <2>(), back), back), 5);
+        BOOST_CHECK_EQUAL (first (drop (r, 3, back), back), 3);
+        BOOST_CHECK_EQUAL (first (drop (r, rime::int_ <3>(), back), back), 3);
 
         // Mutate original container.
         first (r) = 30;
         BOOST_CHECK_EQUAL (random_access_container.front(), 30);
-        first (back, drop (back, r)) = 70;
+        first (drop (r, back), back) = 70;
         BOOST_CHECK_EQUAL (random_access_container [2], 70);
 
         // 30 5 70 9
         {
-            auto value = chop_in_place (back, r);
+            auto value = chop_in_place (r, back);
             BOOST_CHECK_EQUAL (value, 9);
 
-            value = chop_in_place (front, r);
+            value = chop_in_place (r, front);
             BOOST_CHECK_EQUAL (value, 30);
             BOOST_CHECK_EQUAL (size (r), 2u);
 
-            auto chopped = chop (back, r);
+            auto chopped = chop (r, back);
             BOOST_CHECK_EQUAL (chopped.first(), 70);
             BOOST_CHECK_EQUAL (size (chopped.rest()), 1u);
 
@@ -813,16 +812,16 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
         BOOST_CHECK_EQUAL (first (drop (drop (b))), 4.7);
         BOOST_CHECK_EQUAL (first (drop (drop (drop (b)))), 4.9);
 
-        BOOST_CHECK_EQUAL (first (back, cb), 4.9);
-        BOOST_CHECK_EQUAL (first (back, drop (back, cb)), 4.7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, drop (back, cb))), 4.5);
-        BOOST_CHECK_EQUAL (first (back,
-            drop (back, drop (back, drop (back, cb)))), 4.3);
+        BOOST_CHECK_EQUAL (first (cb, back), 4.9);
+        BOOST_CHECK_EQUAL (first (drop (cb, back), back), 4.7);
+        BOOST_CHECK_EQUAL (first (drop (drop (cb, back), back), back), 4.5);
+        BOOST_CHECK_EQUAL (first (
+            drop (drop (drop (cb, back), back), back), back), 4.3);
 
         BOOST_CHECK (empty (drop (drop (drop (drop (b))))));
-        BOOST_CHECK (empty (drop (back, drop (drop (back, drop (cb))))));
+        BOOST_CHECK (empty (drop (drop (drop (drop (cb), back)), back)));
 
-        first (back, drop (back, b)) = 123.4;
+        first (drop (b, back), back) = 123.4;
         BOOST_CHECK_EQUAL (
             *boost::prior (boost::prior (bidirectional_container.end())),
             123.4);
@@ -935,7 +934,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     // Pass in a container.
     static_assert (range::has <
         range::callable::make_iterator_range (decltype (v))>::value, "");
-    static_assert (std::is_same <std::result_of <
+    static_assert (std::is_same <range::result_of <
         range::callable::make_iterator_range (decltype ((v)))>::type,
         random_access_type>::value, "");
 
@@ -943,7 +942,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     static_assert (range::has <
         range::callable::make_iterator_range (
             decltype (v.begin()), decltype (v.end()))>::value, "");
-    static_assert (std::is_same <std::result_of <
+    static_assert (std::is_same <range::result_of <
         range::callable::make_iterator_range (
             decltype (v.begin()), decltype (v.end()))>::type,
         random_access_type>::value, "");
@@ -965,7 +964,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
 
     BOOST_CHECK_EQUAL (size (ir), 2);
     BOOST_CHECK_EQUAL (first (ir), 4);
-    BOOST_CHECK_EQUAL (at (1, ir), 7);
+    BOOST_CHECK_EQUAL (at (ir, 1), 7);
 
     v.push_back (27);
 
@@ -975,8 +974,8 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
 
     BOOST_CHECK_EQUAL (size (ir2), 3);
     BOOST_CHECK_EQUAL (first (ir2), 4);
-    BOOST_CHECK_EQUAL (at (1, ir2), 7);
-    BOOST_CHECK_EQUAL (at (2, ir2), 27);
+    BOOST_CHECK_EQUAL (at (ir2, 1), 7);
+    BOOST_CHECK_EQUAL (at (ir2, 2), 27);
 
 #if !defined (BOOST_NO_INITIALIZER_LISTS)
     auto initializer_list = {6, 32};
@@ -984,7 +983,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
 
     BOOST_CHECK_EQUAL (size (ilir), 2);
     BOOST_CHECK_EQUAL (first (ilir), 6);
-    BOOST_CHECK_EQUAL (at (1, ilir), 32);
+    BOOST_CHECK_EQUAL (at (ilir, 1), 32);
 #endif
 }
 

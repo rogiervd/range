@@ -48,8 +48,8 @@ struct twice {
 };
 
 auto get_twice (int i, float f)
-RETURNS (range::transform (twice(), range::view_shared (
-    get_int_float_string (i, f))));
+RETURNS (range::transform (range::view_shared (get_int_float_string (i, f)),
+    twice()));
 
 BOOST_PYTHON_MODULE (tuple_example) {
     using namespace boost::python;

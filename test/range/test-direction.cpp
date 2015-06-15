@@ -1,5 +1,5 @@
 /*
-Copyright 2012 Rogier van Dalen.
+Copyright 2012, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE (test_weird_direction) {
     static_assert (!direction::has <direction::callable::make_forward (
         weird_direction const)>::value, "");
     static_assert (direction::has <direction::callable::make_forward (
-        weird_reverse_direction)>::value, "");
+        weird_opposite_direction)>::value, "");
     static_assert (direction::has <direction::callable::make_forward (
-        weird_reverse_direction const)>::value, "");
+        weird_opposite_direction const)>::value, "");
 
     static_assert (!direction::has <direction::callable::ensure_forward (
         int)>::value, "");
@@ -57,30 +57,30 @@ BOOST_AUTO_TEST_CASE (test_weird_direction) {
     static_assert (direction::has <direction::callable::ensure_forward (
         weird_direction)>::value, "");
     static_assert (direction::has <direction::callable::ensure_forward (
-        weird_reverse_direction)>::value, "");
+        weird_opposite_direction)>::value, "");
     static_assert (direction::has <direction::callable::ensure_forward (
-        weird_reverse_direction &)>::value, "");
+        weird_opposite_direction &)>::value, "");
 
-    static_assert (!direction::has <direction::callable::reverse (
+    static_assert (!direction::has <direction::callable::opposite (
         int)>::value, "");
-    static_assert (direction::has <direction::callable::reverse (
+    static_assert (direction::has <direction::callable::opposite (
         direction::front)>::value, "");
-    static_assert (direction::has <direction::callable::reverse (
+    static_assert (direction::has <direction::callable::opposite (
         direction::back)>::value, "");
-    static_assert (direction::has <direction::callable::reverse (
+    static_assert (direction::has <direction::callable::opposite (
         weird_direction)>::value, "");
-    static_assert (direction::has <direction::callable::reverse (
-        weird_reverse_direction)>::value, "");
-    static_assert (direction::has <direction::callable::reverse (
-        weird_reverse_direction &&)>::value, "");
+    static_assert (direction::has <direction::callable::opposite (
+        weird_opposite_direction)>::value, "");
+    static_assert (direction::has <direction::callable::opposite (
+        weird_opposite_direction &&)>::value, "");
 
     // 7 is the magic number.
     weird_direction d (7);
 
-    auto rd1 = direction::reverse (d);
+    auto rd1 = direction::opposite (d);
     static_assert (std::is_same <
-        decltype (rd1), weird_reverse_direction>::value, "");
-    auto d1 = direction::reverse (rd1);
+        decltype (rd1), weird_opposite_direction>::value, "");
+    auto d1 = direction::opposite (rd1);
     static_assert (std::is_same <decltype (d1), weird_direction>::value, "");
     auto d2 = direction::ensure_forward (rd1);
     static_assert (std::is_same <decltype (d2), weird_direction>::value, "");
@@ -88,21 +88,21 @@ BOOST_AUTO_TEST_CASE (test_weird_direction) {
     static_assert (std::is_same <decltype (d3), weird_direction>::value, "");
 
     static_assert (std::is_same <direction::result_of <
-        direction::callable::make_forward (weird_reverse_direction)>::type,
+        direction::callable::make_forward (weird_opposite_direction)>::type,
         weird_direction>::value, "");
 
-    static_assert (std::is_same < direction::result_of <
-        direction::callable::reverse (weird_direction const)>::type,
-        weird_reverse_direction>::value, "");
-    static_assert (std::is_same < direction::result_of <
-        direction::callable::reverse (weird_reverse_direction &)>::type,
+    static_assert (std::is_same <direction::result_of <
+        direction::callable::opposite (weird_direction const)>::type,
+        weird_opposite_direction>::value, "");
+    static_assert (std::is_same <direction::result_of <
+        direction::callable::opposite (weird_opposite_direction &)>::type,
         weird_direction>::value, "");
 
-    static_assert (std::is_same < direction::result_of <
+    static_assert (std::is_same <direction::result_of <
         direction::callable::ensure_forward (weird_direction &&)>::type,
         weird_direction>::value, "");
-    static_assert (std::is_same < direction::result_of <
-        direction::callable::ensure_forward (weird_reverse_direction)>::type,
+    static_assert (std::is_same <direction::result_of <
+        direction::callable::ensure_forward (weird_opposite_direction)>::type,
         weird_direction>::value, "");
 }
 

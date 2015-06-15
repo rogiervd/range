@@ -23,24 +23,25 @@ limitations under the License.
 #include "utility/returns.hpp"
 
 #include "core.hpp"
-#include "detail/underlying.hpp"
+#include "helper/underlying.hpp"
 
 namespace range {
 
-namespace operation { namespace view_shared_detail {
+namespace view_shared_detail {
 
-        struct make_view_of_shared;
-        struct get_heavyweight_pointer;
+    struct make_view_of_shared;
+    struct get_heavyweight_pointer;
 
-}} // namespace operation::view_shared_detail
+} // namespace view_shared_detail
 
-/**
+/** \brief
 Range that holds a std::shared_ptr, and also a view of the range.
+
 All copies or derivatives of the range will hold a copy of the shared_ptr, and
-the operations will effect only the view.
+the operations will affect only the view.
 */
 template <class Heavyweight,
-    class View = typename std::decay <typename std::result_of <
+    class View = typename std::decay <typename result_of <
         callable::view (Heavyweight &)>::type>::type>
     struct view_of_shared
 {
@@ -57,7 +58,7 @@ private:
     heavyweight_pointer heavyweight_;
     underlying_type underlying_;
 
-    friend class detail::callable::get_underlying;
+    template <class Wrapper> friend class helper::callable::get_underlying;
 
 public:
     view_of_shared (heavyweight_pointer heavyweight, View const & underlying)
@@ -68,131 +69,108 @@ public:
         underlying_ (std::move (underlying)) {}
 
 private:
-    friend struct operation::view_shared_detail::make_view_of_shared;
-    friend struct operation::view_shared_detail::get_heavyweight_pointer;
+    friend struct view_shared_detail::make_view_of_shared;
+    friend struct view_shared_detail::get_heavyweight_pointer;
 
     heavyweight_pointer const & heavyweight() const { return heavyweight_; }
     heavyweight_pointer & heavyweight() { return heavyweight_; }
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     auto default_direction() const
     RETURNS (range::default_direction (underlying_));
 
     template <class Direction> typename
-        result_of_or <range::callable::empty (
-            Direction, underlying_type const &)
+        result_of <range::callable::empty (
+            underlying_type const &, Direction)
     >::type empty (Direction const & direction) const
-    { return range::empty (direction, underlying_); }
+    { return range::empty (underlying_, direction); }
 
     template <class Direction> typename
-        result_of_or <range::callable::size (
-            Direction, underlying_type const &)
+        result_of <range::callable::size (
+            underlying_type const &, Direction)
     >::type size (Direction const & direction) const
-    { return range::size (direction, underlying_); }
+    { return range::size (underlying_, direction); }
 
     template <class Direction> typename
-        result_of_or <range::callable::chop_in_place (
-            Direction, underlying_type &)
+        result_of <range::callable::chop_in_place (
+            underlying_type &, Direction)
     >::type chop_in_place (Direction const & direction)
-    { return range::chop_in_place (direction, underlying_); }
+    { return range::chop_in_place (underlying_, direction); }
 };
 
-struct view_of_shared_tag;
+namespace operation {
+    struct view_of_shared_tag {};
+} // namespace operation
 
 template <class Heavyweight, class View>
     struct tag_of_qualified <view_of_shared <Heavyweight, View>>
-{ typedef view_of_shared_tag type; };
+{ typedef operation::view_of_shared_tag type; };
+
+namespace view_shared_detail {
+
+    struct make_view_of_shared {
+        template <class Heavyweight, class View>
+            view_of_shared <Heavyweight, typename std::decay <View>::type>
+                operator() (std::shared_ptr <Heavyweight> heavyweight,
+                    View && view) const
+        {
+            return view_of_shared <Heavyweight, View> (
+                std::move (heavyweight), std::forward <View> (view));
+        }
+    };
+
+    struct get_heavyweight_pointer {
+        template <class Range>
+            typename Range::heavyweight_pointer && operator() (
+                Range && range) const
+        { return std::move (range.heavyweight()); }
+
+        template <class Range>
+            typename Range::heavyweight_pointer const & operator() (
+                Range const & range) const
+        { return range.heavyweight(); }
+    };
+
+} // namespace view_shared_detail
 
 namespace operation {
 
-    namespace view_shared_detail {
+    template <class Range, class Direction> inline
+        auto implement_first (view_of_shared_tag const &,
+            Range && range, Direction const & direction)
+    RETURNS (range::first (
+        range::helper::get_underlying <Range> (range), direction));
 
-        struct make_view_of_shared {
-            template <class Heavyweight, class View>
-                view_of_shared <Heavyweight, typename std::decay <View>::type>
-                    operator() (std::shared_ptr <Heavyweight> heavyweight,
-                        View && view) const
-            {
-                return view_of_shared <Heavyweight, View> (
-                    std::move (heavyweight), std::forward <View> (view));
-            }
-        };
+    template <class Range, class Increment, class Direction> inline
+        auto implement_drop (view_of_shared_tag const &, Range && range,
+            Increment const & increment, Direction const & direction)
+    RETURNS (view_shared_detail::make_view_of_shared() (
+        view_shared_detail::get_heavyweight_pointer() (
+            std::forward <Range> (range)),
+        range::drop (range::helper::get_underlying <Range> (range),
+            increment, direction)));
 
-        struct get_heavyweight_pointer {
-            template <class Range>
-                typename Range::heavyweight_pointer && operator() (
-                    Range && range) const
-            { return std::move (range.heavyweight()); }
-
-            template <class Range>
-                typename Range::heavyweight_pointer const & operator() (
-                    Range const & range) const
-            { return range.heavyweight(); }
-        };
-
-    } // namespace view_shared_detail
-
-    template <class Direction, class Range>
-        struct first <view_of_shared_tag, Direction, Range, typename
-            boost::enable_if <has <
-                callable::first (Direction, typename underlying <Range>::type)
-            >>::type>
+    template <class Range, class Direction,
+        class UnderlyingChopped = decltype (range::chop (
+            range::helper::get_underlying <Range> (std::declval <Range &>()),
+            std::declval <Direction>())),
+        class Heavyweight = typename std::decay <Range>::type::heavyweight_type,
+        class Result = chopped <typename UnderlyingChopped::first_type,
+                view_of_shared <Heavyweight,
+                    typename UnderlyingChopped::rest_type>>>
+    inline Result implement_chop (view_of_shared_tag const &,
+        Range && range, Direction const & direction)
     {
-        auto operator() (Direction const & direction, Range && range) const
-        RETURNS (range::first (direction, range::detail::get_underlying (
-            std::forward <Range> (range))));
-    };
-
-    template <class Direction, class Increment, class Range>
-        struct drop <view_of_shared_tag, Direction, Increment, Range, typename
-            boost::enable_if <has <
-                callable::drop (Direction, Increment,
-                    typename underlying <Range>::type)
-            >>::type>
-    {
-        auto operator() (Direction const & direction,
-            Increment const & increment, Range && range) const
-        RETURNS (view_shared_detail::make_view_of_shared() (
-            view_shared_detail::get_heavyweight_pointer() (
-                std::forward <Range> (range)),
-            range::drop (direction, increment,
-            range::detail::get_underlying (std::forward <Range> (range)))));
-    };
-
-    template <class Direction, class Range>
-        struct chop <view_of_shared_tag, Direction, Range, typename
-            boost::enable_if <has <
-                callable::chop (Direction,
-                    typename underlying <Range>::type)
-            >>::type>
-    {
-        typedef typename result_of <callable::chop (Direction,
-            typename underlying <Range>::type)>::type underlying_chopped_type;
-        typedef typename underlying_chopped_type::first_type first_type;
-        typedef typename underlying_chopped_type::rest_type
-            underlying_rest_type;
-
-        typedef typename std::decay <Range>::type::heavyweight_type
-            heavyweight_type;
-
-        typedef chopped <first_type,
-                view_of_shared <heavyweight_type, underlying_rest_type>>
-            result_type;
-
-        result_type operator() (Direction const & direction, Range && range)
-            const
-        {
-            auto underlying_chopped = range::chop (direction,
-                range::detail::get_underlying (std::forward <Range> (range)));
-            return result_type (underlying_chopped.move_first(),
-                view_shared_detail::make_view_of_shared() (
-                    view_shared_detail::get_heavyweight_pointer() (
-                        std::forward <Range> (range)),
-                    underlying_chopped.move_rest()));
-        }
-    };
+        auto underlying_chopped = range::chop (
+            range::helper::get_underlying <Range> (range), direction);
+        return Result (underlying_chopped.move_first(),
+            view_shared_detail::make_view_of_shared() (
+                view_shared_detail::get_heavyweight_pointer() (
+                    std::forward <Range> (range)),
+                underlying_chopped.move_rest()));
+    }
 
 } // namespace operation
 
@@ -206,7 +184,7 @@ namespace callable {
         template <class MakeView, class Heavyweight>
             struct make_view_if_range <MakeView, Heavyweight, typename
                 boost::enable_if <is_range <Heavyweight>>::type>
-        : std::decay <typename std::result_of <MakeView (Heavyweight &)>::type>
+        : std::decay <typename result_of <MakeView (Heavyweight &)>::type>
         {};
 
     public:

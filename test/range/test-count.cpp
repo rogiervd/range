@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -128,8 +128,8 @@ void check_finite (True true_,
         RIME_CHECK_EQUAL (size (c), one);
 
         RIME_CHECK_EQUAL (first (c), zero);
-        RIME_CHECK_EQUAL (first (front, c), zero);
-        RIME_CHECK_EQUAL (first (back, c), zero);
+        RIME_CHECK_EQUAL (first (c, front), zero);
+        RIME_CHECK_EQUAL (first (c, back), zero);
 
         auto chopped = chop (c);
         RIME_CHECK_EQUAL (chopped.first(), zero);
@@ -141,44 +141,44 @@ void check_finite (True true_,
         RIME_CHECK_EQUAL (size (c), three);
 
         RIME_CHECK_EQUAL (first (c), zero);
-        RIME_CHECK_EQUAL (first (front, c), zero);
-        RIME_CHECK_EQUAL (first (back, c), two);
+        RIME_CHECK_EQUAL (first (c, front), zero);
+        RIME_CHECK_EQUAL (first (c, back), two);
 
-        RIME_CHECK_EQUAL (at (one, c), one);
-        RIME_CHECK_EQUAL (at (front, one, c), one);
-        RIME_CHECK_EQUAL (at (two, c), two);
-        RIME_CHECK_EQUAL (at (front, two, c), two);
+        RIME_CHECK_EQUAL (at (c, one), one);
+        RIME_CHECK_EQUAL (at (c, one, front), one);
+        RIME_CHECK_EQUAL (at (c, two), two);
+        RIME_CHECK_EQUAL (at (c, two, front), two);
 
-        RIME_CHECK_EQUAL (at (back, one, c), one);
-        RIME_CHECK_EQUAL (at (back, two, c), zero);
+        RIME_CHECK_EQUAL (at (c, one, back), one);
+        RIME_CHECK_EQUAL (at (c, two, back), zero);
 
         auto c2 = drop (c);
         RIME_CHECK_EQUAL (first (c2), one);
-        RIME_CHECK_EQUAL (first (front, c2), one);
-        RIME_CHECK_EQUAL (first (back, c2), two);
+        RIME_CHECK_EQUAL (first (c2, front), one);
+        RIME_CHECK_EQUAL (first (c2, back), two);
 
-        auto c3 = drop (two, c);
+        auto c3 = drop (c, two);
         RIME_CHECK_EQUAL (first (c3), two);
-        RIME_CHECK_EQUAL (first (front, c3), two);
-        RIME_CHECK_EQUAL (first (back, c3), two);
+        RIME_CHECK_EQUAL (first (c3, front), two);
+        RIME_CHECK_EQUAL (first (c3, back), two);
 
-        auto c4 = drop (3, c);
+        auto c4 = drop (c, 3);
         BOOST_CHECK (empty (c4));
 
-        auto c5 = drop (back, c);
+        auto c5 = drop (c, back);
         RIME_CHECK_EQUAL (first (c5), zero);
-        RIME_CHECK_EQUAL (first (front, c5), zero);
-        RIME_CHECK_EQUAL (first (back, c5), one);
+        RIME_CHECK_EQUAL (first (c5, front), zero);
+        RIME_CHECK_EQUAL (first (c5, back), one);
 
-        auto c6 = drop (back, two, c);
+        auto c6 = drop (c, two, back);
         RIME_CHECK_EQUAL (first (c6), zero);
-        RIME_CHECK_EQUAL (first (front, c6), zero);
-        RIME_CHECK_EQUAL (first (back, c6), zero);
+        RIME_CHECK_EQUAL (first (c6, front), zero);
+        RIME_CHECK_EQUAL (first (c6, back), zero);
 
-        auto chopped = chop (back, c);
+        auto chopped = chop (c, back);
         RIME_CHECK_EQUAL (chopped.first(), two);
         RIME_CHECK_EQUAL (first (chopped.rest()), zero);
-        RIME_CHECK_EQUAL (first (back, chopped.rest()), one);
+        RIME_CHECK_EQUAL (first (chopped.rest(), back), one);
     }
     // Nonzero begin.
     {
@@ -191,11 +191,11 @@ void check_finite (True true_,
         RIME_CHECK_EQUAL (size (c), one);
 
         RIME_CHECK_EQUAL (first (c), two);
-        RIME_CHECK_EQUAL (first (back, c), two);
+        RIME_CHECK_EQUAL (first (c, back), two);
     }
     {
         auto c = count (three, six);
-        auto c2 = drop (three, count (six));
+        auto c2 = drop (count (six), three);
 
         // This does not have to be true:
         // rime::size_t<1> vs rime::constant <size_t, 1>.
@@ -203,8 +203,8 @@ void check_finite (True true_,
 
         RIME_CHECK_EQUAL (first (c), three);
         RIME_CHECK_EQUAL (first (c2), three);
-        RIME_CHECK_EQUAL (first (back, c), five);
-        RIME_CHECK_EQUAL (first (back, c2), five);
+        RIME_CHECK_EQUAL (first (c, back), five);
+        RIME_CHECK_EQUAL (first (c2, back), five);
 
         // If we trust c2, then we trust c.
     }
@@ -238,13 +238,13 @@ template <class Zero, class One, class Two, class Three, class Four>
     auto c = count_from (one);
 
     RIME_CHECK_EQUAL (empty (c), rime::false_);
-    RIME_CHECK_EQUAL (empty (front, c), rime::false_);
+    RIME_CHECK_EQUAL (empty (c, front), rime::false_);
 
     RIME_CHECK_EQUAL (first (c), one);
 
     auto c2 = drop (c);
     RIME_CHECK_EQUAL (first (c2), two);
-    auto c3 = drop (two, c2);
+    auto c3 = drop (c2, two);
     RIME_CHECK_EQUAL (first (c3), four);
 
     auto chopped = chop (c2);
@@ -261,7 +261,7 @@ template <class MinusTwo, class MinusOne, class Zero, class One, class Two>
     BOOST_CHECK (default_direction (c) == front);
 
     RIME_CHECK_EQUAL (empty (c), rime::false_);
-    RIME_CHECK_EQUAL (empty (front, c), rime::false_);
+    RIME_CHECK_EQUAL (empty (c, front), rime::false_);
 
     static_assert (!range::has <
         range::callable::size (decltype (c))>::value, "");
@@ -273,7 +273,7 @@ template <class MinusTwo, class MinusOne, class Zero, class One, class Two>
     RIME_CHECK_EQUAL (first (c), minus_two);
     auto c2 = drop (c);
     RIME_CHECK_EQUAL (first (c2), minus_one);
-    auto c3 = drop (two, c2);
+    auto c3 = drop (c2, two);
     RIME_CHECK_EQUAL (first (c3), one);
 
     auto chopped = chop (c2);
@@ -352,10 +352,10 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         auto c = count (3);
         BOOST_MPL_ASSERT ((is_homogeneous <decltype (c)>));
 
-        auto chopped = chop (back, c);
+        auto chopped = chop (c, back);
         BOOST_CHECK_EQUAL (chopped.first(), 2);
         BOOST_CHECK_EQUAL (first (chopped.rest()), 0);
-        BOOST_CHECK_EQUAL (first (back, chopped.rest()), 1);
+        BOOST_CHECK_EQUAL (first (chopped.rest(), back), 1);
 
         c = drop (chopped.rest());
 
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         // chopped has not changed.
         BOOST_CHECK_EQUAL (chopped.first(), 2);
         BOOST_CHECK_EQUAL (first (chopped.rest()), 0);
-        BOOST_CHECK_EQUAL (first (back, chopped.rest()), 1);
+        BOOST_CHECK_EQUAL (first (chopped.rest(), back), 1);
     }
 
     // Infinite.
@@ -392,14 +392,14 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         BOOST_CHECK (default_direction (c) == front);
 
         RIME_CHECK_EQUAL (empty (c), rime::false_);
-        RIME_CHECK_EQUAL (empty (front, c), rime::false_);
+        RIME_CHECK_EQUAL (empty (c, front), rime::false_);
 
         RIME_CHECK_EQUAL (first (c), size_t (0));
         c = drop (c);
         RIME_CHECK_EQUAL (first (c), size_t (1));
-        c = drop (size_t (5), c);
+        c = drop (c, size_t (5));
         RIME_CHECK_EQUAL (first (c), size_t (6));
-        c = drop (rime::size_t <17>(), c);
+        c = drop (c, rime::size_t <17>());
         RIME_CHECK_EQUAL (first (c), size_t (23));
     }
 

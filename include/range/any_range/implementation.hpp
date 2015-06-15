@@ -206,7 +206,7 @@ namespace range { namespace any_range_implementation {
         using Base::empty;
 
         virtual bool empty (Direction const & direction) const
-        { return range::empty (direction, this->underlying()); }
+        { return range::empty (this->underlying(), direction); }
     };
 
     // size.
@@ -221,7 +221,7 @@ namespace range { namespace any_range_implementation {
         using Base::size;
 
         virtual std::size_t size (Direction const & direction) const
-        { return range::size (direction, this->underlying()); }
+        { return range::size (this->underlying(), direction); }
     };
 
     // first.
@@ -238,15 +238,15 @@ namespace range { namespace any_range_implementation {
     private:
         Element implementation (
             Direction const & direction, rime::false_type) const
-        { return range::first (direction, this->underlying()); }
+        { return range::first (this->underlying(), direction); }
 
         Element implementation (Direction const &, rime::true_type) const
-        { throw std::logic_error ("Bug in any_range."); }
+        { throw std::logic_error ("first() not implemented for empty range."); }
 
     public:
         virtual Element first (Direction const & direction) const {
             return implementation (direction,
-                always_empty <Direction, typename Base::underlying_type>());
+                always_empty <typename Base::underlying_type, Direction>());
         }
     };
 
@@ -272,23 +272,23 @@ namespace range { namespace any_range_implementation {
             // different.
             // It is assumed it has the same capabilities.
             typedef typename result_of <callable::drop (
-                Direction, underlying_type)>::type new_underlying_type;
+                underlying_type, Direction)>::type new_underlying_type;
 
             typedef typename Base::template implementation_for <
                 new_underlying_type>::type new_implementation_type;
             return utility::make_unique <new_implementation_type> (
-                range::drop (direction, this->underlying()));
+                range::drop (this->underlying(), direction));
         }
 
         interface_ptr implementation (Direction const &, rime::true_type) const
-        { throw std::logic_error ("Bug in any_range."); }
+        { throw std::logic_error ("drop() not implemented for empty range."); }
 
     public:
         virtual interface_ptr drop_one (
             Direction const & direction) const
         {
             return implementation (direction,
-                always_empty <Direction, typename Base::underlying_type>());
+                always_empty <typename Base::underlying_type, Direction>());
         }
     };
 
@@ -306,29 +306,31 @@ namespace range { namespace any_range_implementation {
         typedef typename Base::interface_ptr interface_ptr;
 
     private:
-        interface_ptr implementation (Direction const & direction,
-            std::size_t increment, rime::false_type) const
+        // Not always empty.
+        interface_ptr implementation (std::size_t increment,
+            Direction const & direction, rime::false_type) const
         {
             typedef typename Base::underlying_type underlying_type;
             typedef typename result_of <callable::drop (
-                    Direction, std::size_t, underlying_type)>::type
+                    underlying_type, std::size_t, Direction)>::type
                 new_underlying_type;
             typedef typename Base::template implementation_for <
                 new_underlying_type>::type new_implementation_type;
             return utility::make_unique <new_implementation_type> (
-                range::drop (direction, increment, this->underlying()));
+                range::drop (this->underlying(), increment, direction));
         }
 
+        // Always empty.
         interface_ptr implementation (
-            Direction const &, std::size_t, rime::true_type) const
-        { throw std::logic_error ("Bug in any_range."); }
+            std::size_t, Direction const &, rime::true_type) const
+        { throw std::logic_error ("drop() not implemented for empty range."); }
 
     public:
         virtual interface_ptr drop_n (
-            Direction const & direction, std::size_t increment) const
+            std::size_t increment, Direction const & direction) const
         {
-            return implementation (direction, increment,
-                always_empty <Direction, typename Base::underlying_type>());
+            return implementation (increment, direction,
+                always_empty <typename Base::underlying_type, Direction>());
         }
     };
 
@@ -358,7 +360,7 @@ namespace range { namespace any_range_implementation {
             rime::true_type, rime::false_type)
         {
             return chop_destructive_result (
-                range::chop_in_place (direction, this->underlying()),
+                range::chop_in_place (this->underlying(), direction),
                 interface_ptr());
         }
 
@@ -366,7 +368,7 @@ namespace range { namespace any_range_implementation {
             Direction const & direction, interface_ptr & this_,
             rime::false_type, rime::false_type)
         {
-            auto c = range::chop (direction, std::move (this->underlying()));
+            auto c = range::chop (std::move (this->underlying()), direction);
             typedef typename std::decay <decltype (c.forward_rest())>::type
                 new_underlying_type;
             typedef typename Base::template implementation_for <
@@ -381,15 +383,15 @@ namespace range { namespace any_range_implementation {
         template <class Bool>
             chop_destructive_result implementation (
                 Direction const &, interface_ptr &, Bool, rime::true_type)
-        { throw std::logic_error ("Bug in any_range."); }
+        { throw std::logic_error ("chop() not implemented for empty range."); }
 
     public:
         virtual chop_destructive_result chop_destructive (
             Direction const & direction, interface_ptr & this_)
         {
             return implementation (direction, this_,
-                has <callable::chop_in_place (Direction, underlying_type &)>(),
-                always_empty <Direction, typename Base::underlying_type>());
+                has <callable::chop_in_place (underlying_type &, Direction)>(),
+                always_empty <typename Base::underlying_type, Direction>());
         }
     };
 

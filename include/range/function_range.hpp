@@ -55,41 +55,37 @@ private:
     function_type function_;
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     auto empty (direction::front) const RETURNS (rime::false_);
 
     auto chop_in_place (direction::front) RETURNS (function_());
 };
 
-struct function_range_tag;
+namespace operation {
+
+    struct function_range_tag {};
+
+    template <class Function>
+    inline auto implement_chop (function_range_tag const & tag,
+        function_range <Function> && range, direction::front const & direction)
+    RETURNS (helper::chop_by_chop_in_place (std::move (range), direction));
+
+} // namespace operation
 
 template <class Function> struct tag_of_qualified <function_range <Function>>
-{ typedef function_range_tag type; };
+{ typedef operation::function_range_tag type; };
 
+/** \brief
+Create a range whose elements are the results of consecutive function calls.
+
+The resulting range implements operations on rvalues only: it is not possible
+to make a copy of it.
+The range is noncopyable, but movable.
+*/
 template <class Function> function_range <Function>
     make_function_range (Function const & function)
 { return function_range <Function> (function); }
-
-namespace operation {
-
-    // first and drop are defined automatically for rvalues.
-
-    template <class Range>
-        struct chop <function_range_tag, direction::front, Range &&>
-    {
-        template <class Function>
-            auto operator() (
-                direction::front, function_range <Function> && range) const
-        -> chopped <decltype (range.function()()), function_range <Function>>
-        {
-            return chopped <decltype (range.function()()),
-                function_range <Function>> (
-                    range.function()(), std::move (range));
-        }
-    };
-
-} // namespace operation
 
 } // namespace range
 

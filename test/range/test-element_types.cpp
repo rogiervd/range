@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,9 +27,6 @@ limitations under the License.
 
 #include "range/std.hpp"
 #include "range/take.hpp"
-
-// For debugging.
-template <class ... Types> struct show_types;
 
 BOOST_AUTO_TEST_SUITE(test_range_element_types)
 
@@ -178,7 +175,7 @@ BOOST_AUTO_TEST_CASE (test_element_types_homogeneous) {
     }
     {
         std::list <int> l;
-        auto v = range::take (rime::size_t <2>(), l);
+        auto v = range::take (l, rime::size_t <2>());
         typedef range::element_types <decltype (v)> types;
 
         static_assert (std::is_same <

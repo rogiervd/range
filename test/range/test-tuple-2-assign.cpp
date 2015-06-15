@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE (tuple_assign_from_range_more) {
 
         tuple <float, double> t (v);
         BOOST_CHECK_EQUAL (first (t), 7.5);
-        BOOST_CHECK_EQUAL (first (back, t), 9.5);
+        BOOST_CHECK_EQUAL (first (t, back), 9.5);
 
         // Change the original vector.
         // This is not in general recommended: there is the risk of dangling

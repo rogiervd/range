@@ -47,7 +47,7 @@ namespace range { namespace python {
                     View const & tuple, meta::vector <Indices ...>)
             {
                 return boost::python::incref (boost::python::make_tuple (
-                        range::at (Indices(), tuple) ...)
+                        range::at (tuple, Indices()) ...)
                     .ptr());
             }
 
@@ -81,6 +81,6 @@ namespace range { namespace python {
             detail::convert_tuple <Tuple>>();
     }
 
-}} // namespace python::range
+}} // namespace range::python
 
 #endif // RANGE_PYTHON_TUPLE_HPP_INCLUDED

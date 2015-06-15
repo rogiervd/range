@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,21 +51,6 @@ BOOST_AUTO_TEST_CASE (test_call_unpack) {
     double current = 5.5;
     range::tuple <double &, double> pair (current, 2.25);
     double & current2 = call_unpack (plus_assign, pair);
-    BOOST_CHECK_EQUAL (current, 7.75);
-    BOOST_CHECK_EQUAL (&current2, &current);
-}
-
-BOOST_AUTO_TEST_CASE (test_curry_call_unpack) {
-    int minus_7 = range::curry::call_unpack (check_nullary, range::tuple<>());
-    BOOST_CHECK_EQUAL (minus_7, -7);
-
-    auto u = range::curry::call_unpack (check_5u) (std::make_tuple (5u));
-    BOOST_CHECK_EQUAL (u, 'u');
-
-    double current = 5.5;
-    range::tuple <double &, double> pair (current, 2.25);
-    auto plus_assign_with = range::curry::call_unpack (plus_assign);
-    double & current2 = plus_assign_with (pair);
     BOOST_CHECK_EQUAL (current, 7.75);
     BOOST_CHECK_EQUAL (&current2, &current);
 }

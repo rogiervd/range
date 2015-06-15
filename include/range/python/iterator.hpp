@@ -72,8 +72,8 @@ namespace range { namespace python {
         template <class Range2, class Enable = typename
             utility::disable_if_same_or_derived <python_iterator, Range2>::type>
         python_iterator (Range2 && range)
-        : range (range::transform (to_python_object(),
-            std::forward <Range2> (range))) {}
+        : range (range::transform (std::forward <Range2> (range),
+            to_python_object())) {}
 
         /** \brief
         Return the next element of the view, as a boost::python::object, and
@@ -179,6 +179,6 @@ namespace range { namespace python {
             detail::convert_iterator <View>>();
     }
 
-}} // namespace python::range
+}} // namespace range::python
 
 #endif // RANGE_PYTHON_ITERATOR_HPP_INCLUDED

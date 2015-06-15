@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef RANGE_CURRY_HPP_INCLUDED
-#define RANGE_CURRY_HPP_INCLUDED
+#ifndef RANGE_LAZY_HPP_INCLUDED
+#define RANGE_LAZY_HPP_INCLUDED
 
 #include "meta/vector.hpp"
 #include "meta/count.hpp"
@@ -33,17 +33,16 @@ namespace range {
 namespace callable {
 
     /**
-    \brief Curry callable objects.
+    \brief Store arguments for a callable object.
 
-    Class that can be called and called, and will store the arguments until at
-    least one of the arguments is a range, at which point it will call the
-    \a Callable.
+    Class that can be called and called, and will store the arguments until it
+    is called with a range, at which point it will call the \a Callable with
+    the range as the first argument.
 
-    For example, <c>curried \<callable::drop>() (front) (4) (range)</c> is
-    equivalent to <c>drop  (front, 4, range)</c>.
-    <c>curried \<callable::drop>() (front, 4) (range)</c> is too, as is
-    <c>curried \<callable::drop>() (front, 4, range)</c>.
-    The good thing about currying is that curried functions can be passed in as
+    For example, <c>lazy \<callable::drop>() (4) (front) (range)</c> is
+    equivalent to <c>drop  (range, front, 4)</c>.
+    <c>lazy \<callable::drop>() (4, front) (range)</c> is too.
+    The good thing about lazy functions is that they can be passed in as
     functors.
 
     The arguments are stored by value and passed to the function by const
@@ -54,7 +53,7 @@ namespace callable {
     \tparam StoredArguments
         The arguments stored so far.
     */
-    template <class Callable, class ... StoredArguments> class curried {
+    template <class Callable, class ... StoredArguments> class lazy {
         static_assert (meta::all_of_c <
                 std::is_same <StoredArguments,
                     typename std::decay <StoredArguments>::type>::value ...
@@ -78,7 +77,7 @@ namespace callable {
         The type this but then with extra arguments.
         */
         template <class ... NewArguments> struct next_type {
-            typedef curried <Callable, StoredArguments ...,
+            typedef lazy <Callable, StoredArguments ...,
                 typename std::decay <NewArguments>::type ...> type;
         };
 
@@ -88,7 +87,7 @@ namespace callable {
                 NewArguments && ... new_arguments) const
         {
             return typename next_type <NewArguments ...>::type (
-                ::range::at (StoredIndices(), stored_arguments_) ...,
+                ::range::at (stored_arguments_, StoredIndices()) ...,
                 std::forward <NewArguments> (new_arguments) ...);
         }
 
@@ -96,27 +95,25 @@ namespace callable {
         Result type of calling this, assuming the call will go through to the
         Callable.
         */
-        template <class ... NewArguments> struct call_result
-        : std::result_of <Callable (
-            StoredArguments const & ..., NewArguments ...)> {};
+        template <class Range> struct call_result
+        : result_of <Callable (Range, StoredArguments const & ...)> {};
 
-        template <class StoredArgumentsTuple, class ... StoredIndices,
-            class ... NewArguments>
-        static typename call_result <NewArguments ...>::type
-        call_with (StoredArgumentsTuple const & stored_arguments,
-            meta::vector <StoredIndices ...>,
-            NewArguments && ... new_arguments)
+        template <class Range,
+            class StoredArgumentsTuple, class ... StoredIndices>
+        static typename call_result <Range>::type
+        call_with (Range && range,
+            StoredArgumentsTuple const & stored_arguments,
+            meta::vector <StoredIndices ...>)
         {
-            return (Callable() (
-                ::range::at (StoredIndices(), stored_arguments) ...,
-                std::forward <NewArguments> (new_arguments) ...));
+            return Callable() (std::forward <Range> (range),
+                ::range::at (stored_arguments, StoredIndices()) ...);
         }
 
     public:
         template <class ... QStoredArguments, class Enable =
             typename utility::disable_if_variadic_same_or_derived <
-                curried, QStoredArguments ...>::type>
-        curried (QStoredArguments && ... stored_arguments)
+                lazy, QStoredArguments ...>::type>
+        lazy (QStoredArguments && ... stored_arguments)
         : stored_arguments_ (
             std::forward <QStoredArguments> (stored_arguments) ...) {}
 
@@ -128,18 +125,15 @@ namespace callable {
         \param new_arguments
             The arguments to be used in the call behind the stored arguments.
         */
-        template <class ... NewArguments>
-            typename boost::lazy_enable_if <
-                meta::any_of_c <is_range <NewArguments>::value ...>,
-            call_result <NewArguments ...>>::type
-        operator() (NewArguments && ... new_arguments) const
-        {
-            return (call_with (stored_arguments_, stored_indices_type(),
-                std::forward <NewArguments> (new_arguments) ...));
+        template <class Range> typename
+            boost::lazy_enable_if <is_range <Range>, call_result <Range>>::type
+        operator() (Range && range) const {
+            return (call_with (std::forward <Range> (range),
+                stored_arguments_, stored_indices_type()));
         }
 
         /**
-        Return a new <c>curried\<></c> object with the additional arguments.
+        Return a new <c>lazy\<></c> object with the additional arguments.
         This overload is activated when none of the new arguments is a range.
         \param new_arguments
             The arguments to be appended to the currently stored arguments.
@@ -156,27 +150,27 @@ namespace callable {
 
 } // namespace callable
 
-namespace curry {
+namespace lazy {
 
     static auto const default_direction
-        = callable::curried <callable::default_direction>();
+        = callable::lazy <callable::default_direction>();
 
-    static auto const empty = callable::curried <callable::empty>();
-    static auto const size = callable::curried <callable::size>();
-    static auto const first = callable::curried <callable::first>();
-    static auto const at = callable::curried <callable::at>();
-    static auto const drop = callable::curried <callable::drop>();
-    static auto const chop = callable::curried <callable::chop>();
+    static auto const empty = callable::lazy <callable::empty>();
+    static auto const size = callable::lazy <callable::size>();
+    static auto const first = callable::lazy <callable::first>();
+    static auto const at = callable::lazy <callable::at>();
+    static auto const drop = callable::lazy <callable::drop>();
+    static auto const chop = callable::lazy <callable::chop>();
     static auto const chop_in_place
-        = callable::curried <callable::chop_in_place>();
+        = callable::lazy <callable::chop_in_place>();
 
-    static auto const view = callable::curried <callable::view>();
+    static auto const view = callable::lazy <callable::view>();
     static auto const forward_view
-        = callable::curried <callable::forward_view>();
-    static auto const view_once = callable::curried <callable::view_once>();
+        = callable::lazy <callable::forward_view>();
+    static auto const view_once = callable::lazy <callable::view_once>();
 
-} // namespace curry
+} // namespace lazy
 
 } // namespace range
 
-#endif // RANGE_CURRY_HPP_INCLUDED
+#endif // RANGE_LAZY_HPP_INCLUDED

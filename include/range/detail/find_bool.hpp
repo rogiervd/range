@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ Helpers for all() and any().
 #define RANGE_DETAIL_FIND_BOOL_HPP_INCLUDED
 
 #include "rime/core.hpp"
+#include "rime/always.hpp"
 
 #include "../find.hpp"
 
@@ -51,19 +52,18 @@ finds one.
 */
 template <bool Value> struct find_bool {
     equals <!Value> equals_value;
-    range::operation::helper::return_default_constructed <rime::bool_<!Value>>
-        when_not_empty;
-    range::operation::helper::return_default_constructed <rime::bool_<Value>>
-        when_empty;
+    rime::callable::always_default <rime::bool_<!Value>> when_not_empty;
+    rime::callable::always_default <rime::bool_<Value>> when_empty;
 
-    template <class Direction, class Range>
-        auto operator() (Direction const & direction, Range && range) const
-    RETURNS (range::find (direction,
-        equals_value, when_not_empty, when_empty, range));
+    template <class Range, class Direction>
+        auto operator() (Range && range, Direction const & direction) const
+    RETURNS (range::find (std::forward <Range> (range), direction,
+        equals_value, when_not_empty, when_empty));
 
     template <class Range>
         auto operator() (Range && range) const
-    RETURNS (range::find (equals_value, when_not_empty, when_empty, range));
+    RETURNS (range::find (std::forward <Range> (range),
+        equals_value, when_not_empty, when_empty));
 };
 
 }}} // namespace range::callable::find_bool_detail

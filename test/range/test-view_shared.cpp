@@ -20,16 +20,14 @@ limitations under the License.
 #include "range/view_shared.hpp"
 
 #include <list>
+#include <tuple>
 
 #include "range/std/container.hpp"
+#include "range/std/tuple.hpp"
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
-#include "range/curry.hpp"
 
 #include "unique_range.hpp"
-
-static auto const curried_transform =
-    range::callable::curried <range::callable::transform>();
 
 using range::back;
 using range::empty;
@@ -96,10 +94,9 @@ BOOST_AUTO_TEST_CASE (test_range_view_shared_2) {
 
 /* shared_ptr range, transformation function. */
 
-inline
-typename std::result_of <range::callable::view_shared (
-        std::list <int>, range::callable::reverse)>::type
-    return_4_7_10_11()
+inline auto return_4_7_10_11()
+-> decltype (range::view_shared (
+    std::declval <std::shared_ptr <std::list <int>>>(), range::reverse))
 {
     std::list <int> l;
     l.push_back (11);
@@ -125,10 +122,11 @@ BOOST_AUTO_TEST_CASE (test_range_view_shared_reverse) {
     {
         auto v = return_4_7_10_11();
 
-        BOOST_CHECK_EQUAL (first (back, v), 11);
-        BOOST_CHECK_EQUAL (second (back, v), 10);
+        BOOST_CHECK_EQUAL (first (v, back), 11);
+        BOOST_CHECK_EQUAL (first (drop (v, back), back), 10);
+        BOOST_CHECK_EQUAL (second (v, back), 10);
         BOOST_CHECK (empty (
-            drop (back, drop (back, drop (back, drop (back, v))))));
+            drop (drop (drop (drop (v, back), back), back), back), back));
     }
 }
 
@@ -146,8 +144,14 @@ struct add_one {
     int operator() (int i) const { return i + 1; }
 };
 
+struct add_one_to_all {
+    template <class Range>
+        auto operator() (Range const & range) const
+    RETURNS (range::transform (range, add_one()));
+};
+
 inline auto return_8_11_56()
-RETURNS (range::view_shared (get_7_10_55(), curried_transform (add_one())));
+RETURNS (range::view_shared (get_7_10_55(), add_one_to_all()));
 
 BOOST_AUTO_TEST_CASE (test_range_view_shared_transform) {
     auto v = return_8_11_56();
@@ -192,7 +196,7 @@ BOOST_AUTO_TEST_CASE (test_range_view_shared_unique) {
 
 auto return_2_a_hello()
 RETURNS (range::view_shared (
-    range::make_tuple (2, 'a', std::string ("hello"))));
+    std::make_tuple (2, 'a', std::string ("hello"))));
 
 BOOST_AUTO_TEST_CASE (test_range_view_shared_heterogeneous) {
     auto v = return_2_a_hello();

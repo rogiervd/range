@@ -1,5 +1,5 @@
 /*
-Copyright 2012, 2013, 2014 Rogier van Dalen.
+Copyright 2012-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -77,13 +77,13 @@ BOOST_AUTO_TEST_CASE (test_fold_homogeneous_stack_overflow) {
     std::size_t const element_num = 300000;
 
     std::vector <int> v (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (plus(), 0, v), element_num);
+    BOOST_CHECK_EQUAL (fold (0, v, plus()), element_num);
 
     std::list <int> l (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (plus(), 0, l), element_num);
+    BOOST_CHECK_EQUAL (fold (0, l, plus()), element_num);
 
     {
-        auto result = fold (settling_plus(), char (0), v);
+        auto result = fold (char (0), v, settling_plus());
         BOOST_CHECK_EQUAL (rime::get <int> (result), element_num);
     }
 }
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE (test_fold_non_assignable) {
     std::vector <non_assignable> v (element_num, non_assignable (1));
 
     BOOST_CHECK_EQUAL (
-        fold (plus(), non_assignable (0), v).i, element_num);
+        fold (non_assignable (0), v, plus()).i, element_num);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

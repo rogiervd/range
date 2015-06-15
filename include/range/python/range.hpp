@@ -92,11 +92,13 @@ whether the range is empty and if so returns the first element.
 */
 template <class ... Types> class python_range;
 
-struct python_range_tag;
+namespace operation {
+    struct python_range_tag {};
+} // namespace operation
 
 template <class ... Types>
     struct tag_of_qualified <python_range <Types ...>>
-{ typedef python_range_tag type; };
+{ typedef operation::python_range_tag type; };
 
 namespace python {
 namespace detail {
@@ -167,6 +169,10 @@ namespace detail {
         }
     };
 
+    template <class Range> inline
+        boost::python::object next_iterator (Range & range)
+    { return range.next_iterator(); }
+
 } // namespace detail
 
 } // namespace python
@@ -197,8 +203,8 @@ public:
     python_range (python_range const & that) = default;
 
 private:
-    template <class Tag, class Direction, class Range, class Enable>
-        friend struct operation::drop_one;
+    friend boost::python::object
+        python::detail::next_iterator <python_range> (python_range &);
 
     /**
     Construct from a Python iterator with the first element it will produce as
@@ -208,7 +214,7 @@ private:
     : base_type (std::move (iterator)) {}
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     /* empty. */
     bool empty (direction::front) const { return !fill_first(); }
@@ -258,29 +264,27 @@ private:
 
 namespace operation {
 
-    // drop: only for rvalue ranges.
-    template <class Range>
-        struct drop_one <python_range_tag, direction::front, Range &&>
+    // drop_one: only defined for rvalue references.
+    // For zero or one types, return the same range type.
+    template <class ... Types>
+        inline python_range <Types ...> implement_drop_one (
+            python_range_tag const &, python_range <Types ...> && range,
+            direction::front)
     {
-        /// Evaluate to the result type.
-        // For zero or one types, return the same range type.
-        template <class ... Types> struct next_range
-        { typedef python_range <Types ...> type; };
+        return python_range <Types ...> (
+            ::range::python::detail::next_iterator (range));
+    }
 
-        // For two or more types, remove the first type.
-        template <class FirstType, class SecondType, class ... Types>
-            struct next_range <FirstType, SecondType, Types ...>
-        { typedef python_range <SecondType, Types ...> type; };
-
-        template <class One, class ... Types>
-            typename next_range <Types ...>::type operator() (
-                direction::front, One, python_range <Types ...> && range)
-            const
-        {
-            return typename next_range <Types ...>::type (
-                std::move (range.next_iterator()));
-        }
-    };
+    // For two or more types, remove the first type.
+    template <class FirstType, class SecondType, class ... Types>
+        inline python_range <SecondType, Types ...> implement_drop_one (
+            python_range_tag const &,
+            python_range <FirstType, SecondType, Types ...> && range,
+            direction::front)
+    {
+        return python_range <SecondType, Types ...> (
+            ::range::python::detail::next_iterator (range));
+    }
 
     // chop is implemented automatically.
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ Therefore, this file tests this directly.
 using range::tuple;
 using range::transform;
 using range::zip;
-namespace curry = range::curry;
+using range::call_unpack;
 
 BOOST_AUTO_TEST_SUITE(test_range_call_unpack)
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE (test_call_unpack_add) {
     v2.push_back (8.5);
     v2.push_back (18);
 
-    range::for_each (curry::call_unpack (plus_assign), zip (v1, v2));
+    range::for_each (zip (v1, v2), call_unpack (plus_assign));
 
     BOOST_CHECK_EQUAL (v1 [0], 7.5 + 8.5);
     BOOST_CHECK_EQUAL (v1 [1], 17. + 18);
@@ -74,8 +74,7 @@ BOOST_AUTO_TEST_CASE (test_call_unpack_difference) {
     tuple <int, double> t1 (1, 5.5);
     tuple <float, double> t2 (2.5, 7.5);
 
-    auto differences = transform (
-        curry::call_unpack (difference()), zip (t1, t2));
+    auto differences = transform (zip (t1, t2), call_unpack (difference()));
     auto e1 = range::first (differences);
     auto e2 = range::second (differences);
 

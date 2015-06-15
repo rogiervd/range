@@ -42,8 +42,6 @@ Define a general heterogeneous container.
 #include "equal.hpp"
 #include "less_lexicographical.hpp"
 
-#include "detail/enable_if_front_back.hpp"
-
 namespace range {
 
 /**
@@ -84,8 +82,12 @@ Connected with this is the layout
 */
 template <class ... Types> class tuple;
 
+namespace operation {
+    struct tuple_tag : heavyweight_tag {};
+} // namespace operation
+
 template <class ... Types> struct tag_of_qualified <tuple <Types...>>
-{ typedef heavyweight_tag <tuple <Types ...>> type; };
+{ typedef operation::tuple_tag type; };
 
 namespace tuple_detail {
     template <class Type> struct is_tuple_implementation : rime::false_type {};
@@ -142,8 +144,8 @@ namespace tuple_detail {
     and uses these methods, it becomes possible to reach just one "contain".
     "get_contain" returns a reference to the appropriate "contain" class.
     "get_contained_type" is not implemented, just declared as returning
-    contained_type <Type>.
-    By using <c>decltype (t.get_contained_type (contain_index <..>()))</c>,
+    contained_type \c \<Type>.
+    By using <c>decltype (t.get_contained_type (contain_index \<..>()))</c>,
     therefore, the contained type can be found.
     This works with whatever complexity the compiler performs overload
     resolution.
@@ -301,18 +303,18 @@ namespace tuple_detail {
 
         // convertible if \a Range is known to be empty.
         template <class Range> struct range_is_convertible
-        : always_empty <direction::front, Range> {};
+        : always_empty <Range, direction::front> {};
 
         // constructible if \a Range can be empty.
         template <class Range> struct range_is_constructible
-        : boost::mpl::not_ <never_empty <direction::front, Range>> {};
+        : boost::mpl::not_ <never_empty <Range, direction::front>> {};
 
         static constexpr bool is_copy_assignable = true;
         static constexpr bool is_move_assignable = true;
 
         // assignable if \a Range can be empty.
         template <class Range> struct range_is_assignable
-        : boost::mpl::not_ <never_empty <direction::front, Range>> {};
+        : boost::mpl::not_ <never_empty <Range, direction::front>> {};
 
     public:
         elements() {}
@@ -326,7 +328,7 @@ namespace tuple_detail {
         \throw size_mismatch if the range is not empty.
         */
         template <class Range> static Range && maybe_chop (Range && range) {
-            if (!empty (front, range))
+            if (!empty (range, front))
                 throw size_mismatch();
             return static_cast <Range &&> (range);
         }
@@ -334,7 +336,7 @@ namespace tuple_detail {
         template <class Range> explicit elements (from_range, Range &&) {}
 
         template <class Range> elements & operator= (Range && range) {
-            if (!empty (front, range))
+            if (!empty (range, front))
                 throw size_mismatch();
             return *this;
         }
@@ -381,7 +383,7 @@ namespace tuple_detail {
         to be equal.
         */
         template <class Range, bool NeverEmpty
-            = never_empty <direction::front, Range>::value>
+            = never_empty <Range, direction::front>::value>
         struct range_is_convertible;
 
         template <class Range> struct range_is_convertible <Range, false>
@@ -391,10 +393,10 @@ namespace tuple_detail {
         template <class Range> struct range_is_convertible <Range, true>
         : boost::mpl::and_ <
             std::is_convertible <typename result_of <
-                    callable::first (direction::front, Range)>::type,
+                    callable::first (Range, direction::front)>::type,
                 first_stored_type>,
             typename rest_type::template range_is_convertible <typename
-                result_of <callable::drop (direction::front, Range)>::type>
+                result_of <callable::drop (Range, direction::front)>::type>
         > {};
 
         /**
@@ -402,7 +404,7 @@ namespace tuple_detail {
         equal.
         */
         template <class Range, bool AlwaysEmpty
-            = always_empty <direction::front, Range>::value>
+            = always_empty <Range, direction::front>::value>
         struct range_is_constructible;
 
         // Range is always empty: not constructible.
@@ -412,9 +414,9 @@ namespace tuple_detail {
         template <class Range> struct range_is_constructible <Range, false>
         : boost::mpl::and_ <
             std::is_constructible <first_stored_type, typename result_of <
-                    callable::first (direction::front, Range)>::type>,
+                    callable::first (Range, direction::front)>::type>,
             typename rest_type::template range_is_constructible <typename
-                result_of <callable::drop (direction::front, Range)>::type>
+                result_of <callable::drop (Range, direction::front)>::type>
         > {};
 
         /**
@@ -422,7 +424,7 @@ namespace tuple_detail {
         equal.
         */
         template <class Range, bool KnownEmpty
-            = always_empty <direction::front, Range>::value>
+            = always_empty <Range, direction::front>::value>
         struct range_is_assignable;
 
         template <class Range> struct range_is_assignable <Range, true>
@@ -432,9 +434,9 @@ namespace tuple_detail {
         : boost::mpl::and_ <
             utility::is_assignable <
                 First &, typename result_of <
-                    callable::first (direction::front, Range)>::type>,
+                    callable::first (Range, direction::front)>::type>,
             typename rest_type::template range_is_assignable <typename
-                result_of <callable::drop (direction::front, Range)>::type>
+                result_of <callable::drop (Range, direction::front)>::type>
         > {};
 
         static constexpr bool is_copy_assignable =
@@ -476,11 +478,11 @@ namespace tuple_detail {
         */
         template <class Range> static
         typename boost::enable_if <boost::mpl::and_ <
-                has <callable::first (direction::front, Range const &)>,
-                has <callable::drop (direction::front, Range)>>,
+                has <callable::first (Range const &, direction::front)>,
+                has <callable::drop (Range, direction::front)>>,
             Range &&>::type
         maybe_chop (Range && range) {
-            if (empty (front, range))
+            if (empty (range, front))
                 throw size_mismatch();
             return static_cast <Range &&> (range);
         }
@@ -488,9 +490,9 @@ namespace tuple_detail {
         // ... to be used by the corresponding constructor.
         template <class Range>
         elements (from_range, Range && range)
-        :   contain_type (range::first (front, range)),
+        :   contain_type (range::first (range, front)),
             rest_type (from_range(), rest_type::maybe_chop (
-                    range::drop (front, std::forward <Range> (range))))
+                    range::drop (std::forward <Range> (range), front)))
         {}
 
         // Range that does not allow first (Range const &) and drop (Range).
@@ -500,14 +502,14 @@ namespace tuple_detail {
         */
         template <class Range> static
         typename boost::lazy_disable_if <boost::mpl::and_ <
-                has <callable::first (direction::front, Range const &)>,
-                has <callable::drop (direction::front, Range)>>,
-            std::result_of <callable::chop (direction::front, Range)>>::type
+                has <callable::first (Range const &, direction::front)>,
+                has <callable::drop (Range, direction::front)>>,
+            result_of <callable::chop (Range, direction::front)>>::type
         maybe_chop (Range && range)
         {
-            if (empty (front, range))
+            if (empty (range, front))
                 throw size_mismatch();
-            return range::chop (range::front, std::forward <Range> (range));
+            return range::chop (std::forward <Range> (range), range::front);
         }
 
         // ... to be used by the corresponding constructor.
@@ -528,9 +530,9 @@ namespace tuple_detail {
         elements & operator= (elements &&) = default;
 
         template <class Range> elements & operator= (Range && range) {
-            if (empty (front, range))
+            if (empty (range, front))
                 throw size_mismatch();
-            auto chopped = range::chop (front, std::forward <Range> (range));
+            auto chopped = range::chop (std::forward <Range> (range), front);
             this->first_element() = chopped.move_first();
             *static_cast <rest_type *> (this) = chopped.move_rest();
             return *this;
@@ -563,22 +565,26 @@ template <class ... Types> class tuple {
     typedef meta::vector <typename utility::storage::store <Types>::type ...>
         stored_types;
 
+    template <class Type> struct not_this_tuple
+    : boost::mpl::not_ <std::is_same <typename std::decay <Type>::type, tuple>>
+    {};
+
     template <class Range> struct range_is_convertible_impl
     : elements_type::template range_is_convertible <typename
-        range::result_of <callable::view_once (direction::front, Range)>::type>
+        range::result_of <callable::view_once (Range, direction::front)>::type>
     {};
     template <class Range> struct range_is_convertible
     : boost::mpl::and_ <
-        has <callable::view_once (direction::front, Range)>,
+        has <callable::view_once (Range, direction::front)>,
         range_is_convertible_impl <Range>> {};
 
     template <class Range> struct range_is_constructible_impl
     : elements_type::template range_is_constructible <typename
-        range::result_of <callable::view_once (direction::front, Range)>::type>
+        range::result_of <callable::view_once (Range, direction::front)>::type>
     {};
     template <class Range> struct range_is_constructible
     : boost::mpl::and_ <
-        has <callable::view_once (direction::front, Range)>,
+        has <callable::view_once (Range, direction::front)>,
         range_is_constructible_impl <Range>> {};
 
     template <class Range> struct range_is_constructible_but_not_convertible
@@ -589,11 +595,11 @@ template <class ... Types> class tuple {
 
     template <class Range> struct range_is_assignable_impl
     : elements_type::template range_is_assignable <typename
-        range::result_of <callable::view_once (direction::front, Range)>::type>
+        range::result_of <callable::view_once (Range, direction::front)>::type>
     {};
     template <class Range> struct range_is_assignable
     : boost::mpl::and_ <
-        has <callable::view_once (direction::front, Range)>,
+        has <callable::view_once (Range, direction::front)>,
         range_is_assignable_impl <Range>> {};
 
     struct dummy_type {};
@@ -655,10 +661,11 @@ public:
     */
     template <class Range, class Enable = typename
         boost::enable_if <boost::mpl::and_<
-            is_range <Range>, range_is_convertible <Range>>>::type>
+            not_this_tuple <Range>, is_range <Range>,
+            range_is_convertible <Range>>>::type>
     tuple (Range && range, dummy_type = dummy_type())
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
-        view_once (front, std::forward <Range> (range))))
+        view_once (std::forward <Range> (range), front)))
     {}
 
     /**
@@ -675,12 +682,12 @@ public:
     */
     template <class Range, class Enable = typename
         boost::enable_if <boost::mpl::and_<
-            is_range <Range>,
+            not_this_tuple <Range>, is_range <Range>,
             range_is_constructible_but_not_convertible <Range>
         >>::type>
     explicit tuple (Range && range)
     : elements_ (tuple_detail::from_range(), elements_type::maybe_chop (
-        view_once (front, std::forward <Range> (range))))
+        view_once (std::forward <Range> (range), front)))
     {}
 
     /**
@@ -695,22 +702,21 @@ public:
     */
     template <class Range,
         class Enable = typename boost::enable_if <
-            boost::mpl::and_<is_range <Range>, range_is_assignable <Range>
-        >>::type,
-        class Enable2 = typename
-            utility::disable_if_same_or_derived <tuple, Range>::type>
+            boost::mpl::and_<not_this_tuple <Range>, is_range <Range>,
+            range_is_assignable <Range>
+        >>::type>
     tuple & operator= (Range && range) {
-        elements_ = view_once (front, std::forward <Range> (range));
+        elements_ = view_once (std::forward <Range> (range), front);
         return *this;
     }
 
     // Explicit copy and move assignment.
     tuple & operator= (tuple_if_copy_assignable const & that) {
-        elements_ = view_once (front, that);
+        elements_ = view_once (that, front);
         return *this;
     }
     tuple & operator= (tuple_if_move_assignable && that) {
-        elements_ = view_once (front, std::move (that));
+        elements_ = view_once (std::move (that), front);
         return *this;
     }
 
@@ -740,9 +746,9 @@ namespace make_tuple_from_detail {
     { typedef tuple <typename Transform <Types>::type ...> type; };
 
     template <template <class> class Transform, class Range> struct tuple_from {
-        typedef typename std::result_of <callable::view_once (Range)>::type
-            view_type;
-        static_assert (!is_homogeneous <direction::front, view_type>::value,
+        typedef typename result_of <
+            callable::view_once (Range, direction::front)>::type view_type;
+        static_assert (!is_homogeneous <view_type, direction::front>::value,
             "The range passed in is homogeneous and potentially infinite. "
             "Unable to convert it into a tuple.");
         typedef typename tuple_from_types <Transform,
@@ -802,8 +808,9 @@ template <class ... Left, class ... Right> inline
         tuple <Left ...> const & left, tuple <Right ...> const & right)
 RETURNS (!less_lexicographical (left, right));
 
-/**
+/** \brief
 Make a tuple from the arguments passed in.
+
 The arguments are stripped of qualifications.
 
 This is equivalent to \c std::make_tuple except that it returns a
@@ -827,15 +834,18 @@ If \a range is a standard homogeneous container, this is obviously impossible,
 and a compile error about recursive template instantiations will result.
 
 \throw size_mismatch
-    If the range turns out at compile time to finish sooner than it could.
+    If the range turns out at run time to finish sooner than it should.
     In this case, the tuple type will have more elements than the range turns
     out to have, so constructing the tuple type elicits the exception.
 \param range
     The range to construct the range from.
 */
 template <class Range> inline auto make_tuple_from (Range && range)
+/// \cond DONT_DOCUMENT
 RETURNS (typename make_tuple_from_detail::tuple_from <std::decay, Range>::type (
-    std::forward <Range> (range)));
+    std::forward <Range> (range)))
+/// \endcond
+;
 
 /** \brief
 Make a tuple of references to each of the arguments.
@@ -860,16 +870,19 @@ If \a range is a standard homogeneous container, this is obviously impossible,
 and a compile error about recursive template instantiations will result.
 
 \throw size_mismatch
-    If the range turns out at compile time to finish sooner than it could.
+    If the range turns out at run time to finish sooner than it should.
     In this case, the tuple type will have more elements than the range turns
     out to have, so constructing the tuple type elicits the exception.
 \param range
     The range to construct the range from.
 */
 template <class Range> inline auto tie_from (Range && range)
+/// \cond DONT_DOCUMENT
 RETURNS (typename make_tuple_from_detail::tuple_from <
     make_tuple_from_detail::add_reference, Range>::type (
-        std::forward <Range> (range)));
+        std::forward <Range> (range)))
+/// \endcond
+;
 
 /** \brief
 Make a tuple of rvalue references to each of the arguments.
@@ -900,16 +913,19 @@ If \a range is a standard homogeneous container, this is obviously impossible,
 and a compile error about recursive template instantiations will result.
 
 \throw size_mismatch
-    If the range turns out at compile time to finish sooner than it could.
+    If the range turns out at run time to finish sooner than it should.
     In this case, the tuple type will have more elements than the range turns
     out to have, so constructing the tuple type elicits the exception.
 \param range
     The range to construct the range from.
 */
 template <class Range> inline auto copy_tuple_from (Range && range)
+/// \cond DONT_DOCUMENT
 RETURNS (typename make_tuple_from_detail::tuple_from <
     make_tuple_from_detail::identity, Range>::type (
-        std::forward <Range> (range)));
+        std::forward <Range> (range)))
+/// \endcond
+;
 
 namespace tuple_detail {
     /**
@@ -936,9 +952,15 @@ Object that anything can be assigned to syntactically, but it has no effect.
 This is useful in conjunction with \c tie.
 std::ignore could be used just as well, but this can be awkward in practice.
 Because of argument-dependent lookup,
+\code
     using range::tie; tie (std::ignore);
-is ambiguous between range::tie and std::tie. On the other hand,
+\endcode
+is ambiguous between range::tie and std::tie.
+
+On the other hand,
+\code
     using range::tie; tie (range::ignore);
+\endcode
 is fine.
 */
 static auto const ignore = tuple_detail::vacuously_assignable();
@@ -958,6 +980,8 @@ namespace tuple_detail {
     public:
         static constexpr std::size_t begin_position = Begin;
         static constexpr std::size_t end_position = End;
+        static constexpr bool is_empty = (Begin == End);
+        static constexpr std::size_t view_size = (End - Begin);
         static constexpr std::size_t tuple_size
             = range::tuple_size <TupleReference>::value;
 
@@ -976,125 +1000,81 @@ namespace tuple_detail {
         { return static_cast <TupleReference> (*tuple_); }
 
         pointer_type pointer() const { return tuple_; }
-    };
 
-    template <std::size_t Size> struct tuple_view_tag;
+    private:
+        friend class helper::member_access;
 
-} // namespace tuple_detail
+        rime::bool_ <is_empty> empty (direction::front) const
+        { return rime::bool_ <is_empty>(); }
 
-template <std::size_t Begin, std::size_t End, class TupleReference>
-    struct tag_of_qualified <
-        tuple_detail::tuple_view <Begin, End, TupleReference>>
-{ typedef tuple_detail::tuple_view_tag <(End - Begin)> type; };
+        rime::size_t <(End - Begin)> size (direction::front) const
+        { return rime::size_t <(End - Begin)>(); }
 
-namespace operation {
+        // first.
+        struct not_front;
+        typedef typename std::conditional <is_empty, not_front, direction::front
+            >::type front_if_not_empty;
 
-    // empty.
-    template <std::size_t Size, class Range>
-        struct empty <tuple_detail::tuple_view_tag <Size>,
-            direction::front, Range>
-    : rime::callable::always_default <rime::bool_<(Size == 0)>> {};
+        struct not_back;
+        typedef typename std::conditional <is_empty, not_back, direction::back
+            >::type back_if_not_empty;
 
-    // size.
-    template <std::size_t Size, class Range>
-        struct size <tuple_detail::tuple_view_tag <Size>,
-            direction::front, Range>
-    : rime::callable::always_default <rime::size_t <Size>> {};
+        template <bool Empty = is_empty,
+            class Enable = typename std::enable_if <!Empty>::type,
+            class Extract = extract <(tuple_size - Begin - 1)>>
+        typename Extract::template result <TupleReference>::type
+        first (direction::front const &) const
+        { return Extract() (tuple()); }
 
-    // first.
-    template <std::size_t Size, class Range>
-        struct first <tuple_detail::tuple_view_tag <Size>,
-            direction::front, Range,
-            typename std::enable_if <(Size > 0)>::type>
-    {
-        template <class View> auto operator() (
-            direction::front, View const & view) const
-        RETURNS (range::tuple_detail::extract <
-            (View::tuple_size - View::begin_position - 1)>() (view.tuple()));
-    };
-    template <std::size_t Size, class Range>
-        struct first <tuple_detail::tuple_view_tag <Size>,
-            direction::back, Range,
-            typename std::enable_if <(Size > 0)>::type>
-    {
-        template <class View> auto operator() (
-            direction::back, View const & view) const
-        RETURNS (range::tuple_detail::extract <
-            (View::tuple_size - View::end_position)>() (view.tuple()));
-    };
+        template <bool Empty = is_empty,
+            class Enable = typename std::enable_if <!Empty>::type,
+            class Extract = extract <(tuple_size - end_position)>>
+        typename Extract::template result <TupleReference>::type
+        first (direction::back const &) const
+        { return Extract() (tuple()); }
 
-    // at.
-    template <std::size_t Size, class Index, class Range>
-        struct at_constant <tuple_detail::tuple_view_tag <Size>,
-            direction::front, Index, Range,
-            typename std::enable_if <(Index::value < Size)>::type>
-    {
-        template <class View> auto operator() (
-            direction::front, Index const &, View const & view) const
-        RETURNS (range::tuple_detail::extract <
-            (View::tuple_size - View::begin_position - Index::value - 1)>() (
-                view.tuple()));
-    };
-    template <std::size_t Size, class Index, class Range>
-        struct at_constant <tuple_detail::tuple_view_tag <Size>,
-            direction::back, Index, Range,
-            typename std::enable_if <(Index::value < Size)>::type>
-    {
-        template <class View> auto operator() (
-            direction::back, Index const &, View const & view) const
-        RETURNS (range::tuple_detail::extract <
-            (View::tuple_size - View::end_position + Index::value)>() (
-                view.tuple()));
-    };
+        // at.
+        template <class Index, class Enable = typename
+                std::enable_if <(Index::value < view_size)>::type,
+            class Extract = extract <
+                (tuple_size - begin_position - Index::value - 1)>>
+        typename Extract::template result <TupleReference>::type
+        at_constant (Index const & index, direction::front) const
+        { return Extract() (tuple()); }
 
-    // drop.
-    template <class Increment, std::size_t Size, class Range>
-        struct drop_constant <
-            tuple_detail::tuple_view_tag <Size>, direction::front, Increment,
-            Range, typename std::enable_if <(Increment::value <= Size)>::type>
-    {
-        template <std::size_t Begin, std::size_t End, class TupleReference>
-        tuple_detail::tuple_view <Begin + Increment::value, End, TupleReference>
-        operator() (direction::front, Increment,
-            tuple_detail::tuple_view <Begin, End, TupleReference> const & v)
-        const
-        {
-            return tuple_detail::tuple_view <
-                Begin + Increment::value, End, TupleReference> (v);
-        }
-    };
-    template <class Increment, std::size_t Size, class Range>
-        struct drop_constant <
-            tuple_detail::tuple_view_tag <Size>, direction::back, Increment,
-            Range, typename std::enable_if <(Increment::value <= Size)>::type>
-    {
-        template <std::size_t Begin, std::size_t End, class TupleReference>
-        tuple_detail::tuple_view <Begin, End - Increment::value, TupleReference>
-        operator() (direction::back, Increment,
-            tuple_detail::tuple_view <Begin, End, TupleReference> const & v)
-        const
-        {
-            return tuple_detail::tuple_view <
-                Begin, End - Increment::value, TupleReference> (v);
-        }
-    };
+        template <class Index, class Enable = typename
+                std::enable_if <(Index::value < view_size)>::type,
+            class Extract = extract <
+                (tuple_size - end_position + Index::value)>>
+        typename Extract::template result <TupleReference>::type
+        at_constant (Index const & index, direction::back) const
+        { return Extract() (tuple()); }
 
-    // It would be possible to specialised "fold" to improve compile times.
-    // However, the return type must still be computed, so the improvement would
-    // not be great.
+        // drop.
+        template <class Increment, class Enable = typename
+                std::enable_if <(Increment::value <= view_size)>::type,
+            class Result = tuple_detail::tuple_view <
+                Begin + Increment::value, End, TupleReference>>
+        Result drop_constant (Increment const & increment, direction::front)
+            const
+        { return Result (tuple()); }
 
-    // for_each.
-    template <class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <0>, direction::front, Function, Range>
-    { void operator() (direction::front, Function &&, Range &&) const {} };
+        template <class Increment, class Enable = typename
+                std::enable_if <(Increment::value <= view_size)>::type,
+            class Result = tuple_detail::tuple_view <
+                Begin, End - Increment::value, TupleReference>>
+        Result drop_constant (Increment const & increment, direction::back)
+            const
+        { return Result (tuple()); }
 
-    // By putting all the function calls in an initialiser list, they
-    template <std::size_t size, class Function, class Range> struct for_each <
-        tuple_detail::tuple_view_tag <size>, direction::front, Function, Range>
-    {
+        // It would be possible to specialised "fold" to improve compile times.
+        // However, the return type must still be computed, so the improvement
+        // would not be great.
+
+        /* for_each. */
         /// Call a function, and return an int.
         /// This is just to homogenise the return value of the actual function.
-        struct call_function {
+        template <class Function> struct call_function {
             Function && function_;
             call_function (Function && function)
             : function_ (std::forward <Function> (function)) {}
@@ -1110,68 +1090,63 @@ namespace operation {
         By using "Indices::value...", this calls the function with the correct
         elements.
         */
-        template <class View, class ... Indices>
-            static void apply (Function && function, View const & view,
-                meta::vector <Indices ...>)
+        template <class Function, class ... Indices>
+            void apply_for_each (
+                Function && function, meta::vector <Indices ...>) const
         {
-            static constexpr std::size_t begin_index =
-                View::tuple_size - View::begin_position - 1;
-            call_function call (std::forward <Function> (function));
-            int dummy [] = { call (
-                range::tuple_detail::extract <(begin_index - Indices::value)>()
-                    (view.tuple())) ...};
+            call_function <Function> call (std::forward <Function> (function));
+            int dummy [] = { call (extract <
+                ((tuple_size - begin_position - 1) - Indices::value)>() (
+                    tuple())) ...};
             (void) dummy;
         }
 
-        template <class View> void operator() (
-            direction::front, Function && function, View const & view) const
+        template <class Function> void for_each (
+            direction::front, Function && function) const
         {
-            apply (std::forward <Function> (function), view,
-                typename meta::count <size>::type());
+            apply_for_each (std::forward <Function> (function),
+                typename meta::count <view_size>::type());
         }
     };
 
-    namespace tuple_detail {
+    template <std::size_t Size> struct tuple_view_tag {};
 
-        template <bool Move, class ... Types> struct make_view_tuple;
+} // namespace tuple_detail
 
-        template <class ... Types> struct make_view_tuple <false, Types ...> {
-            typedef range::tuple <Types ...> tuple_type;
+template <std::size_t Begin, std::size_t End, class TupleReference>
+    struct tag_of_qualified <
+        tuple_detail::tuple_view <Begin, End, TupleReference>>
+{ typedef tuple_detail::tuple_view_tag <(End - Begin)> type; };
 
-            typedef range::tuple_detail::tuple_view <0, sizeof ... (Types),
-                tuple_type &> view_type;
-            typedef range::tuple_detail::tuple_view <0, sizeof ... (Types),
-                tuple_type const &> const_view_type;
+namespace operation {
 
-            view_type operator() (tuple_type & t) const
-            { return view_type (t); }
+    // implement_make_view for std::tuple.
+    // Const reference.
+    template <class ... Types,
+        class Result = typename tuple_detail::tuple_view <
+            0, sizeof ... (Types), tuple <Types ...> const &>>
+    inline Result implement_make_view (tuple_tag,
+        bool once, tuple <Types ...> const & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
+    { return Result (tuple); }
 
-            const_view_type operator() (tuple_type const & t) const
-            { return const_view_type (t); }
-        };
+    // Reference.
+    template <class ... Types,
+        class Result = typename tuple_detail::tuple_view <
+            0, sizeof ... (Types), tuple <Types ...> &>>
+    inline Result implement_make_view (tuple_tag,
+        bool once, tuple <Types ...> & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
+    { return Result (tuple); }
 
-        template <class ... Types> struct make_view_tuple <true, Types ...>
-        : make_view_tuple <false, Types ...>
-        {
-            typedef make_view_tuple <false, Types ...> base_type;
-            using base_type::operator();
-            typedef typename base_type::tuple_type tuple_type;
-
-            typedef range::tuple_detail::tuple_view <0, sizeof ... (Types),
-                tuple_type &&> rvalue_view_type;
-
-            rvalue_view_type operator() (tuple_type && t) const
-            { return rvalue_view_type (std::move (t)); }
-        };
-
-    } // namespace tuple_detail
-
-    template <bool Move, class ... Types, class Directions, class Range>
-        struct make_view <Move, heavyweight_tag <tuple <Types ...>>,
-            Directions, Range,
-            typename detail::enable_if_front_back <Directions>::type>
-    : helper::call_with_last <1, Directions,
-        tuple_detail::make_view_tuple <Move, Types ...>> {};
+    // Rvalue reference.
+    template <class ... Types,
+        class Result = typename tuple_detail::tuple_view <
+            0, sizeof ... (Types), tuple <Types ...> &&>>
+    inline Result implement_make_view (tuple_tag,
+        rime::true_type once, tuple <Types ...> && tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
+    { return Result (std::move (tuple)); }
 
 } // namespace operation
 

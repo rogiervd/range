@@ -47,42 +47,42 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_homogeneous) {
 
     {
         std::vector <bool> v;
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), false);
-        RIME_CHECK_EQUAL (any_of (back, v), false);
+        RIME_CHECK_EQUAL (any_of (v, front), false);
+        RIME_CHECK_EQUAL (any_of (v, back), false);
         RIME_CHECK_EQUAL (any_of (v), false);
     }
 
     {
         std::vector <bool> v;
         v.push_back (true);
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
         v.push_back (true);
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
         v.push_back (true);
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
     }
@@ -90,30 +90,30 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_homogeneous) {
     {
         std::vector <bool> v;
         v.push_back (false);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), false);
-        RIME_CHECK_EQUAL (any_of (back, v), false);
+        RIME_CHECK_EQUAL (any_of (v, front), false);
+        RIME_CHECK_EQUAL (any_of (v, back), false);
         RIME_CHECK_EQUAL (any_of (v), false);
 
         v.push_back (true);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
         v.push_back (false);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
     }
 
@@ -121,21 +121,21 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_homogeneous) {
         std::vector <bool> v;
         v.push_back (true);
         v.push_back (false);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
         v.push_back (true);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
     }
 
@@ -143,12 +143,12 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_homogeneous) {
         std::vector <bool> v;
         v.push_back (false);
         v.push_back (false);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), false);
-        RIME_CHECK_EQUAL (any_of (back, v), false);
+        RIME_CHECK_EQUAL (any_of (v, front), false);
+        RIME_CHECK_EQUAL (any_of (v, back), false);
         RIME_CHECK_EQUAL (any_of (v), false);
     }
 }
@@ -161,104 +161,104 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_homogeneous_constant) {
 
     {
         std::vector <rime::true_type> v;
-        RIME_CHECK_EQUAL (all_of (front, v), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, v), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (v), rime::true_);
 
         // v is empty, and therefore any_of (v) is false.
-        RIME_CHECK_EQUAL (any_of (front, v), false);
-        RIME_CHECK_EQUAL (any_of (back, v), false);
+        RIME_CHECK_EQUAL (any_of (v, front), false);
+        RIME_CHECK_EQUAL (any_of (v, back), false);
         RIME_CHECK_EQUAL (any_of (v), false);
 
         v.push_back (rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, v), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, v), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (v), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
 
         v.push_back (rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, v), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, v), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (v), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
     }
 
     {
         std::vector <rime::false_type> v;
         // v is empty, and therefore all_of (v) is true.
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, v), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (v), rime::false_);
 
         v.push_back (rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, v), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (v), rime::false_);
 
         v.push_back (rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, v), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (v), rime::false_);
     }
 
     // std::true_type and std::false_type
     {
         std::vector <std::true_type> v;
-        RIME_CHECK_EQUAL (all_of (front, v), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, v), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (v), rime::true_);
 
         // v is empty, and therefore any_of (v) is false.
-        RIME_CHECK_EQUAL (any_of (front, v), false);
-        RIME_CHECK_EQUAL (any_of (back, v), false);
+        RIME_CHECK_EQUAL (any_of (v, front), false);
+        RIME_CHECK_EQUAL (any_of (v, back), false);
         RIME_CHECK_EQUAL (any_of (v), false);
 
         v.push_back (std::true_type());
-        RIME_CHECK_EQUAL (all_of (front, v), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, v), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (v, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (v), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, v), true);
-        RIME_CHECK_EQUAL (any_of (back, v), true);
+        RIME_CHECK_EQUAL (any_of (v, front), true);
+        RIME_CHECK_EQUAL (any_of (v, back), true);
         RIME_CHECK_EQUAL (any_of (v), true);
     }
 
     {
         std::vector <std::false_type> v;
         // v is empty, and therefore all_of (v) is true.
-        RIME_CHECK_EQUAL (all_of (front, v), true);
-        RIME_CHECK_EQUAL (all_of (back, v), true);
+        RIME_CHECK_EQUAL (all_of (v, front), true);
+        RIME_CHECK_EQUAL (all_of (v, back), true);
         RIME_CHECK_EQUAL (all_of (v), true);
 
-        RIME_CHECK_EQUAL (any_of (front, v), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, v), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (v), rime::false_);
 
         v.push_back (std::false_type());
-        RIME_CHECK_EQUAL (all_of (front, v), false);
-        RIME_CHECK_EQUAL (all_of (back, v), false);
+        RIME_CHECK_EQUAL (all_of (v, front), false);
+        RIME_CHECK_EQUAL (all_of (v, back), false);
         RIME_CHECK_EQUAL (all_of (v), false);
 
-        RIME_CHECK_EQUAL (any_of (front, v), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, v), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (v, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (v), rime::false_);
     }
 }

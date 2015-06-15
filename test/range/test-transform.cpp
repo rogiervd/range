@@ -48,7 +48,7 @@ struct simple_count {
     int chop_in_place (direction::front) { return i ++; }
 };
 
-struct simple_count_tag;
+struct simple_count_tag {};
 
 namespace range {
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE (example) {
     }
     {
         int count = 0;
-        RANGE_FOR_EACH (i, transform (twice, v))
+        RANGE_FOR_EACH (i, transform (v, twice))
             count += i;
         BOOST_CHECK_EQUAL (count, 24);
     }
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE (example) {
 BOOST_AUTO_TEST_CASE (test_range_transform) {
     {
         std::tuple <> t;
-        auto v = transform (duplicate, t);
+        auto v = transform (t, duplicate);
         auto direction = default_direction (v);
         BOOST_MPL_ASSERT ((
             std::is_same <decltype (direction), direction::front>));
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
     }
     {
         std::tuple <int> t (7);
-        auto v = transform (duplicate, t);
+        auto v = transform (t, duplicate);
         BOOST_MPL_ASSERT_NOT ((is_homogeneous <decltype (v)>));
         // v should have elements:
         // std::tuple <int, int> (7, 7)
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
     {
         std::tuple <int, char, double> t (7, 'a', 9.25);
         {
-            auto v = transform (duplicate, t);
+            auto v = transform (t, duplicate);
             BOOST_MPL_ASSERT_NOT ((is_homogeneous <decltype (v)>));
             // v should have elements:
             // std::tuple <int, int> (7, 7)
@@ -196,14 +196,14 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
             BOOST_CHECK_EQUAL (first (e2), 'a');
             BOOST_CHECK_EQUAL (second (e2), 'a');
 
-            auto e3 = range::first (drop (rime::size_t <2>(), v));
+            auto e3 = range::first (drop (v, rime::size_t <2>()));
             BOOST_MPL_ASSERT ((
                 std::is_same <decltype (e3), std::tuple <double, double>>));
             BOOST_CHECK_EQUAL (first (e3), 9.25);
             BOOST_CHECK_EQUAL (second (e3), 9.25);
 
             RIME_CHECK_EQUAL (
-                empty (drop (rime::size_t <3>(), v)), rime::true_);
+                empty (drop (v, rime::size_t <3>())), rime::true_);
 
             // Test chop.
             auto chopped1 = chop (v);
@@ -230,21 +230,21 @@ BOOST_AUTO_TEST_CASE (test_range_transform) {
         {
             /*
             Convert the tuple into a range of pointers to its element.
-            Not that this is pretty neat.
+            Note that this is pretty neat.
             Conceptually, just because "point" is defined to return pointers,
             suddently v has a type equivalent to
                 tuple <int *, char *, double *>
             but then on-the-fly.
             */
-            auto v = transform (point, t);
+            auto v = transform (t, point);
 
             // Should be pointing at the actual element.
             BOOST_CHECK_EQUAL (first (v), &first (t));
 
             // Change original element through transform_view.
             // (This may be bad form, but it is supported.)
-            *at (rime::size_t <2>(), v) = 4.5;
-            BOOST_CHECK_EQUAL (first (back, t), 4.5);
+            *at (v, rime::size_t <2>()) = 4.5;
+            BOOST_CHECK_EQUAL (first (t, back), 4.5);
         }
     }
 }
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
         c.push_back (10.5);
         c.push_back (-8);
         {
-            auto v = transform (twice, c);
+            auto v = transform (c, twice);
             BOOST_MPL_ASSERT ((is_homogeneous <decltype (v)>));
             // v should have elements 12, 21, -16.
 
@@ -269,17 +269,17 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_MPL_ASSERT ((
                 range::has <range::callable::drop (decltype (v))>));
             BOOST_MPL_ASSERT ((
-                range::has <range::callable::drop (int, decltype (v))>));
+                range::has <range::callable::drop (decltype (v), int)>));
 
             BOOST_CHECK (!empty (v));
             BOOST_CHECK_EQUAL (size (v), 3u);
 
             BOOST_CHECK_EQUAL (first (v), 12.);
-            BOOST_CHECK_EQUAL (at (1, v), 21.);
-            BOOST_CHECK_EQUAL (at (2, v), -16.);
-            BOOST_CHECK_EQUAL (first (back, v), -16.);
-            BOOST_CHECK_EQUAL (at (back, 1, v), 21.);
-            BOOST_CHECK_EQUAL (at (back, 2, v), 12.);
+            BOOST_CHECK_EQUAL (at (v, 1), 21.);
+            BOOST_CHECK_EQUAL (at (v, 2), -16.);
+            BOOST_CHECK_EQUAL (first (v, back), -16.);
+            BOOST_CHECK_EQUAL (at (v, 1, back), 21.);
+            BOOST_CHECK_EQUAL (at (v, 2, back), 12.);
 
             auto chopped1 = chop (v);
             BOOST_CHECK_EQUAL (chopped1.first(), 12);
@@ -299,10 +299,10 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
         }
         {
             // Transform the container into a range of pointers to elements.
-            auto v = transform (point, c);
+            auto v = transform (c, point);
 
             BOOST_CHECK_EQUAL (first (v), &first (c));
-            BOOST_CHECK_EQUAL (at (1, v), &at (1, c));
+            BOOST_CHECK_EQUAL (at (v, 1), &at (c, 1));
 
             *first (v) = 27.5;
             BOOST_CHECK_EQUAL (first (c), 27.5);
@@ -316,7 +316,7 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
         c.push_back (10.5);
         c.push_back (-8);
         {
-            auto v = transform (twice, c);
+            auto v = transform (c, twice);
             BOOST_MPL_ASSERT ((is_homogeneous <decltype (v)>));
             // v should have elements 12, 21, -16.
 
@@ -329,16 +329,16 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
             BOOST_MPL_ASSERT ((
                 range::has <range::callable::drop (decltype (v))>));
             BOOST_MPL_ASSERT_NOT ((
-                range::has <range::callable::drop (int, decltype (v))>));
+                range::has <range::callable::drop (decltype (v), int)>));
 
             BOOST_CHECK (!empty (v));
 
             BOOST_CHECK_EQUAL (first (v), 12.);
             BOOST_CHECK_EQUAL (first (drop (v)), 21.);
             BOOST_CHECK_EQUAL (first (drop (drop (v))), -16.);
-            BOOST_CHECK_EQUAL (first (back, v), -16.);
-            BOOST_CHECK_EQUAL (first (back, drop (back, v)), 21.);
-            BOOST_CHECK_EQUAL (first (back, drop (back, drop (back, v))), 12.);
+            BOOST_CHECK_EQUAL (first (v, back), -16.);
+            BOOST_CHECK_EQUAL (first (drop (v, back), back), 21.);
+            BOOST_CHECK_EQUAL (first (drop (drop (v, back), back), back), 12.);
         }
     }
 
@@ -349,13 +349,13 @@ BOOST_AUTO_TEST_CASE (test_range_transform_homogeneous) {
         c.push_back (10.5);
         c.push_back (-8);
 
-        auto v = transform (duplicate, transform (twice, c));
+        auto v = transform (transform (c, twice), duplicate);
         // v should contain (12, 12), (21, 21), (-16, -16).
 
         BOOST_CHECK_EQUAL (size (v), 3u);
         BOOST_CHECK (first (v) == std::make_tuple (12., 12.));
         BOOST_CHECK (first (drop (v)) == std::make_tuple (21., 21.));
-        BOOST_CHECK (first (back, v) == std::make_tuple (-16., -16.));
+        BOOST_CHECK (first (v, back) == std::make_tuple (-16., -16.));
 
         auto chopped1 = chop (v);
         BOOST_CHECK (chopped1.first() == std::make_tuple (12., 12.));
@@ -372,32 +372,32 @@ BOOST_AUTO_TEST_CASE (test_range_transform_weird_count) {
         weird_count w;
         weird_direction direction (7);
 
-        auto v = transform (weird_direction (7), twice, w);
+        auto v = transform (w, twice, weird_direction (7));
 
         BOOST_MPL_ASSERT ((std::is_same <range::result_of <
                 range::callable::default_direction (decltype (v))>::type,
             forgotten_to_define_direction>));
 
-        BOOST_CHECK (!empty (direction, v));
+        BOOST_CHECK (!empty (v, direction));
         BOOST_MPL_ASSERT_NOT ((range::has <
             range::callable::size (weird_direction, decltype (v))>));
 
-        BOOST_CHECK_EQUAL (first (direction, v), 0);
-        BOOST_CHECK_EQUAL (first (direction, drop (direction, v)), 2);
-        BOOST_CHECK_EQUAL (first (direction, drop (direction, 5, v)), 10);
+        BOOST_CHECK_EQUAL (first (v, direction), 0);
+        BOOST_CHECK_EQUAL (first (drop (v, direction), direction), 2);
+        BOOST_CHECK_EQUAL (first (drop (v, 5, direction), direction), 10);
     }
     // Should work with views as well.
     {
         weird_count w;
         weird_direction direction (7);
 
-        auto view = range::view (direction, w);
-        auto transformed = transform (direction, duplicate, view);
+        auto view = range::view (w, direction);
+        auto transformed = transform (view, duplicate, direction);
 
-        BOOST_CHECK (!empty (direction, transformed));
+        BOOST_CHECK (!empty (transformed, direction));
 
-        BOOST_CHECK (first (direction, transformed) == std::make_tuple (0, 0));
-        BOOST_CHECK (first (direction, drop (direction, 2, transformed))
+        BOOST_CHECK (first (transformed, direction) == std::make_tuple (0, 0));
+        BOOST_CHECK (first (drop (transformed, 2, direction), direction)
             == std::make_tuple (2, 2));
     }
 }
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
     v.push_back (-5);
 
     {
-        auto t = transform (twice, unique_view (v));
+        auto t = transform (unique_view (v), twice);
 
         BOOST_CHECK_EQUAL (first (t), 12);
         t = drop (std::move (t));
@@ -422,7 +422,7 @@ BOOST_AUTO_TEST_CASE (unique_underlying) {
         BOOST_CHECK (empty (t));
     }
     {
-        auto t = transform (twice, one_time_view (v));
+        auto t = transform (one_time_view (v), twice);
 
         // Chop only available for rvalue references.
         static_assert (range::has <range::callable::chop (decltype (t))
@@ -448,7 +448,7 @@ BOOST_AUTO_TEST_CASE (only_chop_in_place) {
         BOOST_CHECK_EQUAL (one, 1);
     }
     {
-        auto even = transform (twice, simple_count());
+        auto even = transform (simple_count(), twice);
         int zero = chop_in_place (even);
         BOOST_CHECK_EQUAL (zero, 0);
         int two = chop_in_place (even);
@@ -496,7 +496,7 @@ BOOST_AUTO_TEST_CASE (function_with_reference) {
     v.push_back (27);
 
     {
-        auto rounded = transform (round, v);
+        auto rounded = transform (v, round);
 
         BOOST_CHECK_EQUAL (first (rounded), 3);
         rounded = drop (rounded);
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE (function_with_reference) {
     }
     {
         // With one_time_view.
-        auto rounded = transform (round, one_time_view (v));
+        auto rounded = transform (one_time_view (v), round);
 
         step = 4;
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,29 +39,29 @@ BOOST_AUTO_TEST_SUITE(range_less_lexicographical_test_suite_mixed)
 #define CHECK_range_less_lexicographical(r1, r2, value) \
     RIME_CHECK_EQUAL (range::less_lexicographical (r1, r2), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::front, r1, r2), value); \
+        r1, r2, range::front), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::back, range::reverse (r1), range::reverse (r2)), value); \
+        range::reverse (r1), range::reverse (r2), range::back), value); \
     \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        std::less <int>(), r1, r2), value); \
+        r1, r2, std::less <int>()), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::front, std::less <int>(), r1, r2), value); \
+        r1, r2, range::front, std::less <int>()), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::back, std::less <int>(), \
-        range::reverse (r1), range::reverse (r2)), value); \
+        range::reverse (r1), range::reverse (r2), \
+        range::back, std::less <int>()), value); \
     \
-    RIME_CHECK_EQUAL (range::less_lexicographical (std::greater <int>(), \
-        range::transform (negate(), r1), \
-        range::transform (negate(), r2)), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::front, std::greater <int>(), \
-        range::transform (negate(), r1), \
-        range::transform (negate(), r2)), value); \
+        range::transform (r1, negate()), \
+        range::transform (r2, negate()), std::greater <int>()), value); \
     RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::back, std::greater <int>(), \
-        range::transform (negate(), range::reverse (r1)), \
-        range::transform (negate(), range::reverse (r2))), value)
+        range::transform (r1, negate()), \
+        range::transform (r2, negate()), \
+        range::front, std::greater <int>()), value); \
+    RIME_CHECK_EQUAL (range::less_lexicographical ( \
+        range::transform (range::reverse (r1), negate()), \
+        range::transform (range::reverse (r2), negate()), \
+        range::back, std::greater <int>()), value)
 
 // Mix homogeneous and heterogeneous ranges.
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_mixed) {

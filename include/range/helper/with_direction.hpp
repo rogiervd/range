@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "rime/assert.hpp"
 
-namespace range { namespace detail {
+namespace range { namespace helper {
 
 /**
 Ranges often have to hold directions; but they should not take up unnecessary
@@ -59,8 +59,6 @@ public:
     Direction const & default_direction() const { return this->direction(); }
 };
 
-} // namespace detail
-
-} // namespace range
+}} // namespace range::helper
 
 #endif // RANGE_DETAIL_WITH_DIRECTION_HPP_INCLUDED

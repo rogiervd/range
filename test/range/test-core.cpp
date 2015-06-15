@@ -35,8 +35,8 @@ Other aspects are tested on different types of ranges by
 #include "weird_direction.hpp"
 #include "weird_count.hpp"
 
-struct fake_range_1;
-struct fake_range_1_tag;
+struct fake_range_1 {};
+struct fake_range_1_tag {};
 
 namespace range {
 
@@ -93,7 +93,6 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (int, char)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
             double, int, char)>));
-
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (int)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (int, char)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
@@ -135,220 +134,219 @@ BOOST_AUTO_TEST_CASE (test_range_core) {
 
     // is_homogeneous.
     BOOST_MPL_ASSERT ((range::is_homogeneous <
-        weird_direction, weird_count>));
+        weird_count, weird_direction>));
     BOOST_MPL_ASSERT_NOT ((range::is_homogeneous <
-        weird_reverse_direction, weird_count>));
-    BOOST_MPL_ASSERT_NOT ((range::is_homogeneous <
-        weird_direction, weird_reverse_direction, weird_count>));
+        weird_count, weird_opposite_direction>));
 
     // is_view.
-    BOOST_MPL_ASSERT ((range::is_view <weird_direction, weird_count>));
-    BOOST_MPL_ASSERT ((range::is_view <weird_reverse_direction, weird_count>));
+    BOOST_MPL_ASSERT ((range::is_view <weird_count, weird_direction>));
+    BOOST_MPL_ASSERT ((range::is_view <weird_count, weird_opposite_direction>));
     BOOST_MPL_ASSERT ((range::is_view <
-        weird_direction, weird_reverse_direction, weird_count>));
+        weird_count, weird_direction, weird_opposite_direction>));
 
-    BOOST_MPL_ASSERT ((range::is_view <weird_direction, weird_count &>));
+    BOOST_MPL_ASSERT ((range::is_view <weird_count &, weird_direction>));
     BOOST_MPL_ASSERT ((range::is_view <
-        weird_reverse_direction, weird_count const>));
+        weird_count const, weird_opposite_direction>));
     BOOST_MPL_ASSERT ((range::is_view <
-        weird_direction, weird_reverse_direction, weird_count const &>));
+        weird_count const &, weird_direction, weird_opposite_direction>));
 
     // view.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::view (weird_count)>));
     BOOST_MPL_ASSERT_NOT ((
-        range::has <range::callable::view (direction::front, weird_count)>));
+        range::has <range::callable::view (weird_count, direction::front)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::view (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <range::callable::view (
-        weird_direction, weird_count)>::type, weird_count>));
+        weird_count, weird_direction)>::type, weird_count>));
     BOOST_MPL_ASSERT ((std::is_same <
-        decltype (range::view (weird_direction (7), c)), weird_count &>));
+        weird_count &, decltype (range::view (c, weird_direction (7)))>));
 
     // forward_view.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::forward_view (
         weird_count)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::forward_view (
-        direction::front, weird_count)>));
+        weird_count, direction::front)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::forward_view (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <
-        range::callable::forward_view (weird_direction, weird_count)>::type,
+        range::callable::forward_view (weird_count, weird_direction)>::type,
         weird_count &&>));
     BOOST_MPL_ASSERT ((std::is_same <
-        decltype (range::forward_view (weird_direction (7), c)),
+        decltype (range::forward_view (c, weird_direction (7))),
         weird_count &>));
 
     // view_once.
     BOOST_MPL_ASSERT_NOT ((range::has <
         range::callable::view_once (weird_count)>));
     BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::view_once (direction::front, weird_count)>));
+        range::callable::view_once (weird_count, direction::front)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::view_once (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <
-        range::callable::view_once (weird_direction, weird_count)>::type,
-        weird_count &&>));
+        range::callable::view_once (weird_count, weird_direction)>::type,
+        weird_count>));
     BOOST_MPL_ASSERT ((std::is_same <
-        decltype (range::view_once (weird_direction (7), c)), weird_count &>));
+        decltype (range::view_once (c, weird_direction (7))), weird_count &>));
 
     // empty.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::empty (
-        direction::front, weird_count)>));
+        weird_count, direction::front)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::empty (weird_count)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-        weird_reverse_direction, weird_count)>));
+        weird_count, weird_opposite_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::result_of <range::callable::empty (weird_direction, weird_count)
+        range::result_of <range::callable::empty (weird_count, weird_direction)
             >::type,
         rime::false_type>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <
-        range::callable::empty (weird_reverse_direction, weird_count)>::type,
+        range::callable::empty (weird_count, weird_opposite_direction)>::type,
         rime::false_type>));
-    BOOST_MPL_ASSERT_NOT ((range::always_empty <weird_direction, weird_count>));
-    BOOST_MPL_ASSERT ((range::never_empty <weird_direction, weird_count>));
+    BOOST_MPL_ASSERT_NOT ((range::always_empty <weird_count, weird_direction>));
+    BOOST_MPL_ASSERT ((range::never_empty <weird_count, weird_direction>));
 
     // size.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-        direction::front, weird_count)>));
+        weird_count, direction::front)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (weird_count)>));
     // Has no size.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-        weird_reverse_direction, weird_count)>));
+        weird_count, weird_opposite_direction)>));
 
     // first.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-        direction::front, weird_count)>));
+        weird_count, direction::front)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
         weird_count)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::first (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::first (
-        weird_reverse_direction, weird_count)>));
+        weird_count, weird_opposite_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <range::callable::first (
-        weird_direction, weird_count)>::type, int>));
+        weird_count, weird_direction)>::type, int>));
 
     // drop.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-        direction::front &, weird_count)>));
+        weird_count, direction::front &)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (weird_count)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::drop (
-        weird_reverse_direction, weird_count)>));
+        weird_count, weird_opposite_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <range::callable::drop (
-        weird_direction, weird_count)>::type, weird_count>));
+        weird_count, weird_direction)>::type, weird_count>));
 
     BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-        weird_direction, rime::int_<1>, weird_count const)>));
+        weird_count const, rime::int_<1>, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-        weird_direction, rime::int_<5>, weird_count const &)>));
+        weird_count const &, rime::int_<5>, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-        weird_direction, int, weird_count)>));
+        weird_count, int, weird_direction)>));
 
     // chop.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-        direction::front &, weird_count)>));
+        weird_count, direction::front &)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (weird_count)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop (
-        weird_reverse_direction, weird_count)>));
+        weird_count, weird_opposite_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <range::callable::chop (
-        weird_direction, weird_count)>::type,
+        weird_count, weird_direction)>::type,
         range::chopped <int, weird_count>>));
 
     // chop_in_place.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-        direction::front &, weird_count)>));
+        weird_count, direction::front &)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
         weird_count)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-        weird_direction, weird_count)>));
+        weird_count, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-        weird_direction, weird_count const &)>));
+        weird_count const &, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-        weird_direction, weird_count &&)>));
+        weird_count &&, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::chop_in_place (
-        weird_direction, weird_count &)>));
+        weird_count &, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::chop_in_place (
-        weird_reverse_direction, weird_count)>));
+        weird_opposite_direction, weird_count)>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::result_of <range::callable::chop_in_place (
-            weird_direction, weird_count &)>::type,
+            weird_count &, weird_direction)>::type,
         int>));
 
     // at.
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at (
-        direction::front &, int, weird_count)>));
+        weird_count, int, direction::front &)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at (
-        int, weird_count)>));
+        weird_count, int)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::at (
-        weird_direction, int, weird_count)>));
+        weird_count, int, weird_direction)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::at (
-        weird_reverse_direction, int, weird_count)>));
+        weird_count, int, weird_opposite_direction)>));
     BOOST_MPL_ASSERT ((std::is_same <range::result_of <
-        range::callable::at (weird_direction, int, weird_count)>::type, int>));
+        range::callable::at (weird_count, int, weird_direction)>::type, int>));
 
     BOOST_MPL_ASSERT ((range::has <range::callable::at (
-        weird_direction, rime::int_<1>, weird_count const)>));
+        weird_count const, rime::int_<1>, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::at (
-        weird_direction, rime::int_<5>, weird_count const &)>));
+        weird_count const &, rime::int_<5>, weird_direction)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::at (
-        weird_direction, int, weird_count)>));
+        weird_count, int, weird_direction)>));
 
     // Run-time behaviour.
     weird_direction direction (7);
-    BOOST_CHECK_EQUAL (range::first (direction, c), 0);
-    BOOST_CHECK_EQUAL (range::second (direction, c), 1);
-    BOOST_CHECK_EQUAL (range::third (direction, c), 2);
-    BOOST_CHECK_EQUAL (range::fourth (direction, c), 3);
-    BOOST_CHECK_EQUAL (range::fifth (direction, c), 4);
-    BOOST_CHECK_EQUAL (range::sixth (direction, c), 5);
-    BOOST_CHECK_EQUAL (range::seventh (direction, c), 6);
-    BOOST_CHECK_EQUAL (range::eighth (direction, c), 7);
-    BOOST_CHECK_EQUAL (range::ninth (direction, c), 8);
-    BOOST_CHECK_EQUAL (range::tenth (direction, c), 9);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 0);
+    BOOST_CHECK_EQUAL (range::second (c, direction), 1);
+    BOOST_CHECK_EQUAL (range::third (c, direction), 2);
+    BOOST_CHECK_EQUAL (range::fourth (c, direction), 3);
+    BOOST_CHECK_EQUAL (range::fifth (c, direction), 4);
+    BOOST_CHECK_EQUAL (range::sixth (c, direction), 5);
+    BOOST_CHECK_EQUAL (range::seventh (c, direction), 6);
+    BOOST_CHECK_EQUAL (range::eighth (c, direction), 7);
+    BOOST_CHECK_EQUAL (range::ninth (c, direction), 8);
+    BOOST_CHECK_EQUAL (range::tenth (c, direction), 9);
 
-    BOOST_CHECK_EQUAL (range::at (direction, rime::constant <std::size_t, 0u>(),
-        c), 0);
-    BOOST_CHECK_EQUAL (range::at (direction, 2, c), 2);
-    BOOST_CHECK_EQUAL (range::at (direction, 21, c), 21);
+    BOOST_CHECK_EQUAL (
+        range::at (c, rime::constant <std::size_t, 0u>(), direction), 0);
+    BOOST_CHECK_EQUAL (range::at (c, 2, direction), 2);
+    BOOST_CHECK_EQUAL (range::at (c, 21, direction), 21);
 
-    BOOST_CHECK_EQUAL (range::at_c <2> (direction, c), 2);
-    BOOST_CHECK_EQUAL (range::at_c <5> (direction, c), 5);
+    BOOST_CHECK_EQUAL (range::at_c <2> (c, direction), 2);
+    BOOST_CHECK_EQUAL (range::at_c <5> (c, direction), 5);
 
-    c = range::drop (direction, c);
-    BOOST_CHECK_EQUAL (range::first (direction, c), 1);
+    c = range::drop (c, direction);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 1);
 
-    range::chopped <int, weird_count> next = range::chop (direction, c);
+    range::chopped <int, weird_count> next = range::chop (c, direction);
     BOOST_CHECK_EQUAL (next.first(), 1);
-    BOOST_CHECK_EQUAL (range::first (direction, next.rest()), 2);
+    BOOST_CHECK_EQUAL (range::first (next.rest(), direction), 2);
 
-    c = range::drop (direction, rime::constant <std::size_t, 1u>(), c);
-    BOOST_CHECK_EQUAL (range::first (direction, c), 2);
+    c = range::drop (c, rime::constant <std::size_t, 1u>(), direction);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 2);
 
-    // Also apply view (..., c). Should just return c.
-    c = range::drop (direction, rime::constant <std::size_t, 5u>(),
-        range::view (direction, c));
-    BOOST_CHECK_EQUAL (range::first (direction, c), 7);
+    // Also apply view (c, ...). Should just return c.
+    c = range::drop (range::view (c, direction),
+        rime::constant <std::size_t, 5u>(), direction);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 7);
 
-    BOOST_CHECK_EQUAL (range::chop_in_place (direction, c), 7);
-    BOOST_CHECK_EQUAL (range::chop_in_place (direction, c), 8);
+    BOOST_CHECK_EQUAL (range::chop_in_place (c, direction), 7);
+    BOOST_CHECK_EQUAL (range::chop_in_place (c, direction), 8);
 
-    c = range::drop (direction, 2,
-        range::view_once (weird_reverse_direction (direction), c));
-    BOOST_CHECK_EQUAL (range::first (direction, c), 11);
+    c = range::drop (range::view_once (c, weird_opposite_direction (direction)),
+        2, direction);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 11);
 
-    c = range::drop (direction, 8,
-        range::view (direction, weird_reverse_direction (direction), c));
-    BOOST_CHECK_EQUAL (range::first (direction, c), 19);
+    c = range::drop (
+        range::view (c, direction, weird_opposite_direction (direction)),
+        8, direction);
+    BOOST_CHECK_EQUAL (range::first (c, direction), 19);
 
-    BOOST_CHECK_EQUAL (range::at (direction, rime::constant <std::size_t, 5u>(),
-        c), 24);
+    BOOST_CHECK_EQUAL (
+        range::at (c, rime::constant <std::size_t, 5u>(), direction), 24);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

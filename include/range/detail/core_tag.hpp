@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace range {
 
-struct not_a_range_tag;
+struct not_a_range_tag {};
 
 /**
 Helper for tag_of.
@@ -38,8 +38,12 @@ The tag should not depend on the qualifier.
 tag_of should be used to retrieve the range tag for a type.
 To assign tags to ranges, it is easiest to specialise tag_of_qualified.
 */
-template <class Range> struct tag_of
-: tag_of_qualified <typename std::decay <Range>::type> {};
+template <class Range> struct tag_of {
+    typedef typename tag_of_qualified <typename std::decay <Range>::type>::type
+        type;
+    static_assert (std::is_constructible <type>::value,
+        "The range tag must be constructible with no parameters.");
+};
 
 /**
 Evaluate to true if Range is a range type.

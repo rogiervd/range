@@ -37,46 +37,28 @@ struct weird_count {
     weird_count (int current) : current (current) {}
 };
 
-struct weird_count_tag;
+struct weird_count_tag {};
 
 namespace range {
+    template<> struct tag_of_qualified <weird_count>
+    { typedef weird_count_tag type; };
+} // namespace range
 
-template<> struct tag_of_qualified <weird_count>
-{ typedef weird_count_tag type; };
+inline forgotten_to_define_direction implement_default_direction (
+    weird_count_tag, weird_count const &);
 
-namespace operation {
+inline rime::false_type implement_empty (
+    weird_count_tag, weird_count const &, weird_direction)
+{ return rime::false_; }
 
-    template <class WeirdCount>
-        struct default_direction <weird_count_tag, WeirdCount>
-    {
-        forgotten_to_define_direction operator() (weird_count const &) const;
-    };
+// size is not defined.
 
-    template <class WeirdCount>
-        struct empty <weird_count_tag, weird_direction, WeirdCount>
-    {
-        rime::bool_ <false>
-            operator() (weird_direction, weird_count const &) const
-        { return rime::false_; }
-    };
+inline int implement_first (
+    weird_count_tag, weird_count const & c, weird_direction)
+{ return c.current; }
 
-    // size is not defined.
+inline weird_count implement_drop (weird_count_tag, weird_count const & c,
+    std::size_t increment, weird_direction)
+{ return weird_count (c.current + increment); }
 
-    template <class WeirdCount>
-        struct first <weird_count_tag, weird_direction, WeirdCount>
-    {
-        int operator() (weird_direction, weird_count const & c) const
-        { return c.current; }
-    };
-
-    template <class Increment, class WeirdCount>
-        struct drop <weird_count_tag, weird_direction, Increment, WeirdCount>
-    {
-        weird_count operator() (weird_direction, Increment const & increment,
-            weird_count const & c) const
-        { return weird_count (c.current + increment); }
-    };
-
-}} // namespace range::operation
-
-#endif  // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED
+#endif // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED

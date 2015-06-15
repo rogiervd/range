@@ -36,67 +36,67 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_heterogeneous) {
 
     {
         std::tuple <bool> t (false);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
 
-        RIME_CHECK_EQUAL (any_of (front, t), false);
-        RIME_CHECK_EQUAL (any_of (back, t), false);
+        RIME_CHECK_EQUAL (any_of (t, front), false);
+        RIME_CHECK_EQUAL (any_of (t, back), false);
         RIME_CHECK_EQUAL (any_of (t), false);
     }
 
     {
         std::tuple <bool> t (true);
-        RIME_CHECK_EQUAL (all_of (front, t), true);
-        RIME_CHECK_EQUAL (all_of (back, t), true);
+        RIME_CHECK_EQUAL (all_of (t, front), true);
+        RIME_CHECK_EQUAL (all_of (t, back), true);
         RIME_CHECK_EQUAL (all_of (t), true);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
 
     {
         std::tuple <bool, bool> t (false, false);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
 
-        RIME_CHECK_EQUAL (any_of (front, t), false);
-        RIME_CHECK_EQUAL (any_of (back, t), false);
+        RIME_CHECK_EQUAL (any_of (t, front), false);
+        RIME_CHECK_EQUAL (any_of (t, back), false);
         RIME_CHECK_EQUAL (any_of (t), false);
     }
 
     {
         std::tuple <bool, bool> t (false, true);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
 
     {
         std::tuple <bool, bool> t (true, false);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
 
     {
         std::tuple <bool, bool> t (true, true);
-        RIME_CHECK_EQUAL (all_of (front, t), true);
-        RIME_CHECK_EQUAL (all_of (back, t), true);
+        RIME_CHECK_EQUAL (all_of (t, front), true);
+        RIME_CHECK_EQUAL (all_of (t, back), true);
         RIME_CHECK_EQUAL (all_of (t), true);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
 }
@@ -109,163 +109,163 @@ BOOST_AUTO_TEST_CASE (test_range_all_of_any_of_constant) {
 
     {
         std::tuple <> t;
-        RIME_CHECK_EQUAL (all_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (t), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (t), rime::false_);
     }
 
     {
         std::tuple <rime::false_type> t (rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (t), rime::false_);
     }
 
     {
         std::tuple <rime::true_type> t (rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (t), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
 
     {
         std::tuple <rime::false_type, rime::false_type> t (
             rime::false_, rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (any_of (t), rime::false_);
     }
 
     {
         std::tuple <rime::false_type, rime::true_type> t (
             rime::false_, rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
 
     {
         std::tuple <rime::true_type, rime::false_type> t (
             rime::true_, rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
 
     {
         std::tuple <rime::true_type, rime::true_type> t (
             rime::true_, rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (all_of (t), rime::true_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
 
     // Mix of constant and run-time.
     {
         std::tuple <rime::false_type, bool> t (rime::false_, false);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), false);
-        RIME_CHECK_EQUAL (any_of (back, t), false);
+        RIME_CHECK_EQUAL (any_of (t, front), false);
+        RIME_CHECK_EQUAL (any_of (t, back), false);
         RIME_CHECK_EQUAL (any_of (t), false);
     }
     {
         std::tuple <bool, rime::false_type> t (false, rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), false);
-        RIME_CHECK_EQUAL (any_of (back, t), false);
+        RIME_CHECK_EQUAL (any_of (t, front), false);
+        RIME_CHECK_EQUAL (any_of (t, back), false);
         RIME_CHECK_EQUAL (any_of (t), false);
     }
 
     {
         std::tuple <rime::false_type, bool> t (rime::false_, true);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
     {
         std::tuple <bool, rime::false_type> t (true, rime::false_);
-        RIME_CHECK_EQUAL (all_of (front, t), rime::false_);
-        RIME_CHECK_EQUAL (all_of (back, t), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, front), rime::false_);
+        RIME_CHECK_EQUAL (all_of (t, back), rime::false_);
         RIME_CHECK_EQUAL (all_of (t), rime::false_);
 
-        RIME_CHECK_EQUAL (any_of (front, t), true);
-        RIME_CHECK_EQUAL (any_of (back, t), true);
+        RIME_CHECK_EQUAL (any_of (t, front), true);
+        RIME_CHECK_EQUAL (any_of (t, back), true);
         RIME_CHECK_EQUAL (any_of (t), true);
     }
 
     {
         std::tuple <rime::true_type, bool> t (rime::true_, false);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
     {
         std::tuple <bool, rime::true_type> t (false, rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, t), false);
-        RIME_CHECK_EQUAL (all_of (back, t), false);
+        RIME_CHECK_EQUAL (all_of (t, front), false);
+        RIME_CHECK_EQUAL (all_of (t, back), false);
         RIME_CHECK_EQUAL (all_of (t), false);
     }
 
     {
         std::tuple <rime::true_type, bool> t (rime::true_, true);
-        RIME_CHECK_EQUAL (all_of (front, t), true);
-        RIME_CHECK_EQUAL (all_of (back, t), true);
+        RIME_CHECK_EQUAL (all_of (t, front), true);
+        RIME_CHECK_EQUAL (all_of (t, back), true);
         RIME_CHECK_EQUAL (all_of (t), true);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
     {
         std::tuple <bool, rime::true_type> t (true, rime::true_);
-        RIME_CHECK_EQUAL (all_of (front, t), true);
-        RIME_CHECK_EQUAL (all_of (back, t), true);
+        RIME_CHECK_EQUAL (all_of (t, front), true);
+        RIME_CHECK_EQUAL (all_of (t, back), true);
         RIME_CHECK_EQUAL (all_of (t), true);
 
-        RIME_CHECK_EQUAL (any_of (front, t), rime::true_);
-        RIME_CHECK_EQUAL (any_of (back, t), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, front), rime::true_);
+        RIME_CHECK_EQUAL (any_of (t, back), rime::true_);
         RIME_CHECK_EQUAL (any_of (t), rime::true_);
     }
 }

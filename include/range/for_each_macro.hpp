@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Make Doxygen pick up the macro.
+/** \file */
 
 #ifndef RANGE_FOR_EACH_MACRO_HPP_INCLUDED
 #define RANGE_FOR_EACH_MACRO_HPP_INCLUDED
@@ -30,20 +33,23 @@ namespace range { namespace for_each_macro_detail {
     };
 }} // namespace range::for_each_macro_detail
 
-/** \macro RANGE_FOR_EACH
-Iterate through a range.
+/** \brief
+Iterate through a homogeneous range.
+
 Replace a normal for-statement by
-    <tt> RANGE_FOR_EACH (element, range_expression) { ... } </tt>
+\code
+    RANGE_FOR_EACH (element, range_expression) { ... }
+\endcode
 
 Here, \c element is the name by which each element can be referred to inside the
 loop.
-It is of the exact type of first (range), including reference-qualification.
+The type is computed automatically, as the exact type of <c>first (range)</c>,
+including reference-qualification.
 
 \c range_expression is a range, which can be an expression.
 The expression is executed exactly once.
 
-\note This macro has been inspired by Boost.Foreach, though the code is much
-    simpler thanks to C++11.
+\note This macro has been inspired by Boost.Foreach.
 
 \internal
 This is not very readable.

@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "range/any_range.hpp"
 
+#include <type_traits>
 #include <list>
 #include <vector>
 #include <tuple>
@@ -71,14 +72,14 @@ BOOST_AUTO_TEST_CASE (test_make_any_range) {
     // Passing in front and back explicitly.
     static_assert (std::is_same <
         std::result_of <callable::make_any_range (
-            direction::front, direction::back, std::vector <int> &)>::type,
+            std::vector <int> &, direction::front, direction::back)>::type,
         std::result_of <callable::make_any_range (std::vector <int> &)>::type
         >::value, "");
 
     // Only front.
     static_assert (std::is_same <
         std::result_of <callable::make_any_range (
-            direction::front, std::vector <int> &)>::type,
+            std::vector <int> &, direction::front)>::type,
         any_range <int &, map <
             map_element <default_direction, direction::front>,
             map_element <copy_construct, void>,
@@ -89,7 +90,7 @@ BOOST_AUTO_TEST_CASE (test_make_any_range) {
     // Only back: default_direction is still front.
     static_assert (std::is_same <
         std::result_of <callable::make_any_range (
-            direction::back, std::vector <int> &)>::type,
+            std::vector <int> &, direction::back)>::type,
         any_range <int &, map <
             map_element <default_direction, direction::front>,
             map_element <copy_construct, void>,
@@ -104,13 +105,13 @@ BOOST_AUTO_TEST_CASE (test_make_any_range) {
 
         auto a1 = make_any_range (v);
         BOOST_CHECK_EQUAL (range::first (a1), 6);
-        BOOST_CHECK_EQUAL (range::first (range::back, a1), 65);
+        BOOST_CHECK_EQUAL (range::first (a1, range::back), 65);
 
-        auto a2 = make_any_range (range::back, v);
+        auto a2 = make_any_range (v, range::back);
         // The default direction does not match the available directions.
         static_assert (!has <callable::first (decltype (a2))>::value, "");
-        BOOST_CHECK_EQUAL (range::first (range::back, a1), 65);
-        BOOST_CHECK (range::empty (range::drop (range::back, 2, a1)));
+        BOOST_CHECK_EQUAL (range::first (a1, range::back), 65);
+        BOOST_CHECK (range::empty (range::drop (a1, 2, range::back)));
     }
 
     static_assert (std::is_same <
@@ -147,15 +148,6 @@ BOOST_AUTO_TEST_CASE (test_make_any_range) {
         BOOST_CHECK_EQUAL (range::chop_in_place (a), 1);
         BOOST_CHECK_EQUAL (range::chop_in_place (a), 2);
     }
-
-    // Passing in "back" makes this possible if useless.
-    static_assert (std::is_same <
-        std::result_of <callable::make_any_range (
-            direction::back, function_range &&)>::type,
-        any_range <int, map <
-            map_element <default_direction, direction::front>,
-            map_element <direction::back, set <empty>>
-        >> >::value, "");
 
     // Heterogeneous: only if there is at least one element.
     static_assert (std::is_same <

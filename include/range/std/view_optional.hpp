@@ -30,15 +30,16 @@ must be explicitly converted into a range.
 #include "range/core.hpp"
 #include "range/empty_view.hpp"
 
-#include "range/detail/enable_if_front_back.hpp"
-
 namespace range {
 
 template <class Optional> class optional_view;
-struct optional_view_tag;
+
+namespace operation {
+    struct optional_view_tag {};
+} // namespace operation
 
 template <class Optional> struct tag_of_qualified <optional_view <Optional>>
-{ typedef optional_view_tag type; };
+{ typedef operation::optional_view_tag type; };
 
 /**
 A view of an optional in directions "front" and "back".
@@ -57,7 +58,7 @@ public:
         decayed_value_type const, decayed_value_type>::type value_type;
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     bool empty() const { return !this->optional_; }
     bool empty (direction::front) const { return empty(); }
@@ -86,26 +87,20 @@ private:
     }
 };
 
-namespace apply {
+namespace callable {
 
-    template <class ...> struct view_optional : operation::unimplemented {};
-
-    // Do not accept temporaries because that can only lead to tears.
-    template <class Optional> struct view_optional <Optional &> {
-        optional_view <Optional> operator() (Optional & o) const
+    struct view_optional {
+        // Do not accept temporaries because that can only lead to tears.
+        template <class Optional>
+            optional_view <Optional> operator() (Optional & o) const
         { return optional_view <Optional> (o); }
     };
 
-} // namespace apply
-
-namespace callable {
-
-    struct view_optional : generic <apply::view_optional> {};
-
 } // namespace callable
 
-/**
+/** \brief
 View an "optional" as a range containing zero or one elements.
+
 \param optional
     A boost::optional or std::optional (when that becomes available).
     This should not be an rvalue, since a reference to the optional is stored.

@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,15 +107,15 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
     {
         std::tuple<> t;
         BOOST_CHECK (empty (t));
-        BOOST_MPL_ASSERT ((always_empty <direction::front, decltype (t)>));
-        BOOST_MPL_ASSERT ((always_empty <direction::back, decltype (t)>));
+        BOOST_MPL_ASSERT ((always_empty <decltype (t), direction::front>));
+        BOOST_MPL_ASSERT ((always_empty <decltype (t), direction::back>));
         check_equal_value (size (t), zero_type());
 
         BOOST_MPL_ASSERT_NOT ((has <range::callable::first (decltype (t))>));
         BOOST_MPL_ASSERT_NOT ((
-            has <range::callable::at (zero_type, decltype (t))>));
+            has <range::callable::at (decltype (t), zero_type)>));
         BOOST_MPL_ASSERT_NOT ((
-            has <range::callable::at (rime::size_t <1>, decltype (t))>));
+            has <range::callable::at (decltype (t), rime::size_t <1>)>));
 
         BOOST_MPL_ASSERT_NOT ((has <range::callable::chop (decltype (t))>));
     }
@@ -124,13 +124,13 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
     {
         std::tuple <double> const t (6.3);
         BOOST_CHECK (!empty (t));
-        BOOST_MPL_ASSERT ((never_empty <direction::front, decltype (t)>));
-        BOOST_MPL_ASSERT ((never_empty <direction::back, decltype (t)>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (t), direction::front>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (t), direction::back>));
         check_equal_value (size (t), one);
 
         BOOST_MPL_ASSERT ((has <range::callable::first (decltype (t) &)>));
         BOOST_MPL_ASSERT ((
-            has <range::callable::at (zero_type, decltype (t))>));
+            has <range::callable::at (decltype (t), zero_type)>));
         BOOST_MPL_ASSERT_NOT ((
             has <range::callable::at (rime::size_t <1>, decltype (t))>));
 
@@ -146,23 +146,23 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
             range::callable::chop_in_place (decltype (view (t)) &)>));
 
         check_equal_value (first (t), 6.3);
-        check_equal_value (first (front, t), 6.3);
-        check_equal_value (first (back, t), 6.3);
+        check_equal_value (first (t, front), 6.3);
+        check_equal_value (first (t, back), 6.3);
 
-        check_equal_value (at (zero_type(), t), 6.3);
-        check_equal_value (at (front, zero_type(), t), 6.3);
-        check_equal_value (at (back, zero_type(), t), 6.3);
+        check_equal_value (at (t, zero_type()), 6.3);
+        check_equal_value (at (t, zero_type(), front), 6.3);
+        check_equal_value (at (t, zero_type(), back), 6.3);
 
         auto first_and_empty_1 = range::chop (t);
-        auto first_and_empty_2 = range::chop (back, t);
+        auto first_and_empty_2 = range::chop (t, back);
         check_equal_value (first_and_empty_1.first(), 6.3);
         check_equal_value (first_and_empty_2.first(), 6.3);
         check_equal_value (empty (first_and_empty_1.rest()), true_);
         check_equal_value (empty (first_and_empty_2.rest()), true_);
         BOOST_MPL_ASSERT ((always_empty <
-            direction::front, decltype (first_and_empty_2.rest())>));
+            decltype (first_and_empty_2.rest()), direction::front>));
         BOOST_MPL_ASSERT ((always_empty <
-            direction::back, decltype (first_and_empty_2.rest())>));
+            decltype (first_and_empty_2.rest()), direction::back>));
     }
 
     // Two elements.
@@ -170,29 +170,29 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         std::tuple <int, char> t (4, 'a');
 
         BOOST_CHECK (!empty (t));
-        BOOST_MPL_ASSERT ((never_empty <direction::front, decltype (t)>));
-        BOOST_MPL_ASSERT ((never_empty <direction::back, decltype (t)>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (t), direction::front>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (t), direction::back>));
         check_equal_value (size (t), two);
 
-        check_equal_value (first (front, t), 4);
+        check_equal_value (first (t, front), 4);
         check_equal_value (first (t), 4);
-        check_equal_value (first (back, t), 'a');
+        check_equal_value (first (t, back), 'a');
 
         check_equal_value (first (drop (t)), 'a');
 
-        BOOST_CHECK (!empty (drop (back, t)));
+        BOOST_CHECK (!empty (drop (t, back)));
         BOOST_CHECK (!empty (drop (t)));
-        BOOST_CHECK (empty (drop (two, t)));
-        BOOST_CHECK (empty (drop (back, two, t)));
+        BOOST_CHECK (empty (drop (t, two)));
+        BOOST_CHECK (empty (drop (t, two, back)));
 
-        check_equal_value (at (zero_type(), t), 4);
-        check_equal_value (at (one, t), 'a');
-        check_equal_value (at (front, zero_type(), t), 4);
-        check_equal_value (at (back, zero_type(), t), 'a');
-        check_equal_value (at (back, one, t), 4);
+        check_equal_value (at (t, zero_type()), 4);
+        check_equal_value (at (t, one), 'a');
+        check_equal_value (at (t, zero_type(), front), 4);
+        check_equal_value (at (t, zero_type(), back), 'a');
+        check_equal_value (at (t, one, back), 4);
 
         auto first_and_rest = range::chop (t);
-        auto last_and_rest = range::chop (back, t);
+        auto last_and_rest = range::chop (t, back);
         check_equal_value (first_and_rest.first(), 4);
         check_equal_value (last_and_rest.first(), 'a');
         check_equal_value (size (first_and_rest.rest()), one);
@@ -217,31 +217,31 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_CHECK (!empty (t));
         check_equal_value (size (t), three);
 
-        check_equal_value (first (front, t), 4);
+        check_equal_value (first (t, front), 4);
         check_equal_value (first (t), 4);
         check_equal_value (first (drop (t)), 'a');
-        check_equal_value (first (back, drop (back, t)), 'a');
-        check_equal_value (first (back, t), 6.3);
+        check_equal_value (first (drop (t, back), back), 'a');
+        check_equal_value (first (t, back), 6.3);
 
-        BOOST_CHECK (!empty (drop (back, t)));
+        BOOST_CHECK (!empty (drop (t, back)));
         BOOST_CHECK (!empty (drop (t)));
-        BOOST_CHECK (!empty (drop (two, t)));
-        BOOST_CHECK (empty (drop (three, t)));
-        BOOST_CHECK (!empty (drop (back, two, t)));
-        BOOST_CHECK (empty (drop (back, three, t)));
+        BOOST_CHECK (!empty (drop (t, two)));
+        BOOST_CHECK (empty (drop (t, three)));
+        BOOST_CHECK (!empty (drop (t, two, back)));
+        BOOST_CHECK (empty (drop (t, three, back)));
 
-        check_equal_value (at (zero_type(), t), 4);
-        check_equal_value (at (one, t), 'a');
-        check_equal_value (at (two, t), 6.3);
-        check_equal_value (at (front, zero_type(), t), 4);
-        check_equal_value (at (front, one, t), 'a');
-        check_equal_value (at (front, two, t), 6.3);
-        check_equal_value (at (back, zero_type(), t), 6.3);
-        check_equal_value (at (back, one, t), 'a');
-        check_equal_value (at (back, two, t), 4);
+        check_equal_value (at (t, zero_type()), 4);
+        check_equal_value (at (t, one), 'a');
+        check_equal_value (at (t, two), 6.3);
+        check_equal_value (at (t, zero_type(), front), 4);
+        check_equal_value (at (t, one, front), 'a');
+        check_equal_value (at (t, two, front), 6.3);
+        check_equal_value (at (t, zero_type(), back), 6.3);
+        check_equal_value (at (t, one, back), 'a');
+        check_equal_value (at (t, two, back), 4);
 
         auto first_and_rest = range::chop (t);
-        auto last_and_rest = range::chop (back, t);
+        auto last_and_rest = range::chop (t, back);
         check_equal_value (first_and_rest.first(), 4);
         check_equal_value (last_and_rest.first(), 6.3);
         check_equal_value (size (first_and_rest.rest()), two);
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         std::tuple <tracked <int>, tracked <double>> t (
             tracked <int> (r, 7), tracked <double> (r, 4.5));
         RIME_CHECK_EQUAL (first (t).content(), 7);
-        RIME_CHECK_EQUAL (first (back, t).content(), 4.5);
+        RIME_CHECK_EQUAL (first (t, back).content(), 4.5);
 
         // Check the status quo.
         r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (first (v)), tracked <int> &&>));
         BOOST_MPL_ASSERT ((std::is_same <
-            decltype (first (back, v)), tracked <double> &&>));
+            decltype (first (v, back)), tracked <double> &&>));
 
         // The elements should be moved out.
         tracked <int> i = at_c <0> (v);

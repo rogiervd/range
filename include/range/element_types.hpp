@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ limitations under the License.
 #include "core.hpp"
 
 namespace range {
+
     struct element_types_tag;
 
     /**
@@ -39,7 +40,7 @@ namespace range {
         typedef Range underlying_type;
 
         template <class Direction> struct view_once
-        : ::std::result_of < ::range::callable::view_once (Direction, Range)>
+        : result_of < ::range::callable::view_once (Range, Direction)>
         {};
 
         typedef element_types type;
@@ -57,7 +58,7 @@ namespace meta {
         // default_direction.
         template <> struct default_direction <range::element_types_tag> {
             template <class TypesFrom> struct apply
-            : std::result_of < ::range::callable::default_direction (
+            : ::range::result_of < ::range::callable::default_direction (
                 typename TypesFrom::underlying_type)> {};
         };
 
@@ -66,8 +67,9 @@ namespace meta {
             struct empty <range::element_types_tag, Direction>
         {
             template <class TypesFrom> struct apply
-            : ::range::always_empty <Direction,
-                typename TypesFrom::template view_once <Direction>::type> {};
+            : ::range::always_empty <
+                typename TypesFrom::template view_once <Direction>::type,
+                Direction> {};
         };
 
         // size.
@@ -77,8 +79,9 @@ namespace meta {
             // Expect an error here if the size of the underlying range is not
             // known at compile time.
             template <class TypesFrom> struct apply
-            : std::result_of < ::range::callable::size (Direction,
-                typename TypesFrom::template view_once <Direction>::type)>::type
+            : ::range::result_of < ::range::callable::size (
+                typename TypesFrom::template view_once <Direction>::type,
+                Direction)>::type
             {};
         };
 
@@ -87,8 +90,9 @@ namespace meta {
             struct first <range::element_types_tag, Direction>
         {
             template <class TypesFrom> struct apply
-            : std::result_of < ::range::callable::first (Direction,
-                typename TypesFrom::template view_once <Direction>::type)> {};
+            : ::range::result_of < ::range::callable::first (
+                typename TypesFrom::template view_once <Direction>::type,
+                Direction)> {};
         };
 
         // drop.
@@ -98,8 +102,8 @@ namespace meta {
             template <class TypesFrom> struct apply {
                 typedef ::range::element_types <typename
                     ::range::decayed_result_of < ::range::callable::drop (
-                        Direction, Increment, typename
-                        TypesFrom::template view_once <Direction>::type)>::type>
+                        typename TypesFrom::template view_once <Direction
+                            >::type, Increment, Direction)>::type>
                     type;
             };
         };

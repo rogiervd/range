@@ -46,209 +46,61 @@ too.
 #include "callable_traits.hpp"
 #include "../direction.hpp"
 
-#include "meta_split.hpp"
-
 #include "core_tag.hpp"
 
 namespace range {
 
+using utility::overload_order;
+using utility::pick_overload;
+
 using ::callable_traits::has;
 using ::callable_traits::result_of;
-using ::callable_traits::result_of_or;
+using ::callable_traits::decayed_result_of;
+using ::callable_traits::make_void;
 
-template <class Expression> struct decayed_result_of
-: std::decay <typename result_of <Expression>::type> {};
+/** \brief
+Contain names for operations on ranges, and helpers.
 
-/**
-Implementation of operations on ranges.
-Types in this namespace must be specialised to implement range operations.
-This is (hopefully) as simple as possible.
+Real implementations must be found through argument-dependent lookup.
 */
-namespace operation {
+namespace helper {
+
+    struct unusable;
 
     // Forward declarations for operations so they can refer to each other.
-    template <class RangeTag, class Range, class Enable = void>
-        struct default_direction;
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct empty;
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct size;
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct first;
-    template <class RangeTag, class Direction, class Increment, class Range,
-            class Enable = void>
-        struct drop;
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct chop;
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct chop_in_place;
-    template <class RangeTag, class Direction, class Index, class Range,
-            class Enable = void>
-        struct at;
+    void implement_default_direction (unusable);
+    void implement_empty (unusable);
+    void implement_size (unusable);
+    void implement_first (unusable);
+    void implement_drop (unusable);
+    void implement_chop (unusable);
+    void implement_chop_in_place (unusable);
+    void implement_at (unusable);
 
-    /**
-    Base class for marking an operation as not implemented.
-    Operations should be marked as unimplemented when their return type cannot
-    be computed, and in other cases where it can be decided at compile-time
-    that an operation is not be implemented.
+    /** \brief
+    Class that is convertible from direction::front and direction::back.
     */
-    struct unimplemented : ::callable_traits::unimplemented {
-        typedef unimplemented type;
+    struct front_or_back {
+        front_or_back() {}
+
+        front_or_back (direction::front) {}
+        front_or_back (direction::back) {}
     };
 
-    using ::callable_traits::is_implemented;
+} // namespace helper
 
-    namespace helper {
-        /**
-        Operation that returns a default-constructed object.
-        */
-        template <class ResultType> struct return_default_constructed {
-            template <class... Arguments>
-                ResultType operator() (Arguments &&...) const
-            { return ResultType(); }
-        };
+namespace callable { namespace implementation {
 
-        struct return_rvalue_reference {
-            template <class Argument>
-                Argument && operator() (Argument && argument) const
-            { return static_cast <Argument &&> (argument); }
-        };
+    // Forward declarations
+    struct default_direction;
+    struct empty;
+    struct first;
+    struct size;
+    struct drop;
+    struct chop;
+    struct chop_in_place;
 
-        /**
-        Operation that skips the arguments that are given and returns only the
-        result of the function applied to the last "Number" arguments.
-        */
-        template <unsigned Number, class SkipArguments, class Function>
-            struct call_with_last;
-
-#if !(BOOST_CLANG && __clang_major__ == 3 && __clang_minor__ == 0)
-        template <unsigned Number, class ... SkipArguments, class Function>
-            struct call_with_last <
-                Number, meta::vector <SkipArguments ...>, Function>
-        {
-            template <class ... LastArguments> typename
-                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
-                std::result_of <Function (LastArguments ...)>>::type
-                operator() (SkipArguments const & ... skip_arguments,
-                    LastArguments && ... last_arguments) const
-            {
-                return Function() (
-                    std::forward <LastArguments> (last_arguments) ...);
-            }
-        };
-#else
-        // We would like to return the last argument.
-        // CLang 3.0 confuses types when unpacking SkipArguments ... with
-        // LastArgument && last_argument.
-        // Workaround:
-        template <unsigned Number, class Function>
-            struct call_with_last <Number, meta::vector<>, Function>
-        {
-            template <class ... LastArguments> typename
-                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
-                std::result_of <Function (LastArguments ...)>>::type
-                operator() (LastArguments && ... last_arguments) const
-            {
-                return Function() (
-                    std::forward <LastArguments> (last_arguments) ...);
-            }
-        };
-
-        template <unsigned Number, class SkipArguments, class Function>
-            struct call_with_last
-        {
-            typedef call_with_last <Number,
-                typename meta::drop <SkipArguments>::type, Function> recursive;
-
-            template <class FirstArgument, class ... OtherArguments>
-                auto operator() (FirstArgument const & first_argument,
-                    OtherArguments && ... other_arguments) const
-            RETURNS (recursive() (
-                std::forward <OtherArguments> (other_arguments)...));
-        };
-#endif
-
-    } // namespace helper
-
-    namespace range_detail {
-
-        /**
-        Return whether the operation is implemented for the forward direction
-        of Direction.
-        */
-        template <template <class, class, class, class> class Apply,
-            class RangeTag, class Direction, class Range>
-        struct is_implemented_forward
-        : is_implemented <Apply <RangeTag, typename result_of <
-            direction::callable::make_forward (Direction)>::type, Range, void>>
-        {};
-
-        /**
-        Perform operation Apply that takes a direction and a range with the
-        reverse direction.
-        \pre make_forward <Direction> is defined.
-        */
-        template <template <class, class, class, class> class Apply,
-            class RangeTag, class Direction, class Range>
-        struct forward_operation {
-            Apply <RangeTag, typename
-                result_of <direction::callable::make_forward (Direction)>::type,
-                Range, void> implementation;
-
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (implementation (::direction::make_forward (direction),
-                std::forward <Range> (range)));
-        };
-
-    } // namespace range_detail
-
-    /**
-    Evaluate to \c void.
-    This can be used when \a ResultType may or may not be a valid type, like the
-    return type of a call to a member function.
-    */
-    template <class ResultType> struct enable_if_member { typedef void type; };
-
-    /**
-    Derive from the first operation if it is implemented.
-    Otherwise, derive from the second operation if it is implemented.
-    And so on.
-    If none of the operations are implemented, derive from \c unimplemented.
-    */
-    template <class ... Operations> struct try_all;
-
-    template <> struct try_all <> : unimplemented {};
-
-    template <class Operation, class ... OtherOperations>
-        struct try_all <Operation, OtherOperations ...>
-    : boost::mpl::if_ <is_implemented <Operation>,
-        Operation, try_all <OtherOperations ...>>::type {};
-
-} // namespace operation
-
-/**
-Namespace with structures that normalise the parameters for the structures
-in the namespace "operation".
-They take as class template parameters the arguments that the functors (in
-callable) take, and remove cv-qualifications from directions and increments.
-
-The classes are defined for all template parameters, and are implemented
-(i.e. do not derive from operation::unimplemented, and have an operator()) only
-for the relevant ones.
-*/
-namespace apply {
-    /*
-    To allow the classes in callable:: to be implemented easily, with
-    template template parameters, the number of template parameters should be
-    variadic.
-    */
-} // namespace apply
-
-/**** Functions that can actually be called. *****/
-
-namespace callable {
-    using ::callable_traits::generic;
-} // namespace callable
+}} // namespace callable::implementation
 
 static const direction::front front = {};
 static const direction::back back = {};

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-2015, 2015 Rogier van Dalen.
+Copyright 2011-2015, Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,21 +43,21 @@ Therefore, it does not have a copy constructor; first() and drop() only take
 an rvalue, as does chop(), which is the most useful operation.
 An iterator_range based on forward iterators can be copied without any problems.
 
-default_direction (range) just returns front.
+<c>default_direction (range)</c> just returns front.
 
-empty (range) is always defined.
+<c>empty (range)</c> is always defined.
 
-size (range) is defined only for random-access iterators.
+<c>size (range)</c> is defined only for random-access iterators.
 The result type of size (range) is the unsigned version of the distance between
 two iterators.
 
-first (front, range) is defined for all types of iterators; but
-first (back, range) is defined only for bidirectional iterators.
+<c>first (range, front)</c> is defined for all types of iterators; but
+<c>first (range, back)</c> is defined only for bidirectional iterators.
 
-drop (front, range) is defined for input and forward iterators.
-drop (back, range) is defined only for bidirectional iterators.
-drop (front, n, range) and drop (back, n, range) are defined only for
-random-access iterators.
+<c>drop (range, front)</c> is defined for input and forward iterators.
+<c>drop (range, back)</c> is defined only for bidirectional iterators.
+<c>drop (range, n, front)</c> and <c>drop (back, n, range)</c> are defined only
+for random-access iterators.
 
 The code for operations on this class is worth looking at, because it
 embodies the difference between ranges and iterators.
@@ -126,7 +126,7 @@ namespace iterator_range_detail {
         Iterator & end() { return end_; }
 
     private:
-        friend class operation::member_access;
+        friend class helper::member_access;
         bool empty (direction::front) const { return begin_ == end_; }
 
         Iterator begin_;
@@ -135,6 +135,7 @@ namespace iterator_range_detail {
 
 } // namespace iterator_range_detail
 
+/// \cond DONT_DOCUMENT
 // Implementation for forward and higher iterators: copy is possible.
 template <class Iterator>
     class iterator_range <Iterator, typename boost::enable_if <
@@ -181,7 +182,7 @@ public:
     iterator_range & operator = (iterator_range &&) = default;
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     // first.
     dereference_type first (direction::front) const { return *this->begin(); }
@@ -203,13 +204,13 @@ private:
     iterator_range drop_one (back_if_bidirectional) const
     { return iterator_range (this->begin(), boost::prior (this->end())); }
 
-    iterator_range drop (front_if_random_access, size_type increment) const {
+    iterator_range drop (size_type increment, front_if_random_access) const {
         assert (increment <= size (front));
         return iterator_range <Iterator> (
             this->begin() + increment, this->end());
     }
 
-    iterator_range drop (back_if_random_access, size_type increment) const {
+    iterator_range drop (size_type increment, back_if_random_access) const {
         assert (increment <= size (front));
         return iterator_range <Iterator> (
             this->begin(), this->end() - increment);
@@ -225,6 +226,9 @@ private:
     */
     dereference_type chop_in_place (direction::front)
     { return * this->begin() ++; }
+
+    dereference_type chop_in_place (back_if_bidirectional)
+    { return * -- this->end(); }
 };
 
 // Implementation for input iterators: copy is not possible; move is.
@@ -266,13 +270,16 @@ public:
         chop_in_place (direction::front)
     { return * this->begin() ++; }
 };
+/// \endcond
 
-template <class IteratorTag> struct iterator_range_tag;
+namespace operation {
+    template <class IteratorTag> struct iterator_range_tag {};
+} // namespace operation
 
 template <class Iterator>
     struct tag_of_qualified <iterator_range <Iterator>>
 {
-    typedef iterator_range_tag <typename
+    typedef operation::iterator_range_tag <typename
         std::iterator_traits <Iterator>::iterator_category> type;
 };
 
@@ -289,67 +296,44 @@ namespace callable {
 
         // From two iterators or a container.
         struct make_iterator_range {
-            // Two iterators.
-            template <class Begin, class End, class Enable = void>
-                struct apply_two_iterators : operation::unimplemented {};
+            // IteratorCategory is merely to check that Iterator is an iterator.
+            template <class Iterator, class IteratorCategory = typename
+                std::iterator_traits <Iterator>::iterator_category>
+            iterator_range <Iterator> operator() (
+                Iterator const & begin, Iterator const & end) const
+            { return iterator_range <Iterator> (begin, end); }
 
-            template <class Iterator>
-                struct apply_two_iterators <Iterator, Iterator, typename
-                    operation::enable_if_member <typename
-                        std::iterator_traits <Iterator>::iterator_category
-                    >::type>
+            template <class Container, class Iterator
+                = decltype (begin (std::declval <Container &&>()))>
+            iterator_range <Iterator> operator() (Container && container)
+                const
             {
-                iterator_range <Iterator> operator() (
-                    Iterator const & begin, Iterator const & end) const
-                { return iterator_range <Iterator> (begin, end); }
-            };
+                return iterator_range <Iterator> (
+                    begin (container), end (container));
+            }
+        };
 
-            // One container.
-            template <class Container, class Enable = void>
-                struct apply_container : operation::unimplemented {};
-
-            template <class Container>
-                struct apply_container <Container,
-                    typename operation::enable_if_member <decltype (
-                        begin (std::declval <Container &&>()))>::type>
+        struct make_move_iterator_range {
+            template <class Container,
+                class RawIterator = typename std::decay <
+                    decltype (begin (std::declval <Container &>()))>::type,
+                class Iterator
+                = typename std::conditional <
+                    std::is_same <Container,
+                        typename std::decay <Container>::type>::value,
+                    std::move_iterator <RawIterator>, RawIterator
+                >::type>
+            iterator_range <Iterator> operator() (Container && container) const
             {
-                typedef decltype (begin (std::declval <Container &&>()))
-                    Iterator;
-
-                iterator_range <Iterator> operator() (Container && container)
-                    const
-                {
-                    return iterator_range <Iterator> (
-                        begin (container), end (container));
-                }
-            };
-
-            // apply.
-            template <class ... Arguments> struct apply
-            : operation::unimplemented {};
-
-            template <class Begin, class End> struct apply <Begin, End>
-            : apply_two_iterators <typename std::decay <Begin>::type,
-                typename std::decay <End>::type> {};
-
-            template <class Container> struct apply <Container>
-            : apply_container <Container> {};
-
-            // Two iterators.
-            template <class Begin, class End>
-                auto operator() (Begin && begin, End && end) const
-            RETURNS (apply <Begin, End>() (
-                std::forward <Begin> (begin), std::forward <End> (end)));
-
-            template <class Container>
-                auto operator() (Container && container) const
-            RETURNS (apply <Container>() (
-                std::forward <Container> (container)));
+                return iterator_range <Iterator> (
+                    Iterator (begin (container)), Iterator (end (container)));
+            }
         };
 
     } // namespace make_iterator_range_detail
 
     using make_iterator_range_detail::make_iterator_range;
+    using make_iterator_range_detail::make_move_iterator_range;
 
 } // namespace callable
 
@@ -367,14 +351,29 @@ Give either \a begin and \a end, or \a container.
 */
 static constexpr auto make_iterator_range = callable::make_iterator_range();
 
+/**
+Make an iterator_range from a container that will be read only once.
+
+\param container
+    The container to iterate.
+    Begin and end iterators are found with unqualified calls to \c begin
+    and \c end, after <c>using std::begin</c> and <c>using std::end</c>.
+    If this is an rvalue reference, then the iterator_range will use
+    std::move_iterator.
+*/
+static constexpr auto make_move_iterator_range
+    = callable::make_move_iterator_range();
+
 namespace operation {
 
-    // Implement \c chop through \c chop_in_place.
-    template <class IteratorTag, class Range>
-        struct chop <iterator_range_tag <IteratorTag>, direction::front, Range>
-    : chop_by_chop_in_place <iterator_range_tag <IteratorTag>,
-        direction::front, Range> {};
+    template <class IteratorTag, class Range> inline
+        auto implement_chop (iterator_range_tag <IteratorTag> const & tag,
+            Range && range, direction::front const & direction)
+    RETURNS (helper::chop_by_chop_in_place (
+        std::forward <Range> (range), direction));
 
-}} // namespace range::operation
+} // namespace operation
+
+} // namespace range
 
 #endif  // RANGE_ITERATOR_RANGE_HPP_INCLUDED

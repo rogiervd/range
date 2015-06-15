@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -89,15 +89,16 @@ static const auto nothing = callable::nothing();
 template <class Range, class Reference>
     void check_empty (Range const & range, Reference const & reference)
 {
-    // \todo Without direction.
+    static_assert (range::has <range::callable::empty (Range)>::value, "");
     static_assert (range::has <range::callable::empty (
-        direction::front, Range)>::value, "");
+        Range, direction::front)>::value, "");
     static_assert (range::has <range::callable::empty (
-        direction::back, Range)>::value, "");
-    check_equal_value (range::empty (range::front, range),
-        range::empty (range::front, reference));
-    check_equal_value (range::empty (range::back, range),
-        range::empty (range::front, range));
+        Range, direction::back)>::value, "");
+    check_equal_value (range::empty (range), range::empty (reference));
+    check_equal_value (range::empty (range, range::front),
+        range::empty (reference, range::front));
+    check_equal_value (range::empty (range, range::back),
+        range::empty (range, range::front));
 }
 
 // Check size.
@@ -106,20 +107,20 @@ template <class HasSize, class Range, class Reference>
     check_size (Range const & range, Reference const & reference)
 {
     static_assert (range::has <range::callable::size (
-        direction::front, Range)>::value, "");
+        Range, direction::front)>::value, "");
     static_assert (range::has <range::callable::size (
-        direction::back, Range)>::value, "");
-    check_equal_value (range::size (range::front, range),
-        range::size (range::front, reference));
-    check_equal_value (range::size (range::back, range),
-        range::size (range::front, range));
+        Range, direction::back)>::value, "");
+    check_equal_value (range::size (range, range::front),
+        range::size (reference, range::front));
+    check_equal_value (range::size (range, range::back),
+        range::size (range, range::front));
 }
 template <class HasSize, class Range, class Reference>
     typename boost::disable_if <HasSize>::type
     check_size (Range const & range, Reference const & reference, void * = 0)
 {
     static_assert (!range::has <range::callable::size (
-        direction::front, Range)>::value, "");
+        Range, direction::front)>::value, "");
 }
 
 /* Main loop. */
@@ -169,17 +170,17 @@ struct check_equal_behaviour_recursive_from {
         InitialDirection d;
 
         check_equal_value (
-            ::range::first (d, range), ::range::first (d, reference));
-        auto first_and_rest = ::range::chop (d, range);
+            ::range::first (range, d), ::range::first (reference, d));
+        auto first_and_rest = ::range::chop (range, d);
         check_equal_value (
-            first_and_rest.forward_first(), ::range::first (d, reference));
+            first_and_rest.forward_first(), ::range::first (reference, d));
 
         if (!use_chop) {
             check_equal_behaviour_recursive <HasSize, HasBack> (!use_chop,
-                ::range::drop (d, range), ::range::drop (d, reference));
+                ::range::drop (range, d), ::range::drop (reference, d));
         } else {
             check_equal_behaviour_recursive <HasSize, HasBack> (!use_chop,
-                first_and_rest.forward_rest(), ::range::drop (d, reference));
+                first_and_rest.forward_rest(), ::range::drop (reference, d));
         }
     }
 };
@@ -189,23 +190,23 @@ struct check_equal_behaviour_recursive_from {
     template <class Range> void operator() (Range const & range) const {
         Direction d;
         auto current = range::view (range);
-        std::size_t size = range::size (d, range);
+        std::size_t size = range::size (range, d);
         for (std::size_t i = 0; i != size; ++ i) {
-            auto r = range::drop (d, i, range);
+            auto r = range::drop (range, i, d);
             static_assert (std::is_same <
                 decltype (r), decltype (current)>::value, "");
-            check_equal_value (range::empty (d, r),
-                range::empty (d, current));
-            check_equal_value (range::size (d, r),
-                range::size (d, current));
-            check_equal_value (range::first (d, r),
-                range::first (d, current));
+            check_equal_value (range::empty (r, d),
+                range::empty (current, d));
+            check_equal_value (range::size (r, d),
+                range::size (current, d));
+            check_equal_value (range::first (r, d),
+                range::first (current, d));
 
             current = range::drop (d, current);
         }
 
         assert (range::empty (current));
-        auto r = range::drop (d, range::size (d, range), range);
+        auto r = range::drop (range, range::size (range, d), d);
         check_equal_value (range::empty (current), range::empty (r));
     }
 };
@@ -232,37 +233,39 @@ template <class HasSize, class HasBack, class Zero>
         // Not known at compile time that the range is empty.
         // (It may be known to be non-empty, in which case this happily
         // compiles.)
-        template <class Direction, class Range>
-            typename boost::disable_if <range::always_empty <Direction, Range>
-            >::type check_first_equal (Direction const & direction,
-                Range const & range1, Range const & range2) const
+        template <class Range, class Direction>
+            typename boost::disable_if <range::always_empty <Range, Direction>
+            >::type check_first_equal (
+                Range const & range1, Range const & range2,
+                Direction const & direction) const
         {
-            if (!range::empty (direction, range1))
-                check_equal_value (range::first (direction, range1),
-                    range::first (direction, range2));
+            if (!range::empty (range1, direction))
+                check_equal_value (range::first (range1, direction),
+                    range::first (range2, direction));
         }
         // Known only at compile time that the range is empty.
-        template <class Direction, class Range>
-            typename boost::enable_if <range::always_empty <Direction, Range>
-            >::type check_first_equal (Direction const & direction,
-                Range const & range1, Range const & range2) const {}
+        template <class Range, class Direction>
+            typename boost::enable_if <range::always_empty <Range, Direction>
+            >::type check_first_equal (
+                Range const & range1, Range const & range2,
+                Direction const & direction) const {}
 
-        template <class Direction, class Range1, class Range2>
-            void check_equal (Direction const & direction,
-                Range1 const & range1, Range2 const & range2) const;
+        template <class Range1, class Direction, class Range2>
+            void check_equal (Range1 const & range1, Range2 const & range2,
+                Direction const & direction) const;
         // Not defined.
 
         /**
         Check that range1 and range2 are equal under empty, size, and first.
         */
-        template <class Direction, class Range>
-            void check_equal (Direction const & direction,
-                Range const & range1, Range const & range2) const
+        template <class Range, class Direction>
+            void check_equal (Range const & range1, Range const & range2,
+                Direction const & direction) const
         {
-            check_equal_value (range::empty (direction, range1),
-                range::empty (direction, range2));
+            check_equal_value (range::empty (range1, direction),
+                range::empty (range2, direction));
             check_size <HasSize> (range1, range2);
-            check_first_equal (direction, range1, range2);
+            check_first_equal (range1, range2, direction);
         }
 
         /**
@@ -270,14 +273,14 @@ template <class HasSize, class HasBack, class Zero>
         \c reference must have already had \c increment elements dropped.
         */
         struct check_at {
-            template <class Direction, class Range1, class Range2,
-                class Increment>
-            void operator() (Direction const & direction,
-                Range1 const & current, Range2 const & reference, Increment gap)
-                const
+            template <class Range1, class Range2,
+                class Increment, class Direction>
+            void operator() (
+                Range1 const & current, Range2 const & reference, Increment gap,
+                    Direction const & direction) const
             {
-                check_equal_value (range::at (direction, gap, current),
-                    range::first (direction, reference));
+                check_equal_value (range::at (current, gap, direction),
+                    range::first (reference, direction));
             }
         };
 
@@ -291,39 +294,39 @@ template <class HasSize, class HasBack, class Zero>
             dropped.
         \param gap The amount of elements to be dropped from reference.
         */
-        template <class Direction, class Range1, class Range2, class Increment>
-        void operator() (Direction const & direction, Range1 const & current,
-            Range2 const & reference, Increment gap) const
+        template <class Range1, class Range2, class Increment, class Direction>
+        void operator() (Range1 const & current, Range2 const & reference,
+            Increment gap, Direction const & direction) const
         {
             auto new_gap = gap + one;
-            auto new_current = range::drop (direction, new_gap, current);
-            auto new_reference = range::drop (direction, reference);
+            auto new_current = range::drop (current, new_gap, direction);
+            auto new_reference = range::drop (reference, direction);
 
             // Check current position: empty, size, first, and then at.
-            check_equal (direction, new_current, new_reference);
+            check_equal (new_current, new_reference, direction);
 
             rime::call_if (!range::empty (new_current), check_at(), nothing,
-                direction, current, reference, gap);
+                current, reference, gap, direction);
 
             // Recursively check combinations of drop with increment.
             // Recurse with drop (n + 1).
             rime::call_if (!range::empty (new_current), *this, nothing,
-                direction, current, new_reference, new_gap);
+                current, new_reference, new_gap, direction);
 
             // Recurse starting at this point.
             rime::call_if (!range::empty (new_current), *this, nothing,
-                range::front, new_current, new_reference, zero);
+                new_current, new_reference, zero, range::front);
             rime::call_if (rime::and_ (!range::empty (new_current), HasBack()),
                 *this, nothing,
-                range::back, new_current, new_reference, zero);
+                new_current, new_reference, zero, range::back);
         }
     };
 
-    template <class Direction, class Range> void operator() (
-        Direction const & direction, Range const & range) const
+    template <class Range, class Direction> void operator() (
+        Range const & range, Direction const & direction) const
     {
-        rime::call_if (range::empty (Direction(), range),
-            nothing, step(), direction, range, range, zero);
+        rime::call_if (range::empty (range, Direction()),
+            nothing, step(), range, range, zero, direction);
     }
 };
 
@@ -346,19 +349,19 @@ void check_equal_behaviour (Range const & range, Reference const & reference)
 
     rime::call_if (HasDropRuntimeN(),
         detail::check_drop_n <HasSize, HasBack, std::size_t>(), detail::nothing,
-        range::front, range);
+        range, range::front);
     rime::call_if (rime::and_ (HasDropRuntimeN(), HasBack()),
         detail::check_drop_n <HasSize, HasBack, std::size_t>(), detail::nothing,
-        range::back, range);
+        range, range::back);
 
     rime::call_if (HasDropConstantN(),
         detail::check_drop_n <HasSize, HasBack, rime::size_t <0>>(),
         detail::nothing,
-        range::front, range);
+        range, range::front);
     rime::call_if (rime::and_ (HasDropConstantN(), HasBack()),
         detail::check_drop_n <HasSize, HasBack, rime::size_t <0>>(),
         detail::nothing,
-        range::back, range);
+        range, range::back);
 }
 
 #endif  // RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED

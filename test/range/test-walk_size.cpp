@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ void check (std::vector <int> const & v) {
     BOOST_CHECK_EQUAL (range::size (v), v.size());
     // Test implementation that forwards to size.
     BOOST_CHECK_EQUAL (range::walk_size (v), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (range::front, v), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (range::back, v), range::size (v));
+    BOOST_CHECK_EQUAL (range::walk_size (v, range::front), range::size (v));
+    BOOST_CHECK_EQUAL (range::walk_size (v, range::back), range::size (v));
 
     std::list <int> l (v.begin(), v.end());
     // Test slow implementation.
     BOOST_CHECK_EQUAL (range::walk_size (l), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (range::front, l), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (range::back, l), range::size (v));
+    BOOST_CHECK_EQUAL (range::walk_size (l, range::front), range::size (v));
+    BOOST_CHECK_EQUAL (range::walk_size (l, range::back), range::size (v));
 }
 
 BOOST_AUTO_TEST_CASE (test_range_walk_size) {

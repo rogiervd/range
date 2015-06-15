@@ -20,92 +20,111 @@ limitations under the License.
 #include <type_traits>
 #include <stdexcept>
 
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/and.hpp>
+#include <boost/exception/exception.hpp>
 
-#include <boost/utility/enable_if.hpp>
+#include "utility/overload_order.hpp"
 
-#include "meta/vector.hpp"
+#include "rime/core.hpp"
 
 #include "core_base.hpp"
 
 namespace range {
 
-namespace operation {
-
-    /// Turn Direction into the forward direction and apply "size".
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct size_by_forward
-    : unimplemented {};
-
-    template <class RangeTag, class Direction, class Range>
-        struct size_by_forward <RangeTag, Direction, Range, typename
-            boost::enable_if <boost::mpl::and_ <
-                has <direction::callable::make_forward (Direction)>,
-                range_detail::is_implemented_forward <size,
-                    RangeTag, Direction, Range>
-            >>::type>
-    : range_detail::forward_operation <size, RangeTag, Direction, Range> {};
+namespace helper {
 
     /** \brief
     Return the number of elements in the range.
 
-    The standard implementation forwards to the <c>.size (Direction)</c>
-    member function.
-    If that is not available, it will forward to the forward direction, that is,
-    <c>size (make_forward (direction), range)</c>, if that is defined.
-
-    This needs to be implemented (by providing the member function or by
-    specialising this) for any range, but only for the forward direction.
+    To allow the size of a range to be used, this needs to be implemented (by
+    providing the member function or by implementing this free function), but
+    only for the forward direction.
     For example, by defining it for \c direction::front, it will automatically
     also be defined for \c direction::back.
 
-    \tparam RangeTag The range tag.
-    \tparam Direction The decayed direction type.
-    \tparam Range The range itself, qualified (as an rvalue reference if an
-        rvalue).
+    \param tag The range tag.
+    \param range
+        The range itself, qualified (as an rvalue reference if an rvalue).
+    \param direction The direction.
     */
-    template <class RangeTag, class Direction, class Range, class Enable>
-        struct size
-    : try_all <member_access::size <Direction, Range>,
-        size_by_forward <RangeTag, Direction, Range>>
-    {/*
-        ... operator() (Direction const & direction, Range && range) const;
-    */};
+    void implement_size (unusable);
 
-} // namespace operation
-
-namespace apply {
-    template <class ... Arguments> struct size;
-} // namespace apply
+} // namespace helper
 
 namespace callable {
-    struct size : generic <apply::size> {};
+
+    namespace implementation {
+
+        using helper::implement_size;
+
+        struct size {
+        private:
+            struct dispatch {
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <1> *) const
+                RETURNS (implement_size (typename tag_of <Range>::type(),
+                    range, direction));
+
+                // Forward to member if possible.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <2> *) const
+                RETURNS (helper::member_access::size (
+                    range, direction));
+
+                // Use direction::make_forward in case "implement_size" is only
+                // provided for the forward direction.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <3> *) const
+                RETURNS (implement_size (typename tag_of <Range>::type(),
+                    range, direction::make_forward (direction)));
+
+                // Member with make_forward.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range const & range, Direction const & direction,
+                        overload_order <4> *) const
+                RETURNS (helper::member_access::size (
+                    range, direction::make_forward (direction)));
+            };
+
+        public:
+            // With direction.
+            template <class Range, class Direction, class Enable = typename
+                std::enable_if <is_direction <Direction>::value>::type>
+            auto operator() (Range const & range, Direction const & direction)
+                const
+            RETURNS (dispatch() (range, direction, pick_overload()));
+
+            // Without direction: use default direction.
+            template <class Range, class Enable =
+                typename std::enable_if <is_range <Range>::value>::type>
+            auto operator() (Range const & range) const
+            RETURNS (dispatch() (
+                range, range::default_direction (range), pick_overload()));
+        };
+
+    } // namespace implementation
+
+    using implementation::size;
+
 } // namespace callable
 
+/** \brief
+Return the number of elements in a range.
+
+Applying \ref drop this number of times results in the range being empty.
+
+\param range
+    The range to operate on.
+\param direction
+    (optional) The direction from which to count.
+*/
 static const auto size = callable::size();
-
-namespace apply {
-
-    namespace automatic_arguments {
-
-        template <class Directions, class Other, class Ranges,
-            class Enable = void>
-        struct size : operation::unimplemented {};
-
-        template <class Direction, class Range>
-            struct size <meta::vector <Direction>, meta::vector<>,
-                meta::vector <Range>>
-        : operation::size <typename range::tag_of <Range>::type,
-            typename std::decay <Direction>::type, Range &&> {};
-
-    } // namespace automatic_arguments
-
-    template <class ... Arguments> struct size
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::size, meta::vector <Arguments ...>>::type {};
-
-} // namespace apply
 
 /**
 Exception class that is thrown when it is attempted to convert one range into
@@ -113,7 +132,8 @@ another but the size of the source range makes this impossible at run time.
 For example, when converting a vector with 3 elements to a tuple with 2
 elements.
 */
-class size_mismatch : public std::runtime_error {
+class size_mismatch
+: public virtual std::runtime_error, public virtual boost::exception {
 public:
     explicit size_mismatch()
     : std::runtime_error ("Mismatched size of range") {}

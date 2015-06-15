@@ -164,7 +164,7 @@ public:
     typedef Extractors extractors_type;
 
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     auto empty (direction::front) const
     RETURNS (rime::bool_<extractor_num == 0>());
@@ -186,7 +186,7 @@ private:
     { return typename first_extractor <Direction>::type() (this->structure()); }
 
     // drop.
-    template <class Direction, class Increment> struct drop_result {
+    template <class Increment, class Direction> struct drop_result {
         typedef typename meta::drop <Direction, Increment, Extractors>::type
             new_extractors;
         typedef member_view <Structure, new_extractors> type;
@@ -195,18 +195,19 @@ private:
     template <class Direction, class Increment>
         typename boost::lazy_enable_if_c <
             (std::size_t (Increment::value) <= extractor_num),
-            drop_result <Direction, Increment>>::type
-    drop_constant (Direction const &, Increment const &) const
-    { return typename drop_result <Direction, Increment>::type (*this); }
+            drop_result <Increment, Direction>>::type
+    drop_constant (Increment const &, Direction const &) const
+    { return typename drop_result <Increment, Direction>::type (*this); }
 };
 
-template <std::size_t Size> struct member_view_tag;
+
+namespace operation {
+    struct member_view_tag {};
+} // namespace operation
 
 template <class Structure, class Extractors>
     struct tag_of_qualified <member_view <Structure, Extractors>>
-{
-    typedef member_view_tag <meta::size <Extractors>::type::value> type;
-};
+{ typedef operation::member_view_tag type; };
 
 } // namespace range
 

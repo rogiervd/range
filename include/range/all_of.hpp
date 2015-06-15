@@ -32,7 +32,7 @@ Return whether all elements of the range evaluate to true.
 Written tersely,
     all_of (r)
 returns
-    fold (&&, true, r).
+    fold (r, &&, true).
 
 If the result is known at compile time, a compile time constant is returned.
 

@@ -32,14 +32,16 @@ intention.
 */
 class empty_view;
 
-struct empty_view_tag;
+namespace operation {
+    struct empty_view_tag {};
+} // namespace operation
 
 template <> struct tag_of_qualified <empty_view>
-{ typedef empty_view_tag type; };
+{ typedef operation::empty_view_tag type; };
 
 class empty_view {
 private:
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     template <class Direction> rime::true_type empty (Direction const &) const
     { return rime::true_; }

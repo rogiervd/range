@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,19 +31,20 @@ using range::python_range;
 
 void test_static() {
     BOOST_MPL_ASSERT ((std::is_same <
-        range::tag_of <python_range <>>::type, range::python_range_tag>));
+        range::tag_of <python_range <>>::type,
+        range::operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double> &>::type,
-        range::python_range_tag>));
+        range::operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double> const &>::type,
-        range::python_range_tag>));
+        range::operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double, int> const &&>::type,
-        range::python_range_tag>));
+        range::operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double, int, float> &&>::type,
-        range::python_range_tag>));
+        range::operation::python_range_tag>));
 
     BOOST_MPL_ASSERT ((range::has <
         range::callable::empty (range::python_range <int>)>));

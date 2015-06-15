@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -74,12 +74,14 @@ BOOST_AUTO_TEST_CASE (heterogeneous) {
         std::tuple <double> td (7.5);
         auto z = zip (ti, td);
         RIME_CHECK_EQUAL (empty (z), rime::false_);
+
         RIME_CHECK_EQUAL (first (first (z)), 4);
         RIME_CHECK_EQUAL (second (first (z)), 7.5);
 
         RIME_CHECK_EQUAL (size (z), rime::size_t <1>());
 
         auto tuple_tuple = std::make_tuple (ti, td);
+
         auto z2 = zip_from (tuple_tuple);
         static_assert (std::is_same <decltype (z), decltype (z2)>::value, "");
         RIME_CHECK_EQUAL (first (first (z2)), 4);

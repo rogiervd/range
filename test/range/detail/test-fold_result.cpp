@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE (test_fold_result) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             range::fold_detail::all_result_types <
-                direction::front, return_same_type, a, decltype (v)>::type,
+                a, decltype (v), direction::front, return_same_type>::type,
             meta::set <a, int>>));
     }
     {
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE (test_fold_result) {
         auto v = range::view (vec);
 
         BOOST_MPL_ASSERT ((std::is_same <
-            range::fold_detail::all_result_types <direction::front,
-                return_different_type_2, int, decltype (v)>::type,
+            range::fold_detail::all_result_types <int, decltype (v),
+                direction::front, return_different_type_2>::type,
             meta::set <int, char, long, a, b>>));
     }
 
@@ -80,62 +80,62 @@ BOOST_AUTO_TEST_CASE (test_fold_result) {
     // It should normally have been converted into a view already, but here that
     // happens only on the second step.
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_same_type, int, std::vector <b>>::type,
+        range::fold_detail::all_result_types <int, std::vector <b>,
+            direction::front, return_same_type>::type,
         meta::set <int>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_same_type, int const &, std::vector <b>>::type,
+        range::fold_detail::all_result_types <int const &, std::vector <b>,
+            direction::front, return_same_type>::type,
         meta::set <int const &, int>>));
 
     // Tuple: it's known exactly where this ends.
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_same_type, a, std::tuple <>>::type,
+        range::fold_detail::all_result_types <a, std::tuple <>,
+            direction::front, return_same_type>::type,
         meta::set <a>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_same_type, a, std::tuple <b>>::type,
+        range::fold_detail::all_result_types <a, std::tuple <b>,
+            direction::front, return_same_type>::type,
         meta::set <int>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_same_type, a, std::tuple <b, b>>::type,
+        range::fold_detail::all_result_types <a, std::tuple <b, b>,
+            direction::front, return_same_type>::type,
         meta::set <int>>));
 
     // Empty tuple.
     // If the tuple is empty, operator() should not even be instantiated on the
     // function.
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            uncallable, a, std::tuple<>>::type,
+        range::fold_detail::all_result_types <a, std::tuple<>,
+            direction::front, uncallable>::type,
         meta::set <a>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_different_type, int, std::tuple<>>::type,
+        range::fold_detail::all_result_types <int, std::tuple<>,
+            direction::front, return_different_type>::type,
         meta::set <int>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_different_type, int, std::tuple <int>>::type,
+        range::fold_detail::all_result_types <int, std::tuple <int>,
+            direction::front, return_different_type>::type,
         meta::set <char>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_different_type, int, std::tuple <int, a>>::type,
+        range::fold_detail::all_result_types <int, std::tuple <int, a>,
+            direction::front, return_different_type>::type,
         meta::set <long>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_different_type, int, std::tuple <int, a, b>>::type,
+        range::fold_detail::all_result_types <int, std::tuple <int, a, b>,
+            direction::front, return_different_type>::type,
         meta::set <a>>));
     BOOST_MPL_ASSERT ((std::is_same <
-        range::fold_detail::all_result_types <direction::front,
-            return_different_type, int, std::tuple <int, a, b, char>>::type,
+        range::fold_detail::all_result_types <int, std::tuple <int, a, b, char>,
+            direction::front, return_different_type>::type,
         meta::set <b>>));
 
     {
         // It is unknown at compile time when this tuple ends.
-        auto r = range::take (2, std::make_tuple (b(), b()));
+        auto r = range::take (std::make_tuple (b(), b()), 2);
         BOOST_MPL_ASSERT ((std::is_same <
-            range::fold_detail::all_result_types <
-                direction::front, return_same_type, a, decltype (r)>::type,
+            range::fold_detail::all_result_types <a, decltype (r),
+                direction::front, return_same_type>::type,
             meta::set <a, int>>));
     }
 }

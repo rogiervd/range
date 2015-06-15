@@ -60,25 +60,25 @@ using range::reverse;
 #define CHECK_range_less_lexicographical(r1, r2, value) \
     RIME_CHECK_EQUAL (less_lexicographical (r1, r2), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::front, r1, r2), value); \
+        r1, r2, range::front), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::back, reverse (r1), reverse (r2)), value); \
+        reverse (r1), reverse (r2), range::back), value); \
     \
-    RIME_CHECK_EQUAL (less_lexicographical (less(), r1, r2), value); \
+    RIME_CHECK_EQUAL (less_lexicographical (r1, r2, less()), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::front, less(), r1, r2), value); \
+        r1, r2, range::front, less()), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::back, less(), reverse (r1), reverse (r2)), value); \
+        reverse (r1), reverse (r2), range::back, less()), value); \
     \
-    RIME_CHECK_EQUAL (less_lexicographical (greater(), \
-        transform (negate(), r1), transform (negate(), r2)), value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::front, greater(), \
-        transform (negate(), r1), transform (negate(), r2)), value); \
+        transform (r1, negate()), transform (r2, negate()), greater()), \
+        value); \
     RIME_CHECK_EQUAL (less_lexicographical ( \
-        range::back, greater(), \
-        transform (negate(), reverse (r1)), \
-        transform (negate(), reverse (r2))), value)
+        transform (r1, negate()), transform (r2, negate()), \
+        range::front, greater()), value); \
+    RIME_CHECK_EQUAL (less_lexicographical ( \
+        transform (reverse (r1), negate()), \
+        transform (reverse (r2), negate()), range::back, greater()), value)
 
 BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_constant) {
     CHECK_range_less_lexicographical (

@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,10 +52,8 @@ namespace range { namespace fold_detail {
     { typedef typename Step::state_type type; };
 
     /// Return whether the step is not known to be non-empty.
-    template <class Direction, class Step> struct step_may_be_empty
-    : boost::mpl::not_ <rime::equal_constant <rime::false_type,
-        typename std::result_of <range::callable::empty (Direction,
-            typename Step::range_type)>::type>> {};
+    template <class Step, class Direction> struct step_may_be_empty
+    : boost::mpl::not_ <never_empty <typename Step::range_type, Direction>> {};
 
     /**
     Hold a direction and a function, and call it to produce the next step of
@@ -79,23 +77,23 @@ namespace range { namespace fold_detail {
             // This defined first_type and next_range_type if "chop" is not
             // used:
             /*
-            typedef typename std::result_of <
+            typedef typename result_of <
                 range::callable::first (Direction, Range &)>::type first_type;
-            typedef typename std::result_of <
+            typedef typename result_of <
                     range::callable::drop (Direction, Range &&)>::type
                 next_range_type;
             */
 
             static_assert (
-                range::has <range::callable::chop (Direction, Range)>::value,
+                range::has <range::callable::chop (Range, Direction)>::value,
                 "Chop should always be implemented.");
 
-            typedef typename std::result_of <
-                range::callable::chop (Direction, Range)>::type chopped_type;
+            typedef typename result_of <
+                range::callable::chop (Range, Direction)>::type chopped_type;
             typedef typename chopped_type::first_type first_type;
             typedef typename chopped_type::rest_type next_range_type;
 
-            typedef typename std::result_of <
+            typedef typename result_of <
                 Function (State &&, first_type)>::type next_state_type;
 
             typedef step <next_state_type, next_range_type> type;
@@ -127,7 +125,7 @@ namespace range { namespace fold_detail {
     template <class Direction, class Function, class Step, class PreviousSteps>
         struct all_steps_next
     : boost::mpl::eval_if <
-        always_empty <Direction, typename Step::range_type>,
+        always_empty <typename Step::range_type, Direction>,
         meta::push <meta::front, Step, PreviousSteps>,
         all_steps_next_not_empty <Direction, Function, Step, PreviousSteps>
     > {};
@@ -148,14 +146,14 @@ namespace range { namespace fold_detail {
     be finished (in which case the fold finishes) and returning the set of
     state types that may result from this.
     */
-    template <class Direction, class Function, class State, class Range>
+    template <class State, class Range, class Direction, class Function>
         struct all_result_types
     {
         typedef typename all_steps <Direction, Function, step <State, Range>
-        >::type steps;
+            >::type steps;
 
         typedef typename meta::as_vector <meta::filter <
-                step_may_be_empty <Direction, boost::mpl::_1>, steps>
+                step_may_be_empty <boost::mpl::_1, Direction>, steps>
             >::type returnable_steps;
 
         /*typedef typename meta::as_set <

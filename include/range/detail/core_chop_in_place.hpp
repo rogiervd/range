@@ -30,130 +30,134 @@ limitations under the License.
 
 namespace range {
 
-namespace operation {
-
-    /* chop_in_place. */
-
-    /*
-    Two strategies for synthesising the implementation can be used:
-    1. Use first() and drop().
-    2. Use chop().
-    Both are quite straightforward.
-    */
-
-    // Strategy 1: synthesise an implementation with first() and drop().
-
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct chop_in_place_by_first_drop
-    : unimplemented {};
-
-    namespace chop_detail {
-
-        template <class Type, class Expression> struct result_is_same
-        : std::is_same <Type, typename result_of <Expression>::type> {};
-
-        template <class Type, class Expression> struct rest_type_is_same
-        : std::is_same <Type, typename result_of <Expression>::type::rest_type>
-        {};
-
-    } // namespace chop_detail
-
-    template <class RangeTag, class Direction, class Range>
-        class chop_in_place_by_first_drop <RangeTag, Direction, Range &,
-            typename boost::enable_if <boost::mpl::and_ <
-                is_implemented <first <RangeTag, Direction, Range &>>,
-                is_implemented <drop <RangeTag, Direction, one_type, Range &&>>,
-                chop_detail::result_is_same <Range,
-                    callable::drop (Direction, Range)>
-            >>::type>
-    {
-    public:
-        typename result_of <range::callable::first (
-            Direction const &, Range &)>::type
-        operator() (Direction const & direction, Range & range) const
-        {
-            auto && first = range::first (direction, range);
-            range = range::drop (direction, std::move (range));
-            return static_cast <decltype (first)> (first);
-        }
-    };
-
-    // Strategy 2: synthesise an implementation with chop().
-
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct chop_in_place_by_chop
-    : unimplemented {};
-
-    template <class RangeTag, class Direction, class Range>
-        struct chop_in_place_by_chop <RangeTag, Direction, Range &, typename
-        boost::enable_if <boost::mpl::and_ <
-            is_implemented <chop <RangeTag, Direction, Range &&>>,
-            chop_detail::rest_type_is_same <Range,
-                callable::chop (Direction, Range)>
-        >>::type>
-    {
-        typename result_of <callable::chop (Direction, Range)>::type::first_type
-        operator() (Direction const & direction, Range & range) const {
-            auto result = range::chop (direction, std::move (range));
-            range = result.move_rest();
-            return result.forward_first();
-        }
-    };
+namespace helper {
 
     /** \brief
     Return the first element of the range, and replace the range in place by
     the range without the first element.
 
-    The range must be homogeneous.
-
-    The standard implementation forwards to the
-    <c>.chop_in_place (Direction)</c> member function, if that is available.
+    This can only be used for homogeneous ranges.
 
     If this is not implemented, a default implementation is provided if either
     \a first and \a drop are implemented, or if \a chop is implemented.
-    This happens in \c chop_in_place_automatic.
-    If for some reason this needs to be switched off, then
-    \c chop_in_place_automatic can be implemented as deriving from
-    \c unimplemented.
 
-    Usually, it is necessary to make sure that only non-const reference
-    ranges are picked up.
-    When specialising this struct, the range tag must then differentiate between
-    non-const references and other qualificatiers.
-
-    \tparam RangeTag The range tag.
-    \tparam Direction The decayed direction type.
-    \tparam Range The range itself, qualified (as an rvalue reference if an
-        rvalue).
+    \param tag The range tag.
+    \param range The range.
+    \param direction The direction.
+    \param range The range.
     */
-    template <class RangeTag, class Direction, class Range, class Enable>
-        struct chop_in_place
-    : member_access::chop_in_place <Direction, Range> {/*
-        ... operator() (Direction const & direction, Range && range) const;
-    */};
+    void implement_chop_in_place (unusable);
 
-    /** \brief
-    Return the first element of the range, and replace the range in place by
-    the range without the first element, using \c first and \c drop if necessary
-    and possible.
-
-    The only reason to specialise this would be disable this and derive it from
-    \c unimplemented even when \c chop is implemented.
-    */
-    template <class RangeTag, class Direction, class Range>
-        struct chop_in_place_automatic
-    : try_all <chop_in_place <RangeTag, Direction, Range>,
-        chop_in_place_by_first_drop <RangeTag, Direction, Range>,
-        chop_in_place_by_chop <RangeTag, Direction, Range>> {};
-
-} // namespace operation
-
-namespace apply {
-    template <class ... Arguments> struct chop_in_place;
-} // namespace apply
+} // namespace helper
 
 namespace callable {
-    struct chop_in_place : generic <apply::chop_in_place> {};
+
+    namespace implementation {
+
+        using helper::implement_chop_in_place;
+
+        /** \brief
+        Call implementation for range::chop_in_place, but do not synthesise
+        implementations.
+
+        This requires an extra argument \c pick_overload().
+
+        \param range
+        \param direction
+        \param overload_order
+        */
+        struct chop_in_place_direct {
+            template <class Range, class Direction>
+                auto operator() (Range & range, Direction const & direction,
+                    overload_order <1> *) const
+            RETURNS (implement_chop_in_place (typename tag_of <Range>::type(),
+                range, direction));
+
+            // Forward to member if possible.
+            template <class Range, class Direction>
+                auto operator() (Range & range, Direction const & direction,
+                    overload_order <2> *) const
+            RETURNS (helper::member_access::chop_in_place (range, direction));
+        };
+
+        struct chop_in_place {
+        private:
+            struct dispatch : public chop_in_place_direct {
+                using chop_in_place_direct::operator();
+
+                // Use "first" and "drop".
+                // Only enabled if "drop" returns a range of the same type.
+                template <class Range, class Direction,
+                    class Result = decltype (std::declval <first_direct>() (
+                        std::declval <Range &>(), std::declval <Direction>(),
+                        pick_overload())),
+                    class Enable = typename std::enable_if <std::is_same <
+                        typename std::decay <Range>::type,
+                        typename std::decay <decltype (
+                            std::declval <drop_direct>() (
+                                std::declval <Range>(), one_type(),
+                                std::declval <Direction>(), pick_overload()))
+                        >::type
+                    >::value>::type>
+                Result operator() (Range & range, Direction const & direction,
+                    overload_order <3> *) const
+                {
+                    Result element = first_direct() (range, direction,
+                        pick_overload());
+                    range = drop_direct() (std::move (range),
+                        one_type(), direction, pick_overload());
+                    return static_cast <Result &&> (element);
+                }
+
+                // Use "chop".
+                // Only enabled if "drop" returns a range of the same type.
+                // This is less preferred than using "first" and "drop", since
+                // this is usually slightly slower.
+                template <class Range, class Direction,
+                    class Result = decltype (std::declval <chop_direct>() (
+                        std::declval <Range &&>(), std::declval <Direction>(),
+                        pick_overload()).forward_first()),
+                    class Enable = typename std::enable_if <std::is_same <
+                        typename std::decay <Range>::type,
+                        typename std::decay <decltype (
+                            std::declval <chop_direct>() (
+                                std::declval <Range>(),
+                                std::declval <Direction>(), pick_overload()
+                            ).forward_rest())>::type
+                        >::value>::type>
+                Result operator() (Range & range, Direction const & direction,
+                    overload_order <4> *) const
+                {
+                    auto chopped = chop_direct() (
+                        std::move (range), direction, pick_overload());
+                    range = chopped.move_rest();
+                    return chopped.move_first();
+                }
+            };
+
+        public:
+            // With direction.
+            template <class Range, class Direction, class Enable = typename
+                std::enable_if <is_range <Range>::value
+                    && !std::is_const <Range>::value
+                    && is_direction <Direction>::value>::type>
+            auto operator() (Range & range, Direction const & direction)
+                const
+            RETURNS (dispatch() (range, direction, pick_overload()));
+
+            // Without direction: use default direction.
+            template <class Range, class Enable =
+                typename std::enable_if <is_range <Range>::value>::type>
+            auto operator() (Range & range) const
+            RETURNS (dispatch() (
+                range, range::default_direction (range), pick_overload()));
+        };
+
+    } // namespace implementation
+
+    using implementation::chop_in_place_direct;
+    using implementation::chop_in_place;
+
 } // namespace callable
 
 /**
@@ -170,29 +174,45 @@ itself.
 */
 static const auto chop_in_place = callable::chop_in_place();
 
-namespace apply {
+namespace helper {
 
-    namespace automatic_arguments {
+    /** \brief
+    Implement chop by using chop_in_place.
 
-        /* chop_in_place. */
+    It is often straightforward to implement chop_in_place() for a range.
+    If move construction is cheap, then chop() can be implemented in terms of
+    chop_in_place.
+    To do so, implement_chop should forward to this.
 
-        template <class Directions, class Others, class Ranges,
-            class Enable = void>
-        struct chop_in_place : operation::unimplemented {};
+    For example,
+    \code
+    template <class MyRange>
+    inline auto implement_chop (my_range_tag const & tag,
+        MyRange && range, direction::front const & direction)
+    RETURNS (helper::chop_by_chop_in_place (
+        tag, std::move (range), direction, pick_overload()));
+    \endcode
+    */
+    template <class Range, class Direction,
+        class DecayedRange = typename std::decay <Range>::type,
+        class First = decltype (
+            callable::chop_in_place_direct() (
+                std::declval <DecayedRange &>(), std::declval <Direction>(),
+                pick_overload())),
+        class Result = chopped <First, DecayedRange>,
+        class Enable = typename std::enable_if <
+            !std::is_reference <Range>::value>::type>
+    inline Result chop_by_chop_in_place (
+        Range && range, Direction const & direction)
+    {
+        auto new_range = std::move (range);
+        auto && first = callable::chop_in_place_direct() (
+            new_range, direction, pick_overload());
+        return Result (static_cast <First &&> (first), std::move (new_range));
+    }
 
-        template <class Direction, class Range>
-            struct chop_in_place <
-                meta::vector <Direction>, meta::vector<>, meta::vector <Range>>
-        : operation::chop_in_place_automatic <typename tag_of <Range>::type,
-            typename std::decay <Direction>::type, Range &&> {};
+} // namespace helper
 
-    } // namespace automatic_arguments
-
-    template <class ... Arguments> struct chop_in_place
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::chop_in_place, meta::vector <Arguments ...>>::type
-    {};
-
-}} // namespace range::apply
+} // namespace range
 
 #endif  // RANGE_DETAIL_CORE_CHOP_IN_PLACE_HPP_INCLUDED

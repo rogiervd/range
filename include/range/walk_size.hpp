@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,20 +26,21 @@ namespace range {
 namespace callable {
 
     struct walk_size {
-        template <class Direction, class Range> typename
-            result_of_or <range::callable::size (Direction, Range)>::type
-        operator() (Direction const & direction, Range && range) const
-        { return range::size (direction, std::forward <Range> (range)); }
+        // Use size.
+        template <class Range, class Direction> typename
+            result_of <range::callable::size (Range, Direction)>::type
+        operator() (Range && range, Direction const & direction) const
+        { return range::size (std::forward <Range> (range), direction); }
 
-        template <class Direction, class Range>
+        template <class Range, class Direction>
             typename boost::disable_if <
-                range::has <range::callable::size (Direction, Range)>,
+                range::has <range::callable::size (Range, Direction)>,
                 std::size_t>::type
-        operator() (Direction const & direction, Range && range) const {
+        operator() (Range && range, Direction const & direction) const {
             std::size_t size = 0;
-            auto current = range::view (range);
-            while (!range::empty (current)) {
-                current = range::drop (direction, current);
+            auto current = range::view (range, direction);
+            while (!range::empty (current, direction)) {
+                current = range::drop (current, direction);
                 ++ size;
             }
             return size;
@@ -48,26 +49,29 @@ namespace callable {
         // No direction: use default_direction.
         template <class Range> auto operator() (Range && range) const
         -> decltype (std::declval <walk_size>() (
-            range::default_direction (range), std::declval <Range>()))
+            std::declval <Range>(), range::default_direction (range)))
         {
             return (*this) (
-                range::default_direction (range), std::forward <Range> (range));
+                std::forward <Range> (range), range::default_direction (range));
         }
     };
 
 } // namespace callable
 
-/**
-walk_size (range) or walk_size (direction, range) computes the number of
-elements in any type of range.
-If the range has a size() operation, that is used.
-If not, then the drop() operation is used until the range is empty, and the
+/** \brief
+Computes the number of elements in a range.
+
+If the range has a \c size() operation, that is used.
+If not, then the \c drop() operation is used until the range is empty, and the
 number of steps is counted.
+
 \todo Currently only works on homogeneous ranges; use fold to remedy this.
+
+\param range The range to count the number of elements of.
+\param direction The direction to traverse the range in.
 */
 static const auto walk_size = callable::walk_size();
 
 } // namespace range
 
 #endif // RANGE_WALK_SIZE_HPP_INCLUDED
-

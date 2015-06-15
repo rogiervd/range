@@ -31,32 +31,25 @@ converts to weird_count for traversal.
 */
 struct weird_heavyweight_count {};
 
+struct weird_heavyweight_count_tag : range::operation::heavyweight_tag {};
+
 namespace range {
 
     template <> struct tag_of_qualified <weird_heavyweight_count>
-    { typedef heavyweight_tag <weird_heavyweight_count> type; };
-
-    namespace operation {
-        template <class Range>
-            struct default_direction <heavyweight_tag <weird_heavyweight_count>,
-                Range>
-        {
-            // Should not be called.
-            forgotten_to_define_direction operator() (weird_heavyweight_count);
-        };
-
-        template <class Range>
-            struct make_view <false, heavyweight_tag <weird_heavyweight_count>,
-                meta::vector <weird_direction>, Range>
-        {
-            weird_count operator() (
-                weird_direction const &, weird_heavyweight_count)
-            { return weird_count(); }
-        };
-
-    } // namespace operation
+    { typedef weird_heavyweight_count_tag type; };
 
 } // namespace range
+
+// Should not be called.
+forgotten_to_define_direction implement_default_direction (
+    range::operation::heavyweight_tag, weird_heavyweight_count);
+
+inline weird_count implement_make_view (weird_heavyweight_count_tag,
+    bool once, weird_heavyweight_count, weird_direction const &)
+{ return weird_count(); }
+
+struct std_forward_list_tag : range::operation::heavyweight_tag {};
+struct std_vector_tag : range::operation::heavyweight_tag {};
 
 /*
 Adapt STL containers (badly) as heavyweights.
@@ -64,80 +57,50 @@ Adapt STL containers (badly) as heavyweights.
 namespace range {
 
     // Of course the containers have too few parameters here.
-    template <typename Type>
-        struct tag_of_qualified <std::forward_list <Type>>
-    { typedef heavyweight_tag <std::forward_list <Type>> type; };
+    template <typename Type> struct tag_of_qualified <std::forward_list <Type>>
+    { typedef std_forward_list_tag type; };
 
     template <typename Type> struct tag_of_qualified <std::vector <Type>>
-    { typedef heavyweight_tag <std::vector <Type>> type; };
+    { typedef std_vector_tag type; };
 
-    namespace operation {
-
-        namespace detail {
-
-            template <bool Move, class Container> struct view_stl_container;
-
-            template <class Container>
-                struct view_stl_container <false, Container>
-            {
-                typedef typename Container::iterator iterator;
-                typedef typename Container::const_iterator
-                    const_iterator;
-
-                template <class Direction>
-                iterator_range <iterator> operator() (
-                    Direction const &, Container & list) const
-                {
-                    return iterator_range <iterator> (list.begin(), list.end());
-                }
-
-                template <class Direction>
-                iterator_range <const_iterator> operator() (
-                    Direction const &, Container const & list) const
-                {
-                    return iterator_range <const_iterator> (
-                        list.begin(), list.end());
-                }
-            };
-
-            template <class Container>
-                struct view_stl_container <true, Container>
-            : view_stl_container <false, Container>
-            {
-                using view_stl_container <false, Container>::operator();
-
-                typedef std::move_iterator <typename Container::iterator>
-                    move_iterator;
-
-                template <class Direction>
-                    iterator_range <move_iterator> operator() (
-                        Direction const &, Container && list) const
-                {
-                    return iterator_range <move_iterator> (
-                        move_iterator (list.begin()),
-                        move_iterator (list.end()));
-                }
-            };
-
-        } // namespace detail
-
-        template <bool Move, typename Type, class Range>
-            struct make_view <Move, heavyweight_tag <std::forward_list <Type>>,
-                meta::vector <direction::front>, Range>
-        : detail::view_stl_container <Move, std::forward_list <Type>> {};
-
-        template <bool Move, typename Type, class Range>
-            struct make_view <Move, heavyweight_tag <std::vector <Type>>,
-                meta::vector <direction::front>, Range>
-        : detail::view_stl_container <Move, std::vector <Type>> {};
-
-        template <bool Move, typename Type, class Range>
-            struct make_view <Move, heavyweight_tag <std::vector <Type>>,
-                meta::vector <direction::back>, Range>
-        : detail::view_stl_container <Move, std::vector <Type>> {};
-
-    } // namespace operation
 } // namespace range
+
+// Rvalue, only if once == true.
+template <class Container, class Result
+    = range::iterator_range <std::move_iterator <typename Container::iterator>>>
+inline Result view_stl_container (
+    rime::true_type once, Container && container, utility::overload_order <1> *)
+{
+    return Result (
+        std::move_iterator <typename Container::iterator> (container.begin()),
+        std::move_iterator <typename Container::iterator> (container.end()));
+}
+
+// Reference.
+template <class Container, class Result
+    = range::iterator_range <typename Container::iterator>>
+inline Result view_stl_container (bool once, Container & container,
+    utility::overload_order <2> *)
+{ return Result (container.begin(), container.end()); }
+
+// Const reference.
+template <class Container, class Result
+    = range::iterator_range <typename Container::const_iterator>>
+inline Result view_stl_container (bool once, Container const & container,
+    utility::overload_order <3> *)
+{ return Result (container.begin(), container.end()); }
+
+template <class Once, class Container>
+inline auto implement_make_view (std_forward_list_tag,
+    Once once, Container && container, direction::front const &)
+RETURNS (view_stl_container <typename std::decay <Container>::type> (
+    once, std::forward <Container> (container), utility::pick_overload()));
+
+template <class Once, class Container>
+inline auto implement_make_view (std_vector_tag,
+    Once once, Container && container, range::helper::front_or_back const &)
+RETURNS (view_stl_container <typename std::decay <Container>::type> (
+    once, std::forward <Container> (container), utility::pick_overload()));
 
 BOOST_AUTO_TEST_SUITE(test_range_heavyweight)
 
@@ -145,11 +108,11 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
     BOOST_MPL_ASSERT ((range::has <range::callable::empty (
         std::forward_list <int>)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-        direction::front, std::forward_list <int> &)>));
+        std::forward_list <int> &, direction::front)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
         std::forward_list <int> const)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-        direction::front &, std::forward_list <int> const &)>));
+        std::forward_list <int> const &, direction::front &)>));
 
     using range::empty;
     using range::size;
@@ -163,7 +126,7 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
     rime::int_ <1> one;
     rime::int_ <2> two;
 
-    // std::forward_list
+    // std::forward_list.
     {
         std::forward_list <int> l;
 
@@ -221,60 +184,57 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         v.push_back (5.5);
         BOOST_CHECK (!empty (v));
         BOOST_CHECK_EQUAL (size (v), 2u);
-        BOOST_CHECK_EQUAL (first (front, v), 3.3);
-        BOOST_CHECK_EQUAL (first (back, v), 5.5);
-        BOOST_CHECK_EQUAL (first (front, v), 3.3);
-        BOOST_CHECK_EQUAL (first (back, v), 5.5);
+        BOOST_CHECK_EQUAL (first (v, front), 3.3);
+        BOOST_CHECK_EQUAL (first (v, back), 5.5);
+        BOOST_CHECK_EQUAL (first (v, front), 3.3);
+        BOOST_CHECK_EQUAL (first (v, back), 5.5);
 
         BOOST_CHECK_EQUAL (first (drop (v)), 5.5);
-        BOOST_CHECK_EQUAL (first (drop (back, v)), 3.3);
-        BOOST_CHECK_EQUAL (first (back, drop (back, one, v)), 3.3);
+        BOOST_CHECK_EQUAL (first (drop (v, back)), 3.3);
+        BOOST_CHECK_EQUAL (first (drop (v, one, back), back), 3.3);
 
-        BOOST_CHECK_EQUAL (at (0, v), 3.3);
-        BOOST_CHECK_EQUAL (at (1, v), 5.5);
-        BOOST_CHECK_EQUAL (at (back, 0, v), 5.5);
-        BOOST_CHECK_EQUAL (at (back, 1, v), 3.3);
+        BOOST_CHECK_EQUAL (at (v, 0), 3.3);
+        BOOST_CHECK_EQUAL (at (v, 1), 5.5);
+        BOOST_CHECK_EQUAL (at (v, 0, back), 5.5);
+        BOOST_CHECK_EQUAL (at (v, 1, back), 3.3);
 
         BOOST_CHECK (empty (drop (drop (v))));
-        BOOST_CHECK (empty (drop (back, drop (v))));
-        BOOST_CHECK (empty (drop (front, drop (back, one, v))));
-        BOOST_CHECK (empty (drop (2, v)));
-        BOOST_CHECK (empty (drop (back, 2u, v)));
-        BOOST_CHECK (empty (drop (two, v)));
-        BOOST_CHECK (empty (drop (back, two, v)));
+        BOOST_CHECK (empty (drop (drop (v), one, back), back));
+        BOOST_CHECK (empty (drop (drop (v, front))));
+        BOOST_CHECK (empty (drop (v, 2)));
+        BOOST_CHECK (empty (drop (v, 2u, back)));
+        BOOST_CHECK (empty (drop (v, two)));
+        BOOST_CHECK (empty (drop (v, two, back)));
 
         auto moved_view = range::view_once (std::move (v));
 
-        auto && first_element = at (0, moved_view);
+        auto && first_element = at (moved_view, 0);
         BOOST_CHECK_EQUAL (first_element, 3.3);
         BOOST_MPL_ASSERT ((std::is_same <decltype (first_element), double &&>));
 
-        auto && second_element = at (1, moved_view);
+        auto && second_element = at (moved_view, 1);
         BOOST_CHECK_EQUAL (second_element, 5.5);
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (second_element), double &&>));
     }
 
-    BOOST_MPL_ASSERT_NOT ((range::operation::is_implemented<range::apply::view <
-        forgotten_to_define_direction, weird_heavyweight_count> >));
-
     // weird_heavyweight_count
     {
         // weird_direction.
         BOOST_MPL_ASSERT ((range::has <range::callable::view (
-            weird_direction, weird_heavyweight_count)>));
+            weird_heavyweight_count, weird_direction)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::empty (
-            weird_direction, weird_heavyweight_count)>));
+            weird_heavyweight_count, weird_direction)>));
         BOOST_MPL_ASSERT_NOT ((range::has <range::callable::size (
-            weird_direction, weird_heavyweight_count)>));
+            weird_heavyweight_count, weird_direction)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::first (
-            weird_direction, weird_heavyweight_count const &)>));
+            weird_heavyweight_count const &, weird_direction)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            weird_direction, weird_heavyweight_count &)>));
+            weird_heavyweight_count &, weird_direction)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::drop (
-            weird_direction, int, weird_heavyweight_count &)>));
+            weird_heavyweight_count &, int, weird_direction)>));
         BOOST_MPL_ASSERT ((range::has <range::callable::chop (
-            weird_direction, weird_heavyweight_count &)>));
+            weird_heavyweight_count &, weird_direction)>));
 
         // without direction.
         BOOST_MPL_ASSERT_NOT ((range::has <
@@ -293,17 +253,16 @@ BOOST_AUTO_TEST_CASE (test_range_heavyweight) {
         weird_heavyweight_count w;
         weird_direction d (7);
 
-        BOOST_CHECK (!empty (d, w));
-        BOOST_CHECK_EQUAL (first (d, w), 0);
-        BOOST_CHECK_EQUAL (first (d, drop (d, w)), 1);
-        BOOST_CHECK_EQUAL (first (d, drop (d, one, w)), 1);
-        BOOST_CHECK_EQUAL (first (d, drop (d, two, w)), 2);
+        BOOST_CHECK (!empty (w, d));
+        BOOST_CHECK_EQUAL (first (w, d), 0);
+        BOOST_CHECK_EQUAL (first (drop (w, d), d), 1);
+        BOOST_CHECK_EQUAL (first (drop (w, one, d), d), 1);
+        BOOST_CHECK_EQUAL (first (drop (w, two, d), d), 2);
 
-        auto first_and_rest = chop (d, w);
+        auto first_and_rest = chop (w, d);
         BOOST_CHECK_EQUAL (first_and_rest.first(), 0);
-        BOOST_CHECK_EQUAL (first (d, first_and_rest.rest()), 1);
+        BOOST_CHECK_EQUAL (first (first_and_rest.rest(), d), 1);
     }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

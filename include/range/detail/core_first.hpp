@@ -19,105 +19,127 @@ limitations under the License.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
+#include "rime/core.hpp"
 
 #include "core_base.hpp"
 
 namespace range {
 
-namespace operation {
-
-
-    /// Implement "first" by calling "chop".
-    template <class RangeTag, class Direction, class Range, class Enable = void>
-        struct first_by_chop
-    : unimplemented {};
-
-    template <class RangeTag, class Direction, class Range>
-        struct first_by_chop <RangeTag, Direction, Range, typename
-            boost::enable_if <
-                is_implemented <chop <RangeTag, Direction, Range>>>::type>
-    {
-        auto operator() (Direction const & direction, Range && range) const
-        RETURNS (chop <RangeTag, Direction, Range>() (
-            direction, std::forward <Range> (range)).forward_first());
-    };
+namespace helper {
 
     /** \brief
     Return the first element in the range.
 
-    The standard implementation forwards to the <c>.first (Direction)</c>
-    member function, if that is available.
-
     This normally should be implemented (by providing the member function or by
     specialising this) for any range.
 
-    If this is not implemented, but operation::chop is implemented, then this is
-    automatically implemented in terms of \c chop.
+    If this is not implemented, but operation::chop is implemented, then "first"
+    is automatically implemented in terms of \c chop.
     This only works for the qualification that \c chop is implemented for.
-    This happens in \c first_automatic.
-    If for some reason this needs to be switched off, then \c first_automatic
-    can be implemented as deriving from \c unimplemented.
 
-    \tparam RangeTag The range tag.
-    \tparam Direction The decayed direction type.
-    \tparam Range The range itself, qualified (as an rvalue reference if an
-        rvalue).
+    \param tag The range tag.
+    \param direction The direction.
+    \param range The range.
     */
-    template <class RangeTag, class Direction, class Range, class Enable>
-        struct first
-    : member_access::first <Direction, Range>
-    {/*
-        ... operator() (Direction const & direction, Range && range) const;
-    */};
+    void implement_first (unusable);
 
-    /** \brief
-    Return the first element in the range, using \c chop if necessary and
-    possible.
-
-    The only reason to specialise this would be disable this and derive it from
-    \c unimplemented even when \c chop is implemented.
-    */
-    template <class RangeTag, class Direction, class Range>
-        struct first_automatic
-    : try_all <first <RangeTag, Direction, Range>,
-        first_by_chop <RangeTag, Direction, Range>> {};
-
-} // namespace operation
-
-namespace apply {
-    template <class ... Arguments> struct first;
-} // namespace apply
+} // namespace helper
 
 namespace callable {
-    struct first : generic <apply::first> {};
+
+    namespace implementation {
+
+        using helper::implement_first;
+        using helper::implement_chop;
+
+        /** \brief
+        Implement "first" only by calling the direct implementation, not through
+        "chop"
+
+        Compared to first itself, this requires an additional argument
+        \c pick_overload() to be passed in, and no argument is optional.
+
+        \param range
+        \param direction
+        \param overload_order
+        */
+        struct first_direct {
+            template <class Range, class Direction>
+                auto operator() (
+                    Range && range, Direction const & direction,
+                    overload_order <1> *) const
+            RETURNS (implement_first (typename tag_of <Range>::type(),
+                std::forward <Range> (range), direction));
+
+            // Forward to member if possible.
+            template <class Range, class Direction>
+                auto operator() (
+                    Range && range, Direction const & direction,
+                    overload_order <2> *) const
+            RETURNS (helper::member_access::first (
+                std::forward <Range> (range), direction));
+        };
+
+        struct first {
+        private:
+            struct dispatch : first_direct {
+                using first_direct::operator();
+
+                // Additional overloads.
+
+                // Forward to chop if possible.
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range && range, Direction const & direction,
+                        overload_order <3> *) const
+                RETURNS (implement_chop (typename tag_of <Range>::type(),
+                    std::forward <Range> (range), direction).forward_first());
+
+                template <class Range, class Direction>
+                    auto operator() (
+                        Range && range, Direction const & direction,
+                        overload_order <4> *) const
+                RETURNS (helper::member_access::chop (
+                    std::forward <Range> (range), direction).forward_first());
+            };
+
+        public:
+            // With direction.
+            template <class Range, class Direction, class Enable = typename
+                std::enable_if <is_direction <Direction>::value>::type>
+            auto operator() (Range && range, Direction const & direction)
+                const
+            RETURNS (dispatch() (std::forward <Range> (range), direction,
+                pick_overload()));
+
+            // Without direction: use default direction.
+            template <class Range, class Enable =
+                typename std::enable_if <is_range <Range>::value>::type>
+            auto operator() (Range && range) const
+            RETURNS (dispatch() (
+                std::forward <Range> (range), range::default_direction (range),
+                pick_overload()));
+        };
+
+    } // namespace implementation
+
+    using implementation::first_direct;
+    using implementation::first;
+
 } // namespace callable
 
+/** \brief
+Return the first element from a range.
+
+\param range
+    The range to operate on.
+\param direction
+    (optional) The direction from which the first element will be taken.
+*/
 static const auto first = callable::first();
-
-namespace apply {
-
-    namespace automatic_arguments {
-
-        template <class Directions, class Other, class Ranges,
-            class Enable = void>
-        struct first : operation::unimplemented {};
-
-        template <class Direction, class Range>
-            struct first <meta::vector <Direction>, meta::vector<>,
-                meta::vector <Range>>
-        : operation::first_automatic <typename range::tag_of <Range>::type,
-            typename std::decay <Direction>::type, Range &&> {};
-
-    } // namespace automatic_arguments
-
-    template <class ... Arguments> struct first
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::first, meta::vector <Arguments ...>>::type {};
-
-} // namespace apply
 
 } // namespace range
 

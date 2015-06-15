@@ -47,24 +47,21 @@ BOOST_AUTO_TEST_CASE (vector) {
     v.push_back (6);
     v.push_back (7);
 
-    typedef tag_of <decltype (range::view (v)) &>::type vector_view_tag;
-
     // Test unique_view.
-
     {
         auto view = unique_view (v);
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <vector_view_tag, false>>));
+            unique_range_tag <false>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <vector_view_tag, false>>));
+            unique_range_tag <false>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <vector_view_tag, false>>));
+            unique_range_tag <false>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -73,66 +70,66 @@ BOOST_AUTO_TEST_CASE (vector) {
         // first.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view))>));
+            callable::first (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view))>));
+            callable::first (decltype (view), direction::back)>));
 
         // Also for lvalues.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view) &)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::back)>));
 
         // drop.
         BOOST_MPL_ASSERT ((has <callable::drop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::front, decltype (view))>));
+            callable::drop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::back, decltype (view))>));
+            callable::drop (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, decltype (view) &)>));
+            decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, decltype (view) &)>));
+            decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::is_homogeneous <decltype (view)>));
 
         BOOST_MPL_ASSERT ((has <callable::drop (
-            std::size_t, decltype (view))>));
+            decltype (view), std::size_t)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view))>));
+            decltype (view), std::size_t, direction::front)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view))>));
+            decltype (view), std::size_t, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::back)>));
 
         // chop.
         BOOST_MPL_ASSERT ((has <callable::chop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::front, decltype (view))>));
+            callable::chop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::back, decltype (view))>));
+            callable::chop (decltype (view), direction::back)>));
 
         // Not for lvalues (whether const or not).
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) const &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::back)>));
 
         // Run-time.
         BOOST_CHECK (!empty (view));
@@ -174,15 +171,15 @@ BOOST_AUTO_TEST_CASE (vector) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <vector_view_tag, true>>));
+            unique_range_tag <true>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <vector_view_tag, true>>));
+            unique_range_tag <true>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <vector_view_tag, true>>));
+            unique_range_tag <true>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -191,66 +188,66 @@ BOOST_AUTO_TEST_CASE (vector) {
         // first.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view))>));
+            callable::first (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view))>));
+            callable::first (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::first (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::first (direction::front, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::first (direction::back, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::back)>));
 
         // drop.
         BOOST_MPL_ASSERT ((has <callable::drop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::front, decltype (view))>));
+            callable::drop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::back, decltype (view))>));
+            callable::drop (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, decltype (view) &)>));
+            decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, decltype (view) &)>));
+            decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT ((range::is_homogeneous <decltype (view)>));
 
         BOOST_MPL_ASSERT ((has <callable::drop (
-            std::size_t, decltype (view))>));
+            decltype (view), std::size_t)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view))>));
+            decltype (view), std::size_t, direction::front)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view))>));
+            decltype (view), std::size_t, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::back)>));
 
         // chop.
         BOOST_MPL_ASSERT ((has <callable::chop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::front, decltype (view))>));
+            callable::chop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::back, decltype (view))>));
+            callable::chop (decltype (view), direction::back)>));
 
         // Not for lvalues (whether const or not).
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) const &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::back)>));
 
         // Run-time.
         BOOST_CHECK (!empty (view));
@@ -278,24 +275,21 @@ BOOST_AUTO_TEST_CASE (vector) {
 BOOST_AUTO_TEST_CASE (tuple) {
     std::tuple <int, int> v (5, 6);
 
-    typedef tag_of <decltype (range::view (v)) &>::type tuple_view_tag;
-
     // Test unique_view.
-
     {
         auto view = unique_view (v);
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <tuple_view_tag, false>>));
+            unique_range_tag <false>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <tuple_view_tag, false>>));
+            unique_range_tag <false>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <tuple_view_tag, false>>));
+            unique_range_tag <false>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -304,75 +298,75 @@ BOOST_AUTO_TEST_CASE (tuple) {
         // first.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view))>));
+            callable::first (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view))>));
+            callable::first (decltype (view), direction::back)>));
 
         // Also for lvalues.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view) &)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::back)>));
 
         // drop.
         BOOST_MPL_ASSERT ((has <callable::drop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::front, decltype (view))>));
+            callable::drop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::back, decltype (view))>));
+            callable::drop (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, decltype (view) &)>));
+            decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, decltype (view) &)>));
+            decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::is_homogeneous <decltype (view)>));
 
         BOOST_MPL_ASSERT ((has <callable::drop (
-            rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::front, rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>, direction::front)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::back, rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::back)>));
 
         // chop.
         BOOST_MPL_ASSERT ((has <callable::chop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::front, decltype (view))>));
+            callable::chop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::back, decltype (view))>));
+            callable::chop (decltype (view), direction::back)>));
 
         // Not for lvalues (whether const or not).
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) const &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::back)>));
 
         // Run-time.
-        BOOST_MPL_ASSERT ((never_empty <direction::front, decltype (view)>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (view), direction::front>));
         BOOST_CHECK_EQUAL (size (view), 2);
         BOOST_CHECK_EQUAL (first (view), 5);
 
         auto view2 = drop (std::move (view));
 
-        BOOST_MPL_ASSERT ((never_empty <direction::front, decltype (view2)>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (view2), direction::front>));
         BOOST_CHECK_EQUAL (size (view2), 1);
         BOOST_CHECK_EQUAL (first (view2), 6);
 
@@ -380,7 +374,7 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         BOOST_CHECK_EQUAL (chopped.first(), 6);
         BOOST_MPL_ASSERT ((
-            always_empty <direction::front, decltype (chopped.rest())>));
+            always_empty <decltype (chopped.rest()), direction::front>));
         BOOST_CHECK_EQUAL (size (chopped.rest()), 0);
     }
 
@@ -391,15 +385,15 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view)>::type,
-            unique_range_tag <tuple_view_tag, true>>));
+            unique_range_tag <true>>));
         // &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) &>::type,
-            unique_range_tag <tuple_view_tag, true>>));
+            unique_range_tag <true>>));
         // const &.
         BOOST_MPL_ASSERT ((std::is_same <
             tag_of <decltype (view) const &>::type,
-            unique_range_tag <tuple_view_tag, true>>));
+            unique_range_tag <true>>));
 
         // empty.
         BOOST_MPL_ASSERT ((has <callable::empty (decltype (view))>));
@@ -408,83 +402,83 @@ BOOST_AUTO_TEST_CASE (tuple) {
         // first.
         BOOST_MPL_ASSERT ((has <callable::first (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::front, decltype (view))>));
+            callable::first (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::first (direction::back, decltype (view))>));
+            callable::first (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::first (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::first (direction::front, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::first (direction::back, decltype (view) &)>));
+            callable::first (decltype (view) &, direction::back)>));
 
         // drop.
         BOOST_MPL_ASSERT ((has <callable::drop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::front, decltype (view))>));
+            callable::drop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::drop (direction::back, decltype (view))>));
+            callable::drop (decltype (view), direction::back)>));
 
         // Not for lvalues.
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, decltype (view) &)>));
+            decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, decltype (view) &)>));
+            decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((range::is_homogeneous <decltype (view)>));
 
         BOOST_MPL_ASSERT ((has <callable::drop (
-            rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::front, rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>, direction::front)>));
         BOOST_MPL_ASSERT ((has <callable::drop (
-            direction::back, rime::size_t <2>, decltype (view))>));
+            decltype (view), rime::size_t <2>, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::front, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <callable::drop (
-            direction::back, std::size_t, decltype (view) &)>));
+            decltype (view) &, std::size_t, direction::back)>));
 
         // chop.
         BOOST_MPL_ASSERT ((has <callable::chop (decltype (view))>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::front, decltype (view))>));
+            callable::chop (decltype (view), direction::front)>));
         BOOST_MPL_ASSERT ((has <
-            callable::chop (direction::back, decltype (view))>));
+            callable::chop (decltype (view), direction::back)>));
 
         // Not for lvalues (whether const or not).
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) &)>));
+            callable::chop (decltype (view) &, direction::back)>));
 
         BOOST_MPL_ASSERT_NOT ((has <callable::chop (decltype (view) const &)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::front, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::front)>));
         BOOST_MPL_ASSERT_NOT ((has <
-            callable::chop (direction::back, decltype (view) const &)>));
+            callable::chop (decltype (view) const &, direction::back)>));
 
         // Run-time.
-        BOOST_MPL_ASSERT ((never_empty <direction::front, decltype (view)>));
+        BOOST_MPL_ASSERT ((never_empty <decltype (view), direction::front>));
         BOOST_CHECK_EQUAL (size (view), 2);
 
         auto chopped1 = chop (std::move (view));
 
         BOOST_CHECK_EQUAL (chopped1.first(), 5);
         BOOST_MPL_ASSERT ((
-            never_empty <direction::front, decltype (chopped1.rest())>));
+            never_empty <decltype (chopped1.rest()), direction::front>));
         BOOST_CHECK_EQUAL (size (chopped1.rest()), 1);
 
         auto chopped2 = chop (chopped1.move_rest());
 
         BOOST_CHECK_EQUAL (chopped2.first(), 6);
         BOOST_MPL_ASSERT ((
-            always_empty <direction::front, decltype (chopped2.rest())>));
+            always_empty <decltype (chopped2.rest()), direction::front>));
         BOOST_CHECK_EQUAL (size (chopped2.rest()), 0);
     }
 }

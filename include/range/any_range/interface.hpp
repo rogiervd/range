@@ -239,7 +239,7 @@ namespace range { namespace any_range_interface {
         Return a pointer to a newly constructed object that represents the
         result of calling \c drop with an increment on the underlying range.
         */
-        virtual interface_ptr drop_n (Direction const &, std::size_t) const
+        virtual interface_ptr drop_n (std::size_t, Direction const &) const
         { throw std::logic_error ("Bug in any_range."); }
 
         /**

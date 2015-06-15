@@ -57,24 +57,24 @@ BOOST_AUTO_TEST_CASE (test_any_range_has) {
         static_assert (!has <callable::first (range const &)>::value, "");
         static_assert (!has <callable::size (range const &)>::value, "");
         static_assert (!has <callable::drop (range const &)>::value, "");
-        static_assert (!has <callable::drop (int, range const &)>::value, "");
+        static_assert (!has <callable::drop (range const &, int)>::value, "");
         static_assert (has <callable::chop (range &&)>::value, "");
         static_assert (has <callable::chop_in_place (range &)>::value, "");
 
         static_assert (has <
-            callable::empty (direction::back, range const &)>::value, "");
+            callable::empty (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::first (direction::back, range const &)>::value, "");
+            callable::first (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::size (direction::back, range const &)>::value, "");
+            callable::size (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::drop (direction::back, range const &)>::value, "");
+            callable::drop (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::drop (direction::back, int, range const &)>::value, "");
+            callable::drop (range const &, int, direction::back)>::value, "");
         static_assert (!has <
-            callable::chop (direction::back, range &&)>::value, "");
+            callable::chop (range &&, direction::back)>::value, "");
         static_assert (!has <
-            callable::chop_in_place (direction::back, range &)>::value, "");
+            callable::chop_in_place (range &, direction::back)>::value, "");
     }
     {
         typedef any_range <int, range::capability::forward_capabilities> range;
@@ -82,24 +82,24 @@ BOOST_AUTO_TEST_CASE (test_any_range_has) {
         static_assert (has <callable::first (range const &)>::value, "");
         static_assert (!has <callable::size (range const &)>::value, "");
         static_assert (has <callable::drop (range const &)>::value, "");
-        static_assert (!has <callable::drop (int, range const &)>::value, "");
+        static_assert (!has <callable::drop (range const &, int)>::value, "");
         static_assert (has <callable::chop (range &&)>::value, "");
         static_assert (has <callable::chop_in_place (range &)>::value, "");
 
         static_assert (has <
-            callable::empty (direction::back, range const &)>::value, "");
+            callable::empty (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::first (direction::back, range const &)>::value, "");
+            callable::first (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::size (direction::back, range const &)>::value, "");
+            callable::size (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::drop (direction::back, range const &)>::value, "");
+            callable::drop (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::drop (direction::back, int, range const &)>::value, "");
+            callable::drop (range const &, int, direction::back)>::value, "");
         static_assert (!has <
-            callable::chop (direction::back, range &&)>::value, "");
+            callable::chop (range &&, direction::back)>::value, "");
         static_assert (!has <
-            callable::chop_in_place (direction::back, range &)>::value, "");
+            callable::chop_in_place (range &, direction::back)>::value, "");
     }
     {
         typedef any_range <int, range::capability::bidirectional_capabilities>
@@ -108,24 +108,24 @@ BOOST_AUTO_TEST_CASE (test_any_range_has) {
         static_assert (has <callable::first (range const &)>::value, "");
         static_assert (!has <callable::size (range const &)>::value, "");
         static_assert (has <callable::drop (range const &)>::value, "");
-        static_assert (!has <callable::drop (int, range const &)>::value, "");
+        static_assert (!has <callable::drop (range const &, int)>::value, "");
         static_assert (has <callable::chop (range &&)>::value, "");
         static_assert (has <callable::chop_in_place (range &)>::value, "");
 
         static_assert (has <
-            callable::empty (direction::back, range const &)>::value, "");
+            callable::empty (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::first (direction::back, range const &)>::value, "");
+            callable::first (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::size (direction::back, range const &)>::value, "");
+            callable::size (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::drop (direction::back, range const &)>::value, "");
+            callable::drop (range const &, direction::back)>::value, "");
         static_assert (!has <
-            callable::drop (direction::back, int, range const &)>::value, "");
+            callable::drop (range const &, int, direction::back)>::value, "");
         static_assert (has <
-            callable::chop (direction::back, range &&)>::value, "");
+            callable::chop (range &&, direction::back)>::value, "");
         static_assert (has <
-            callable::chop_in_place (direction::back, range &)>::value, "");
+            callable::chop_in_place (range &, direction::back)>::value, "");
     }
     {
         typedef any_range <int, range::capability::random_access_capabilities>
@@ -134,24 +134,24 @@ BOOST_AUTO_TEST_CASE (test_any_range_has) {
         static_assert (has <callable::first (range const &)>::value, "");
         static_assert (has <callable::size (range const &)>::value, "");
         static_assert (has <callable::drop (range const &)>::value, "");
-        static_assert (has <callable::drop (int, range const &)>::value, "");
+        static_assert (has <callable::drop (range const &, int)>::value, "");
         static_assert (has <callable::chop (range &&)>::value, "");
         static_assert (has <callable::chop_in_place (range &)>::value, "");
 
         static_assert (has <
-            callable::empty (direction::back, range const &)>::value, "");
+            callable::empty (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::first (direction::back, range const &)>::value, "");
+            callable::first (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::size (direction::back, range const &)>::value, "");
+            callable::size (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::drop (direction::back, range const &)>::value, "");
+            callable::drop (range const &, direction::back)>::value, "");
         static_assert (has <
-            callable::drop (direction::back, int, range const &)>::value, "");
+            callable::drop (range const &, int, direction::back)>::value, "");
         static_assert (has <
-            callable::chop (direction::back, range &&)>::value, "");
+            callable::chop (range &&, direction::back)>::value, "");
         static_assert (has <
-            callable::chop_in_place (direction::back, range &)>::value, "");
+            callable::chop_in_place (range &, direction::back)>::value, "");
     }
 }
 
@@ -193,25 +193,25 @@ BOOST_AUTO_TEST_CASE (test_any_range_homogeneous) {
         auto a = range::make_any_range (v);
 
         BOOST_MPL_ASSERT ((
-            range::has <callable::empty (direction::back, decltype (a))>));
+            range::has <callable::empty (decltype (a), direction::back)>));
         BOOST_MPL_ASSERT ((
-            range::has <callable::first (direction::front, decltype (a))>));
+            range::has <callable::first (decltype (a), direction::front)>));
         BOOST_MPL_ASSERT ((
-            range::has <callable::size (direction::back, decltype (a))>));
+            range::has <callable::size (decltype (a), direction::back)>));
         BOOST_MPL_ASSERT ((
-            range::has <callable::drop (direction::back, decltype (a))>));
+            range::has <callable::drop (decltype (a), direction::back)>));
         BOOST_MPL_ASSERT ((
-            range::has <callable::drop (direction::front, int, decltype (a))>));
+            range::has <callable::drop (decltype (a), int, direction::front)>));
 
         BOOST_CHECK (!empty (a));
         BOOST_CHECK_EQUAL (size (a), 4u);
         BOOST_CHECK_EQUAL (size (drop (a)), 3u);
         BOOST_CHECK_EQUAL (first (drop (a)), 5);
-        BOOST_CHECK_EQUAL (first (drop (2, a)), 6);
-        BOOST_CHECK_EQUAL (first (back, a), 7);
-        BOOST_CHECK_EQUAL (first (back, drop (back, a)), 6);
-        BOOST_CHECK_EQUAL (first (back, drop (back, 2, a)), 5);
-        BOOST_CHECK (empty (back, drop (4, a)));
+        BOOST_CHECK_EQUAL (first (drop (a, 2)), 6);
+        BOOST_CHECK_EQUAL (first (a, back), 7);
+        BOOST_CHECK_EQUAL (first (drop (a, back), back), 6);
+        BOOST_CHECK_EQUAL (first (drop (a, 2, back), back), 5);
+        BOOST_CHECK (empty (drop (a, 4), back));
 
         first (drop (a)) = 14;
         BOOST_CHECK_EQUAL (v[1], 14);
@@ -340,9 +340,9 @@ BOOST_AUTO_TEST_CASE (test_any_range_heterogeneous) {
         BOOST_CHECK (!empty (a));
         BOOST_CHECK_EQUAL (chop_in_place (a), 7l);
         BOOST_CHECK (!empty (a));
-        BOOST_CHECK_EQUAL (chop_in_place (back, a), 294l);
+        BOOST_CHECK_EQUAL (chop_in_place (a, back), 294l);
         BOOST_CHECK (!empty (a));
-        BOOST_CHECK_EQUAL (chop_in_place (back, a), long ('a'));
+        BOOST_CHECK_EQUAL (chop_in_place (a, back), long ('a'));
         BOOST_CHECK (empty (a));
     }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,23 +52,23 @@ struct add_one {
 
 BOOST_AUTO_TEST_CASE (has) {
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        plus, tuple <int>)>));
+        tuple <int>, plus)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        direction::front, plus, tuple <int>)>));
+        tuple <int>, direction::front, plus)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        direction::back, plus, tuple <int>)>));
+        tuple <int>, direction::back, plus)>));
 
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-        weird_direction, plus, tuple <int>)>));
+        tuple <int>, weird_direction, plus)>));
 
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (float)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
         tuple <int>)>));
 
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-        float, plus, tuple <int>)>));
+        tuple <int>, float, plus)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-        int, plus, tuple <int>)>));
+        tuple <int>, int, plus)>));
 }
 
 BOOST_AUTO_TEST_CASE (add) {
@@ -79,26 +79,26 @@ BOOST_AUTO_TEST_CASE (add) {
     {
         tuple <> v;
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 0);
     }
 
     {
         tuple <int> v (27);
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 1);
     }
 
     {
         tuple <int, short> v (27, 32);
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 3);
 
-        for_each (add_one(), v);
-        BOOST_CHECK_EQUAL (at (rime::size_t <0>(), v), 28);
-        BOOST_CHECK_EQUAL (at (rime::size_t <1>(), v), 33);
+        for_each (v, add_one());
+        BOOST_CHECK_EQUAL (at (v, rime::size_t <0>()), 28);
+        BOOST_CHECK_EQUAL (at (v, rime::size_t <1>()), 33);
     }
 }
 
@@ -121,14 +121,14 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     {
         tuple<> t;
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 0);
     }
     // Tuple with 1 elements.
     {
         tuple <double> t (87.5);
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 1);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements[0]), 87.5);
     }
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     {
         tuple <double, short> t (87.5, 43);
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 2);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     {
         tuple <double, short, bool> const t (87.5, 43, true);
         collect_any c;
-        for_each (range::back, c, t);
+        for_each (t, range::back, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 3);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [0]), true);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     {
         tuple <double, short, bool, int> t (87.5, 43, true, -5);
         collect_any c;
-        for_each (range::front, c, t);
+        for_each (t, range::front, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 4);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
     {
         tuple <double, short, bool, int, unsigned> t (87.5, 43, true, -5, 900u);
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 5);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple <double, short, bool, int, unsigned, unsigned short, float, char>
             t (87.5, 43, true, -5, 900u, 30u, 4.5, 'A');
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 8);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
                 unsigned char>
             t (87.5, 43, true, -5, 900u, 30u, 4.5, 'A', 'q');
         collect_any c;
-        for_each (c, t);
+        for_each (t, c);
         BOOST_CHECK_EQUAL (c.elements.size(), 9);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);

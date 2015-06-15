@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         RIME_CHECK_EQUAL (second (first (z)), 5);
         RIME_CHECK_EQUAL (second (second (z)), 7);
 
-        RIME_CHECK_EQUAL (empty (drop (rime::size_t <2>(), z)), rime::true_);
+        RIME_CHECK_EQUAL (empty (drop (z, rime::size_t <2>())), rime::true_);
     }
 }
 

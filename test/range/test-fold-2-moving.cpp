@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ limitations under the License.
 #include "utility/unique_ptr.hpp"
 
 #include "range/std.hpp"
-#include "range/tuple.hpp"
 #include "range/function_range.hpp"
 
 #include "range/take.hpp"
@@ -49,7 +48,7 @@ struct add {
 BOOST_AUTO_TEST_CASE (function_range) {
     auto count = range::make_function_range (&get_next);
 
-    auto result = fold (add(), 0, range::take (10, std::move (count)));
+    auto result = fold (0, range::take (std::move (count), 10), add());
     BOOST_CHECK_EQUAL (result, 45);
 }
 
@@ -62,8 +61,8 @@ BOOST_AUTO_TEST_CASE (test_fold_moving) {
         v.push_back (6);
         v.push_back (7);
         auto view = unique_view (v);
-        // range::detail::get_underlying (view);
-        int result = fold (add(), 0, std::move (view));
+        // range::helper::get_underlying (view);
+        int result = fold (0, std::move (view), add());
         BOOST_CHECK_EQUAL (result, 5+6+7);
     }
 }
@@ -78,7 +77,7 @@ BOOST_AUTO_TEST_CASE (test_fold_chop) {
         // Note: one_time_view.
         auto view = one_time_view (v);
 
-        int result = fold (add(), 0, std::move (view));
+        int result = fold (0, std::move (view), add());
         BOOST_CHECK_EQUAL (result, 5+6+7);
     }
     {
@@ -86,7 +85,7 @@ BOOST_AUTO_TEST_CASE (test_fold_chop) {
         // Note: one_time_view.
         auto view = one_time_view (v);
 
-        int result = fold (add(), 0, std::move (view));
+        int result = fold (0, std::move (view), add());
         BOOST_CHECK_EQUAL (result, 5+6+7);
     }
 }
@@ -113,21 +112,21 @@ BOOST_AUTO_TEST_CASE (test_fold_move_state) {
         v.push_back (222);
 
         std::unique_ptr <int> result
-            = fold (add_to_unique_ptr(), make_unique <int> (0), v);
+            = fold (make_unique <int> (0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL (*result, 555);
     }
     {
         std::tuple <int, short, int> v (456, -123, 222);
 
         std::unique_ptr <int> result
-            = fold (add_to_unique_ptr(), make_unique <int> (0), v);
+            = fold (make_unique <int> (0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL (*result, 555);
     }
     {
-        range::tuple <int, short, int> v (456, -123, 222);
+        std::tuple <int, short, int> v (456, -123, 222);
 
         std::unique_ptr <int> result
-            = fold (add_to_unique_ptr(), make_unique <int> (0), v);
+            = fold (make_unique <int> (0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL (*result, 555);
     }
 }

@@ -40,23 +40,23 @@ bool approximately_equal (double i, double j)
 #define CHECK_tuple_view_equal(r1, r2, value, approximately_value) \
     RIME_CHECK_EQUAL (equal (r1, r2), value); \
     RIME_CHECK_EQUAL (equal (r2, r1), value); \
-    RIME_CHECK_EQUAL (equal (range::front, r1, r2), value); \
-    RIME_CHECK_EQUAL (equal (range::front, r2, r1), value); \
-    RIME_CHECK_EQUAL (equal (range::back, r1, r2), value); \
-    RIME_CHECK_EQUAL (equal (range::back, r2, r1), value); \
+    RIME_CHECK_EQUAL (equal (r1, r2, range::front), value); \
+    RIME_CHECK_EQUAL (equal (r2, r1, range::front), value); \
+    RIME_CHECK_EQUAL (equal (r1, r2, range::back), value); \
+    RIME_CHECK_EQUAL (equal (r2, r1, range::back), value); \
     \
     RIME_CHECK_EQUAL (equal ( \
-        approximately_equal, r1, r2), approximately_value); \
+        r1, r2, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (equal ( \
-        approximately_equal, r2, r1), approximately_value); \
+        r2, r1, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (equal ( \
-        range::front, approximately_equal, r1, r2), approximately_value); \
+        r1, r2, range::front, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (equal ( \
-        range::front, approximately_equal, r2, r1), approximately_value); \
+        r2, r1, range::front, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (equal ( \
-        range::back, approximately_equal, r1, r2), approximately_value); \
+        r1, r2, range::back, approximately_equal), approximately_value); \
     RIME_CHECK_EQUAL (equal ( \
-        range::back, approximately_equal, r2, r1), approximately_value)
+        r2, r1, range::back, approximately_equal), approximately_value)
 
 #define CHECK_tuple_equal(r1, r2, value, approximately_value) \
     CHECK_tuple_view_equal (r1, r2, value, approximately_value); \

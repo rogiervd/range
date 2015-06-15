@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#define BOOST_TEST_MODULE test_range_curry
+#define BOOST_TEST_MODULE test_range_lazy
 #include "utility/test/boost_unit_test.hpp"
 
-#include "range/curry.hpp"
+#include "range/lazy.hpp"
 
 #include <vector>
 
@@ -26,16 +26,16 @@ limitations under the License.
 
 using range::tuple;
 
-BOOST_AUTO_TEST_SUITE(test_range_curry)
+BOOST_AUTO_TEST_SUITE(test_range_lazy)
 
 struct take_4_true_tuple {
-    int operator() (int i, bool b, tuple<> t) const{
+    int operator() (tuple<> t, int i, bool b) const{
         BOOST_CHECK_EQUAL (i, 4);
         BOOST_CHECK_EQUAL (b, true);
         return 71;
     }
 
-    int operator() (int i, bool b, tuple <int> t) const{
+    int operator() (tuple <int> t, int i, bool b) const{
         BOOST_CHECK_EQUAL (i, 4);
         BOOST_CHECK_EQUAL (b, true);
         return range::first (t);
@@ -43,12 +43,12 @@ struct take_4_true_tuple {
 
     double operator() (tuple <double> t) const { return range::first (t); }
 
-    void operator() (double & target, tuple <double> source) const
+    void operator() (tuple <double> source, double & target) const
     { target = range::first (source); }
 };
 
-BOOST_AUTO_TEST_CASE (test_range_callable_curried) {
-    range::callable::curried <take_4_true_tuple> f;
+BOOST_AUTO_TEST_CASE (test_range_callable_lazy) {
+    range::callable::lazy <take_4_true_tuple> f;
     {
         auto f2 = f (4);
         auto f3 = f2();
@@ -82,23 +82,23 @@ BOOST_AUTO_TEST_CASE (test_range_callable_curried) {
     }
 }
 
-BOOST_AUTO_TEST_CASE (test_range_curry) {
+BOOST_AUTO_TEST_CASE (test_range_lazy) {
     std::vector <int> v;
 
-    auto empty_back = range::curry::empty (range::back);
+    auto empty_back = range::lazy::empty (range::back);
     BOOST_CHECK (empty_back (v));
 
-    auto size_back = range::curry::size (range::back);
+    auto size_back = range::lazy::size (range::back);
     BOOST_CHECK_EQUAL (size_back (v), 0);
     v.push_back (1);
     BOOST_CHECK_EQUAL (size_back (v), 1);
 
     v.push_back (7);
-    auto first_back = range::curry::first (range::back);
+    auto first_back = range::lazy::first (range::back);
     BOOST_CHECK_EQUAL (first_back (v), 7);
 
-    auto drop_1 = range::curry::drop (1);
-    auto drop_2 = range::curry::drop (2);
+    auto drop_1 = range::lazy::drop (1);
+    auto drop_2 = range::lazy::drop (2);
     BOOST_CHECK_EQUAL (range::first (drop_1 (v)), 7);
     BOOST_CHECK (empty_back (drop_2 (v)));
 }

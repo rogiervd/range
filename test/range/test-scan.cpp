@@ -64,7 +64,7 @@ struct reference_right {
 BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     std::vector <int> v;
     {
-        auto acc = scan (plus(), 0, v);
+        auto acc = scan (0, v, plus());
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     {
         // Note the use of one_time_view to test whether everything is moved
         // properly when necessary.
-        auto acc = scan (plus(), 0, one_time_view (v));
+        auto acc = scan (0, one_time_view (v), plus());
         RIME_CHECK_EQUAL (empty (acc), false);
         BOOST_CHECK_EQUAL (size (acc), 2);
         BOOST_CHECK_EQUAL (first (acc), 0);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
 
     v.push_back (2);
     {
-        auto acc = scan (plus(), 0, v);
+        auto acc = scan (0, v, plus());
         RIME_CHECK_EQUAL (empty (acc), false);
         BOOST_CHECK_EQUAL (size (acc), 3);
         BOOST_CHECK_EQUAL (first (acc), 0);
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     }
     // The same, but from the back.
     {
-        auto acc = scan (range::back, plus(), 0, v);
+        auto acc = scan (0, v, range::back, plus());
         RIME_CHECK_EQUAL (range::default_direction (acc) == range::back,
             rime::true_);
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     // Reference return type.
     {
         int i = 0;
-        auto acc = scan (reference_right(), i, v);
+        auto acc = scan (i, v, reference_right());
         static_assert (std::is_same <decltype (first (acc)), int &>::value, "");
         BOOST_CHECK_EQUAL (&first (acc), &i);
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     {
         // Only with chop_in_place.
         int i = 0;
-        auto acc = scan (reference_right(), i, v);
+        auto acc = scan (i, v, reference_right());
         int & element0 = chop_in_place (acc);
         BOOST_CHECK_EQUAL (&element0, &i);
         int & element1 = chop_in_place (acc);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     {
         // Only with chop_in_place; and with one_time_view.
         int i = 0;
-        auto acc = scan (reference_right(), i, one_time_view (v));
+        auto acc = scan (i, one_time_view (v), reference_right());
         int & element0 = chop_in_place (acc);
         BOOST_CHECK_EQUAL (&element0, &i);
         int & element1 = chop_in_place (acc);
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
 
     std::list <int> l;
     {
-        auto acc = scan (plus(), 0, l);
+        auto acc = scan (0, l, plus());
         static_assert (!has <callable::size (decltype (acc))>::value,
             "Scan over forward range cannot implement size.");
     }
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
 BOOST_AUTO_TEST_CASE (test_scan_heterogeneous) {
     {
         std::tuple<> t;
-        auto acc = scan (plus(), 0, t);
+        auto acc = scan (0, t, plus());
         RIME_CHECK_EQUAL (empty (acc), rime::false_);
         RIME_CHECK_EQUAL (size (acc), rime::size_t <1>());
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE (test_scan_heterogeneous) {
 
     {
         std::tuple <int> t (1);
-        auto acc = scan (plus(), 0, t);
+        auto acc = scan (0, t, plus());
         BOOST_CHECK (!empty (acc));
         RIME_CHECK_EQUAL (size (acc), rime::size_t <2>());
         BOOST_CHECK_EQUAL (first (acc), 0);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE (test_scan_heterogeneous) {
 
     {
         std::tuple <int, double> t (1, 2.0);
-        auto acc = scan (plus(), 0, t);
+        auto acc = scan (0, t, plus());
         BOOST_CHECK (!empty (acc));
         RIME_CHECK_EQUAL (size (acc), rime::size_t <3>());
         BOOST_CHECK_EQUAL (first (acc), 0);
@@ -230,22 +230,21 @@ BOOST_AUTO_TEST_CASE (test_scan_heterogeneous) {
 BOOST_AUTO_TEST_CASE (scan_weird_count) {
     weird_direction direction (7);
 
-    auto s = scan (direction, plus(), 0, weird_count (4));
+    auto s = scan (0, weird_count (4), direction, plus());
 
-    BOOST_CHECK_EQUAL (first (direction, s), 0);
-    s = drop (direction, s);
-    BOOST_CHECK_EQUAL (first (direction, s), 4);
-    s = drop (direction, s);
-    BOOST_CHECK_EQUAL (first (direction, s), 9);
-    s = drop (direction, s);
-    BOOST_CHECK_EQUAL (first (direction, s), 15);
+    BOOST_CHECK_EQUAL (first (s, direction), 0);
+    s = drop (s, direction);
+    BOOST_CHECK_EQUAL (first (s, direction), 4);
+    s = drop (s, direction);
+    BOOST_CHECK_EQUAL (first (s, direction), 9);
+    s = drop (s, direction);
+    BOOST_CHECK_EQUAL (first (s, direction), 15);
 }
-
 
 BOOST_AUTO_TEST_CASE (scan_unique_range) {
     std::vector <int> v;
     {
-        auto acc = scan (plus(), 0, one_time_view (v));
+        auto acc = scan (0, one_time_view (v), plus());
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
@@ -259,6 +258,7 @@ BOOST_AUTO_TEST_CASE (scan_unique_range) {
         // drop and chop only available for rvalue references.
         static_assert (has <callable::drop (decltype (acc) &&)>::value, "");
         static_assert (has <callable::chop (decltype (acc) &&)>::value, "");
+
         static_assert (
             !has <callable::drop (decltype (acc) const &)>::value, "");
         static_assert (
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE (scan_unique_range) {
     v.push_back (1);
     v.push_back (7);
     {
-        auto acc = scan (plus(), 0, unique_view (v));
+        auto acc = scan (0, unique_view (v), plus());
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE (test_scan_parser) {
         parse_outcome <void> initial_state (true,
             range::make_iterator_range (sequence));
 
-        auto result = scan (parse(), initial_state, parsers);
+        auto result = scan (initial_state, parsers, parse());
 
         auto result2 = drop (result);
         auto result3 = drop (result2);

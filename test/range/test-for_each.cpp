@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,23 +52,23 @@ struct add_one {
 
 BOOST_AUTO_TEST_CASE (has) {
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        plus, std::vector <int>)>));
+        std::vector <int>, plus)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        direction::front, plus, std::vector <int>)>));
+        std::vector <int>, direction::front, plus)>));
     BOOST_MPL_ASSERT ((range::has <range::callable::for_each (
-        direction::back, plus, std::vector <int>)>));
+        std::vector <int>, direction::back, plus)>));
 
-    // BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-    //     weird_direction, plus, std::vector <int>)>));
+    BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
+        std::vector <int>, weird_direction, plus)>));
 
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (float)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
         std::vector <int>)>));
 
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-        float, plus, std::vector <int>)>));
+        std::vector <int>, float, plus)>));
     BOOST_MPL_ASSERT_NOT ((range::has <range::callable::for_each (
-        int, plus, std::vector <int>)>));
+        std::vector <int>, int, plus)>));
 }
 
 BOOST_AUTO_TEST_CASE (homogeneous) {
@@ -78,20 +78,20 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
     std::vector <int> v;
 
-    for_each (c, v);
+    for_each (v, c);
     BOOST_CHECK_EQUAL (c.number, 0);
 
     v.push_back (27);
-    for_each (c, v);
+    for_each (v, c);
     BOOST_CHECK_EQUAL (c.number, 1);
 
     v.push_back (32);
-    for_each (c, v);
+    for_each (v, c);
     BOOST_CHECK_EQUAL (c.number, 3);
 
-    for_each (add_one(), v);
-    BOOST_CHECK_EQUAL (at (0, v), 28);
-    BOOST_CHECK_EQUAL (at (1, v), 33);
+    for_each (v, add_one());
+    BOOST_CHECK_EQUAL (at (v, 0), 28);
+    BOOST_CHECK_EQUAL (at (v, 1), 33);
 }
 
 BOOST_AUTO_TEST_CASE (heterogeneous) {
@@ -102,26 +102,26 @@ BOOST_AUTO_TEST_CASE (heterogeneous) {
     {
         std::tuple <> v;
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 0);
     }
 
     {
         std::tuple <int> v (27);
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 1);
     }
 
     {
         std::tuple <int, short> v (27, 32);
 
-        for_each (c, v);
+        for_each (v, c);
         BOOST_CHECK_EQUAL (c.number, 3);
 
-        for_each (add_one(), v);
-        BOOST_CHECK_EQUAL (at (rime::size_t <0>(), v), 28);
-        BOOST_CHECK_EQUAL (at (rime::size_t <1>(), v), 33);
+        for_each (v, add_one());
+        BOOST_CHECK_EQUAL (at (v, rime::size_t <0>()), 28);
+        BOOST_CHECK_EQUAL (at (v, rime::size_t <1>()), 33);
     }
 }
 

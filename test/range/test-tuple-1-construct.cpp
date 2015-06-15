@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -116,12 +116,12 @@ BOOST_AUTO_TEST_CASE (tuple_construct_default) {
     }
     {
         tuple <int> t;
-        static_assert (never_empty <direction::front, tuple <int>>::value, "");
+        static_assert (never_empty <tuple <int>, direction::front>::value, "");
         BOOST_CHECK_EQUAL (at_c <0> (t), 0);
     }
     {
         tuple <std::string, int> t;
-        static_assert (never_empty <direction::front, tuple <int>>::value, "");
+        static_assert (never_empty <tuple <int>, direction::front>::value, "");
         BOOST_CHECK_EQUAL (at_c <0> (t), "");
         BOOST_CHECK_EQUAL (at_c <1> (t), 0);
     }
@@ -154,10 +154,10 @@ BOOST_AUTO_TEST_CASE (tuple_construct_one_element) {
             range::callable::first (decltype (t) &)>::type, int &>));
 
         BOOST_CHECK_EQUAL (first (t), 2);
-        BOOST_CHECK_EQUAL (first (front, t), 2);
-        BOOST_CHECK_EQUAL (first (back, t), 2);
+        BOOST_CHECK_EQUAL (first (t, front), 2);
+        BOOST_CHECK_EQUAL (first (t, back), 2);
 
-        first (back, t) += 7;
+        first (t, back) += 7;
         BOOST_CHECK_EQUAL (first (t), 9);
 
         RIME_CHECK_EQUAL (empty (drop (t)), rime::true_);
@@ -307,20 +307,20 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         RIME_CHECK_EQUAL (range::empty (t), rime::false_);
 
         BOOST_CHECK_EQUAL (first (t), 17);
-        BOOST_CHECK_EQUAL (first (front, t), 17);
-        BOOST_CHECK_EQUAL (first (back, t), true);
+        BOOST_CHECK_EQUAL (first (t, front), 17);
+        BOOST_CHECK_EQUAL (first (t, back), true);
 
         RIME_CHECK_EQUAL (empty (drop (t)), false_);
         RIME_CHECK_EQUAL (empty (drop (drop (t))), true_);
-        RIME_CHECK_EQUAL (empty (drop (back, drop (t))), true_);
-        RIME_CHECK_EQUAL (empty (drop (rime::size_t <2>(), t)), true_);
+        RIME_CHECK_EQUAL (empty (drop (drop (t), back)), true_);
+        RIME_CHECK_EQUAL (empty (drop (t, rime::size_t <2>())), true_);
 
         BOOST_CHECK_EQUAL (first (drop (t)), true);
-        BOOST_CHECK_EQUAL (first (back, drop (back, t)), 17);
+        BOOST_CHECK_EQUAL (first (drop (t, back), back), 17);
 
-        first (front, t) = 15;
+        first (t, front) = 15;
         BOOST_CHECK_EQUAL (first (t), 15);
-        first (back, t) = false;
+        first (t, back) = false;
         BOOST_CHECK_EQUAL (first (drop (t)), false);
     }
 
@@ -330,11 +330,11 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         RIME_CHECK_EQUAL (range::empty (t), rime::false_);
 
         BOOST_CHECK_EQUAL (first (t), 17);
-        BOOST_CHECK_EQUAL (first (front, t), 17);
-        RIME_CHECK_EQUAL (first (back, t), 20.5);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <2>(), t)), 20.5);
+        BOOST_CHECK_EQUAL (first (t, front), 17);
+        RIME_CHECK_EQUAL (first (t, back), 20.5);
+        RIME_CHECK_EQUAL (first (drop (t, rime::size_t <2>())), 20.5);
         RIME_CHECK_EQUAL (first (drop (t)), true);
-        RIME_CHECK_EQUAL (first (back, drop (back, t)), true);
+        RIME_CHECK_EQUAL (first (drop (t, back), back), true);
 
         RIME_CHECK_EQUAL (empty (drop (t)), false_);
         RIME_CHECK_EQUAL (empty (drop (drop (t))), false_);
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
                 tracked <std::string> (c, "Hello"));
             c.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
             BOOST_CHECK_EQUAL (first (t).content(), 45);
-            BOOST_CHECK_EQUAL (first (back, t).content(), "Hello");
+            BOOST_CHECK_EQUAL (first (t, back).content(), "Hello");
         }
     }
 
@@ -359,10 +359,10 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         tuple <bool, int const> const t2 (true, 67);
 
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-                range::callable::first (direction::back, decltype (t2) &)
+                range::callable::first (decltype (t2) &, direction::back)
             >::type, int const &>));
 
-        BOOST_CHECK_EQUAL (first (back, t2), 67);
+        BOOST_CHECK_EQUAL (first (t2, back), 67);
     }
     // const &.
     {
@@ -370,10 +370,10 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         tuple <bool, int const &> const t2 (true, i2);
 
         BOOST_MPL_ASSERT ((std::is_same <typename range::result_of <
-                range::callable::first (direction::back, decltype (t2) &)
+                range::callable::first (decltype (t2) &, direction::back)
             >::type, int const &>));
 
-        BOOST_CHECK_EQUAL (first (back, t2), 67);
+        BOOST_CHECK_EQUAL (first (t2, back), 67);
     }
     // &.
     {
@@ -382,12 +382,12 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             typename range::result_of <
-                range::callable::first (direction::back, decltype (t2) &)
+                range::callable::first (decltype (t2) &, direction::back)
             >::type, int &>));
 
-        BOOST_CHECK_EQUAL (first (back, t2), 67);
+        BOOST_CHECK_EQUAL (first (t2, back), 67);
         i2 = 23;
-        BOOST_CHECK_EQUAL (first (back, t2), 23);
+        BOOST_CHECK_EQUAL (first (t2, back), 23);
     }
     // &&.
     // Essentially should work like &, but then return &&.
@@ -397,12 +397,12 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
 
         BOOST_MPL_ASSERT ((std::is_same <
             typename range::result_of <
-                range::callable::first (direction::back, decltype (t2) &)
+                range::callable::first (decltype (t2) &, direction::back)
             >::type, int &&>));
 
-        BOOST_CHECK_EQUAL (first (back, t2), 67);
+        BOOST_CHECK_EQUAL (first (t2, back), 67);
         i2 = 23;
-        BOOST_CHECK_EQUAL (first (back, t2), 23);
+        BOOST_CHECK_EQUAL (first (t2, back), 23);
     }
 }
 
@@ -715,35 +715,35 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
         tuple_type t2 (t1);
         RIME_CHECK_EQUAL (first (t2), 7);
         RIME_CHECK_EQUAL (first (drop (t2)), false);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <2>(), t2)), 22.25f);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <3>(), t2)).content(),
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <2>())), 22.25f);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <3>())).content(),
             17.5);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <4>(), t2)).content(), 25);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <5>(), t2)).content(), 27l);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <4>())).content(), 25);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <5>())).content(), 27l);
 
         c.check_counts (3, 2, 0, 0, 0, 0, 0, 0);
 
         f = -3.75;
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <2>(), t2)), -3.75f);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <2>())), -3.75f);
         d.content() = -2.;
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <3>(), t2)).content(), -2.);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <3>())).content(), -2.);
         o.content() = 987;
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <4>(), t2)).content(), 987);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <4>())).content(), 987);
         l.content() = 34;
         // Copy of l does not change.
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <5>(), t2)).content(), 27l);
+        RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <5>())).content(), 27l);
 
         // Moving a tuple.
         tuple_type t3 (std::move (t1));
         RIME_CHECK_EQUAL (first (t3), 7);
         RIME_CHECK_EQUAL (first (drop (t3)), false);
-        RIME_CHECK_EQUAL (first (drop (two, t3)), -3.75f);
-        RIME_CHECK_EQUAL (first (drop (three, t3)).content(), -2.);
-        BOOST_CHECK_EQUAL (&first (drop (three, t3)), &d);
-        RIME_CHECK_EQUAL (first (drop (four, t3)).content(), 987);
+        RIME_CHECK_EQUAL (first (drop (t3, two)), -3.75f);
+        RIME_CHECK_EQUAL (first (drop (t3, three)).content(), -2.);
+        BOOST_CHECK_EQUAL (&first (drop (t3, three)), &d);
+        RIME_CHECK_EQUAL (first (drop (t3, four)).content(), 987);
         BOOST_CHECK_EQUAL (
-            &static_cast <tracked <int> const &> (first (drop (four, t3))), &o);
-        RIME_CHECK_EQUAL (first (drop (rime::size_t <5>(), t3)).content(), 27l);
+            &static_cast <tracked <int> const &> (first (drop (t3, four))), &o);
+        RIME_CHECK_EQUAL (first (drop (t3, rime::size_t <5>())).content(), 27l);
 
         // If moveability was not exploited, it would be this:
         // c.check_counts (3, 3, 0, 0, 0, 0, 0, 0);

@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ BOOST_AUTO_TEST_CASE (tuple_multiple_elements) {
         RIME_CHECK_EQUAL (first (t), 4);
         RIME_CHECK_EQUAL (first (drop (t)), 5.5f);
         RIME_CHECK_EQUAL (first (drop (drop (t))), 6.75f);
-        RIME_CHECK_EQUAL (first (back, t), 7);
+        RIME_CHECK_EQUAL (first (t, back), 7);
     }
     {
         std::tuple <int, int> source (6, 7);
         tuple <int, int> t (source);
         BOOST_CHECK_EQUAL (first (t), 6);
-        BOOST_CHECK_EQUAL (first (back, t), 7);
+        BOOST_CHECK_EQUAL (first (t, back), 7);
     }
 }
 

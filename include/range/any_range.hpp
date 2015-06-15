@@ -93,14 +93,13 @@ something to be careful with.
 */
 template <class Element, class Capabilities = void> class any_range;
 
-template <class Capabilities> struct any_range_tag;
+namespace operation {
+    struct any_range_tag {};
+} // namespace operation
 
 template <class Element, class Capabilities>
     struct tag_of_qualified <any_range <Element, Capabilities>>
-{
-    typedef any_range_tag <typename
-        capability::normalise_capabilities <Capabilities>::type> type;
-};
+{ typedef operation::any_range_tag type; };
 
 template <class Element, class Capabilities> class any_range {
 public:
@@ -191,22 +190,20 @@ public:
     /** \brief
     Construct with a range.
 
+    \param range
+        The actual range to view with this any_range.
     \param directions (optional; any number of arguments is allowed)
         The directions that should be passed to \ref range::view to view the
         range.
         If left out, the default direction is used.
-    \param range
-        The actual range to view with this any_range.
     */
-    template <class ... Arguments,
-        class Range = typename
-            meta::first <meta::back, meta::vector <Arguments ...>>::type,
+    template <class Range, class ... Directions,
         class Enable1 = typename boost::enable_if <is_range <Range>>::type,
         class Enable2 = typename boost::disable_if <
             is_any_range_with_same_element_type <Range>>::type>
-    explicit any_range (Arguments && ... arguments)
+    explicit any_range (Range && range, Directions const & ... directions)
     : implementation_ (wrap_view (range::view (
-        std::forward <Arguments> (arguments) ...))) {}
+        std::forward <Range> (range), directions ...))) {}
 
     /** \brief
     Copy constructor.
@@ -259,7 +256,7 @@ public:
 private:
     // Implementation of operations.
 
-    friend class operation::member_access;
+    friend class helper::member_access;
 
     default_direction_type default_direction() const
     { return implementation_->default_direction(); }
@@ -294,8 +291,8 @@ private:
 
     template <class Direction, class Enable = typename boost::enable_if <
         is_implemented <capability::drop_n, Direction>>::type>
-    any_range drop (Direction const & direction, size_t increment) const
-    { return any_range (implementation_->drop_n (direction, increment)); }
+    any_range drop (size_t increment, Direction const & direction) const
+    { return any_range (implementation_->drop_n (increment, direction)); }
 
     template <class Direction, class Enable = typename boost::enable_if <
         is_implemented <capability::chop_destructive, Direction>>::type>
@@ -309,75 +306,60 @@ private:
 
 namespace operation {
 
-    // chop cannot be implemented in the class for older compilers, because
-    // member functions cannot be qualified with &&.
-    template <class Capabilities, class Direction, class AnyRange>
-        struct chop <any_range_tag <Capabilities>, Direction, AnyRange &&>
-    : chop_by_chop_in_place <
-        any_range_tag <Capabilities>, Direction, AnyRange &&> {};
+    template <class AnyRange, class Direction> inline
+        auto implement_chop (any_range_tag const & tag,
+            AnyRange && r, Direction const & direction)
+    RETURNS (helper::chop_by_chop_in_place (
+        std::forward <AnyRange> (r), direction));
 
 } // namespace operation
 
 namespace callable {
 
     class make_any_range {
+    private:
         /// Compute the capabilities, using the directions, or not, if they are
         /// not given.
-        template <class Directions, class View> struct compute_capabilities;
-
-        template <class ... Directions, class View>
-            struct compute_capabilities <meta::set <Directions ...>, View>
+        template <class View, class ... Directions> struct compute_capabilities
         : capability::detect_capabilities <View,
             typename capability::detect_copy_construct_key <View,
                 meta::set <Directions ...>>::type> {};
 
-        template <class View> struct compute_capabilities <meta::set<>, View>
-        : capability::detect_capabilities <View> {};
+        struct apply {
+            template <class Range, class FirstDirection, class ... Directions,
+                class Capabilities = typename compute_capabilities <
+                    typename std::decay <Range>::type,
+                    FirstDirection, Directions ...>::type,
+                class Element = typename range::result_of <
+                    callable::first (Range &&, FirstDirection)>::type,
+                class AnyRange = any_range <Element, Capabilities>>
+            AnyRange operator() (Range && range,
+                FirstDirection const & first_direction,
+                Directions const & ... directions) const
+            {
+                return AnyRange (std::forward <Range> (range),
+                    first_direction, directions ...);
+            }
 
-        /**
-        The actual implementation, having split up the argument types into
-        Directions (everything except for the last argument) and Range (the last
-        argument).
-        */
-        template <class Directions, class Range, class Enable = void>
-            struct implementation : operation::unimplemented {};
-
-        template <class ... Directions, class Range>
-            class implementation <meta::vector <Directions ...>, Range,
-                typename boost::enable_if <meta::all_of_c <
-                    is_direction <Directions>::value ...,
-                    is_range <Range>::value>>::type>
-        {
-            typedef typename range::decayed_result_of <callable::view (
-                Directions ..., Range)>::type view_type;
-            typedef typename compute_capabilities <
-                meta::set <typename std::decay <Directions>::type ...>,
-                view_type>::type capabilities;
-            typedef typename range::result_of <callable::first (view_type &&)
-                >::type element_type;
-        public:
-            typedef any_range <element_type, capabilities> result_type;
-
-            // Clang 3.0 does not like being passed Directions ..., Range.
-            template <class ... Arguments>
-                result_type operator() (Arguments && ... arguments) const
-            { return result_type (std::forward <Arguments> (arguments) ...); }
+            // Without directions: get first element type from the default
+            // directions, and detect directions automatically.
+            template <class Range,
+                class Capabilities = typename capability::detect_capabilities <
+                    typename std::decay <Range>::type>::type,
+                class Element = typename range::result_of <
+                    callable::first (Range &&)>::type,
+                class AnyRange = any_range <Element, Capabilities>>
+            AnyRange operator() (Range && range) const
+            { return AnyRange (std::forward <Range> (range)); }
         };
 
     public:
-        template <class ...> struct apply;
-
-        template <class ... Arguments> struct apply
-        : implementation <
-            typename meta::drop <meta::back,
-                meta::vector <Arguments ...>>::type,
-            typename meta::first <meta::back,
-                meta::vector <Arguments ...>>::type> {};
-
-        template <class ... Arguments>
-            auto operator() (Arguments && ... arguments) const
-        RETURNS (apply <Arguments ...>() (
-            std::forward <Arguments> (arguments) ...));
+        template <class Range, class ... Directions>
+            auto operator() (Range && range, Directions const & ... directions)
+            const
+        RETURNS (apply() (
+            range::view (std::forward <Range> (range), directions ...),
+            directions ...));
     };
 
 } // namespace callable
@@ -392,15 +374,15 @@ Otherwise, the default direction will be used, and its reverse, if applicable.
 The any_range always has the correct type for default_direction.
 
 The element type is set to the result type of <c>first (range)</c>, in the
-default direction.
+first direction given (or the default direction).
 make_any_range can only be used if this is implemented.
 
+\param range
+    The actual range the any_range will give a view on.
 \param directions (optional; any number of arguments is allowed)
     The directions that should be passed to \ref range::view to view the range.
     If left out, the default direction is used to call view, and the any_range
     will allow traversal in that direction and its reverse, if applicable.
-\param range
-    The actual range the any_range will give a view on.
 */
 static auto constexpr make_any_range = callable::make_any_range();
 

@@ -244,7 +244,7 @@ namespace range { namespace helper {
         = member_access::callable_size();
     member_access::callable_first const member_access::first
         = member_access::callable_first();
-    member_access::callable_at const member_access::at_constant
+    member_access::callable_at_constant const member_access::at_constant
         = member_access::callable_at_constant();
     member_access::callable_at const member_access::at
         = member_access::callable_at();

@@ -94,7 +94,8 @@ run test-scan.cpp : : : <dependency>std <dependency>test-tuple-0-basic ;
 
 run test-buffer.cpp : : : <dependency>test-core <dependency>std ;
 run test-buffer-file.cpp : : ./example/short.txt
-    : <dependency>test-core <dependency>std ;
+    : <dependency>test-core <dependency>std
+    -<testing.launcher>"valgrind --leak-check=full --error-exitcode=1" ;
 
 run test-any_range-capability.cpp : : : <dependency>test-core <dependency>std ;
 run test-any_range.cpp : : : <dependency>test-any_range-capability ;

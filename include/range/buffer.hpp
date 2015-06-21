@@ -53,10 +53,11 @@ namespace utility { namespace pointer_policy {
     /*
     Make sure buffers are destructed non-recursively.
     */
-    template <class Element, std::size_t Number>
-        struct move_recursive_next <range::element_producer <Element, Number>>
+    template <class Element>
+        struct move_recursive_next <range::buffer_detail::
+            element_producer_base <Element>>
     {
-        typedef range::element_producer <Element, Number> producer;
+        typedef range::buffer_detail::element_producer_base <Element> producer;
         typedef typename producer::pointer pointer;
 
         pointer && operator() (producer * producer) const
@@ -70,8 +71,8 @@ namespace range {
 
 namespace buffer_detail {
 
-template <class Range, class Element, std::size_t Number>
-    class range_element_producer;
+    template <class Range, class Element, std::size_t NumberOrZero>
+        class range_element_producer;
 
 } // namespace buffer_detail
 
@@ -84,18 +85,16 @@ Not threadsafe.
 
 \todo Make Number better
 */
-template <class Element, std::size_t NumberOrZero = 0> class buffer {
+template <class Element> class buffer {
 
-    static constexpr std::size_t element_num = (NumberOrZero == 0) ?
-        // Automatic: max 256 bytes.
-        ((sizeof (Element) < 256) ? 256 / sizeof (Element) : 1)
-        : NumberOrZero;
-
-    typedef range::element_producer <Element, element_num> producer_type;
+    typedef range::buffer_detail::element_producer_base <Element> producer_type;
+public:
+    // \todo Or use something else for the interface?
     typedef typename producer_type::pointer producer_ptr;
 
+private:
     producer_ptr producer_;
-    Element * first_;
+    Element const * first_;
 
     // \todo Which one?
 private:
@@ -103,25 +102,10 @@ public:
     explicit buffer (producer_ptr producer)
     : producer_ (std::move (producer)), first_ (producer_->first()) {}
 
-    buffer (producer_ptr producer, Element * first)
+    buffer (producer_ptr producer, Element const * first)
     : producer_ (std::move (producer)), first_ (first) {}
 
 public:
-    /**
-    \todo Must be front.
-    */
-    template <class Range,
-        class Enable1 = typename
-            std::enable_if <is_range <Range>::value>::type,
-        class Enable2 = typename
-            utility::disable_if_same_or_derived <buffer, Range>::type,
-        class View = typename decayed_result_of <callable::view (Range)>::type>
-    buffer (Range && range)
-    : producer_ (producer_ptr::template construct <
-            buffer_detail::range_element_producer <View, Element, element_num>> (
-        view (std::forward <Range> (range))))
-    { first_ = producer_->first(); }
-
 private:
     friend class range::helper::member_access;
 
@@ -132,7 +116,7 @@ private:
     buffer drop_one (direction::front) const {
         assert (!empty (front));
 
-        Element * new_first = first_ + 1;
+        Element const * new_first = first_ + 1;
         if (new_first == producer_->end()) {
             producer_ptr next_producer = producer_->next();
             if (next_producer)
@@ -168,87 +152,141 @@ namespace operation {
     struct buffer_tag {};
 } // namespace operation
 
-template <class Element, std::size_t NumberOrZero>
-    struct tag_of_qualified <buffer <Element, NumberOrZero>>
+template <class Element> struct tag_of_qualified <buffer <Element>>
 { typedef operation::buffer_tag type; };
 
-template <class Element, std::size_t Number> class element_producer
-: public utility::shared
-{
-public:
-    typedef utility::pointer_policy::strict_weak_ordered <
-            utility::pointer_policy::pointer_access <
-            utility::pointer_policy::reference_count_shared <
-            utility::pointer_policy::with_recursive_type <
-            utility::pointer_policy::use_new_delete <element_producer>>>>>
-        pointer_policy;
 
-    class pointer
-    : public utility::pointer_policy::pointer <pointer_policy, pointer>
+
+
+/**
+\todo Must be default direction.
+*/
+template <class Element, std::size_t NumberOrZero, class Range,
+    class Enable1 = typename
+        std::enable_if <is_range <Range>::value>::type,
+    class View = typename decayed_result_of <callable::view (Range)>::type>
+buffer <Element> make_buffer (Range && range)
+{
+    typedef typename buffer <Element>::producer_ptr producer_ptr;
+    return buffer <Element> (producer_ptr::template construct <
+        buffer_detail::range_element_producer <View, Element, NumberOrZero>> (
+            view (std::forward <Range> (range))));
+}
+
+namespace buffer_detail {
+
+    template <class Element> class element_producer_base
+    : public utility::shared
     {
-        typedef utility::pointer_policy::pointer <pointer_policy, pointer>
-            base_type;
     public:
-        template <class ... Arguments>
-            explicit pointer (Arguments && ... arguments)
-        : base_type (std::forward <Arguments> (arguments) ...) {}
+        typedef utility::pointer_policy::strict_weak_ordered <
+                utility::pointer_policy::pointer_access <
+                utility::pointer_policy::reference_count_shared <
+                utility::pointer_policy::with_recursive_type <
+                utility::pointer_policy::use_new_delete <
+                    element_producer_base>>>>>
+            pointer_policy;
+
+        class pointer
+        : public utility::pointer_policy::pointer <pointer_policy, pointer>
+        {
+            typedef utility::pointer_policy::pointer <pointer_policy, pointer>
+                base_type;
+        public:
+            template <class ... Arguments>
+                explicit pointer (Arguments && ... arguments)
+            : base_type (std::forward <Arguments> (arguments) ...) {}
+
+        };
+
+    protected:
+        Element * end_;
+        pointer next_;
+
+        template <class Producer> friend
+            struct utility::pointer_policy::move_recursive_next;
+
+    protected:
+        explicit element_producer_base() : next_() {}
+
+        element_producer_base (element_producer_base const &) = delete;
+        element_producer_base (element_producer_base &&) = delete;
+
+        /**
+        Get a pointer to a newly produced producer.
+        */
+        virtual pointer get_next() = 0;
+
+    public:
+        pointer next() {
+            if (!next_)
+                next_ = get_next();
+            return next_;
+        }
+
+        virtual Element const * first() const = 0;
+        Element const * end() const { return end_; }
+
+        virtual ~element_producer_base() {}
     };
+
+} // namespace buffer_detail
+
+template <class Element, std::size_t Number> class element_producer
+: public buffer_detail::element_producer_base <Element>
+{
+    typedef buffer_detail::element_producer_base <Element> base_type;
+public:
+    typedef typename base_type::pointer pointer;
+
+protected:
+    Element * memory()
+    { return reinterpret_cast <Element *> (memory_); }
+
+    Element const * memory() const
+    { return reinterpret_cast <Element const *> (memory_); }
 
 private:
     typename std::aligned_storage <sizeof (Element), alignof (Element)>::type
         memory_ [Number];
 
-protected:
-    Element * memory() { return reinterpret_cast <Element *> (memory_); }
-    Element const * memory() const { return reinterpret_cast <Element const *> (memory_); }
-
-    Element * end_;
-
-    pointer next_;
-
-    template <class Producer> friend
-        struct utility::pointer_policy::move_recursive_next;
-
     void destruct_elements (rime::true_type trivial) {}
 
     void destruct_elements (rime::false_type trivial) {
-        Element * current = this->memory();
-        while (current != end_) {
+        Element * current = memory();
+        while (current != this->end_) {
             current->~Element();
             ++ current;
         }
     }
 
-protected:
-    explicit element_producer () : next_() {}
-
-    /**
-    Get a pointer to a newly produced producer.
-    */
-    virtual pointer get_next() = 0;
-
 public:
-    pointer next() {
-        if (!next_)
-            next_ = get_next();
-        return next_;
-    }
-
-    Element * first() { return memory(); }
-    Element const * end() const { return end_; }
+    explicit element_producer() : base_type() {}
 
     virtual ~element_producer()
     { destruct_elements (std::has_trivial_destructor <Element>()); }
-};
 
+    virtual Element const * first() const { return memory(); }
+};
 
 namespace buffer_detail {
 
-template <class Range, class Element, std::size_t Number>
-    class range_element_producer
-: public element_producer <Element, Number>
+template <class Element, std::size_t NumberOrZero> struct compute_element_num {
+    static constexpr std::size_t value =
+        NumberOrZero == 0 ?
+        // Automatic: max 256 bytes.
+        ((sizeof (Element) < 256) ? 256 / sizeof (Element) : 1)
+        : NumberOrZero;
+};
+
+
+
+template <class Range, class Element, std::size_t NumberOrZero>
+class range_element_producer
+: public element_producer <Element, compute_element_num <Element, NumberOrZero>::value>
 {
-    typedef element_producer <Element, Number> base_type;
+    static constexpr std::size_t buffer_size = compute_element_num <Element, NumberOrZero>::value;
+    typedef element_producer <Element, buffer_size> base_type;
     typedef typename base_type::pointer pointer;
 
     // Only the last producer needs and has access to the range.
@@ -261,7 +299,7 @@ protected:
     void fill() {
         Element * current = this->memory();
 
-        while (!empty (*range_) && current != this->memory() + Number) {
+        while (!empty (*range_) && current != this->memory() + buffer_size) {
             // Use placement new.
             new (current) Element (chop_in_place (*range_));
             ++ current;
@@ -272,18 +310,18 @@ protected:
 
 public:
     range_element_producer (std::unique_ptr <Range> && r)
-    : element_producer <Element, Number>(), range_ (std::move (r))
+    : element_producer <Element, buffer_size>(), range_ (std::move (r))
     { fill(); }
 
     range_element_producer (Range && range)
-    : element_producer <Element, Number>(),
+    : element_producer <Element, buffer_size>(),
         range_ (utility::make_unique <Range> (std::move (range)))
     {
         fill();
     }
 
     range_element_producer (Range const & range)
-    : element_producer <Element, Number>(),
+    : element_producer <Element, buffer_size>(),
         range_ (utility::make_unique <Range> (range))
     { fill(); }
 };

@@ -140,7 +140,6 @@ namespace helper {
     \param tag The range tag.
     \param range The range.
     \param direction The direction.
-    \param range The range.
     */
     void implement_chop (unusable);
 

@@ -4,6 +4,7 @@ project /range
       <library>/meta//meta
       <library>/utility//utility
       <library>/rime//rime
+      <library>/boost//iostreams
     ;
 
 # Declare target /range//range as a header-only library.

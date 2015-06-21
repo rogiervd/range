@@ -22,8 +22,9 @@ limitations under the License.
 
 #include <istream>
 #include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
 #include <boost/exception/errinfo_errno.hpp>
 #include <boost/exception/errinfo_file_name.hpp>
@@ -119,13 +120,26 @@ namespace file_producer_detail {
         }
     };
 
+    class gzip_file_stream
+    : public boost::iostreams::filtering_streambuf <boost::iostreams::input>
+    {
+        boost::iostreams::stream_buffer <file_producer_detail::file_source>
+            underlying_;
+    public:
+        gzip_file_stream (std::string file_name)
+        : underlying_ (std::move (file_name)) {
+            this->push (boost::iostreams::gzip_decompressor());
+            this->push (underlying_);
+        }
+    };
+
 } // namespace file_producer_detail
 
 template <class Char> class file_element_producer;
 
 // \todo Also provide non-templated version
 template <class Char> inline
-    range::buffer <Char, 256> read_file (std::string const & file_name)
+    range::buffer <Char> read_file (std::string const & file_name)
 {
     // This makes it impossible to detect read error.s
     //auto stream_buffer = file_producer_detail::read_file_buffer (file_name);
@@ -135,8 +149,24 @@ template <class Char> inline
         boost::iostreams::stream_buffer <file_producer_detail::file_source>> (
             file_name);
 
-    return range::buffer <Char, 256> (
+    return range::buffer <Char> (
         element_producer <Char, 256>::pointer::template construct <file_element_producer <Char>> (
+            std::move (stream_buffer)));
+}
+
+inline range::buffer <char> read_gzip_file (std::string const & file_name)
+{
+    // \todo Not on stack!
+    /*boost::iostreams::stream_buffer <file_producer_detail::file_source> file (
+            file_name);
+    auto stream_buffer = utility::make_unique <
+        boost::iostreams::filtering_streambuf <boost::iostreams::input>>();
+    stream_buffer->push (boost::iostreams::gzip_decompressor());
+    stream_buffer->push (file);*/
+    auto stream_buffer = utility::make_unique <
+        file_producer_detail::gzip_file_stream> (file_name);
+    return range::buffer <char> (
+        element_producer <char, 256>::pointer::template construct <file_element_producer <char>> (
             std::move (stream_buffer)));
 }
 

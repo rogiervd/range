@@ -17,7 +17,12 @@ limitations under the License.
 #define BOOST_TEST_MODULE test_range_buffer_file
 #include "utility/test/boost_unit_test.hpp"
 
+// \todo Move testing of gzipped files to another test file so valgrind isn't necessary?
+// Valgrind catches things in zlib.
+
 #include "range/file_buffer.hpp"
+
+using range::buffer;
 
 using range::empty;
 using range::first;
@@ -26,6 +31,34 @@ using range::chop;
 using range::chop_in_place;
 
 BOOST_AUTO_TEST_SUITE(test_range_buffer_file)
+
+void checkShortText (buffer <char> b) {
+    BOOST_CHECK_EQUAL (first (b), 'S');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 'h');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 'o');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 'r');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 't');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), ' ');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 't');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 'e');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 'x');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), 't');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), '.');
+    b = drop (b);
+    BOOST_CHECK_EQUAL (first (b), '\n');
+    b = drop (b);
+    BOOST_CHECK (empty (b));
+}
 
 BOOST_AUTO_TEST_CASE (file) {
     int argc = boost::unit_test::framework::master_test_suite().argc;
@@ -37,32 +70,10 @@ BOOST_AUTO_TEST_CASE (file) {
     std::string file_name = argv [1];
 
     auto buffer = range::read_file <char> (file_name);
+    checkShortText (std::move (buffer));
 
-    BOOST_CHECK_EQUAL (first (buffer), 'S');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 'h');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 'o');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 'r');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 't');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), ' ');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 't');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 'e');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 'x');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), 't');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), '.');
-    buffer = drop (buffer);
-    BOOST_CHECK_EQUAL (first (buffer), '\n');
-    buffer = drop (buffer);
-    BOOST_CHECK (empty (buffer));
+    buffer = range::read_gzip_file (file_name + ".gz");
+    checkShortText (std::move (buffer));
 }
 
 // \todo Test errors.
@@ -71,6 +82,10 @@ BOOST_AUTO_TEST_CASE (error) {
     BOOST_CHECK_THROW (range::read_file <char> ("non_existing_file_name.txt"),
         std::exception);
 }
+
+// \todo Also implement gzip.
+
+// \todo Also Test on long files!
 
 // \todo Also test on char16_t
 

@@ -9,4 +9,7 @@ project
       <target-os>linux:<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
     ;
 
-alias "range-tests" : range ;
+alias "range-tests" :
+    range
+    container
+    ;

@@ -27,6 +27,8 @@ limitations under the License.
 
 #include "unique_range.hpp"
 
+using range::make_buffer;
+
 using range::empty;
 using range::first;
 using range::drop;
@@ -36,7 +38,9 @@ using range::chop_in_place;
 BOOST_AUTO_TEST_SUITE(test_range_buffer)
 
 BOOST_AUTO_TEST_CASE (count) {
-    range::buffer <std::size_t> count (one_time_view (range::count()));
+    // \todo make_buffer without number.
+    // \todo make_buffer without Element.
+    auto count = make_buffer <std::size_t, 0> (one_time_view (range::count()));
 
     BOOST_CHECK_EQUAL (first (count), 0);
     BOOST_CHECK_EQUAL (first (drop (count)), 1);
@@ -62,7 +66,7 @@ BOOST_AUTO_TEST_CASE (tracked) {
             RANGE_FOR_EACH (i, range::count (size))
                 v.push_back (tracked (r, i));
 
-            range::buffer <tracked, 7> b (v);
+            auto b = make_buffer <tracked, 7> (v);
             RANGE_FOR_EACH (i, range::count (size)) {
                 BOOST_CHECK_EQUAL (first (b).content(), i);
                 switch (i % 3)
@@ -95,7 +99,7 @@ BOOST_AUTO_TEST_CASE (tracked) {
 }
 
 BOOST_AUTO_TEST_CASE (stack_overflow) {
-    range::buffer <std::size_t, 1> count (range::count());
+    auto count = make_buffer <std::size_t, 1> (range::count());
     auto count2 = count;
     // Reserve 100000 buffers.
     // It will break the stack if they are destructed recursively.

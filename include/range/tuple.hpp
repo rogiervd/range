@@ -808,6 +808,51 @@ template <class ... Left, class ... Right> inline
         tuple <Left ...> const & left, tuple <Right ...> const & right)
 RETURNS (!less_lexicographical (left, right));
 
+namespace callable {
+
+    struct make_tuple {
+        template <class ... Types> inline
+            tuple <Types ...> operator() (Types const & ... arguments) const
+        { return tuple <Types ...> (arguments ...); }
+    };
+
+    struct make_tuple_from {
+        template <class Range, class Result = typename
+            make_tuple_from_detail::tuple_from <std::decay, Range>::type>
+        Result operator() (Range && range) const
+        { return Result (std::forward <Range> (range)); }
+    };
+
+    struct tie {
+        template <class ... Types>
+            tuple <Types & ...> operator() (Types & ... arguments) const
+        { return tuple <Types & ...> (arguments ...); }
+    };
+
+    struct tie_from {
+        template <class Range, class Result = typename
+            make_tuple_from_detail::tuple_from <
+                make_tuple_from_detail::add_reference, Range>::type>
+        Result operator() (Range && range) const
+        { return Result (std::forward <Range> (range)); }
+    };
+
+    struct forward_as_tuple {
+        template <class ... Types>
+            tuple <Types && ...> operator() (Types && ... arguments) const
+        { return tuple <Types && ...> (std::forward <Types> (arguments) ...); }
+    };
+
+    struct copy_tuple_from {
+        template <class Range, class Result = typename
+            make_tuple_from_detail::tuple_from <
+                make_tuple_from_detail::identity, Range>::type>
+        Result operator() (Range && range) const
+        { return Result (std::forward <Range> (range)); }
+    };
+
+} // namespace callable
+
 /** \brief
 Make a tuple from the arguments passed in.
 
@@ -816,9 +861,7 @@ The arguments are stripped of qualifications.
 This is equivalent to \c std::make_tuple except that it returns a
 \c range::tuple.
 */
-template <class ... Types> inline
-    tuple <Types ...> make_tuple (Types const & ... arguments)
-{ return tuple <Types ...> (arguments ...); }
+static auto const make_tuple = callable::make_tuple();
 
 /** \brief
 Make a tuple from the range passed in, stripping the types of qualifications.
@@ -840,21 +883,14 @@ and a compile error about recursive template instantiations will result.
 \param range
     The range to construct the range from.
 */
-template <class Range> inline auto make_tuple_from (Range && range)
-/// \cond DONT_DOCUMENT
-RETURNS (typename make_tuple_from_detail::tuple_from <std::decay, Range>::type (
-    std::forward <Range> (range)))
-/// \endcond
-;
+static auto const make_tuple_from = callable::make_tuple_from();
 
 /** \brief
 Make a tuple of references to each of the arguments.
 
 This is equivalent to \c std::tie except that it returns a \c range::tuple.
 */
-template <class ... Types> inline
-    tuple <Types & ...> tie (Types & ... arguments)
-{ return tuple <Types & ...> (arguments ...); }
+static auto const tie = callable::tie();
 
 /** \brief
 Make a tuple of references to the elements of the range passed in.
@@ -876,13 +912,7 @@ and a compile error about recursive template instantiations will result.
 \param range
     The range to construct the range from.
 */
-template <class Range> inline auto tie_from (Range && range)
-/// \cond DONT_DOCUMENT
-RETURNS (typename make_tuple_from_detail::tuple_from <
-    make_tuple_from_detail::add_reference, Range>::type (
-        std::forward <Range> (range)))
-/// \endcond
-;
+static auto const tie_from = callable::tie_from();
 
 /** \brief
 Make a tuple of rvalue references to each of the arguments.
@@ -890,9 +920,7 @@ Make a tuple of rvalue references to each of the arguments.
 This is equivalent to \c std::forward_as_tuple except that it returns a
 \c range::tuple.
 */
-template <class ... Types> inline
-    tuple <Types && ...> forward_as_tuple (Types && ... arguments)
-{ return tuple <Types && ...> (std::forward <Types> (arguments) ...); }
+static auto const forward_as_tuple = callable::forward_as_tuple();
 
 /** \brief
 Make a tuple that is a copy of the range passed in, down to the exact element
@@ -919,13 +947,7 @@ and a compile error about recursive template instantiations will result.
 \param range
     The range to construct the range from.
 */
-template <class Range> inline auto copy_tuple_from (Range && range)
-/// \cond DONT_DOCUMENT
-RETURNS (typename make_tuple_from_detail::tuple_from <
-    make_tuple_from_detail::identity, Range>::type (
-        std::forward <Range> (range)))
-/// \endcond
-;
+static auto const copy_tuple_from = callable::copy_tuple_from();
 
 namespace tuple_detail {
     /**

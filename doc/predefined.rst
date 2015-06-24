@@ -10,12 +10,12 @@ Tuple
 .. doxygenclass:: range::tuple
     :members:
 
-.. doxygenfunction:: range::make_tuple
-.. doxygenfunction:: range::make_tuple_from
-.. doxygenfunction:: range::tie
-.. doxygenfunction:: range::tie_from
-.. doxygenfunction:: range::forward_as_tuple
-.. doxygenfunction:: range::copy_tuple_from
+.. doxygenvariable:: range::make_tuple
+.. doxygenvariable:: range::make_tuple_from
+.. doxygenvariable:: range::tie
+.. doxygenvariable:: range::tie_from
+.. doxygenvariable:: range::forward_as_tuple
+.. doxygenvariable:: range::copy_tuple_from
 
 .. doxygenvariable:: range::ignore
 

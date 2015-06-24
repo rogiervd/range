@@ -35,6 +35,7 @@ struct negate { double operator() (double i) const { return -i; } };
 BOOST_AUTO_TEST_SUITE(range_test_tuple_less)
 
 using range::make_tuple;
+using range::make_tuple_from;
 using range::less_lexicographical;
 
 using range::drop;

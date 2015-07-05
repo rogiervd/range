@@ -2,7 +2,7 @@ import python ;
 
 project
     : requirements
-      <library>/boost//python
+      <conditional>@appropriate_boost_python
     ;
 
 local rule run-test ( test-name : sources + )

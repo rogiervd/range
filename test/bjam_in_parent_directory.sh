@@ -31,7 +31,7 @@ set -o errexit
     rm -r range
     ln -s ../range
 
-    # Test it
-    bjam test "$@"
+    # Run the tests.
+    bjam "$@"
 
 )

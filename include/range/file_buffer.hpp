@@ -17,11 +17,8 @@ limitations under the License.
 #ifndef RANGE_FILE_BUFFER_HPP_INCLUDED
 #define RANGE_FILE_BUFFER_HPP_INCLUDED
 
-// \todo What includes?
 #include <cstdio>
 
-#include <istream>
-#include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -35,47 +32,34 @@ limitations under the License.
 
 namespace range {
 
+/** \brief
+Exception that indicates an error while opening a file.
+*/
 struct file_open_error
 : virtual std::ios_base::failure, virtual boost::exception
 {
     file_open_error()
     : std::ios_base::failure ("Error opening file") {}
 };
+
+/** \brief
+Exception that indicates an error while reading from a file.
+*/
 struct file_read_error
 : virtual std::ios_base::failure, virtual boost::exception
 {
     file_read_error()
-    : std::ios_base::failure ("Error reading file") {}
+    : std::ios_base::failure ("Error reading from file") {}
 };
 
 namespace file_producer_detail {
 
     /** \brief
-    Open a file and return a std::filebuf object representing it.
-
-    After the file is opened, read failures and end-of-file look the same.
-    This is a limitation of std::streambuf.
-
-    \throw file_open_error
-        Iff opening the file fails.
-    */
-    inline std::unique_ptr <std::filebuf> read_file_buffer (
-        std::string const & file_name)
-    {
-        auto buffer = utility::make_unique <std::filebuf>();
-        auto result = buffer->open (file_name,
-            std::ios_base::in | std::ios_base::binary);
-        if (!result)
-            throw file_open_error() << boost::errinfo_file_name (file_name);
-        return std::move (buffer);
-    }
-
-    /** \brief
     File source for use with Boost.IOStreams.
 
-    This is a thin wrapper over the C API which behaves as it should.
-    If the object exists, the file is open.
-    If an error occurs, an exception is thrown.
+    This is a thin wrapper over the C API which behaves as it should: if an
+    object is constructed, the file is open; if an error occurs, an exception is
+    thrown.
     */
     class file_source {
         std::string file_name_;
@@ -111,7 +95,7 @@ namespace file_producer_detail {
         \throw file_read_error
             Iff an error occurs.
         */
-        std::streamsize read (char* target, std::streamsize number) {
+        std::streamsize read (char * target, std::streamsize number) {
             std::size_t actually_read_num = std::fread (
                 target, sizeof (char), number, handle_.get());
             if (std::ferror (handle_.get()))
@@ -137,44 +121,41 @@ namespace file_producer_detail {
 
 template <class Char> class file_element_producer;
 
-// \todo Also provide non-templated version
-template <class Char> inline
-    range::buffer <Char> read_file (std::string const & file_name)
-{
-    // This makes it impossible to detect read error.s
-    //auto stream_buffer = file_producer_detail::read_file_buffer (file_name);
+/** \brief
+Open a file for reading and expose as a \ref buffer.
 
-    // This is better.
+The file is opened in binary mode, i.e. no conversion of line endings is
+performed.
+
+This uses Boost.IOStreams, which you must explicitly link to if you use this
+function.
+*/
+inline buffer <char> read_file (std::string const & file_name) {
     auto stream_buffer = utility::make_unique <
         boost::iostreams::stream_buffer <file_producer_detail::file_source>> (
             file_name);
 
-    return range::buffer <Char> (
-        element_producer <Char, 256>::pointer::template construct <file_element_producer <Char>> (
-            std::move (stream_buffer)));
+    return range::buffer <char> (
+        internal_element_producer <char, 256>::pointer::template
+        construct <file_element_producer <char>> (std::move (stream_buffer)));
 }
 
-inline range::buffer <char> read_gzip_file (std::string const & file_name)
-{
-    // \todo Not on stack!
-    /*boost::iostreams::stream_buffer <file_producer_detail::file_source> file (
-            file_name);
-    auto stream_buffer = utility::make_unique <
-        boost::iostreams::filtering_streambuf <boost::iostreams::input>>();
-    stream_buffer->push (boost::iostreams::gzip_decompressor());
-    stream_buffer->push (file);*/
+/** \brief
+Open a file in Gzip format for reading and expose as a \ref buffer.
+*/
+inline buffer <char> read_gzip_file (std::string const & file_name) {
     auto stream_buffer = utility::make_unique <
         file_producer_detail::gzip_file_stream> (file_name);
     return range::buffer <char> (
-        element_producer <char, 256>::pointer::template construct <file_element_producer <char>> (
-            std::move (stream_buffer)));
+        internal_element_producer <char, 256>::pointer::template
+        construct <file_element_producer <char>> (std::move (stream_buffer)));
 }
 
 template <class Char> class file_element_producer
-: public element_producer <Char, 256>
+: public internal_element_producer <Char, 256>
 {
     static constexpr std::size_t buffer_size = 256;
-    typedef element_producer <Char, buffer_size> base_type;
+    typedef internal_element_producer <Char, buffer_size> base_type;
     typedef typename base_type::pointer pointer;
 
     typedef std::unique_ptr <std::basic_streambuf <Char>> stream_buffer_ptr;
@@ -183,16 +164,16 @@ template <class Char> class file_element_producer
     stream_buffer_ptr stream_buffer_;
 
 protected:
-    virtual pointer get_next()
-    { return pointer::template construct <file_element_producer> (std::move (stream_buffer_)); }
+    virtual pointer get_next() {
+        return pointer::template construct <file_element_producer> (
+            std::move (stream_buffer_));
+    }
 
     void fill() {
         auto count = stream_buffer_->sgetn (this->memory(), buffer_size);
         this->end_  = this->memory() + count;
     }
 
-private:
-    // \todo Can anything be done about this?
 public:
     /**
     The buffer must be set to throw on errors.

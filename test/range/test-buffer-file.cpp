@@ -17,10 +17,14 @@ limitations under the License.
 #define BOOST_TEST_MODULE test_range_buffer_file
 #include "utility/test/boost_unit_test.hpp"
 
-// \todo Move testing of gzipped files to another test file so valgrind isn't necessary?
-// Valgrind catches things in zlib.
-
 #include "range/file_buffer.hpp"
+
+#include <fstream>
+
+#include <boost/filesystem/operations.hpp>
+
+#include "range/for_each_macro.hpp"
+#include "range/count.hpp"
 
 using range::buffer;
 
@@ -69,24 +73,46 @@ BOOST_AUTO_TEST_CASE (file) {
 
     std::string file_name = argv [1];
 
-    auto buffer = range::read_file <char> (file_name);
+    auto buffer = range::read_file (file_name);
     checkShortText (std::move (buffer));
 
     buffer = range::read_gzip_file (file_name + ".gz");
     checkShortText (std::move (buffer));
 }
 
-// \todo Test errors.
-
 BOOST_AUTO_TEST_CASE (error) {
-    BOOST_CHECK_THROW (range::read_file <char> ("non_existing_file_name.txt"),
-        std::exception);
+    BOOST_CHECK_THROW (range::read_file ("non_existing_file_name.txt"),
+        range::file_open_error);
+    BOOST_CHECK_THROW (range::read_gzip_file ("non_existing_file_name.txt.gz"),
+        range::file_open_error);
+
+    // I do not know how to check for read errors.
 }
 
-// \todo Also implement gzip.
+BOOST_AUTO_TEST_CASE (long_file) {
+    auto temporary_file_name = boost::filesystem::temp_directory_path() /
+        boost::filesystem::unique_path();
 
-// \todo Also Test on long files!
+    // Make 100k file with cycling chars.
+    {
+        std::ofstream f (temporary_file_name.native(), std::ios_base::binary);
+        RANGE_FOR_EACH (i, range::count (100000)) {
+            f << char (i);
+        }
+        f.flush();
+    }
 
-// \todo Also test on char16_t
+    // Read the file.
+    {
+        auto b = range::read_file (temporary_file_name.native());
+        RANGE_FOR_EACH (i, range::count (100000)) {
+            char c = chop_in_place (b);
+            BOOST_CHECK_EQUAL (c, char (i));
+        }
+        BOOST_CHECK (empty (b));
+    }
+
+    boost::filesystem::remove (temporary_file_name);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

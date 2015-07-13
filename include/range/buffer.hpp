@@ -25,6 +25,7 @@ limitations under the License.
 #include "utility/pointer_policy.hpp"
 #include "utility/unique_ptr.hpp"
 #include "utility/disable_if_same.hpp"
+#include "utility/is_trivially_destructible.hpp"
 
 #include "core.hpp"
 
@@ -335,7 +336,7 @@ public:
     Destruct the array up to end_.
     */
     virtual ~internal_element_producer()
-    { destruct_elements (std::has_trivial_destructor <Element>()); }
+    { destruct_elements (utility::is_trivially_destructible <Element>()); }
 
     virtual Element const * first() const { return memory(); }
 };

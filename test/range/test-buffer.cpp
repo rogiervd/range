@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE (tracked) {
                 // Check the number of elements alive at each time.
                 // This should be the size of v plus the size of the buffer.
                 // Only one buffer should be alive at any time.
-                BOOST_CHECK (r.alive_count() <= size + 7u);
+                BOOST_CHECK (r.alive_count() <= int (size + 7));
             }
             BOOST_CHECK (empty (b));
         }

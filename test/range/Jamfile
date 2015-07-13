@@ -92,6 +92,16 @@ run test-hash_range.cpp : : :
 
 run test-scan.cpp : : : <dependency>std <dependency>test-tuple-0-basic ;
 
+run test-buffer.cpp : : : <dependency>test-core <dependency>std ;
+run test-buffer-file.cpp : : ./example/short.txt
+    :
+    <library>/boost//iostreams
+    <library>/boost//system
+    <library>/boost//filesystem
+    <dependency>test-core <dependency>std
+    # zlib causes Valgrind to complain, so switch Valgrind off.
+    -<testing.launcher>"valgrind --leak-check=full --error-exitcode=1" ;
+
 run test-any_range-capability.cpp : : : <dependency>test-core <dependency>std ;
 run test-any_range.cpp : : : <dependency>test-any_range-capability ;
 run test-any_range-make.cpp : : : <dependency>test-any_range ;

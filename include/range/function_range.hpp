@@ -62,7 +62,7 @@ private:
     auto chop_in_place (direction::front) RETURNS (function_());
 };
 
-namespace operation {
+namespace function_range_operation {
 
     struct function_range_tag {};
 
@@ -71,10 +71,10 @@ namespace operation {
         function_range <Function> && range, direction::front const & direction)
     RETURNS (helper::chop_by_chop_in_place (std::move (range), direction));
 
-} // namespace operation
+} // namespace function_range_operation
 
 template <class Function> struct tag_of_qualified <function_range <Function>>
-{ typedef operation::function_range_tag type; };
+{ typedef function_range_operation::function_range_tag type; };
 
 /** \brief
 Create a range whose elements are the results of consecutive function calls.

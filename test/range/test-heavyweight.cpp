@@ -31,7 +31,7 @@ converts to weird_count for traversal.
 */
 struct weird_heavyweight_count {};
 
-struct weird_heavyweight_count_tag : range::operation::heavyweight_tag {};
+struct weird_heavyweight_count_tag : range::heavyweight::heavyweight_tag {};
 
 namespace range {
 
@@ -42,14 +42,14 @@ namespace range {
 
 // Should not be called.
 forgotten_to_define_direction implement_default_direction (
-    range::operation::heavyweight_tag, weird_heavyweight_count);
+    range::heavyweight::heavyweight_tag, weird_heavyweight_count);
 
 inline weird_count implement_make_view (weird_heavyweight_count_tag,
     bool once, weird_heavyweight_count, weird_direction const &)
 { return weird_count(); }
 
-struct std_forward_list_tag : range::operation::heavyweight_tag {};
-struct std_vector_tag : range::operation::heavyweight_tag {};
+struct std_forward_list_tag : range::heavyweight::heavyweight_tag {};
+struct std_vector_tag : range::heavyweight::heavyweight_tag {};
 
 /*
 Adapt STL containers (badly) as heavyweights.

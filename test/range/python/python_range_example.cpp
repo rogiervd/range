@@ -32,19 +32,19 @@ using range::python_range;
 void test_static() {
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <>>::type,
-        range::operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double> &>::type,
-        range::operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double> const &>::type,
-        range::operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double, int> const &&>::type,
-        range::operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>));
     BOOST_MPL_ASSERT ((std::is_same <
         range::tag_of <python_range <double, int, float> &&>::type,
-        range::operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>));
 
     BOOST_MPL_ASSERT ((range::has <
         range::callable::empty (range::python_range <int>)>));

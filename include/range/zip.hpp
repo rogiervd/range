@@ -271,17 +271,17 @@ private:
         range::transform (underlying_, lazy::size (direction)), rime::min));
 };
 
-namespace operation {
+namespace zip_operation {
     template <class Direction> struct zip_range_tag {};
-} // namespace operation
+} // namespace zip_operation
 
 template <class Direction, class ... Ranges>
     struct tag_of_qualified <zip_range <Direction, Ranges ...>>
-{ typedef operation::zip_range_tag <Direction> type; };
+{ typedef zip_operation::zip_range_tag <Direction> type; };
 
 /* Operations. */
 
-namespace operation {
+namespace zip_operation {
 
     namespace zip_detail {
 
@@ -438,7 +438,7 @@ namespace operation {
             NewRest (direction, std::move (rest)));
     }
 
-} // namespace operation
+} // namespace zip_operation
 
 } // namespace range
 

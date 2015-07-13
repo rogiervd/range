@@ -77,16 +77,16 @@ private:
     size (Direction const & direction) const
     { return range::size (underlying_, direction::opposite (direction)); }
 
-    // first and drop are implemented in namespace operation (below) where it is
-    // easier to distinguish between qualifications.
+    // first and drop are implemented in namespace reverse_operation (below)
+    // where it is easier to distinguish between qualifications.
 };
 
-namespace operation {
+namespace reverse_operation {
     struct reverse_view_tag {};
-} // namespace operation
+} // namespace reverse_operation
 
 template <class Underlying> struct tag_of_qualified <reverse_view <Underlying>>
-{ typedef operation::reverse_view_tag type; };
+{ typedef reverse_operation::reverse_view_tag type; };
 
 namespace callable {
 
@@ -125,7 +125,7 @@ converted on the fly by direction::opposite().
 */
 static auto const reverse = callable::reverse();
 
-namespace operation {
+namespace reverse_operation {
 
     template <class ReverseView, class Direction> inline
         auto implement_first (reverse_view_tag, ReverseView && r,
@@ -140,7 +140,7 @@ namespace operation {
         helper::get_underlying <ReverseView> (r),
         increment, direction::opposite (direction))));
 
-} // namespace operation
+} // namespace reverse_operation
 
 } // namespace range
 

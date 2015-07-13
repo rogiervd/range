@@ -259,20 +259,20 @@ public:
     { return rime::get <content_type> (content_).underlying_; }
 };
 
-namespace operation {
+namespace scan_operation {
 
     /**
     Tag for scan_range.
     */
     template <class Direction> struct scan_tag {};
 
-} // namespace operation
+} // namespace scan_operation
 
 template <class Direction, class Empty, class Function, class State,
     class Underlying>
 struct tag_of_qualified <scan_range <
     Direction, Empty, Function, State, Underlying>>
-{ typedef operation::scan_tag <Direction> type; };
+{ typedef scan_operation::scan_tag <Direction> type; };
 
 namespace scan_detail {
 
@@ -284,7 +284,7 @@ namespace scan_detail {
 
 } // namespace scan_detail
 
-namespace operation {
+namespace scan_operation {
 
     template <class Direction, class ScanRange> inline
         auto implement_size (scan_tag <Direction> const &,
@@ -300,7 +300,7 @@ namespace operation {
             typename std::decay <ScanRange>::type::state_type,
             ScanRange &&>() (r.state()));
 
-} // namespace operation
+} // namespace scan_operation
 
 /* drop_one. */
 namespace scan_detail {
@@ -407,7 +407,7 @@ namespace scan_detail {
 
 } // namespace scan_detail
 
-namespace operation {
+namespace scan_operation {
 
     template <class Direction, class ScanRange, class Result =
         typename scan_detail::drop_one_result <Direction, ScanRange>::type,
@@ -452,7 +452,7 @@ namespace operation {
         return std::forward <Result> (first);
     }
 
-} // namespace operation
+} // namespace scan_operation
 
 namespace callable {
 

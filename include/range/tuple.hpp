@@ -82,12 +82,12 @@ Connected with this is the layout
 */
 template <class ... Types> class tuple;
 
-namespace operation {
-    struct tuple_tag : heavyweight_tag {};
-} // namespace operation
+namespace tuple_operation {
+    struct tuple_tag : heavyweight::heavyweight_tag {};
+} // namespace tuple_operation
 
 template <class ... Types> struct tag_of_qualified <tuple <Types...>>
-{ typedef operation::tuple_tag type; };
+{ typedef tuple_operation::tuple_tag type; };
 
 namespace tuple_detail {
     template <class Type> struct is_tuple_implementation : rime::false_type {};
@@ -1140,7 +1140,7 @@ template <std::size_t Begin, std::size_t End, class TupleReference>
         tuple_detail::tuple_view <Begin, End, TupleReference>>
 { typedef tuple_detail::tuple_view_tag <(End - Begin)> type; };
 
-namespace operation {
+namespace tuple_operation {
 
     // implement_make_view for std::tuple.
     // Const reference.
@@ -1170,7 +1170,7 @@ namespace operation {
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     { return Result (std::move (tuple)); }
 
-} // namespace operation
+} // namespace tuple_operation
 
 } // namespace range
 

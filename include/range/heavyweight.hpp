@@ -27,7 +27,7 @@ the container).
 
 #include "core.hpp"
 
-namespace range { namespace operation {
+namespace range { namespace heavyweight {
 
 /** \brief
 Tag for heavyweight objects that can be used as ranges.
@@ -39,8 +39,11 @@ To allow a heavyweight container to be converted to a view, give the
 heavyweight container a range tag that derives from \ref heavyweight_tag.
 first(), for example, will then automatically be implemented for heavyweight
 \c h as <c>first (view (h))</c>.
+This works because the tag causes functions to be looked up both in this
+namespace and in the namespace that the tag is derived in.
 
-Then, implement the following operations:
+Then, implement the following operations in the namespace that the tag is
+derived in:
 
 \li implement_default_direction, if it is not \ref direction::front.
 
@@ -116,6 +119,6 @@ RETURNS (range::chop (
 // chop_in_place is not defined: by definition, the (heavyweight) container
 // type cannot be returned.
 
-}} // namespace range::operation
+}} // namespace range::heavyweight
 
 #endif  // RANGE_HEAVYWEIGHT_HPP_INCLUDED

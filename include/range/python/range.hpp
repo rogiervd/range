@@ -92,13 +92,13 @@ whether the range is empty and if so returns the first element.
 */
 template <class ... Types> class python_range;
 
-namespace operation {
+namespace python_range_operation {
     struct python_range_tag {};
-} // namespace operation
+} // namespace python_range_operation
 
 template <class ... Types>
     struct tag_of_qualified <python_range <Types ...>>
-{ typedef operation::python_range_tag type; };
+{ typedef python_range_operation::python_range_tag type; };
 
 namespace python {
 namespace detail {
@@ -262,7 +262,7 @@ private:
     }
 };
 
-namespace operation {
+namespace python_range_operation {
 
     // drop_one: only defined for rvalue references.
     // For zero or one types, return the same range type.
@@ -288,7 +288,7 @@ namespace operation {
 
     // chop is implemented automatically.
 
-} // namespace operation
+} // namespace python_range_operation
 
 namespace python {
 

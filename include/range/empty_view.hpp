@@ -32,12 +32,12 @@ intention.
 */
 class empty_view;
 
-namespace operation {
+namespace empty_view_operation {
     struct empty_view_tag {};
-} // namespace operation
+} // namespace empty_view_operation
 
 template <> struct tag_of_qualified <empty_view>
-{ typedef operation::empty_view_tag type; };
+{ typedef empty_view_operation::empty_view_tag type; };
 
 class empty_view {
 private:

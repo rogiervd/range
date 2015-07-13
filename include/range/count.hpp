@@ -162,16 +162,16 @@ private:
         rime::cast_value <Begin> (rime::plus (begin_, increment))));
 };
 
-namespace operation {
+namespace count_operation {
     struct count_range_tag {};
-} // namespace operation
+} // namespace count_operation
 
 template <class Begin, class End>
     struct tag_of_qualified <count_range <Begin, End>>
-{ typedef operation::count_range_tag type; };
+{ typedef count_operation::count_range_tag type; };
 
 template <class Begin> struct tag_of_qualified <infinite_count_range <Begin>>
-{ typedef operation::count_range_tag type; };
+{ typedef count_operation::count_range_tag type; };
 
 // count() function: needs to be defined after the classes, because
 // infinite_count_range needs to be instantiated.

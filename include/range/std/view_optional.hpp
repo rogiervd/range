@@ -34,12 +34,12 @@ namespace range {
 
 template <class Optional> class optional_view;
 
-namespace operation {
+namespace view_optional_operation {
     struct optional_view_tag {};
-} // namespace operation
+} // namespace view_optional_operation
 
 template <class Optional> struct tag_of_qualified <optional_view <Optional>>
-{ typedef operation::optional_view_tag type; };
+{ typedef view_optional_operation::optional_view_tag type; };
 
 /**
 A view of an optional in directions "front" and "back".

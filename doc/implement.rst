@@ -28,4 +28,4 @@ Helpers
 Implementing a view on a heavyweight range
 ==========================================
 
-.. doxygenstruct:: range::operation::heavyweight_tag
+.. doxygenstruct:: range::heavyweight::heavyweight_tag

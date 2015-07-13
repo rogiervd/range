@@ -201,13 +201,13 @@ private:
 };
 
 
-namespace operation {
+namespace member_view_operation {
     struct member_view_tag {};
-} // namespace operation
+} // namespace member_view_operation
 
 template <class Structure, class Extractors>
     struct tag_of_qualified <member_view <Structure, Extractors>>
-{ typedef operation::member_view_tag type; };
+{ typedef member_view_operation::member_view_tag type; };
 
 } // namespace range
 

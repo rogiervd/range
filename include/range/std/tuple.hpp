@@ -43,22 +43,22 @@ namespace range {
 
     // Tags.
 
-    namespace operation {
+    namespace std_tuple_operation {
 
-        struct std_pair_tag : heavyweight_tag {};
-        struct std_tuple_tag : heavyweight_tag {};
+        struct std_pair_tag : heavyweight::heavyweight_tag {};
+        struct std_tuple_tag : heavyweight::heavyweight_tag {};
 
-    } // namespace operation
+    } // namespace std_tuple_operation
 
     template <class First, class Second>
         struct tag_of_qualified <std::pair <First, Second>>
-    { typedef operation::std_pair_tag type; };
+    { typedef std_tuple_operation::std_pair_tag type; };
 
     template <class ... Types>
         struct tag_of_qualified <std::tuple <Types ...>>
-    { typedef operation::std_tuple_tag type; };
+    { typedef std_tuple_operation::std_tuple_tag type; };
 
-    namespace std_tuple_detail {
+    namespace std_tuple_operation {
 
         template <class QPair> struct std_pair_member_view {
             typedef typename std::decay <QPair>::type pair;
@@ -108,16 +108,12 @@ namespace range {
             typedef member_view <QTuple, extractors_type> type;
         };
 
-    } // namespace std_tuple_detail
-
-    namespace operation {
-
         // implement_make_view for std::pair.
         // Const reference.
         template <class First, class Second,
-            class Result = typename std_tuple_detail::std_pair_member_view <
+            class Result = typename std_tuple_operation::std_pair_member_view <
                 std::pair <First, Second> const &>::type>
-        inline Result implement_make_view (std_pair_tag,
+        inline Result implement_make_view (std_tuple_operation::std_pair_tag,
             bool once, std::pair <First, Second> const & pair,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
@@ -125,9 +121,9 @@ namespace range {
 
         // Reference.
         template <class First, class Second,
-            class Result = typename std_tuple_detail::std_pair_member_view <
+            class Result = typename std_tuple_operation::std_pair_member_view <
                 std::pair <First, Second> &>::type>
-        inline Result implement_make_view (std_pair_tag,
+        inline Result implement_make_view (std_tuple_operation::std_pair_tag,
             bool once, std::pair <First, Second> & pair,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
@@ -135,9 +131,9 @@ namespace range {
 
         // Rvalue reference.
         template <class First, class Second,
-            class Result = typename std_tuple_detail::std_pair_member_view <
+            class Result = typename std_tuple_operation::std_pair_member_view <
                 std::pair <First, Second> &&>::type>
-        inline Result implement_make_view (std_pair_tag,
+        inline Result implement_make_view (std_tuple_operation::std_pair_tag,
             rime::true_type once, std::pair <First, Second> && pair,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
@@ -147,9 +143,9 @@ namespace range {
         // implement_make_view for std::tuple.
         // Const reference.
         template <class ... Types,
-            class Result = typename std_tuple_detail::std_tuple_member_view <
+            class Result = typename std_tuple_operation::std_tuple_member_view <
                 std::tuple <Types ...> const &, Types ...>::type>
-        inline Result implement_make_view (std_tuple_tag,
+        inline Result implement_make_view (std_tuple_operation::std_tuple_tag,
             bool once, std::tuple <Types ...> const & tuple,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
@@ -157,9 +153,9 @@ namespace range {
 
         // Reference.
         template <class ... Types,
-            class Result = typename std_tuple_detail::std_tuple_member_view <
+            class Result = typename std_tuple_operation::std_tuple_member_view <
                 std::tuple <Types ...> &, Types ...>::type>
-        inline Result implement_make_view (std_tuple_tag,
+        inline Result implement_make_view (std_tuple_operation::std_tuple_tag,
             bool once, std::tuple <Types ...> & tuple,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
@@ -167,15 +163,15 @@ namespace range {
 
         // Rvalue reference.
         template <class ... Types,
-            class Result = typename std_tuple_detail::std_tuple_member_view <
+            class Result = typename std_tuple_operation::std_tuple_member_view <
                 std::tuple <Types ...> &&, Types ...>::type>
-        inline Result implement_make_view (std_tuple_tag,
+        inline Result implement_make_view (std_tuple_operation::std_tuple_tag,
             rime::true_type once, std::tuple <Types ...> && tuple,
             helper::front_or_back,
             helper::front_or_back = helper::front_or_back())
         { return Result (std::move (tuple)); }
 
-    } // namespace operation
+    } // namespace std_tuple_operation
 
 } // namespace range
 

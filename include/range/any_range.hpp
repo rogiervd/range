@@ -93,13 +93,13 @@ something to be careful with.
 */
 template <class Element, class Capabilities = void> class any_range;
 
-namespace operation {
+namespace any_range_operation {
     struct any_range_tag {};
-} // namespace operation
+} // namespace any_range_operation
 
 template <class Element, class Capabilities>
     struct tag_of_qualified <any_range <Element, Capabilities>>
-{ typedef operation::any_range_tag type; };
+{ typedef any_range_operation::any_range_tag type; };
 
 template <class Element, class Capabilities> class any_range {
 public:
@@ -304,7 +304,7 @@ private:
     }
 };
 
-namespace operation {
+namespace any_range_operation {
 
     template <class AnyRange, class Direction> inline
         auto implement_chop (any_range_tag const & tag,
@@ -312,7 +312,7 @@ namespace operation {
     RETURNS (helper::chop_by_chop_in_place (
         std::forward <AnyRange> (r), direction));
 
-} // namespace operation
+} // namespace any_range_operation
 
 namespace callable {
 

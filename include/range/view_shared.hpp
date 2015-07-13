@@ -100,13 +100,13 @@ private:
     { return range::chop_in_place (underlying_, direction); }
 };
 
-namespace operation {
+namespace view_of_shared_operation {
     struct view_of_shared_tag {};
-} // namespace operation
+} // namespace view_of_shared_operation
 
 template <class Heavyweight, class View>
     struct tag_of_qualified <view_of_shared <Heavyweight, View>>
-{ typedef operation::view_of_shared_tag type; };
+{ typedef view_of_shared_operation::view_of_shared_tag type; };
 
 namespace view_shared_detail {
 
@@ -135,7 +135,7 @@ namespace view_shared_detail {
 
 } // namespace view_shared_detail
 
-namespace operation {
+namespace view_of_shared_operation {
 
     template <class Range, class Direction> inline
         auto implement_first (view_of_shared_tag const &,
@@ -172,7 +172,7 @@ namespace operation {
                 underlying_chopped.move_rest()));
     }
 
-} // namespace operation
+} // namespace view_of_shared_operation
 
 namespace callable {
 

@@ -64,77 +64,77 @@ namespace std {
 
 namespace range {
 
-    namespace operation {
+    namespace std_container_operation {
 
-        struct std_front_container_tag : heavyweight_tag {};
+        struct std_front_container_tag : heavyweight::heavyweight_tag {};
         struct std_front_back_container_tag : std_front_container_tag {};
 
-    } // namespace operation
+    } // namespace std_container_operation
 
     // Sequence containers.
     /// \cond DONT_DOCUMENT
     template <class Type, class Allocator>
         struct tag_of_qualified <std::vector <Type, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Type, class Allocator>
         struct tag_of_qualified <std::deque <Type, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Type, class Allocator>
         struct tag_of_qualified <std::forward_list <Type, Allocator>>
-    { typedef operation::std_front_container_tag type; };
+    { typedef std_container_operation::std_front_container_tag type; };
 
     template <class Type, class Allocator>
         struct tag_of_qualified <std::list <Type, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Type, class Traits, class Allocator>
         struct tag_of_qualified <std::basic_string <Type, Traits, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     // Associative containers.
     template <class Key, class Compare, class Allocator>
         struct tag_of_qualified <std::set <Key, Compare, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Compare, class Allocator>
         struct tag_of_qualified <std::multiset <Key, Compare, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Value, class Compare, class Allocator>
     struct tag_of_qualified <std::map <Key, Value, Compare, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Value, class Compare, class Allocator>
     struct tag_of_qualified <std::multimap <Key, Value, Compare, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     // Unordered associative containers.
     template <class Key, class Hash, class KeyEqual, class Allocator>
         struct tag_of_qualified <
             std::unordered_set <Key, Hash, KeyEqual, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Hash, class KeyEqual, class Allocator>
         struct tag_of_qualified <
             std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Value, class Hash, class KeyEqual,
             class Allocator>
         struct tag_of_qualified <
             std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
 
     template <class Key, class Value, class Hash, class KeyEqual,
             class Allocator>
         struct tag_of_qualified <
             std::unordered_multimap <Key, Value, Hash, KeyEqual, Allocator>>
-    { typedef operation::std_front_back_container_tag type; };
+    { typedef std_container_operation::std_front_back_container_tag type; };
     /// \endcond
 
-    namespace operation {
+    namespace std_container_operation {
 
         /* make_iterator_range_with_once. */
 
@@ -181,7 +181,7 @@ namespace range {
         RETURNS (make_iterator_range_with_once (once,
             std::forward <Container> (container)));
 
-    } // namespace operation
+    } // namespace std_container_operation
 
 } // namespace range
 

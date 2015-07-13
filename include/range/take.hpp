@@ -110,13 +110,13 @@ private:
     }
 };
 
-namespace operation {
+namespace take_operation {
     struct take_range_tag {};
-} // namespace operation
+} // namespace take_operation
 
 template <class Underlying, class Limit, class Direction>
     struct tag_of_qualified <take_range <Direction, Limit, Underlying>>
-{ typedef operation::take_range_tag type; };
+{ typedef take_operation::take_range_tag type; };
 
 namespace take_detail {
 
@@ -325,7 +325,7 @@ static auto const take = callable::take();
 /* Operations on take_range. */
 // These require take to be defined, so they are implemented down here.
 
-namespace operation {
+namespace take_operation {
 
     template <class TakeRange, class Direction>
         inline auto implement_size (take_range_tag const &,
@@ -409,7 +409,7 @@ namespace operation {
                 rime::cast_value <Limit> (r.limit() - one), direction));
     }
 
-} // namespace operation
+} // namespace take_operation
 
 } // namespace range
 

@@ -257,7 +257,7 @@ public:
     iterator_range & operator = (iterator_range const &) = delete;
     iterator_range & operator = (iterator_range &&) = default;
 
-    // Only "chop" is implemented, in namespace operation.
+    // Only "chop" is implemented, in namespace iterator_range_operation.
 
     /*
     Input iterators need special handling.
@@ -272,14 +272,14 @@ public:
 };
 /// \endcond
 
-namespace operation {
+namespace iterator_range_operation {
     template <class IteratorTag> struct iterator_range_tag {};
-} // namespace operation
+} // namespace iterator_range_operation
 
 template <class Iterator>
     struct tag_of_qualified <iterator_range <Iterator>>
 {
-    typedef operation::iterator_range_tag <typename
+    typedef iterator_range_operation::iterator_range_tag <typename
         std::iterator_traits <Iterator>::iterator_category> type;
 };
 
@@ -364,7 +364,7 @@ Make an iterator_range from a container that will be read only once.
 static constexpr auto make_move_iterator_range
     = callable::make_move_iterator_range();
 
-namespace operation {
+namespace iterator_range_operation {
 
     template <class IteratorTag, class Range> inline
         auto implement_chop (iterator_range_tag <IteratorTag> const & tag,
@@ -372,7 +372,7 @@ namespace operation {
     RETURNS (helper::chop_by_chop_in_place (
         std::forward <Range> (range), direction));
 
-} // namespace operation
+} // namespace iterator_range_operation
 
 } // namespace range
 

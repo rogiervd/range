@@ -32,13 +32,13 @@ namespace range {
 
 template <class Underlying, class Function> struct transform_view;
 
-namespace operation {
+namespace transform_operation {
     struct transform_view_tag {};
-} // namespace operation
+} // namespace transform_operation
 
 template <class Underlying, class Function>
     struct tag_of_qualified <transform_view <Underlying, Function>>
-{ typedef operation::transform_view_tag type; };
+{ typedef transform_operation::transform_view_tag type; };
 
 template <class Underlying, class Function> struct transform_view {
 public:
@@ -152,7 +152,7 @@ static const auto transform = callable::transform();
 
 /* Forward to underlying and then wrap: first, drop. */
 
-namespace operation {
+namespace transform_operation {
 
     // first: transform first element of underlying.
     template <class View, class Direction> inline
@@ -201,7 +201,7 @@ namespace operation {
             range::transform (chopped.move_rest(), view.function(), direction));
     }
 
-} // namespace operation
+} // namespace transform_operation
 
 } // namespace range
 

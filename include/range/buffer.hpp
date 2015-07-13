@@ -53,7 +53,7 @@ itself.
 template <class Element, std::size_t NumberOrZero>
     class internal_element_producer;
 
-} // namespace detail
+} // namespace range
 
 namespace utility { namespace pointer_policy {
 
@@ -168,12 +168,12 @@ private:
     }
 };
 
-namespace operation {
+namespace buffer_operation {
     struct buffer_tag {};
-} // namespace operation
+} // namespace buffer_operation
 
 template <class Element> struct tag_of_qualified <buffer <Element>>
-{ typedef operation::buffer_tag type; };
+{ typedef buffer_operation::buffer_tag type; };
 
 namespace buffer_detail {
 
@@ -197,10 +197,14 @@ If the underlying range is an input range, this is an upgrade.
 The range is traversed along its default direction, though the buffer always
 uses \ref front.
 
-\tparam Element The element type of the buffer.
-\tparam NumberOrZero The number of elements kept in one chunk.
+\tparam Element (optional)
+    The element type of the buffer.
+    If not given, the decayed type of the first element of the range is used.
+\tparam Number (optional)
+    The number of elements kept in one chunk.
+    If not given, a reasonable value is picked automatically.
 */
-template <class Element, std::size_t NumberOrZero, class Range,
+template <class Element, std::size_t Number = 0, class Range,
     class Enable1 = typename
         std::enable_if <is_range <Range>::value>::type,
     class View = typename decayed_result_of <callable::view (Range)>::type>
@@ -208,9 +212,24 @@ buffer <Element> make_buffer (Range && range)
 {
     typedef typename buffer <Element>::producer_ptr producer_ptr;
     return buffer <Element> (producer_ptr::template construct <
-        buffer_detail::range_element_producer <View, Element, NumberOrZero>> (
+        buffer_detail::range_element_producer <View, Element, Number>> (
             view (std::forward <Range> (range))));
 }
+
+/// \cond DONT_DOCUMENT
+template <std::size_t Number = 0, class Range,
+    class Enable1 = typename
+        std::enable_if <is_range <Range>::value>::type,
+    class View = typename decayed_result_of <callable::view (Range)>::type,
+    class Element = typename decayed_result_of <callable::first (View)>::type>
+buffer <Element> make_buffer (Range && range)
+{
+    typedef typename buffer <Element>::producer_ptr producer_ptr;
+    return buffer <Element> (producer_ptr::template construct <
+        buffer_detail::range_element_producer <View, Element, Number>> (
+            view (std::forward <Range> (range))));
+}
+/// \endcond
 
 template <class Element> class element_producer
 : public utility::shared

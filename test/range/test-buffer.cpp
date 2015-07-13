@@ -38,9 +38,10 @@ using range::chop_in_place;
 BOOST_AUTO_TEST_SUITE(test_range_buffer)
 
 BOOST_AUTO_TEST_CASE (count) {
-    // \todo make_buffer without number.
-    // \todo make_buffer without Element.
-    auto count = make_buffer <std::size_t, 0> (one_time_view (range::count()));
+    auto count = make_buffer (one_time_view (range::count()));
+
+    static_assert (std::is_same <decltype (first (count)), std::size_t>::value,
+        "");
 
     BOOST_CHECK_EQUAL (first (count), 0);
     BOOST_CHECK_EQUAL (first (drop (count)), 1);
@@ -90,8 +91,7 @@ BOOST_AUTO_TEST_CASE (tracked) {
                 // Check the number of elements alive at each time.
                 // This should be the size of v plus the size of the buffer.
                 // Only one buffer should be alive at any time.
-                BOOST_CHECK (r.alive_count()
-                    <= size + 7);
+                BOOST_CHECK (r.alive_count() <= size + 7u);
             }
             BOOST_CHECK (empty (b));
         }

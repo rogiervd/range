@@ -34,6 +34,33 @@ using range::equal;
 
 BOOST_AUTO_TEST_SUITE(range_tuple_equal_suite)
 
+BOOST_AUTO_TEST_CASE (types) {
+    auto t = range::make_tuple (1, 5., true);
+    auto v0 = range::view (t);
+    auto v1 = drop (t);
+    auto v2 = drop (t, range::back);
+    auto v3 = drop (drop (t));
+    auto v4 = drop (v3, range::back);
+
+    static_assert (std::is_same <
+        range::tuple_detail::types <decltype (v0)>::type,
+        meta::vector <int &, double &, bool &>>::value, "");
+
+    static_assert (std::is_same <
+        range::tuple_detail::types <decltype (v1)>::type,
+        meta::vector <double &, bool &>>::value, "");
+    static_assert (std::is_same <
+        range::tuple_detail::types <decltype (v2)>::type,
+        meta::vector <int &, double &>>::value, "");
+
+    static_assert (std::is_same <
+        range::tuple_detail::types <decltype (v3)>::type,
+        meta::vector <bool &>>::value, "");
+    static_assert (std::is_same <
+        range::tuple_detail::types <decltype (v4)>::type,
+        meta::vector<>>::value, "");
+}
+
 bool approximately_equal (double i, double j)
 { return i-1 == j || i == j || i+1 == j; }
 

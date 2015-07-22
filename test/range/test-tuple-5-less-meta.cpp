@@ -25,8 +25,8 @@ limitations under the License.
 /// This saves typing in the tests.
 template <class LeftTypes, class RightTypes>
     struct predicate_results
-: meta::as_vector <range::tuple_detail::less_lexicographical_detail
-    ::predicate_results <LeftTypes, RightTypes, rime::callable::less>>
+: range::tuple_detail::less_lexicographical_detail
+    ::predicate_results <LeftTypes, RightTypes, rime::callable::less>
 {};
 
 BOOST_AUTO_TEST_SUITE(range_test_tuple_less_meta)
@@ -40,10 +40,12 @@ BOOST_AUTO_TEST_CASE (test_meta) {
         vector <pair <rime::false_type, rime::true_type>>>::value, "");
     static_assert (std::is_same <predicate_results <
         vector <int>, vector<>>::type,
-        vector <pair <rime::false_type, rime::true_type>>>::value, "");
+        vector <pair <rime::false_type, rime::true_type>,
+            pair <rime::false_type, rime::true_type>>>::value, "");
     static_assert (std::is_same <predicate_results <
         vector<>, vector <int>>::type,
-        vector <pair <rime::true_type, rime::false_type>>>::value, "");
+        vector <pair <rime::true_type, rime::false_type>,
+            pair <rime::false_type, rime::true_type>>>::value, "");
 
     static_assert (std::is_same <predicate_results <
         vector <int>, vector <int>>::type,
@@ -79,7 +81,8 @@ BOOST_AUTO_TEST_CASE (test_meta) {
         vector <
             pair <rime::constant <bool, false>, rime::constant <bool, true>>,
             pair <bool, bool>,
-            pair <rime::true_type, rime::false_type>>>::value, "");
+            pair <rime::true_type, rime::false_type>,
+            pair <rime::false_type, rime::true_type>>>::value, "");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

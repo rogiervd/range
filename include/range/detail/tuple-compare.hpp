@@ -16,6 +16,7 @@ limitations under the License.
 
 /** \file
 Define optimised versions of "equal" and "less_lexicographical" for tuples.
+
 */
 
 #ifndef RANGE_DETAIL_TUPLE_COMPARE_HPP_INCLUDED
@@ -27,6 +28,8 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 #include <boost/mpl/bool.hpp>
 
 #include "meta/vector.hpp"
+#include "meta/all_of_c.hpp"
+#include "meta/any_of_c.hpp"
 
 #include "utility/overload_order.hpp"
 
@@ -39,10 +42,13 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 
 namespace range { namespace tuple_detail {
 
+    /**
+    Extract the types from a tuple_view.
+    */
     template <class TupleView> struct types;
 
     template <std::size_t Begin, std::size_t End, class TupleReference>
-        struct types <class tuple_view <Begin, End, TupleReference>>
+        struct types <tuple_view <Begin, End, TupleReference>>
     {
         static constexpr std::size_t tuple_size
             = range::tuple_size <TupleReference>::value;
@@ -51,8 +57,7 @@ namespace range { namespace tuple_detail {
 
         template <class ... Indices> struct compute <meta::vector <Indices ...>>
         {
-            typedef meta::vector <
-                decltype (extract <
+            typedef meta::vector <decltype (extract <
                 ((tuple_size - Begin - 1) - Indices::value)>() (
                     std::declval <TupleReference>())) ...> type;
         };
@@ -74,26 +79,22 @@ namespace range { namespace tuple_detail {
     namespace equal_detail {
 
         // result.
-        template <class PredicateResults, class Enable = void> struct result;
+        template <class PredicateResults> struct result;
 
-        template <> struct result <meta::vector<>>
-        { typedef rime::true_type type; };
-
-        template <class First, class ... Rest>
-            struct result <meta::vector <First, Rest ...>,
-                typename std::enable_if <!rime::is_constant <First>::value
-                    >::type>
-        { typedef bool type; };
-
-        template <class First, class ... Rest>
-            struct result <meta::vector <First, Rest ...>,
-                typename rime::enable_if_constant_true <First>::type>
-        : result <meta::vector <Rest ...>> {};
-
-        template <class First, class ... Rest>
-            struct result <meta::vector <First, Rest ...>,
-                typename rime::enable_if_constant_false <First>::type>
-        { typedef rime::false_type type; };
+        template <class ... PredicateResults>
+            struct result <meta::vector <PredicateResults ...>>
+        : boost::mpl::eval_if <
+            // If any type is known false, then false.
+            meta::any_of_c <rime::equal_constant <
+                rime::false_type, PredicateResults>::value ...>,
+            rime::false_type,
+            boost::mpl::if_ <
+                // If all are known true, then true.
+                meta::all_of_c <rime::equal_constant <
+                    rime::true_type, PredicateResults>::value ...>,
+                rime::true_type,
+                // Else: runtime.
+                bool>> {};
 
         // Implementation.
 
@@ -108,8 +109,7 @@ namespace range { namespace tuple_detail {
         // Constant result.
         template <class Result, class PredicateResults>
             struct equal_implementation <Result, PredicateResults,
-                typename std::enable_if <rime::is_constant <Result>::value
-                    >::type>
+                typename rime::enable_if_constant <Result>::type>
         {
             template <class Left, class Right, class Predicate>
                 Result operator() (Left const &, Right const &, Predicate &&)
@@ -143,6 +143,8 @@ namespace range { namespace tuple_detail {
                                 std::forward <Predicate> (predicate));
             }
 
+            // If the result is know false, do not instantiate the rest of the
+            // comparison.
             template <class Left, class Right, class Predicate>
                 bool implement (Left const &, Right const &,
                     Predicate &&, rime::false_type,
@@ -224,28 +226,6 @@ namespace range { namespace tuple_detail {
         types <LeftView>::type, typename types <RightView>::type, Predicate>()
             (left, right, std::forward <Predicate> (predicate)));
 
-}} // namespace range::tuple_detail
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-namespace range { namespace tuple_detail {
 
     /* less_lexicographical specialised for tuple. */
 
@@ -253,189 +233,168 @@ namespace range { namespace tuple_detail {
 
         /**
         A lazy compile-time range that returns the result types of applying the
-        predicate to the types in the tuple.
+        predicate, both ways around, to the types in the tuple.
         */
-        template <class LeftTypes, class RightTypes, class Predicate,
-            class Enable = void>
-        struct predicate_results;
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results;
 
-        struct predicate_results_tag;
-
-        // Unequal lengths. \todo Why do you say that?
-        template <class FirstLeft, class ... Left,
-            class FirstRight, class ... Right, class Predicate, class Enable>
-        struct predicate_results <
-            meta::vector <FirstLeft, Left ...>,
-            meta::vector <FirstRight, Right ...>, Predicate, Enable>
+        template <class LeftType, class RightType, class Predicate>
+            struct compute_predicate_result
         {
-            typedef decltype (std::declval <Predicate>() (
-                    std::declval <FirstLeft>(), std::declval <FirstRight>()))
-                left_right;
-            typedef decltype (std::declval <Predicate>() (
-                    std::declval <FirstRight>(), std::declval <FirstLeft>()))
-                right_left;
-
-            typedef predicate_results <
-                meta::vector <Left ...>, meta::vector <Right ...>,
-                Predicate> next;
+            typedef boost::mpl::pair <
+                decltype (std::declval <Predicate>() (
+                    std::declval <LeftType>(), std::declval <RightType>())),
+                decltype (std::declval <Predicate>() (
+                    std::declval <RightType>(), std::declval <LeftType>()))
+                > type;
         };
 
-        // \todo Derive these and call them something_results.
+        // Left sequence is empty and right sequence is not.
+        template <class RightType, class Predicate>
+            struct compute_predicate_result <void, RightType, Predicate>
+        { typedef boost::mpl::pair <rime::true_type, rime::false_type> type; };
 
-        // Left finished.
-        template <class FirstRight, class ... Right, class Predicate>
-        struct predicate_results <meta::vector<>,
-            meta::vector <FirstRight, Right ...>, Predicate>
+        // Right sequence is empty and left sequence is not.
+        template <class LeftType, class Predicate>
+            struct compute_predicate_result <LeftType, void, Predicate>
+        { typedef boost::mpl::pair <rime::false_type, rime::true_type> type; };
+
+        /**
+        Actually collect the result types.
+
+        LeftTypes and RightTypes must have the same lengths.
+        One of them may be padded with "void".
+        */
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results_implementation;
+
+        template <class ... LeftTypes, class ... RightTypes, class Predicate>
+            struct predicate_results_implementation <
+                meta::vector <LeftTypes ...>, meta::vector <RightTypes ...>,
+                Predicate>
         {
-            typedef rime::true_type left_right;
-            typedef rime::false_type right_left;
-
-            typedef meta::vector<> next;
+            typedef meta::vector <typename compute_predicate_result <
+                LeftTypes, RightTypes, Predicate>::type ...,
+                // Make the result for empty sequences correct.
+                boost::mpl::pair <rime::false_type, rime::true_type>> type;
         };
 
-        // Right finished.
-        template <class FirstLeft, class ... Left, class Predicate>
-        struct predicate_results <meta::vector <FirstLeft, Left ...>,
-            meta::vector<>, Predicate>
-        {
-            typedef rime::false_type left_right;
-            typedef rime::true_type right_left;
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results_left_shorter;
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results_left_not_shorter;
 
-            typedef meta::vector<> next;
+        /**
+        Return meta::vector \a Types with \c void appended as many times as
+        there are elements in \a PadTypes.
+        */
+        template <class Types, class PadTypes> struct pad_with_void;
+        template <class> struct make_void { typedef void type; };
+
+        template <class ... Types, class ... PadTypes>
+            struct pad_with_void <
+                meta::vector <Types ...>, meta::vector <PadTypes ...>>
+        {
+            typedef meta::vector <Types ...,
+                typename make_void <PadTypes>::type ...> type;
         };
 
-        // Both finished: should return false.
-        template <class Predicate>
-        struct predicate_results <meta::vector<>, meta::vector<>, Predicate>
-        {
-            typedef rime::false_type left_right;
-            typedef rime::true_type right_left;
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results_left_shorter
+        : predicate_results_implementation <
+            typename pad_with_void <LeftTypes, typename
+                meta::tail_of_longer <LeftTypes, RightTypes>::type>::type,
+            RightTypes, Predicate> {};
 
-            typedef meta::vector<> next;
-        };
+        template <class LeftTypes, class RightTypes, class Predicate>
+            struct predicate_results_left_not_shorter
+        : predicate_results_implementation <LeftTypes,
+            typename pad_with_void <RightTypes, typename
+                meta::tail_of_longer <RightTypes, LeftTypes>::type>::type,
+            Predicate> {};
 
-    } // namespace less_lexicographical_detail
-
-}} // namespace range::tuple_detail
-
-namespace meta {
-
-    template <class LeftTypes, class RightTypes, class Predicate>
-        struct range_tag <range::tuple_detail::less_lexicographical_detail
-            ::predicate_results <LeftTypes, RightTypes, Predicate>>
-    {
-        typedef range::tuple_detail::less_lexicographical_detail
-            ::predicate_results_tag type;
-    };
-
-    namespace operation {
-
-        template <> struct default_direction <range::tuple_detail
-            ::less_lexicographical_detail::predicate_results_tag>
-        {
-            template <class Range> struct apply
-            { typedef meta::front type; };
-        };
-
-        template <> struct empty <range::tuple_detail
-            ::less_lexicographical_detail::predicate_results_tag, meta::front>
-        {
-            template <class Range> struct apply : boost::mpl::false_ {};
-        };
-
-        template <> struct first <range::tuple_detail
-            ::less_lexicographical_detail::predicate_results_tag, meta::front>
-        {
-            template <class Range> struct apply {
-                typedef boost::mpl::pair <typename Range::left_right,
-                    typename Range::right_left> type;
-            };
-        };
-
-        template <> struct drop_one <range::tuple_detail
-            ::less_lexicographical_detail::predicate_results_tag, meta::front>
-        {
-            template <class Range> struct apply
-            { typedef typename Range::next type; };
-        };
-
-    } // namespace operation        
-
-} // namespace meta
-
-namespace range { namespace tuple_detail {
-
-    namespace less_lexicographical_detail {
+        template <class ... LeftTypes, class ... RightTypes, class Predicate>
+            struct predicate_results <meta::vector <LeftTypes ...>,
+                meta::vector <RightTypes ...>, Predicate>
+        : std::conditional <
+            (sizeof... (LeftTypes) < sizeof... (RightTypes)),
+            predicate_results_left_shorter <meta::vector <LeftTypes ...>,
+                meta::vector <RightTypes ...>, Predicate>,
+            predicate_results_left_not_shorter <meta::vector <LeftTypes ...>,
+                meta::vector <RightTypes ...>, Predicate>
+        >::type::type {};
 
         // result.
         template <class PredicateResults,
-                class First = typename meta::first <PredicateResults>::type,
-                class Enable1 = void, class Enable2 = void>
-            struct result;
+            class Enable1 = void, class Enable2 = void>
+        struct result;
 
         // Both non-constant.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>, typename
-                std::enable_if <!rime::is_constant <FirstLeft>::value
-                    && !rime::is_constant <FirstRight>::value>::type>
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
+                typename rime::disable_if_constant <FirstLeft>::type,
+                typename rime::disable_if_constant <FirstRight>::type>
         { typedef bool type; };
 
         // Left true_: always true.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>, typename
-                rime::enable_if_constant_true <FirstLeft>::type>
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
+                typename rime::enable_if_constant_true <FirstLeft>::type>
         { typedef rime::true_type type; };
 
         // Right true_: always false.
         // This should never conflict with the above, unless left < right and
         // right < left are both true, and there is no strict weak ordering.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>, typename
-                rime::enable_if_constant_true <FirstRight>::type>
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
+                typename rime::enable_if_constant_true <FirstRight>::type>
         { typedef rime::false_type type; };
 
         // false_, false_: both equal, so go for next.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>,
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
                 typename rime::enable_if_constant_false <FirstLeft>::type,
                 typename rime::enable_if_constant_false <FirstRight>::type>
-        : result <typename meta::drop <PredicateResults>::type> {};
+        : result <meta::vector <PredicateResults ...>> {};
 
         // false_, bool: false or next.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>,
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
                 typename rime::enable_if_constant_false <FirstLeft>::type,
-                typename std::enable_if <!rime::is_constant <FirstRight>::value
-                    >::type>
+                typename rime::disable_if_constant <FirstRight>::type>
         : std::conditional <
             std::is_same <typename result <
-                    typename meta::drop <PredicateResults>::type>::type,
+                    meta::vector <PredicateResults ...>>::type,
                 rime::false_type>::value,
             rime::false_type, bool> {};
 
         // bool, false_: true or next.
-        template <class PredicateResults, class FirstLeft, class FirstRight>
-            struct result <PredicateResults,
-                boost::mpl::pair <FirstLeft, FirstRight>,
-                typename std::enable_if <!rime::is_constant <FirstLeft>::value
-                    >::type,
+        template <class ... PredicateResults, class FirstLeft, class FirstRight>
+            struct result <meta::vector <
+                    boost::mpl::pair <FirstLeft, FirstRight>,
+                    PredicateResults ...>,
+                typename rime::disable_if_constant <FirstLeft>::type,
                 typename rime::enable_if_constant_false <FirstRight>::type>
         : std::conditional <
             std::is_same <typename result <
-                    typename meta::drop <PredicateResults>::type>::type,
+                    meta::vector <PredicateResults ...>>::type,
                 rime::true_type>::value,
             rime::true_type, bool> {};
 
         // Implementation.
 
-        template <class Result, class PredicateResults,
-            class Enable1 = void, class Enable2 = void, class Enable3 = void>
-        struct less_lexicographical_implementation {};
+        template <class Result, class PredicateResults, class Enable = void>
+            struct less_lexicographical_implementation {};
 
         template <class PredicateResults>
             struct less_lexicographical_implementation_forwarder
@@ -444,9 +403,9 @@ namespace range { namespace tuple_detail {
 
         // Constant result.
         template <class Result, class PredicateResults>
-            struct less_lexicographical_implementation <Result, PredicateResults,
-                typename std::enable_if <rime::is_constant <Result>::value
-                    >::type>
+            struct less_lexicographical_implementation <
+                Result, PredicateResults,
+                typename rime::enable_if_constant <Result>::type>
         {
             template <class Left, class Right, class Predicate>
                 Result operator() (Left const &, Right const &, Predicate &&)
@@ -455,9 +414,9 @@ namespace range { namespace tuple_detail {
         };
 
         // Run-time result.
-        template <class PredicateResults, class Enable1, class Enable2, class Enable3>
+        template <class FirstPredicateResult, class ... PredicateResults>
             struct less_lexicographical_implementation <
-                bool, PredicateResults, Enable1, Enable2, Enable3>
+                bool, meta::vector <FirstPredicateResult, PredicateResults ...>>
         {
         private:
             // left < right: always return true. Don't recurse.
@@ -471,21 +430,21 @@ namespace range { namespace tuple_detail {
             template <class Left, class Right, class Predicate>
                 bool implement_2 (Left const &, Right const &,
                     Predicate &&, bool, rime::true_type,
-                    utility::overload_order <2> *) const
+                    utility::overload_order <1> *) const
             { return false; }
 
             // Other cases: recursion should be compiled.
             template <class Left, class Right, class Predicate>
                 bool implement_2 (Left const & left, Right const & right,
                     Predicate && predicate, bool left_right, bool right_left,
-                    utility::overload_order <3> *) const
+                    utility::overload_order <2> *) const
             {
                 if (left_right)
                     return true;
                 if (right_left)
                     return false;
                 return less_lexicographical_implementation <bool,
-                    typename meta::drop <PredicateResults>::type>()
+                    meta::vector <PredicateResults ...>>()
                         (range::drop (left), range::drop (right),
                             std::forward <Predicate> (predicate));
             }
@@ -522,13 +481,10 @@ namespace range { namespace tuple_detail {
             }
         };
 
-        template <class PredicateResults, class Enable2, class Enable3>
+        template <class ... PredicateResults>
             struct less_lexicographical_implementation <
-                bool, PredicateResults,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <PredicateResults>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type, Enable2, Enable3>
+                bool, meta::vector <boost::mpl::pair <bool, bool>,
+                    PredicateResults ...>>
         {
             template <class Left, class Right, class Predicate>
                 bool operator() (Left const & left, Right const & right,
@@ -539,23 +495,16 @@ namespace range { namespace tuple_detail {
                 if (predicate (range::first (right), range::first (left)))
                     return false;
                 return less_lexicographical_implementation <bool,
-                    typename meta::drop <PredicateResults>::type>()
+                    meta::vector <PredicateResults ...>>()
                         (range::drop (left), range::drop (right),
                             std::forward <Predicate> (predicate));
             }
         };
 
-        template <class PredicateResults, class Enable3>
+        template <class ... PredicateResults>
             struct less_lexicographical_implementation <
-                bool, PredicateResults,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <PredicateResults>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <typename meta::drop <PredicateResults>::type>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type, Enable3>
+                bool, meta::vector <boost::mpl::pair <bool, bool>,
+                    boost::mpl::pair <bool, bool>, PredicateResults ...>>
         {
             template <class Left, class Right, class Predicate>
                 bool operator() (Left const & left, Right const & right,
@@ -570,29 +519,18 @@ namespace range { namespace tuple_detail {
                 if (predicate (range::second (right), range::second (left)))
                     return false;
                 return less_lexicographical_implementation <bool,
-                    typename meta::drop <boost::mpl::size_t <2>, PredicateResults>::type>()
+                    meta::vector <PredicateResults ...>>()
                         (range::drop (left, rime::size_t <2>()),
                             range::drop (right, rime::size_t <2>()),
                             std::forward <Predicate> (predicate));
             }
         };
 
-        // Not sure this has any effect in practice!
-        template <class PredicateResults>
+        template <class ... PredicateResults>
             struct less_lexicographical_implementation <
-                bool, PredicateResults,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <PredicateResults>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <typename meta::drop <PredicateResults>::type>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type,
-                typename std::enable_if <std::is_same <typename
-                    meta::first <typename meta::drop <boost::mpl::size_t <2>, PredicateResults>::type>::type,
-                    boost::mpl::pair <bool, bool>
-                >::value>::type>
+                bool, meta::vector <boost::mpl::pair <bool, bool>,
+                    boost::mpl::pair <bool, bool>,
+                    boost::mpl::pair <bool, bool>, PredicateResults ...>>
         {
             template <class Left, class Right, class Predicate>
                 bool operator() (Left const & left, Right const & right,
@@ -611,7 +549,7 @@ namespace range { namespace tuple_detail {
                 if (predicate (range::third (right), range::third (left)))
                     return false;
                 return less_lexicographical_implementation <bool,
-                    typename meta::drop <boost::mpl::size_t <3>, PredicateResults>::type>()
+                    meta::vector <PredicateResults ...>>()
                         (range::drop (left, rime::size_t <3>()),
                             range::drop (right, rime::size_t <3>()),
                             std::forward <Predicate> (predicate));
@@ -630,7 +568,7 @@ namespace range { namespace tuple_detail {
         : less_lexicographical_implementation_forwarder <
             typename less_lexicographical_detail::predicate_results <
                 meta::vector <LeftTypes ...>, meta::vector <RightTypes ...>,
-                Predicate>>
+                Predicate>::type>
         {};
 
     } // namespace less_lexicographical_detail

@@ -85,13 +85,13 @@ namespace range { namespace tuple_detail {
             struct result <meta::vector <PredicateResults ...>>
         : boost::mpl::eval_if <
             // If any type is known false, then false.
-            meta::any_of_c <rime::equal_constant <
-                rime::false_type, PredicateResults>::value ...>,
+            meta::any_of_c <
+                rime::is_constant_false <PredicateResults>::value ...>,
             rime::false_type,
             boost::mpl::if_ <
                 // If all are known true, then true.
-                meta::all_of_c <rime::equal_constant <
-                    rime::true_type, PredicateResults>::value ...>,
+                meta::all_of_c <
+                    rime::is_constant_true <PredicateResults>::value ...>,
                 rime::true_type,
                 // Else: runtime.
                 bool>> {};

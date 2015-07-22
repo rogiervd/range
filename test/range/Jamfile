@@ -83,6 +83,7 @@ run test-tuple-5-fold-state_types.cpp : : :
     <dependency>test-tuple-0-basic <dependency>test-fold-1 ;
 run test-tuple-5-for_each.cpp : : :
     <dependency>test-tuple-0-basic <dependency>test-for_each ;
+run test-tuple-5-less-meta.cpp ;
 run test-tuple-5-less-constant.cpp : : : <dependency>test-tuple-0-basic ;
 run test-tuple-5-less-heterogeneous.cpp : : : <dependency>test-tuple-0-basic ;
 run test-tuple-5-less-types.cpp : : : <dependency>test-tuple-0-basic ;

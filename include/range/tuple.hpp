@@ -27,6 +27,7 @@ Define a general heterogeneous container.
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
 
+#include "utility/overload_order.hpp"
 #include "utility/storage.hpp"
 #include "utility/is_assignable.hpp"
 #include "utility/type_sequence_traits.hpp"
@@ -35,12 +36,16 @@ Define a general heterogeneous container.
 #include "rime/core.hpp"
 #include "rime/assert.hpp"
 #include "rime/always.hpp"
+#include "rime/enable_if_constant.hpp"
 
 #include "core.hpp"
 #include "heavyweight.hpp"
 #include "element_types.hpp"
 #include "equal.hpp"
 #include "less_lexicographical.hpp"
+
+#include "detail/tuple-fwd.hpp"
+#include "detail/tuple-compare.hpp"
 
 namespace range {
 

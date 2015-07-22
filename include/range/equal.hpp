@@ -154,8 +154,6 @@ namespace helper {
     \param range2 The right-hand side range.
     \param direction The direction.
     \param predicate The predicate used to compare the elements.
-
-    \todo Test
     */
     void implement_equal (unusable);
 

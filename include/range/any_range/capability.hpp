@@ -37,6 +37,8 @@ limitations under the License.
 #include "meta/all_of.hpp"
 #include "meta/all_of_c.hpp"
 
+#include "utility/enable_if_compiles.hpp"
+
 #include "rime/core.hpp"
 
 #include "range/direction.hpp"
@@ -325,8 +327,10 @@ namespace capability {
         : meta::vector <Direction1> {};
 
         template <class Direction1>
-            struct detect_directions <Direction1, typename make_void <decltype (
-                ::direction::opposite (std::declval <Direction1>()))>::type>
+            struct detect_directions <Direction1, typename
+                utility::enable_if_compiles <decltype (
+                    ::direction::opposite (std::declval <Direction1>()))
+                >::type>
         : meta::vector <Direction1, typename decayed_result_of <
             ::direction::callable::opposite (Direction1)>::type> {};
 

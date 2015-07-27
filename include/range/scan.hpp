@@ -25,6 +25,7 @@ limitations under the License.
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/not.hpp>
 
+#include "utility/enable_if_compiles.hpp"
 #include "utility/returns.hpp"
 #include "utility/storage.hpp"
 
@@ -347,9 +348,9 @@ namespace scan_detail {
         class UnderlyingEmpty>
     struct drop_one_result <Direction, ScanRange, Empty,
         Function, State, Underlying, UnderlyingEmpty,
-        typename make_void <decltype (first (
+        typename utility::enable_if_compiles <decltype (first (
             std::declval <Underlying>(), std::declval <Direction>()))>::type,
-        typename make_void <decltype (drop (
+        typename utility::enable_if_compiles <decltype (drop (
             std::declval <Underlying>(), std::declval <Direction>()))>::type>
     {
         typedef decltype (

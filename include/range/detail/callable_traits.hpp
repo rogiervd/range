@@ -26,17 +26,11 @@ Use utility/nested_callable.hpp to set up generic traits for callables.
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/identity.hpp>
 
+#include "utility/enable_if_compiles.hpp"
+
 #include "meta/all_of_c.hpp"
 
 namespace callable_traits {
-
-    /** \brief
-    Evaluate to \c void.
-
-    This can be used when \a ResultType may or may not be a valid type, like the
-    return type of a call to a member function.
-    */
-    template <class ...> struct make_void { typedef void type; };
 
     namespace detail {
 
@@ -50,8 +44,8 @@ namespace callable_traits {
         // (This specialisation is taken out of consideration by SFINAE if not.)
         template <class Function, class ... Arguments>
             struct result_of <Function (Arguments ...), typename
-                make_void <decltype (std::declval <Function>() (
-                    std::declval <Arguments>() ...))>::type>
+                utility::enable_if_compiles <decltype (std::declval <Function>()
+                    (std::declval <Arguments>() ...))>::type>
         {
             typedef decltype (std::declval <Function>() (
                 std::declval <Arguments>() ...)) type;
@@ -69,8 +63,8 @@ namespace callable_traits {
 
         template <class Function, class ... Arguments>
             struct decayed_result_of <Function (Arguments ...), typename
-                make_void <decltype (std::declval <Function>() (
-                    std::declval <Arguments>() ...))>::type>
+                utility::enable_if_compiles <decltype (std::declval <Function>()
+                    (std::declval <Arguments>() ...))>::type>
         : std::decay <decltype (std::declval <Function>() (
             std::declval <Arguments>() ...))> {};
 
@@ -88,8 +82,8 @@ namespace callable_traits {
         // (This specialisation is taken out of consideration by SFINAE if not.)
         template <class Function, class ... Arguments>
             struct has <Function (Arguments ...), typename
-                make_void <decltype (std::declval <Function>() (
-                    std::declval <Arguments>() ...))>::type>
+                utility::enable_if_compiles <decltype (std::declval <Function>()
+                    (std::declval <Arguments>() ...))>::type>
         : std::true_type {};
 
         // In case a function pointer is passed in.

@@ -56,7 +56,6 @@ using utility::pick_overload;
 using ::callable_traits::has;
 using ::callable_traits::result_of;
 using ::callable_traits::decayed_result_of;
-using ::callable_traits::make_void;
 
 /** \brief
 Contain names for operations on ranges, and helpers.

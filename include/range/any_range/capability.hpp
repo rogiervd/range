@@ -327,8 +327,9 @@ namespace capability {
         : meta::vector <Direction1> {};
 
         template <class Direction1>
-            struct detect_directions <Direction1, typename enable_if_compiles <
-                decltype (::direction::opposite (std::declval <Direction1>()))
+            struct detect_directions <Direction1, typename
+                utility::enable_if_compiles <decltype (
+                    ::direction::opposite (std::declval <Direction1>()))
                 >::type>
         : meta::vector <Direction1, typename decayed_result_of <
             ::direction::callable::opposite (Direction1)>::type> {};

@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <type_traits>
 
+#include "utility/enable_if_compiles.hpp"
+
 #include "rime/core.hpp"
 
 #include "../direction.hpp"
@@ -38,9 +40,11 @@ namespace is_homogeneous_detail {
     : rime::false_type {};
 
     template <class Range, class Direction>
-        struct is_homogeneous <Range, Direction, typename make_void <
-            decltype (std::declval <callable::chop_in_place>() (
-                std::declval <Range &>(), std::declval <Direction>()))>::type>
+        struct is_homogeneous <Range, Direction,
+            typename utility::enable_if_compiles <
+                decltype (std::declval <callable::chop_in_place>() (
+                    std::declval <Range &>(), std::declval <Direction>()))
+                >::type>
     : rime::true_type {};
 
 } // namespace is_homogeneous_detail

@@ -1,1 +1,3 @@
 build-project test ;
+
+run test_contiguous_storage.cpp ;

@@ -12,7 +12,7 @@ project
 
     # 1) Use Valgrind, which then must be installed on the computer.
     # This uses Valgrind's MemCheck tool.
-#      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
 
     # 2) Switch on Address Sanitizer.
     # It is available in LLVM from version 3.1.
@@ -24,5 +24,6 @@ project
 
     ;
 
-# Always build the project in ./range/
+# Always build the projects in the subdirectories.
 build-project range ;
+build-project container ;

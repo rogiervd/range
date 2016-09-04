@@ -47,6 +47,7 @@ using utility::is_assignable;
 
 using utility::tracked_registry;
 using utility::tracked;
+using utility::tracked_counts;
 
 struct source {};
 
@@ -249,14 +250,14 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         tracked <int> ci (c, 45);
         float f = 4.5f;
         tracked <double> cd (c, 6.7);
-        c.check_counts (2, 0, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 0, 0, 0, 0, 0, 0, 0));
 
         tuple <tracked <int> &, float &, tracked <double> &>
             tied (ci, f, cd);
         tuple <tracked <int>, float, tracked <double>>
             saved (ci, f, cd);
 
-        c.check_counts (2, 2, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
 
         // Values in "saved".
         first (saved).content() = 56;
@@ -271,7 +272,7 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (at_c <2> (saved).content(), 10.6);
         BOOST_CHECK_EQUAL (cd.content(), 6.7);
 
-        c.check_counts (2, 2, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
 
         // Assign values to the original objects.
         tied = saved;
@@ -279,7 +280,7 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (f, 7.6f);
         BOOST_CHECK_EQUAL (cd.content(), 10.6);
 
-        c.check_counts (2, 2, 0, 2, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 0, 0, 0, 0));
 
         // Move.
         // First change the values in "saved" so that it's noticeable.
@@ -293,9 +294,10 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (cd.content(), 18.45);
 
         // If moveability is exploited, the result is:
-        c.check_counts (2, 2, 0, 2, 2, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 2, 0, 0, 0));
         // Otherwise it would be:
-        // c.check_counts (2, 2, 0, 4, 0, 0, 0, 0);
+        // BOOST_CHECK_EQUAL (c.counts(),
+        //     tracked_counts (2, 2, 0, 4, 0, 0, 0, 0));
     }
     // Check whether the implementation is better than Visual C++'s original
     // implementation of std::pair in handling rvalue references.
@@ -311,10 +313,12 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
 
             typedef tuple <tracked <int> &, tracked <double> &> pair;
             pair p (a1, a2);
-            r.check_counts (4, 0, 0, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (r.counts(),
+                utility::tracked_counts (4, 0, 0, 0, 0, 0, 0, 0));
             // This should copy-assign b1 into a1 and b2 into a2, not move it.
             p = pair (b1, b2);
-            r.check_counts (4, 0, 0, 2, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (r.counts(),
+                utility::tracked_counts (4, 0, 0, 2, 0, 0, 0, 0));
         }
     }
 }

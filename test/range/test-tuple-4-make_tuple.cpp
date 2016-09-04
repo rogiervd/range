@@ -54,6 +54,7 @@ using range::third;
 
 using utility::tracked_registry;
 using utility::tracked;
+using utility::tracked_counts;
 
 BOOST_AUTO_TEST_SUITE(test_range_tuple)
 
@@ -630,10 +631,12 @@ BOOST_AUTO_TEST_CASE (test_range_tuple_swap) {
             tracked <int> (c, 10), 'b',
             tracked <float> (c, 12.5f));
 
-        c.check_counts (4, 0, 4, 0, 0, 0, 0, 4);
+        BOOST_CHECK_EQUAL (c.counts(),
+            utility::tracked_counts (4, 0, 4, 0, 0, 0, 0, 4));
 
         swap (t1, t2);
-        c.check_counts (4, 0, 4, 0, 0, 2, 0, 4);
+        BOOST_CHECK_EQUAL (c.counts(),
+            utility::tracked_counts (4, 0, 4, 0, 0, 2, 0, 4));
 
         BOOST_CHECK_EQUAL (first (t1).content(), 10);
         BOOST_CHECK_EQUAL (at_c <1> (t1), 'b');

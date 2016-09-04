@@ -62,6 +62,7 @@ using rime::true_;
 using rime::false_;
 
 using utility::tracked;
+using utility::tracked_counts;
 
 BOOST_AUTO_TEST_CASE (test_std_tuple_types) {
     {
@@ -272,7 +273,7 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         RIME_CHECK_EQUAL (first (t, back).content(), 4.5);
 
         // Check the status quo.
-        r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 2, 0, 0, 0, 0, 2));
 
         auto v = view_once (std::move (t));
         BOOST_MPL_ASSERT ((std::is_same <
@@ -283,11 +284,11 @@ BOOST_AUTO_TEST_CASE (test_std_tuple) {
         // The elements should be moved out.
         tracked <int> i = at_c <0> (v);
         BOOST_CHECK_EQUAL (i.content(), 7);
-        r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 3, 0, 0, 0, 0, 2));
 
         tracked <double> d = at_c <1> (v);
         BOOST_CHECK_EQUAL (d.content(), 4.5);
-        r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 4, 0, 0, 0, 0, 2));
     }
 }
 

@@ -83,10 +83,9 @@ BOOST_AUTO_TEST_CASE (test_range_detail_underlying) {
         tracked_registry c;
         typedef with_underlying <tracked <int>> type;
         type u (c, 9);
-        BOOST_CHECK_EQUAL (c.value_construct_count(), 1);
+        auto before = c.counts();
         tracked <int> object (get_underlying <type> (u));
-        BOOST_CHECK_EQUAL (c.move_count(), 1);
-        c.check_counts (1, 0, 1, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.since (before), utility::move_count (1));
     }
 
     // Reference to const.

@@ -73,6 +73,7 @@ using rime::false_type;
 using rime::true_type;
 
 using utility::tracked;
+using utility::tracked_counts;
 
 BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     std::vector <int> v;
@@ -200,7 +201,7 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         // Check the status quo.
         RIME_CHECK_EQUAL (first (c).content(), 7);
         RIME_CHECK_EQUAL (first (c, back).content(), 45);
-        r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 2, 0, 0, 0, 0, 2));
         auto v = view_once (std::move (c));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (first (v)), tracked <int> &&>));
@@ -210,11 +211,11 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         // The elements should be moved out.
         tracked <int> i = at (v, 0);
         BOOST_CHECK_EQUAL (i.content(), 7);
-        r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 3, 0, 0, 0, 0, 2));
 
         tracked <int> d = at (v, 1);
         BOOST_CHECK_EQUAL (d.content(), 45);
-        r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 4, 0, 0, 0, 0, 2));
     }
 }
 

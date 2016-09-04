@@ -22,9 +22,11 @@ limitations under the License.
 #include <string>
 #include <tuple>
 #include <vector>
+#include <memory>
 
 #include <boost/mpl/assert.hpp>
 
+#include "utility/unique_ptr.hpp"
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 
@@ -133,6 +135,26 @@ BOOST_AUTO_TEST_CASE (tuple_assign_one) {
         tuple <long> tl (31l);
         tl = t;
         BOOST_CHECK_EQUAL (first (tl), 7l);
+    }
+    tracked_registry r;
+    {
+        tuple <tracked <int>> t (tracked <int> (r, 44));
+
+        auto before = r.counts();
+        tuple <tracked <int>> t_copy (t);
+        BOOST_CHECK_EQUAL (first (t_copy).content(), 44);
+        BOOST_CHECK_EQUAL (r.since (before), utility::copy_count (1));
+
+        before = r.counts();
+        tuple <tracked <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (first (t_moved).content(), 44);
+        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (1));
+    }
+    // Noncopyable
+    {
+        tuple <std::unique_ptr <int>> t (utility::make_unique <int> (66));
+        tuple <std::unique_ptr <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (*first (t_moved), 66);
     }
     {
         int i1 = 80;

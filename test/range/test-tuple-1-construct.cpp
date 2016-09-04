@@ -27,6 +27,7 @@ limitations under the License.
 #include <boost/mpl/assert.hpp>
 
 #include "utility/test/tracked.hpp"
+#include "utility/unique_ptr.hpp"
 
 #include "range/std.hpp"
 
@@ -187,6 +188,11 @@ BOOST_AUTO_TEST_CASE (tuple_construct_one_element) {
             BOOST_CHECK_EQUAL (first (t).content(), 7);
             BOOST_CHECK_EQUAL (c.counts(),
                 tracked_counts (1, 0, 1, 0, 0, 0, 0, 0));
+        }
+        {
+            auto i = utility::make_unique <int> (7);
+            tuple <std::unique_ptr <int>> t (std::move (i));
+            BOOST_CHECK_EQUAL (*first (t), 7);
         }
     }
 
@@ -407,6 +413,38 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         BOOST_CHECK_EQUAL (first (t2, back), 67);
         i2 = 23;
         BOOST_CHECK_EQUAL (first (t2, back), 23);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (copy_construction) {
+    utility::tracked_registry r;
+    {
+        tuple <tracked <int>, tracked <char>> t (
+            tracked <int> (r, 77), tracked <char> (r, 'c'));
+
+        // Copy-construct.
+        auto before = r.counts();
+        tuple <tracked <int>, tracked <char>> t_copy (t);
+        BOOST_CHECK_EQUAL (first (t_copy).content(), 77);
+        BOOST_CHECK_EQUAL (second (t_copy).content(), 'c');
+        BOOST_CHECK_EQUAL (r.since (before), utility::copy_count (2));
+
+        // Move-construct.
+        before = r.counts();
+        tuple <tracked <int>, tracked <char>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (first (t_moved).content(), 77);
+        BOOST_CHECK_EQUAL (second (t_moved).content(), 'c');
+        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (2));
+    }
+    {
+        // Move-construct from noncopyable.
+        tuple <std::unique_ptr <int>> t (utility::make_unique <int> (55));
+
+        // This causes a compile error:
+        // tuple <std::unique_ptr <int>> t_copy (t);
+
+        tuple <std::unique_ptr <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (*first (t_moved), 55);
     }
 }
 

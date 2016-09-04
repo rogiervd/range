@@ -817,8 +817,12 @@ namespace callable {
 
     struct make_tuple {
         template <class ... Types> inline
-            tuple <Types ...> operator() (Types const & ... arguments) const
-        { return tuple <Types ...> (arguments ...); }
+            tuple <typename std::decay <Types>::type ...> operator() (
+                Types && ... arguments) const
+        {
+            return tuple <typename std::decay <Types>::type ...> (
+                std::forward <Types> (arguments) ...);
+        }
     };
 
     struct make_tuple_from {

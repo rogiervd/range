@@ -80,7 +80,8 @@ A more readable version with comments is in test/for_each_macro.cpp.
                     for (auto && variable_name = \
                         ::range::chop_in_place (RANGE_FOR_EACH_internal_view); \
                         !RANGE_FOR_EACH_internal_seen; \
-                        RANGE_FOR_EACH_internal_seen = true)
+                        ((void) variable_name), \
+                            RANGE_FOR_EACH_internal_seen = true)
 
 #endif  // RANGE_FOR_EACH_MACRO_HPP_INCLUDED
 

@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef RANGE_CALL_UNPACK_HPP_INCLUDED
 #define RANGE_CALL_UNPACK_HPP_INCLUDED
 
-#include "meta/count.hpp"
+#include "meta/count_c.hpp"
 
 #include "utility/storage.hpp"
 
@@ -30,11 +30,11 @@ namespace callable {
     namespace call_unpack_detail {
 
         struct implementation {
-            template <class Function, class Arguments, class ... Indices>
+            template <class Function, class Arguments, std::size_t ... Indices>
                 auto operator() (Function && function, Arguments && arguments,
-                    meta::vector <Indices ...>) const
+                    meta::size_t_vector <Indices ...>) const
             RETURNS (std::forward <Function> (function) (
-                ::range::at (arguments, Indices()) ...));
+                ::range::at_c <Indices> (arguments) ...));
         };
 
     } // namespace call_unpack_detail
@@ -59,14 +59,14 @@ namespace callable {
         template <class Arguments> auto operator() (Arguments && arguments)
         RETURNS (call_unpack_detail::implementation() (function_,
             ::range::view_once (std::forward <Arguments> (arguments)),
-            typename meta::count <result_of <size (Arguments)>::type::value
+            typename meta::count_c <result_of <size (Arguments)>::type::value
                 >::type()));
 
         template <class Arguments> auto operator() (Arguments && arguments)
             const
         RETURNS (call_unpack_detail::implementation() (function_,
             ::range::view_once (std::forward <Arguments> (arguments)),
-            typename meta::count <result_of <size (Arguments)>::type::value
+            typename meta::count_c <result_of <size (Arguments)>::type::value
                 >::type()));
     };
 
@@ -77,7 +77,7 @@ namespace callable {
         RETURNS (call_unpack_detail::implementation() (
             std::forward <Function> (function),
             ::range::view_once (std::forward <Arguments> (arguments)),
-            typename meta::count <result_of <size (Arguments)>::type::value
+            typename meta::count_c <result_of <size (Arguments)>::type::value
                 >::type()));
 
         template <class Function>

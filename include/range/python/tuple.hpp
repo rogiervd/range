@@ -30,7 +30,7 @@ Expose views as Python iterators.
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/tuple.hpp>
 
-#include <meta/count.hpp>
+#include <meta/count_c.hpp>
 #include <meta/vector.hpp>
 
 #include "range/core.hpp"
@@ -42,12 +42,12 @@ namespace range { namespace python {
         template <class Tuple> class convert_tuple {
             static_assert (is_range <Tuple>::value, "Tuple must be a range.");
 
-            template <class View, class ... Indices>
+            template <class View, std::size_t ... Indices>
                 static PyObject * construct_tuple (
-                    View const & tuple, meta::vector <Indices ...>)
+                    View const & tuple, meta::size_t_vector <Indices ...>)
             {
                 return boost::python::incref (boost::python::make_tuple (
-                        range::at (tuple, Indices()) ...)
+                        range::at_c <Indices> (tuple) ...)
                     .ptr());
             }
 
@@ -56,7 +56,7 @@ namespace range { namespace python {
                 typedef decltype (range::size (tuple)) size_type;
                 static auto constexpr size = size_type::value;
                 return construct_tuple (range::view (tuple),
-                    typename meta::count <size>::type());
+                    typename meta::count_c <size>::type());
             }
         };
 

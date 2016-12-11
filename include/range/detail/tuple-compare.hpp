@@ -30,6 +30,7 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 #include "meta/vector.hpp"
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"
+#include "meta/count_c.hpp"
 
 #include "utility/overload_order.hpp"
 
@@ -55,14 +56,15 @@ namespace range { namespace tuple_detail {
 
         template <class Indices> struct compute;
 
-        template <class ... Indices> struct compute <meta::vector <Indices ...>>
+        template <std::size_t ... Indices>
+            struct compute <meta::size_t_vector <Indices ...>>
         {
             typedef meta::vector <decltype (extract <
-                ((tuple_size - Begin - 1) - Indices::value)>() (
+                ((tuple_size - Begin - 1) - Indices)>() (
                     std::declval <TupleReference>())) ...> type;
         };
 
-        typedef typename compute <typename meta::count <End - Begin>::type
+        typedef typename compute <typename meta::count_c <End - Begin>::type
             >::type type;
     };
 

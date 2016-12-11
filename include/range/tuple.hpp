@@ -27,6 +27,8 @@ Define a general heterogeneous container.
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
 
+#include "meta/count_c.hpp"
+
 #include "utility/overload_order.hpp"
 #include "utility/storage.hpp"
 #include "utility/is_assignable.hpp"
@@ -1121,13 +1123,13 @@ namespace tuple_detail {
         By using "Indices::value...", this calls the function with the correct
         elements.
         */
-        template <class Function, class ... Indices>
+        template <class Function, std::size_t ... Indices>
             void apply_for_each (
-                Function && function, meta::vector <Indices ...>) const
+                Function && function, meta::size_t_vector <Indices ...>) const
         {
             call_function <Function> call (std::forward <Function> (function));
             int dummy [] = { call (extract <
-                ((tuple_size - begin_position - 1) - Indices::value)>() (
+                ((tuple_size - begin_position - 1) - Indices)>() (
                     tuple())) ...};
             (void) dummy;
         }
@@ -1136,7 +1138,7 @@ namespace tuple_detail {
             direction::front, Function && function) const
         {
             apply_for_each (std::forward <Function> (function),
-                typename meta::count <view_size>::type());
+                typename meta::count_c <view_size>::type());
         }
     };
 

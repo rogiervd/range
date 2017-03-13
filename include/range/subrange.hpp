@@ -43,9 +43,9 @@ template <class Underlying, class Original, class BeforeSize, class Direction>
         subrange_view <Underlying, Original, BeforeSize, Direction>>
 { typedef subrange_detail::subrange_view_tag type; };
 
-/**
+/** \brief
 Range that remembers that it is a subrange of a larger range, and provides
-access to the ranges before and after it.
+access to the range before.
 */
 template <class Underlying, class Original, class BeforeSize, class Direction>
     class subrange_view
@@ -76,13 +76,15 @@ public:
 
 public:
     // \todo useful? For users? Really?
-    subrange_view (Direction const & direction, Underlying const & underlying)
+    subrange_view (Underlying const & underlying, Direction const & direction)
     : with_direction_type (direction), underlying_ (underlying),
         before_size_(), original_ (underlying) {}
 
     subrange_view (subrange_view const &) = default;
+    subrange_view (subrange_view &&) = default;
 
     subrange_view & operator= (subrange_view const &) = default;
+    subrange_view & operator= (subrange_view &&) = default;
 
     Direction const & direction() const
     { return with_direction_type::direction(); }
@@ -95,6 +97,7 @@ public:
 
     Original const & original() const { return original_; }
 
+    // \todo Privatise?
     BeforeSize const & before_size() const { return before_size_; }
 
     /**
@@ -124,11 +127,14 @@ private:
 namespace callable {
 
     class make_subrange {
-    private:
+    protected:
         struct dispatch {
-            template <class Underlying, class Original, class BeforeSize, class Direction,
-                class Result = subrange_view <typename std::decay <Underlying>::type,
-                    typename std::decay <Original>::type, BeforeSize, Direction>>
+            template <class Underlying, class Original,
+                class BeforeSize, class Direction,
+                class Result = subrange_view <
+                    typename std::decay <Underlying>::type,
+                    typename std::decay <Original>::type,
+                    BeforeSize, Direction>>
             Result operator() (Underlying && underlying, Original && original,
                 BeforeSize const & before_size, Direction const & direction)
             {
@@ -147,44 +153,90 @@ namespace callable {
             decayed_result_of <callable::default_direction (Range)>::type> {};
 
     public:
-        template <class Underlying, class Original, class BeforeSize, class Direction>
-            auto operator() (Underlying && underlying, Original && original,
-                BeforeSize const & before_size, Direction const & direction) const
-        RETURNS (dispatch() (
-            range::view (std::forward <Underlying> (underlying)),
-            range::view (std::forward <Original> (original)),
-            before_size, direction));
-
         // Normal invocation: no original, no before_size.
         template <class Underlying, class Direction>
             auto operator() (
-                Underlying const & underlying, Direction const & direction) const
-        RETURNS (dispatch() (range::view (underlying, direction), range::view (underlying, direction),
+                Underlying && underlying, Direction const & direction) const
+        RETURNS (dispatch() (
+            range::view (std::forward <Underlying> (underlying), direction),
+            range::view (std::forward <Underlying> (underlying), direction),
             typename default_before_size <Underlying, Direction>::type(),
             direction));
 
         // No direction: use default.
         template <class Underlying>
-            auto operator() (Underlying const & underlying) const
-        RETURNS (dispatch() (range::view (underlying), range::view (underlying),
+            auto operator() (Underlying && underlying) const
+        RETURNS (dispatch() (
+            range::view (std::forward <Underlying> (underlying)),
+            range::view (std::forward <Underlying> (underlying)),
             typename default_before_size <Underlying>::type(),
             range::default_direction (underlying)));
     };
 
 } // namespace callable
 
+/**
+Return a range that represents another range, but when elements are dropped,
+keeps track of the part of the original range that are before it.
+
+\code
+std::vector <int> v {3, 6, 7};
+auto tail = drop (make_subrange (v));
+// tail now is a view on {6, 7}.
+auto head = tail.before();
+// head now is a view on {3}.
+\endcode
+
+Algorithms that indicate a specific element in a range could return a subrange
+so that it is possible to use the range starting from that element or the range
+up to that element.
+
+This is also useful to implement algorithms, especially ones that edit the
+underlying range.
+For example, QuickSort partitions a range by moving elements less than the pivot
+to before it, and elements greater than the pivot to after it.
+A natural way to implement this uses <c>subrange(subrange(r, back), front)</c>.
+
+The subrange that is returned always offers the same interface as
+\c subrange_view.
+However, though by default it is actually \c subrange_view, a more specialised
+type may be returned for reasons of efficiency.
+
+\todo Specialise for iterator_range.
+*/
 static auto const make_subrange = callable::make_subrange();
 
 namespace subrange_detail {
+
+    /**
+    Internal version of make_subrange.
+    underlying and original are given separately, and before_size explicitly.
+    */
+    struct make_subrange : ::range::callable::make_subrange {
+    public:
+        template <class Underlying, class Original,
+            class BeforeSize, class Direction>
+            auto operator() (Underlying && underlying, Original && original,
+                BeforeSize const & before_size, Direction const & direction)
+        const
+        RETURNS (dispatch() (
+            range::view (std::forward <Underlying> (underlying)),
+            range::view (std::forward <Original> (original)),
+            before_size, direction));
+    };
 
     struct drop_same_direction {
         // \todo Qualification of underlying and original
         template <class Subrange, class Increment, class Direction>
             auto operator() (Subrange && subrange, Increment const & increment, Direction const & direction) const
-        RETURNS (make_subrange (
-            // New subrange.
+        // Dropping in the direction of the subrange.
+        RETURNS (make_subrange() (
+            // Only change the underlying range...
             range::drop (subrange.underlying(), increment, direction),
-            subrange.original(), subrange.before_size() + increment,
+            // ... not the original ...
+            subrange.original(),
+            // ... so before_size does change.
+            subrange.before_size() + increment,
             subrange.direction()));
     };
 
@@ -192,11 +244,15 @@ namespace subrange_detail {
         // \todo Qualification of underlying and original
         template <class Subrange, class Increment, class Direction>
             auto operator() (Subrange && subrange, Increment const & increment, Direction const & direction) const
-        RETURNS (make_subrange (
-            // New subrange.
+        // Dropping in a different direction from the subrange.
+        // Apply to the underlying and original ranges.
+        RETURNS (make_subrange() (
+            // Change the underlying range ...
             range::drop (subrange.underlying(), increment, direction),
+            // ... as well as the original ...
             range::drop (subrange.original(), increment, direction),
-            subrange.before_size() + increment,
+            // ... with no difference to before_size.
+            subrange.before_size(),
             subrange.direction()));
     };
 
@@ -209,73 +265,6 @@ namespace subrange_detail {
         std::forward <Subrange> (range), increment, direction));
 
 } // namespace subrange_detail
-
-/*
-template <class Range> inline auto
-    subrange (Range && range)
-RETURNS (subrange_view <typename result_of <callable::default_direction (Range)>::type,
-    typename decayed_result_of <callable::view (Range)>::type>
-        (default_direction (range), view (std::forward <Range> (range))));
-
-template <class Direction, class Range> inline auto
-    subrange (Direction const & direction, Range && range)
-RETURNS (subrange_view <Direction,
-    typename decayed_result_of <callable::view (Direction, Range)>::type>
-        (direction, view (direction, std::forward <Range> (range))));
-*/
-
-/*namespace operation {
-
-    // default_direction.
-
-    template <class Direction1, class Direction2, class UnderlyingTag>
-        struct empty <subrange_view_tag <Direction1, UnderlyingTag>, Direction2>
-    : forward_to_underlying <empty <UnderlyingTag, Direction2>> {};
-
-    template <class Direction1, class Direction2, class UnderlyingTag>
-        struct size <subrange_view_tag <Direction1, UnderlyingTag>, Direction2>
-    : forward_to_underlying <size <UnderlyingTag, Direction2>> {};
-
-    template <class Direction1, class Direction2, class UnderlyingTag>
-        struct first <subrange_view_tag <Direction1, UnderlyingTag>, Direction2>
-    : forward_to_underlying <first <UnderlyingTag, Direction2>> {};
-
-    template <class Direction, class UnderlyingTag, class Increment>
-        struct drop <subrange_view_tag <Direction, UnderlyingTag>,
-            Direction, Increment>
-    {
-        template <class Underlying>
-            subrange_view <Direction, Underlying>
-            operator() (Direction const & direction,
-                Increment const & increment,
-                subrange_view <Direction, Underlying> const & r) const
-        {
-            // \todo Should forward to other implementation if direction != r.direction?
-            return subrange_view <Direction, Underlying> (
-                r.direction_, range::drop (direction, increment, r.underlying_),
-                r.before_size_ + increment, r.original_ );
-        }
-    };
-    // Directions are different.
-    // \todo Should be disabled if Underlying does not support this.
-    template <class Direction1, class Direction2, class UnderlyingTag, class Increment>
-        struct drop <subrange_view_tag <Direction1, UnderlyingTag>,
-            Direction2, Increment>
-    {
-        template <class Underlying>
-            subrange_view <Direction1, Underlying>
-            operator() (Direction2 const & direction2,
-                Increment const & increment,
-                subrange_view <Direction1, Underlying> const & r) const
-        {
-            return subrange_view <Direction1, Underlying> (
-                r.direction_, range::drop (direction2, increment, r.underlying_),
-                r.before_size_, range::drop (direction2, increment, r.original_));
-        }
-    };
-
-} // namespace operation
-*/
 
 } // namespace range
 

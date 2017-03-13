@@ -55,6 +55,7 @@ run test-for_each.cpp : : : <dependency>test-fold-1 ;
 
 run test-find.cpp : : : <dependency>test-core <dependency>std ;
 
+run test-subrange.cpp : : : <dependency>test-core <dependency>std ;
 run test-subrange-quicksort.cpp : : : <dependency>test-core <dependency>std ;
 
 run test-all_of_any_of-heterogeneous.cpp : : : <dependency>test-find ;

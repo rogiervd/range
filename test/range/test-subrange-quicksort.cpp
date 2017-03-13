@@ -77,13 +77,14 @@ template <class Range, class Predicate>
         // Swap first (unpartitioned, front) with something.
         // Since it is known that it should go at the other end, why not put
         // it there.
+        // \todo Problem when size() == 1?
         swap (first (unpartitioned, front), first (unpartitioned, back));
         assert (!predicate (first (unpartitioned, back), pivot));
 
         // Check the back of the range. 
         // Here, predicate (element, pivot) should be false.
         while (!empty (unpartitioned, back) &&
-                !predicate (first (unpartitioned, back), pivot))
+            !predicate (first (unpartitioned, back), pivot))
         {
             unpartitioned = drop (unpartitioned, back);
         }

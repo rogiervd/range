@@ -30,7 +30,9 @@ limitations under the License.
 #include "rime/check/check_equal.hpp"
 #include "utility/returns.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/list.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_fold_large)
 

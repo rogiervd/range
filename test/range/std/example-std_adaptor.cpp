@@ -21,7 +21,10 @@ Example to be used in the documentation.
 #define BOOST_TEST_MODULE example_std_adaptor
 #include "utility/test/boost_unit_test.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/string.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/view_optional.hpp"
 
 #include <iostream>
 #include <ostream>

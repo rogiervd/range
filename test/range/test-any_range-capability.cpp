@@ -20,12 +20,11 @@ limitations under the License.
 #include "range/any_range/capability.hpp"
 
 #include <type_traits>
-#include <forward_list>
-#include <list>
-#include <vector>
 
 #include "range/tuple.hpp"
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/forward_list.hpp"
 #include "range/function_range.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_any_range_capability)

@@ -24,7 +24,8 @@ limitations under the License.
 #include <tuple>
 #include <string>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
 

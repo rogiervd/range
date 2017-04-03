@@ -30,7 +30,7 @@ test-python_range.py.
 
 #include "range/count.hpp"
 #include "range/function_range.hpp"
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
 auto count (int size) RETURNS (range::count (size));

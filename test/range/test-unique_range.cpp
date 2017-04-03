@@ -21,7 +21,8 @@ limitations under the License.
 
 #include <vector>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_unique_range)
 

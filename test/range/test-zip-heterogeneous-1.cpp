@@ -25,7 +25,8 @@ limitations under the License.
 #include "rime/check/check_equal.hpp"
 
 #include "range/tuple.hpp"
-#include "range/std.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 #include "range/for_each_macro.hpp"
 
 #include "weird_direction.hpp"

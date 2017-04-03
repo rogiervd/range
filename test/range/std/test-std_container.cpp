@@ -1,5 +1,5 @@
 /*
-Copyright 2013-2015 Rogier van Dalen.
+Copyright 2013-2015, 2017 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,17 +17,16 @@ limitations under the License.
 #define BOOST_TEST_MODULE test_container_std_adaptor
 #include "utility/test/boost_unit_test.hpp"
 
-#include "range/std/container.hpp"
-
-#include <vector>
-#include <string>
-#include <deque>
-#include <forward_list>
-#include <list>
-#include <set>
-#include <map>
-#include <unordered_set>
-#include <unordered_map>
+#include <range/std/array.hpp>
+#include <range/std/vector.hpp>
+#include <range/std/string.hpp>
+#include <range/std/deque.hpp>
+#include <range/std/forward_list.hpp>
+#include <range/std/list.hpp>
+#include <range/std/set.hpp>
+#include <range/std/map.hpp>
+#include <range/std/unordered_set.hpp>
+#include <range/std/unordered_map.hpp>
 
 #include <type_traits>
 
@@ -236,6 +235,20 @@ BOOST_AUTO_TEST_CASE (test_std_list_adaptor) {
     static_assert (!has <callable::at (decltype (view))>::value, "");
 }
 
+template <std::size_t Number, class Type>
+    void compare_array (std::vector <Type> const & v,
+        std::array <Type, Number> const & a)
+{
+    typedef std::array <Type, Number> array_type;
+
+    BOOST_MPL_ASSERT_NOT ((is_view <array_type>));
+    BOOST_MPL_ASSERT_NOT ((is_homogeneous <array_type>));
+    BOOST_MPL_ASSERT ((is_view <decltype (view (a))>));
+    BOOST_MPL_ASSERT ((is_homogeneous <decltype (view (a)) &>));
+
+    check_equal_behaviour <true_type, true_type, false_type, true_type> (a, v);
+}
+
 template <class Type>
     void compare_sequence_containers (std::vector <Type> const & v)
 {
@@ -297,18 +310,23 @@ template <class HasBack, class OtherContainer, class MultiContainer>
 BOOST_AUTO_TEST_CASE (test_other_homogeneous_containers) {
     {
         std::vector <int> v;
+        compare_array <0> (v, {});
         compare_sequence_containers (v);
 
         v.push_back (12);
+        compare_array <1> (v, {{12}});
         compare_sequence_containers (v);
 
         v.push_back (14);
+        compare_array <2> (v, {{12, 14}});
         compare_sequence_containers (v);
 
         v.push_back (17);
+        compare_array <3> (v, {{12, 14, 17}});
         compare_sequence_containers (v);
 
         v.push_back (20);
+        compare_array <4> (v, {{12, 14, 17, 20}});
         compare_sequence_containers (v);
     }
     {

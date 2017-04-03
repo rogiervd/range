@@ -26,7 +26,8 @@ limitations under the License.
 #include <tuple>
 #include <vector>
 
-#include "range/std.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 #include "range/take.hpp"
 
 struct a {};

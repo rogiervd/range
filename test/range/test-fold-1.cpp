@@ -28,7 +28,8 @@ limitations under the License.
 #include "weird_direction.hpp"
 #include "unique_range.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_fold)
 

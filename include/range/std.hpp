@@ -1,5 +1,5 @@
 /*
-Copyright 2013 Rogier van Dalen.
+Copyright 2013, 2017 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,15 +17,33 @@ limitations under the License.
 /** \file
 Turn heterogeneous and homogeneous containers in std:: into ranges.
 
-This file does not include the required system headers; it only has forward
-declarations as necessary.
+This file includes all the required system headers.
+For compile speed, prefer to include the headers from \c ./std/.
 */
 
 #ifndef RANGE_STD_HPP_INCLUDED
 #define RANGE_STD_HPP_INCLUDED
 
-#include "std/container.hpp"
+// Sequence containers.
+#include "std/array.hpp"
+#include "std/vector.hpp"
+#include "std/deque.hpp"
+#include "std/forward_list.hpp"
+#include "std/list.hpp"
+#include "std/string.hpp"
+
+// Associative containers.
+#include "std/set.hpp"
+#include "std/map.hpp"
+
+// Unordered (hashed) associative containers.
+#include "std/unordered_set.hpp"
+#include "std/unordered_map.hpp"
+
+// tuple.
 #include "std/tuple.hpp"
+
+// view_optional.
 #include "std/view_optional.hpp"
 
 #endif  // RANGE_STD_HPP_INCLUDED

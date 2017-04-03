@@ -19,11 +19,9 @@ limitations under the License.
 
 #include "range/view_shared.hpp"
 
-#include <list>
-#include <tuple>
-
-#include "range/std/container.hpp"
+#include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
 

@@ -13,9 +13,10 @@ But also, standard containers can be used straight away.
 Standard containers
 ===================
 
-To use standard container types as ranges, say::
+To use standard container types, for example vectors and tuples as ranges, say::
 
-    #include "range/std.hpp"
+    #include "range/std/vector.hpp"
+    #include "range/std/tuple.hpp"
 
 and then, for example::
 
@@ -53,6 +54,8 @@ Optionals
 Another type of container is ``boost::optional``, or ``std::optional``, when that comes through.
 To use this as a range, of length 0 or 1, ``range::view_optional`` must be used.
 For example::
+
+    #include "range/std/view_optional.hpp"
 
     using boost::optional;
     using namespace range;

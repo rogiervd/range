@@ -26,7 +26,8 @@ limitations under the License.
 
 #include "utility/config.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 #include "range/reverse.hpp"
 #include "range/transform.hpp"
 

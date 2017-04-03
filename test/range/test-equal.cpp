@@ -22,7 +22,8 @@ limitations under the License.
 #include <vector>
 #include <tuple>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
 

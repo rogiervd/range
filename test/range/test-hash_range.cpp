@@ -27,7 +27,10 @@ limitations under the License.
 #include <boost/functional/hash.hpp>
 
 #include "range/tuple.hpp"
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/string.hpp"
+#include "range/std/unordered_set.hpp"
 
 using range::tuple;
 using range::hash_range;

@@ -30,7 +30,8 @@ limitations under the License.
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
 

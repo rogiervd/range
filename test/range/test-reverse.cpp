@@ -19,13 +19,10 @@ limitations under the License.
 
 #include "range/reverse.hpp"
 
-#include <vector>
-#include <list>
-#include <tuple>
-
 #include <boost/mpl/assert.hpp>
 
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"

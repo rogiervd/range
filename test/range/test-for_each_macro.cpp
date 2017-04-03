@@ -24,7 +24,7 @@ Test the RANGE_FOR_EACH macro.
 #include <iostream>
 #include "range/for_each_macro.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
 #include "range/function_range.hpp"
 
 #include <vector>

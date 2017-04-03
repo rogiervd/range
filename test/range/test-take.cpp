@@ -496,9 +496,9 @@ BOOST_AUTO_TEST_CASE (test_range_take_input_range) {
             range::make_function_range (produce_consecutive), 3);
         auto result1 = chop (std::move (t));
         BOOST_CHECK_EQUAL (result1.first(), 1);
-        auto result2 = chop (std::move (result1.forward_rest()));
+        auto result2 = chop (result1.forward_rest());
         BOOST_CHECK_EQUAL (result2.first(), 2);
-        auto result3 = chop (std::move (result2.forward_rest()));
+        auto result3 = chop (result2.forward_rest());
         BOOST_CHECK_EQUAL (result3.first(), 3);
         BOOST_CHECK (range::empty (result3.rest()));
     }

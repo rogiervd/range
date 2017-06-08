@@ -138,6 +138,11 @@ BOOST_AUTO_TEST_CASE (test_vector) {
         BOOST_CHECK_EQUAL (size (cc), 3);
         BOOST_CHECK_EQUAL (first (cc), 1);
         BOOST_CHECK_EQUAL (first (cc, back), 3);
+
+        BOOST_CHECK (!empty (cc.underlying()));
+        BOOST_CHECK_EQUAL (size (cc.underlying()), 3);
+        BOOST_CHECK_EQUAL (first (cc.underlying()), 1);
+        BOOST_CHECK_EQUAL (first (cc.underlying(), back), 3);
     }
 
     auto c2 = drop (c, front);
@@ -217,6 +222,11 @@ BOOST_AUTO_TEST_CASE (test_tuple) {
         BOOST_CHECK_EQUAL (size (cc), 3);
         BOOST_CHECK_EQUAL (first (cc), 1);
         BOOST_CHECK_EQUAL (first (cc, back), 3);
+
+        BOOST_CHECK (!empty (cc.underlying()));
+        BOOST_CHECK_EQUAL (size (cc.underlying()), 3);
+        BOOST_CHECK_EQUAL (first (cc.underlying()), 1);
+        BOOST_CHECK_EQUAL (first (cc.underlying(), back), 3);
     }
 
     auto c2 = drop (c, front);

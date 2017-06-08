@@ -118,6 +118,8 @@ public:
 
     void assert_valid() const { assert (valid_); }
 
+    Underlying const & underlying() const { return underlying_; }
+
 private:
     friend class helper::member_access;
 
@@ -233,7 +235,7 @@ namespace checked_operation {
             typename std::enable_if <
                 has <callable::size (Range, Direction)>::value>::type * = 0)
     {
-        if (range::size (range, direction) < increment)
+        if (range::size (range, direction) < std::size_t (increment))
             throw out_of_range_error();
     }
 

@@ -22,6 +22,10 @@ test-python_range.py.
 
 #include <string>
 
+// To prevent some strange macro conflict, include <locale> before Python
+// headers.
+#include <locale>
+
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 

@@ -371,9 +371,13 @@ public:
     Destruct the array up to end_.
     */
     virtual ~internal_element_producer()
+<<<<<<< HEAD
     {
         destruct_elements(std::is_trivially_destructible<Element>());
     }
+=======
+    { destruct_elements (std::is_trivially_destructible <Element>()); }
+>>>>>>> bc1d099 (Use is_trivially_destructible from std:: instead of utility::)
 
     virtual Element const * first() const { return memory(); }
 };

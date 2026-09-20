@@ -1,6 +1,7 @@
 # Use bzlmod (Bazel Modules) for dependency handling.
 common --enable_bzlmod
 
+# Bazel registry for rogiervd.
 common --registry https://raw.githubusercontent.com/rogiervd/bazel-registry/main
 
 # The standard Bazel registry (this gets removed when entries are added
@@ -10,11 +11,9 @@ common --registry https://bcr.bazel.build/
 # Arguments for C++ builds.
 # All warnings are switched on and generate errors.
 # TODO does this work on Windows?
-build --cxxopt=-std=c++14
+build --cxxopt=-std=c++17
 build --cxxopt=-Werror
 build --cxxopt=-Wall
-# Don't turn warnings in third-party code (e.g. Boost) into errors.
-build --per_file_copt=external/.*@-Wno-error
 
 # GCC Configuration
 build:gcc --repo_env=CC=gcc

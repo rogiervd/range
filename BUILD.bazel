@@ -12,6 +12,7 @@ cc_library(
         "include/range/any_range/*.hpp",
         "include/range/std/*.hpp",
         "include/range/std/detail/*.hpp",
+        "include/range/python/*.hpp",
     ]),
     include_prefix = "",
     # The prefix to be stripped from the include path.
@@ -32,3 +33,5 @@ filegroup(
     srcs = glob(["include/range/**"]),
     visibility = ["//documentation:__pkg__"],
 )
+
+exports_files(["requirements.txt"])

@@ -1,0 +1,46 @@
+"""
+This test builds four Python extensions, each tested with a .py test.
+"""
+
+load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
+load("@rules_python//python:py_library.bzl", "py_library")
+load("@rules_python//python:py_test.bzl", "py_test")
+
+test_names = [
+    "python_range",
+    "iterator",
+    "tuple",
+    "return_view",
+]
+
+[
+    nanobind_extension(
+        name = test_name + "_example",
+        srcs = [test_name + "_example.cpp"],
+        deps = [
+            "@nanobind_bazel//:nanobind",
+            "@range",
+        ],
+        local_defines = ["NB_ABORT_ON_LEAK"]
+    )
+    for test_name in test_names
+]
+
+[
+    py_test(
+        name = "test-" + test_name,
+        size = "small",
+        srcs = [
+            "pytest_main.py",
+            "test-" + test_name + ".py",
+        ],
+        args = ["$(rootpath test-" + test_name + ".py)"],
+        data = ["test-" + test_name + ".py"],
+        main = "pytest_main.py",
+        deps = [
+            test_name + "_example",
+            "@range_pypi//pytest",
+        ],
+    )
+    for test_name in test_names
+]

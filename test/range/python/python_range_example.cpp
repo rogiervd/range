@@ -22,111 +22,107 @@ test-python_range.py.
 
 #include <string>
 
-// To prevent some strange macro conflict, include <locale> before Python
-// headers.
-#include <locale>
-
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "range/python/range.hpp"
 
 using range::python_range;
 
 void test_static() {
-    BOOST_MPL_ASSERT ((std::is_same <
+    static_assert (std::is_same <
         range::tag_of <python_range <>>::type,
-        range::python_range_operation::python_range_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <
+        range::python_range_operation::python_range_tag>::value);
+    static_assert (std::is_same <
         range::tag_of <python_range <double> &>::type,
-        range::python_range_operation::python_range_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <
+        range::python_range_operation::python_range_tag>::value);
+    static_assert (std::is_same <
         range::tag_of <python_range <double> const &>::type,
-        range::python_range_operation::python_range_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <
+        range::python_range_operation::python_range_tag>::value);
+    static_assert (std::is_same <
         range::tag_of <python_range <double, int> const &&>::type,
-        range::python_range_operation::python_range_tag>));
-    BOOST_MPL_ASSERT ((std::is_same <
+        range::python_range_operation::python_range_tag>::value);
+    static_assert (std::is_same <
         range::tag_of <python_range <double, int, float> &&>::type,
-        range::python_range_operation::python_range_tag>));
+        range::python_range_operation::python_range_tag>::value);
 
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::empty (range::python_range <int>)>));
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::empty (range::python_range <int> const &)>));
+    static_assert (range::has <
+        range::callable::empty (range::python_range <int>)>::value);
+    static_assert (range::has <
+        range::callable::empty (range::python_range <int> const &)>::value);
 
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::size (range::python_range <int> &)>));
+    static_assert (!range::has <
+        range::callable::size (range::python_range <int> &)>::value);
 
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::first (range::python_range <int>)>));
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::first (range::python_range <int> &)>));
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::first (range::python_range <int> const &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::first (direction::back, range::python_range <int>)>));
+    static_assert (range::has <
+        range::callable::first (range::python_range <int>)>::value);
+    static_assert (range::has <
+        range::callable::first (range::python_range <int> &)>::value);
+    static_assert (range::has <
+        range::callable::first (range::python_range <int> const &)>::value);
+    static_assert (!range::has <
+        range::callable::first (direction::back, range::python_range <int>)>::value);
 
     // drop: only for rvalues.
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::drop (range::python_range <int>)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::drop (range::python_range <int> &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::drop (range::python_range <int> const &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::drop (direction::back, range::python_range <int>)>));
+    static_assert (range::has <
+        range::callable::drop (range::python_range <int>)>::value);
+    static_assert (!range::has <
+        range::callable::drop (range::python_range <int> &)>::value);
+    static_assert (!range::has <
+        range::callable::drop (range::python_range <int> const &)>::value);
+    static_assert (!range::has <
+        range::callable::drop (direction::back, range::python_range <int>)>::value);
 
     // chop: only for rvalues.
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::chop (range::python_range <int>)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop (range::python_range <int> &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop (range::python_range <int> const &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop (direction::back, range::python_range <int>)>));
+    static_assert (range::has <
+        range::callable::chop (range::python_range <int>)>::value);
+    static_assert (!range::has <
+        range::callable::chop (range::python_range <int> &)>::value);
+    static_assert (!range::has <
+        range::callable::chop (range::python_range <int> const &)>::value);
+    static_assert (!range::has <
+        range::callable::chop (direction::back, range::python_range <int>)>::value);
 
     // chop_in_place: only for lvalue references.
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop_in_place (range::python_range <int>)>));
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::chop_in_place (range::python_range <int> &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop_in_place (range::python_range <int> const &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
+    static_assert (!range::has <
+        range::callable::chop_in_place (range::python_range <int>)>::value);
+    static_assert (range::has <
+        range::callable::chop_in_place (range::python_range <int> &)>::value);
+    static_assert (!range::has <
+        range::callable::chop_in_place (range::python_range <int> const &)>::value);
+    static_assert (!range::has <
         range::callable::chop_in_place (
-            direction::back, range::python_range <int> &)>));
+            direction::back, range::python_range <int> &)>::value);
     // But only for homogeneous ranges.
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::chop_in_place (range::python_range <> &)>));
-    BOOST_MPL_ASSERT ((range::has <
-        range::callable::chop_in_place (range::python_range <int> &)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        range::callable::chop_in_place (range::python_range <int, double> &)>));
+    static_assert (range::has <
+        range::callable::chop_in_place (range::python_range <> &)>::value);
+    static_assert (range::has <
+        range::callable::chop_in_place (range::python_range <int> &)>::value);
+    static_assert (!range::has <
+        range::callable::chop_in_place (range::python_range <int, double> &)>::value);
 
     // Return types.
     // first.
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+    static_assert (std::is_same <range::result_of <
         range::callable::first (range::python_range<>)>::type,
-        boost::python::object>));
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        nanobind::object>::value);
+    static_assert (std::is_same <range::result_of <
         range::callable::first (range::python_range <int>)>::type,
-        int>));
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        int>::value);
+    static_assert (std::is_same <range::result_of <
         range::callable::first (range::python_range <double, char>)>::type,
-        double>));
+        double>::value);
 
     // drop.
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+    static_assert (std::is_same <range::result_of <
         range::callable::drop (range::python_range<>)>::type,
-        range::python_range<>>));
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        range::python_range<>>::value);
+    static_assert (std::is_same <range::result_of <
         range::callable::drop (range::python_range <int>)>::type,
-        range::python_range <int>>));
-    BOOST_MPL_ASSERT ((std::is_same <range::result_of <
+        range::python_range <int>>::value);
+    static_assert (std::is_same <range::result_of <
         range::callable::drop (range::python_range <double, char>)>::type,
-        range::python_range <char>>));
+        range::python_range <char>>::value);
 }
 
 template <class Range> void check_empty (Range range)
@@ -167,10 +163,9 @@ template <class DoubleRange>
 
 void check_5_hello_untyped (python_range<> range) {
     assert (!range::empty (range));
-    assert (boost::python::extract <int> (range::first (range)) == 5);
+    assert (nanobind::cast <int> (range::first (range)) == 5);
     auto range2 = range::drop (std::move (range));
-    std::string s = boost::python::extract <std::string> (
-        range::first (range2));
+    std::string s = nanobind::cast <std::string> (range::first (range2));
     assert (s == "hello");
     // This should be possible: at the end of the type sequence, the last
     // element (here, std::string) gets repeated forever.
@@ -221,48 +216,31 @@ void check_hello_5_bye_27 (
 
 // Check that None can be an element of the range without problem.
 void check_17_None_hi (python_range<> r) {
-    using boost::python::object;
-    assert (range::chop_in_place (r) == object (17));
-    assert (range::chop_in_place (r) == object());
-    assert (range::chop_in_place (r) == object("hi"));
+    assert (range::chop_in_place (r).equal (nanobind::int_ (17)));
+    assert (range::chop_in_place (r).is_none());
+    assert (range::chop_in_place (r).equal (nanobind::str ("hi")));
     assert (range::empty (r));
 }
 
-boost::python::handle<> test_return_something() {
-    boost::python::object o (1);
-    return boost::python::handle<> (boost::python::incref (o.ptr()));
-}
+nanobind::object test_return_something() { return nanobind::int_ (1); }
 
-BOOST_PYTHON_MODULE (python_range_example) {
-    using namespace boost::python;
+NB_MODULE (python_range_example, m) {
+    m.def ("check_empty", check_empty <python_range<>>);
 
-    range::python::convert_object_to_range <python_range <>>();
-    range::python::convert_object_to_range <python_range <double>>();
-    range::python::convert_object_to_range <python_range <int, std::string>>();
-    range::python::convert_object_to_range <
-        python_range <int, std::string, char, double>>();
+    m.def ("check_empty_2", check_empty <python_range <double>>);
 
-    range::python::convert_object_to_range <python_range <std::string, int>>();
-    range::python::convert_object_to_range <
-        python_range <python_range <std::string, int>>>();
+    m.def ("check_6_25_8_5", check_6_25_8_5 <python_range <double>>);
+    m.def ("check_6_25_8_5_chop", check_6_25_8_5_chop <python_range <double>>);
+    m.def ("check_6_25_8_5_chop_in_place",
+        check_6_25_8_5_chop_in_place <python_range <double>>);
 
-    def <void (python_range<>)> ("check_empty", check_empty);
+    m.def ("check_5_hello_untyped", check_5_hello_untyped);
+    m.def ("check_5_hello_typed", check_5_hello_typed);
+    m.def ("check_5_hello_overtyped", check_5_hello_overtyped);
 
-    def <void (python_range <double>)> ("check_empty_2", check_empty);
+    m.def ("check_hello_5_bye_27", check_hello_5_bye_27);
 
-    def <void (python_range <double>)> ("check_6_25_8_5", check_6_25_8_5);
-    def <void (python_range <double>)> (
-        "check_6_25_8_5_chop", check_6_25_8_5_chop);
-    def <void (python_range <double>)> (
-        "check_6_25_8_5_chop_in_place", check_6_25_8_5_chop_in_place);
+    m.def ("check_17_None_hi", check_17_None_hi);
 
-    def ("check_5_hello_untyped", check_5_hello_untyped);
-    def ("check_5_hello_typed", check_5_hello_typed);
-    def ("check_5_hello_overtyped", check_5_hello_overtyped);
-
-    def ("check_hello_5_bye_27", check_hello_5_bye_27);
-
-    def ("check_17_None_hi", check_17_None_hi);
-
-    def ("test_return_something", test_return_something);
+    m.def ("test_return_something", test_return_something);
 }

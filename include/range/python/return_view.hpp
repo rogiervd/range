@@ -1,5 +1,5 @@
 /*
-Copyright 2014, 2015 Rogier van Dalen.
+Copyright 2014, 2015, 2026 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,12 +21,9 @@ Expose return values that are ranges as Python iterators.
 #ifndef RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED
 #define RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED
 
-// Include the Python C API, safely.
-#include <boost/python/detail/wrap_python.hpp>
+#include <utility>
 
-#include <boost/python/default_call_policies.hpp>
-#include <boost/python/make_constructor.hpp>
-#include <boost/python/with_custodian_and_ward.hpp>
+#include <nanobind/nanobind.h>
 
 #include "iterator.hpp"
 
@@ -35,91 +32,60 @@ Expose return values that are ranges as Python iterators.
 namespace range { namespace python {
 
     /** \brief
-    A call policy for Boost.Python to return a view as a Python iterator.
+    Wrap a function that returns a view (or a reference to a range) so that
+    it returns a Python iterator.
 
-    Use this call policy for a function that returns a view.
+    Pass the result to \c def of Nanobind.
+    The function can be a free function or a member function.
     The Python iterator that the view is converted to will be traversed in
     direction \ref front, which must be the default direction.
     The view must be homogeneous.
+    The return value is converted with \c range::view.
 
     The view can be movable but not copyable.
-    This may depend on the implementation of Boost.Python and be a bit lucky,
-    but our luck is unlikely to change since any new version of Boost.Python
-    will surely consider rvalue references.
 
     You must call \c range::python::initialise_iterator() once in your
-    \c BOOST_PYTHON_MODULE for this call policy to work.
+    \c NB_MODULE for this to work.
 
-    \sa return_view_of_internal_reference
+    If the function returns a reference to a range that is owned by an argument,
+    for example the object that a member function is called on, then also pass
+    \c nanobind::keep_alive <0, 1>() (for argument 1, the object itself) to
+    \c def.
+    That keeps the argument alive at least until the returned iterator goes out
+    of scope.
     */
-    template <class BasePolicy = boost::python::default_call_policies>
-        struct return_view
-    : BasePolicy
+    template <class Result, class ... Arguments>
+        inline auto return_view (Result (*function) (Arguments ...))
     {
-        struct result_converter {
-            template <class View> struct apply {
-                static_assert (is_view <View>::value,
-                    "To use the return_view call policy for Boost.Python, "
-                    "the return type must be a view.");
-
-                static_assert (std::is_same <View,
-                            typename std::decay <View>::type>::value,
-                    "To use the return_view call policy for Boost.Python, "
-                    "the return type must be unqualied.");
-
-                typedef detail::iterator_converter <View> type;
-            };
+        return [function] (Arguments ... arguments) -> python_iterator {
+            return python_iterator (range::view (
+                function (std::forward <Arguments> (arguments) ...)));
         };
-    };
+    }
 
-    /** \brief
-    A call policy for Boost.Python to return a reference to a range as a Python
-    iterator.
-
-    This assumes that the range that the return value references is contained
-    in argument \a owner_argument_index of the function.
-    After the function is called, range::view will called on the range.
-    The Python iterator that the view is converted to will be traversed in
-    direction \ref front, which must be the default direction.
-    The view must be homogeneous.
-
-    This is similar to the standard
-    <c>boost::python::return_internal_reference</c> in that it keeps an argument
-    alive at least until the return value goes out of scope.
-    Additionally, however, the return value is converted into a view.
-
-    You must call \c range::python::initialise_iterator() once in your
-    \c BOOST_PYTHON_MODULE for this call policy to work.
-
-    \sa return_view
-    */
-    template <std::size_t owner_argument_index,
-            class BasePolicy = boost::python::default_call_policies>
-        struct return_view_of_internal_reference
-    : boost::python::with_custodian_and_ward_postcall <
-        0, owner_argument_index, BasePolicy>
+    /// \overload
+    template <class Result, class Class, class ... Arguments>
+        inline auto return_view (Result (Class::*function) (Arguments ...))
     {
-        static_assert (owner_argument_index > 0,
-            "The index of the argument that owns the result must be greater "
-            "than 0 (0 means the result itself).");
-
-        struct result_converter {
-            template <class Range> struct apply {
-                static_assert (is_range <Range>::value,
-                    "To use the return_internal_reference_view call policy "
-                    "for Boost.Python, the return type must be "
-                    "(a reference to) a range.");
-
-                static_assert (std::is_lvalue_reference <Range>::value,
-                    "To use the return_internal_reference_view call policy "
-                    "for Boost.Python, the return type must be "
-                    "an lvalue reference (to a range).");
-
-                typedef detail::iterator_converter <
-                    typename std::decay <Range>::type> type;
-            };
+        return [function] (Class & object, Arguments ... arguments)
+            -> python_iterator
+        {
+            return python_iterator (range::view (
+                (object.*function) (std::forward <Arguments> (arguments) ...)));
         };
-    };
+    }
+
+    /// \overload
+    template <class Result, class Class, class ... Arguments>
+        inline auto return_view (Result (Class::*function) (Arguments ...) const)
+    {
+        return [function] (Class const & object, Arguments ... arguments)
+            -> python_iterator
+        {
+            return python_iterator (range::view (
+                (object.*function) (std::forward <Arguments> (arguments) ...)));
+        };
+    }
 
 }} // namespace range::python
 

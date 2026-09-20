@@ -1,0 +1,34 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# The main target that should be used by other modules that want to depend on
+# this library.
+cc_library(
+    name = "range",
+    # Headers that a user of this library can include.
+    hdrs = glob([
+        "include/range/*.hpp",
+        "include/range/detail/*.hpp",
+        "include/range/helper/*.hpp",
+        "include/range/any_range/*.hpp",
+        "include/range/std/*.hpp",
+        "include/range/std/detail/*.hpp",
+    ]),
+    include_prefix = "",
+    # The prefix to be stripped from the include path.
+    strip_include_prefix = "include/",
+    visibility = ["//visibility:public"],
+    # Dependencies of this library.
+    deps = [
+        "@meta",
+        "@rime",
+        "@utility",
+        "@boost.iostreams" # TODO can we make this more specific?
+    ],
+)
+
+# All include files, for Doxygen to generate documentation from.
+filegroup(
+    name = "doc_sources",
+    srcs = glob(["include/range/**"]),
+    visibility = ["//documentation:__pkg__"],
+)

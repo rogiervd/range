@@ -1,0 +1,179 @@
+# Define the tests.
+
+# To run all test in all packages:
+#   bazel test //test/...
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+# Used by tests in subpackages.
+exports_files(["check_equal_behaviour.hpp"])
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "unique_range.hpp",
+            "weird_count.hpp",
+            "weird_direction.hpp",
+        ],
+        deps = [
+            "//:range",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "example-fibonacci",
+        "test-all_of_any_of-heterogeneous",
+        "test-all_of_any_of-homogeneous",
+        "test-any_range-capability",
+        "test-any_range-make",
+        "test-any_range",
+        "test-buffer",
+        "test-call_unpack-integration",
+        "test-call_unpack",
+        "test-core",
+        "test-count",
+        "test-direction",
+        "test-element_types",
+        "test-empty_view",
+        "test-equal",
+        "test-find",
+        "test-fold-1",
+        "test-fold-2-moving",
+        "test-fold-3-state_types",
+        "test-fold-4-large",
+        "test-for_each_macro",
+        "test-for_each",
+        "test-function_range",
+        "test-hash_range",
+        "test-heavyweight",
+        "test-lazy",
+        "test-less_lexicographical-constant",
+        "test-less_lexicographical-heterogeneous-2",
+        "test-less_lexicographical-heterogeneous",
+        "test-less_lexicographical-homogeneous",
+        "test-less_lexicographical-mixed",
+        "test-member_view",
+        "test-reverse",
+        "test-scan",
+        "test-transform",
+        "test-tuple-1-construct",
+        "test-tuple-2-assign",
+        "test-tuple-3-types",
+        "test-tuple-4-make_tuple",
+        "test-tuple-5-equal-constant",
+        "test-tuple-5-equal-types",
+        "test-tuple-5-equal",
+        "test-tuple-5-fold-state_types",
+        "test-tuple-5-less-constant",
+        "test-tuple-5-less-heterogeneous",
+        "test-tuple-5-less-meta",
+        "test-tuple-5-less-types",
+        "test-unique_range",
+        "test-view_shared",
+        "test-walk_size",
+        "test-zip-heterogeneous-1",
+        "test-zip-heterogeneous-2",
+        "test-zip-heterogeneous-3",
+        "test-zip-homogeneous-1",
+        "test-zip-homogeneous-2",
+        "test-zip-homogeneous-3",
+        "test-zip-homogeneous-4",
+    ]
+]
+
+cc_test(
+    name = "test-iterator_range",
+    size = "small",
+    srcs = [ "test-iterator_range.cpp" ],
+    deps = [
+        "//:range",
+        "@boost.test//:unit_test_main",
+    ],
+)
+
+# The same test with checked containers and iterators.
+cc_test(
+    name = "test-iterator_range-iterator_debug",
+    size = "small",
+    srcs = [ "test-iterator_range.cpp" ],
+    local_defines = [
+        # libc++ hardening.
+        "_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG",
+    ] + select({
+        # libstdc++ iterator debugging, only for GCC.
+        # (On Clang with libstdc++ this can cause compilation problems.)
+        "@rules_cc//cc/compiler:gcc": ["_GLIBCXX_DEBUG"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//:range",
+        "@boost.test//:unit_test_main",
+    ],
+)
+
+cc_test(
+    name = "test-take",
+    size = "small",
+    srcs = [
+        "check_equal_behaviour.hpp",
+        "test-take.cpp",
+    ],
+    deps = [
+        "//:range",
+        "@boost.test//:unit_test_main",
+    ],
+)
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "tuple-basic_tests.hpp",
+        ],
+        deps = [
+            "//:range",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-tuple-0-basic-2",
+        "test-tuple-0-basic",
+    ]
+]
+
+cc_test(
+    name = "test-tuple-5-for_each",
+    size = "small",
+    srcs = [
+        "test-tuple-5-for_each.cpp",
+        "unique_range.hpp",
+        "weird_count.hpp",
+        "weird_direction.hpp",
+    ],
+    deps = [
+        "//:range",
+        "@boost.any",
+        "@boost.test//:unit_test_main",
+    ],
+)
+
+cc_test(
+    name = "test-buffer-file",
+    size = "small",
+    srcs = ["test-buffer-file.cpp"],
+    args = ["$(rootpath example/short.txt)"],
+    data = [
+        "example/short.txt",
+        "example/short.txt.gz",
+    ],
+    deps = [
+        "//:range",
+        "@boost.filesystem",
+        "@boost.test//:unit_test_main",
+    ],
+)

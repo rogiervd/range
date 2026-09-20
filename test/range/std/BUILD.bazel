@@ -1,0 +1,24 @@
+# Define the tests.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "//test/range:check_equal_behaviour.hpp",
+        ],
+        deps = [
+            "//:range",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-std_container",
+        "test-std_tuple",
+        "test-view_optional",
+        "example-std_adaptor",
+    ]
+]

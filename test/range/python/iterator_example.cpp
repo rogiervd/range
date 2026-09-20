@@ -24,8 +24,10 @@ test-python_range.py.
 
 #include <list>
 
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
+#include <string>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include <boost/optional.hpp>
 
@@ -37,7 +39,7 @@ std::list <double> doubles;
 
 auto get_doubles() RETURNS (range::view (doubles));
 
-void set_first_to_doubles (boost::python::object & object) {
+void set_first_to_doubles (nanobind::object object) {
     object [0] = range::view (doubles);
 }
 
@@ -49,7 +51,21 @@ boost::optional <bool> optional;
 
 auto get_optional() RETURNS (range::view_optional (optional));
 
-BOOST_PYTHON_MODULE (iterator_example) {
+// Tell Nanobind how to convert the views to Python.
+namespace nanobind { namespace detail {
+
+    template <> struct type_caster <decltype (get_doubles())>
+    : range::python::view_caster <decltype (get_doubles())> {};
+
+    template <> struct type_caster <decltype (get_tuple())>
+    : range::python::view_caster <decltype (get_tuple())> {};
+
+    template <> struct type_caster <decltype (get_optional())>
+    : range::python::view_caster <decltype (get_optional())> {};
+
+}} // namespace nanobind::detail
+
+NB_MODULE (iterator_example, m) {
     doubles.push_back (3.5);
     doubles.push_back (7.25);
 
@@ -57,15 +73,10 @@ BOOST_PYTHON_MODULE (iterator_example) {
 
     optional = true;
 
-    range::python::initialise_iterator();
-    range::python::register_view <decltype (get_doubles())>();
-    range::python::register_view <decltype (get_tuple())>();
-    range::python::register_view <decltype (get_optional())>();
+    range::python::initialise_iterator (m);
 
-    using namespace boost::python;
-
-    def ("getDoubles", &get_doubles);
-    def ("setFirstToDoubles", &set_first_to_doubles);
-    def ("getTuple", &get_tuple);
-    def ("getOptional", &get_optional);
+    m.def ("getDoubles", &get_doubles);
+    m.def ("setFirstToDoubles", &set_first_to_doubles);
+    m.def ("getTuple", &get_tuple);
+    m.def ("getOptional", &get_optional);
 }

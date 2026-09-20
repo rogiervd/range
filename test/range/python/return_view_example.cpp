@@ -15,18 +15,19 @@ limitations under the License.
 */
 
 /* \file
-Provide an example usage of python_range.
+Provide an example usage of return_view.
 The functions defined here are exported to Python, and used by
-test-python_range.py.
+test-return_view.py.
 */
 
 #include "range/python/return_view.hpp"
 
 #include <vector>
 
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/class.hpp>
+#include <string>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
 
 #include "range/count.hpp"
 #include "range/function_range.hpp"
@@ -63,21 +64,21 @@ public:
     { return t; }
 };
 
-int test();
+NB_MODULE (return_view_example, m) {
+    namespace nb = nanobind;
 
-BOOST_PYTHON_MODULE (return_view_example) {
-    using namespace boost::python;
-    using namespace range::python;
+    range::python::initialise_iterator (m);
 
-    range::python::initialise_iterator();
+    m.def ("count", range::python::return_view (&count));
 
-    def ("count", &count, range::python::return_view<>());
+    m.def ("count2", range::python::return_view (&count2));
 
-    def ("count2", &count2, range::python::return_view<>());
-
-    class_ <container_container> ("ContainerContainer")
-        .def ("get_17_19", &container_container::get_17_19,
-            range::python::return_view_of_internal_reference <1>())
-        .def ("get_tuple", &container_container::get_tuple,
-            range::python::return_view_of_internal_reference <1>());
+    nb::class_ <container_container> (m, "ContainerContainer")
+        .def (nb::init<>())
+        .def ("get_17_19",
+            range::python::return_view (&container_container::get_17_19),
+            nb::keep_alive <0, 1>())
+        .def ("get_tuple",
+            range::python::return_view (&container_container::get_tuple),
+            nb::keep_alive <0, 1>());
 }

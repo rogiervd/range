@@ -14,92 +14,111 @@
 
 # This test should run under Python 2 and 3 without modification.
 
-from python_range_example import *
+import pytest
+
+import python_range_example as example
+
 
 def yield_empty():
     if False:
         yield 3
 
+
 def yield_6_25_8_5():
     yield 6.25
     yield 8.5
 
-class TestError (Exception):
+
+class TestError(Exception):
     pass
+
 
 def yield_6_25_error():
     yield 6.25
     raise TestError()
 
+
 def yield_5_hello():
     yield 5
     yield "hello"
 
-check_empty ([])
-check_empty (())
-check_empty (yield_empty())
-check_empty ([i for i in [3,4] if i == None])
-check_empty (i for i in [3,4] if i == None)
 
-check_empty_2 ([])
-check_empty_2 (())
-check_empty_2 (yield_empty())
-check_empty_2 ([i for i in [3,4] if i == None])
-check_empty_2 (i for i in [3,4] if i == None)
+def empty_iterables():
+    return [
+        [],
+        (),
+        yield_empty(),
+        [i for i in [3, 4] if i is None],
+        (i for i in [3, 4] if i is None),
+    ]
 
-check_6_25_8_5 ([6.25, 8.5])
-check_6_25_8_5 ((6.25, 8.5))
-check_6_25_8_5 (i + 1 for i in [5.25, 7.5])
-check_6_25_8_5 (yield_6_25_8_5())
 
-check_6_25_8_5_chop ([6.25, 8.5])
-check_6_25_8_5_chop ((6.25, 8.5))
-check_6_25_8_5_chop (i + 1 for i in [5.25, 7.5])
-check_6_25_8_5_chop (yield_6_25_8_5())
+def iterables_6_25_8_5():
+    return [
+        [6.25, 8.5],
+        (6.25, 8.5),
+        (i + 1 for i in [5.25, 7.5]),
+        yield_6_25_8_5(),
+    ]
 
-check_6_25_8_5_chop_in_place ([6.25, 8.5])
-check_6_25_8_5_chop_in_place ((6.25, 8.5))
-check_6_25_8_5_chop_in_place (i + 1 for i in [5.25, 7.5])
-check_6_25_8_5_chop_in_place (yield_6_25_8_5())
 
-check_5_hello_untyped ([5, 'hello'])
-check_5_hello_untyped ((5, 'hello'))
-check_5_hello_untyped (yield_5_hello())
+def iterables_5_hello():
+    return [[5, "hello"], (5, "hello"), yield_5_hello()]
 
-check_5_hello_typed ([5, 'hello'])
-check_5_hello_typed ((5, 'hello'))
-check_5_hello_typed (yield_5_hello())
 
-check_5_hello_overtyped ([5, 'hello'])
-check_5_hello_overtyped ((5, 'hello'))
-check_5_hello_overtyped (yield_5_hello())
+def test_empty():
+    for iterable in empty_iterables():
+        example.check_empty(iterable)
 
-check_hello_5_bye_27 ([
-    ('hello', 5),
-    ('bye', 27),
-    ])
 
-check_17_None_hi ([17, None, "hi"]);
+def test_empty_typed():
+    for iterable in empty_iterables():
+        example.check_empty_2(iterable)
 
-# Break things.
 
-# Check that iter(5) throws a TypeError.
-try:
-    iter (5)
-except TypeError:
-    pass
+@pytest.mark.parametrize(
+    "check",
+    [
+        "check_6_25_8_5",
+        "check_6_25_8_5_chop",
+        "check_6_25_8_5_chop_in_place",
+    ],
+)
+def test_6_25_8_5(check):
+    for iterable in iterables_6_25_8_5():
+        getattr(example, check)(iterable)
 
-# This should throw the same.
-try:
-    check_6_25_8_5 (5)
-except TypeError:
-    pass
 
-# Throw some random error.
-try:
-    check_6_25_8_5 (yield_6_25_error())
-except TestError:
-    pass
+@pytest.mark.parametrize(
+    "check",
+    [
+        "check_5_hello_untyped",
+        "check_5_hello_typed",
+        "check_5_hello_overtyped",
+    ],
+)
+def test_5_hello(check):
+    for iterable in iterables_5_hello():
+        getattr(example, check)(iterable)
 
-v = test_return_something()
-assert (v == 1)
+
+def test_nested():
+    example.check_hello_5_bye_27([("hello", 5), ("bye", 27)])
+
+
+def test_none_element():
+    example.check_17_None_hi([17, None, "hi"])
+
+
+def test_not_iterable():
+    with pytest.raises(TypeError):
+        example.check_6_25_8_5(5)
+
+
+def test_exception_in_iterator():
+    with pytest.raises(TestError):
+        example.check_6_25_8_5(yield_6_25_error())
+
+
+def test_return_something():
+    assert example.test_return_something() == 1

@@ -12,21 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This test should run under Python 2 and 3 without modification.
+import tuple_example
 
-from tuple_example import *
 
-t = getDoubleString()
-assert (type (t) == type ((4,5)))
-print (t)
-assert (t == (6.5, "Excellent."))
+def test_double_string():
+    t = tuple_example.getDoubleString()
+    assert type(t) == tuple
+    assert t == (6.5, "Excellent.")
 
-t = getIntBoolString (27, 5.25)
-assert (type (t) == type ((4,5)))
-print (t)
-assert (t == (27, 5.25, "Wow!"))
 
-t = getTwice (27, 5.25)
-assert (type (t) == type ((4,5)))
-print (t)
-assert (t == (54, 10.5, "Wow!Wow!"))
+def test_int_float_string():
+    t = tuple_example.getIntBoolString(27, 5.25)
+    assert type(t) == tuple
+    assert t == (27, 5.25, "Wow!")
+
+
+def test_twice():
+    t = tuple_example.getTwice(27, 5.25)
+    assert type(t) == tuple
+    assert t == (54, 10.5, "Wow!Wow!")

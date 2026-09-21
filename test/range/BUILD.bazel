@@ -87,7 +87,7 @@ exports_files(["check_equal_behaviour.hpp"])
 cc_test(
     name = "test-iterator_range",
     size = "small",
-    srcs = [ "test-iterator_range.cpp" ],
+    srcs = ["test-iterator_range.cpp"],
     deps = [
         "//:range",
         "@boost.test//:unit_test_main",
@@ -98,7 +98,7 @@ cc_test(
 cc_test(
     name = "test-iterator_range-iterator_debug",
     size = "small",
-    srcs = [ "test-iterator_range.cpp" ],
+    srcs = ["test-iterator_range.cpp"],
     local_defines = [
         # libc++ hardening.
         "_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG",

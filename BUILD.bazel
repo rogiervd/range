@@ -20,10 +20,10 @@ cc_library(
     visibility = ["//visibility:public"],
     # Dependencies of this library.
     deps = [
+        "@boost.iostreams",  # TODO can we make this more specific?
         "@meta",
         "@rime",
         "@utility",
-        "@boost.iostreams" # TODO can we make this more specific?
     ],
 )
 

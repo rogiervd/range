@@ -20,16 +20,16 @@ limitations under the License.
 #include <memory>
 #include <type_traits>
 
-#include "meta/contains.hpp"
 #include "meta/all_of_c.hpp"
+#include "meta/contains.hpp"
 
-#include "utility/returns.hpp"
 #include "utility/disable_if_same.hpp"
+#include "utility/returns.hpp"
 
-#include "core.hpp"
 #include "any_range/capability.hpp"
-#include "any_range/interface.hpp"
 #include "any_range/implementation.hpp"
+#include "any_range/interface.hpp"
+#include "core.hpp"
 
 namespace range {
 
@@ -94,25 +94,31 @@ something to be careful with.
 template <class Element, class Capabilities = void> class any_range;
 
 namespace any_range_operation {
-    struct any_range_tag {};
-} // namespace any_range_operation
+    struct any_range_tag
+    {};
+}  // namespace any_range_operation
 
 template <class Element, class Capabilities>
-    struct tag_of_qualified <any_range <Element, Capabilities>>
-{ typedef any_range_operation::any_range_tag type; };
+struct tag_of_qualified<any_range<Element, Capabilities>>
+{
+    typedef any_range_operation::any_range_tag type;
+};
 
-template <class Element, class Capabilities> class any_range {
+template <class Element, class Capabilities> class any_range
+{
 public:
-    typedef typename capability::normalise_capabilities <Capabilities>::type
+    typedef typename capability::normalise_capabilities<Capabilities>::type
         capabilities;
-    typedef typename meta::at <capability::default_direction, capabilities
-        >::type default_direction_type;
-    typedef typename capability::extract_capability_keys <capabilities>::type
+    typedef typename meta::at<capability::default_direction, capabilities>::type
+        default_direction_type;
+    typedef typename capability::extract_capability_keys<capabilities>::type
         capability_keys;
+
 private:
-    typedef any_range_interface::interface <
-        Element, capability_keys, default_direction_type> interface_type;
-    typedef std::unique_ptr <interface_type> interface_ptr;
+    typedef any_range_interface::interface<
+        Element, capability_keys, default_direction_type>
+        interface_type;
+    typedef std::unique_ptr<interface_type> interface_ptr;
 
     /**
     Pointer to implementation.
@@ -123,68 +129,79 @@ private:
     template <class Element2, class Capabilities2> friend class any_range;
 
     template <class Underlying>
-        interface_ptr wrap_view (Underlying && underlying) const
+    interface_ptr wrap_view(Underlying && underlying) const
     {
-        typedef any_range_implementation::implementation <Element,
-                capability_keys, typename std::decay <Underlying>::type>
+        typedef any_range_implementation::implementation<
+            Element, capability_keys, typename std::decay<Underlying>::type>
             implementation;
         // implementation::capabilities now contains the actual capabilities.
         // The required capabilities, in "capabilities", must be a subset of
         // those.
-        static_assert (capability::is_subset <
-            capabilities, typename implementation::capabilities>::value,
+        static_assert(
+            capability::is_subset<
+                capabilities, typename implementation::capabilities>::value,
             "Required capabilities must be subset of available ones.");
 
-        return utility::make_unique <implementation> (
-            std::forward <Underlying> (underlying));
+        return utility::make_unique<implementation>(
+            std::forward<Underlying>(underlying));
     }
 
-    template <class OtherCapabilities>
-        struct any_range_is_convertible
-    : capability::is_subset <capabilities, typename
-        capability::normalise_capabilities <OtherCapabilities>::type> {};
+    template <class OtherCapabilities> struct any_range_is_convertible
+    : capability::is_subset<
+          capabilities,
+          typename capability::normalise_capabilities<OtherCapabilities>::type>
+    {};
 
-    static_assert (any_range_is_convertible <Capabilities>::value,
+    static_assert(
+        any_range_is_convertible<Capabilities>::value,
         "Sanity: interface must be convertible to itself.");
 
-    template <class OtherCapabilities> struct convert_from {
-        typedef typename any_range <Element, OtherCapabilities>::capability_keys
+    template <class OtherCapabilities> struct convert_from
+    {
+        typedef typename any_range<Element, OtherCapabilities>::capability_keys
             other_capability_keys;
 
-        typedef any_range_interface::convert_interface <
-            interface_ptr, capability_keys, other_capability_keys> convert;
+        typedef any_range_interface::convert_interface<
+            interface_ptr, capability_keys, other_capability_keys>
+            convert;
 
-        interface_ptr operator() (
-            any_range <Element, OtherCapabilities> const & other) const
-        { return convert() (other.implementation_); }
+        interface_ptr operator()(
+            any_range<Element, OtherCapabilities> const & other) const
+        {
+            return convert()(other.implementation_);
+        }
 
-        interface_ptr operator() (
-            any_range <Element, OtherCapabilities> && other) const
-        { return convert() (std::move (other.implementation_)); }
+        interface_ptr operator()(
+            any_range<Element, OtherCapabilities> && other) const
+        {
+            return convert()(std::move(other.implementation_));
+        }
     };
 
     template <class Type> struct is_any_range_with_same_element_type_impl
-    : boost::mpl::false_ {};
+    : boost::mpl::false_
+    {};
 
     template <class Capabilities2>
-        struct is_any_range_with_same_element_type_impl <
-            any_range <Element, Capabilities2>>
-    : boost::mpl::true_ {};
+    struct is_any_range_with_same_element_type_impl<
+        any_range<Element, Capabilities2>> : boost::mpl::true_
+    {};
 
     template <class Type> struct is_any_range_with_same_element_type
-    : is_any_range_with_same_element_type_impl <
-        typename std::decay <Type>::type> {};
+    : is_any_range_with_same_element_type_impl<typename std::decay<Type>::type>
+    {};
 
     struct not_constructible;
-    typedef typename boost::mpl::if_ <
-        meta::has_key <capability::copy_construct, capability_keys>,
-        any_range, not_constructible>::type any_range_if_copy_constructible;
+    typedef typename boost::mpl::if_<
+        meta::has_key<capability::copy_construct, capability_keys>, any_range,
+        not_constructible>::type any_range_if_copy_constructible;
 
     /**
     Internal constructor.
     */
-    any_range (interface_ptr && implementation)
-    : implementation_ (std::move (implementation)) {}
+    any_range(interface_ptr && implementation)
+    : implementation_(std::move(implementation))
+    {}
 
 public:
     /** \brief
@@ -197,13 +214,15 @@ public:
         range.
         If left out, the default direction is used.
     */
-    template <class Range, class ... Directions,
-        class Enable1 = typename boost::enable_if <is_range <Range>>::type,
-        class Enable2 = typename boost::disable_if <
-            is_any_range_with_same_element_type <Range>>::type>
-    explicit any_range (Range && range, Directions const & ... directions)
-    : implementation_ (wrap_view (range::view (
-        std::forward <Range> (range), directions ...))) {}
+    template <
+        class Range, class... Directions,
+        class Enable1 = typename boost::enable_if<is_range<Range>>::type,
+        class Enable2 = typename boost::disable_if<
+            is_any_range_with_same_element_type<Range>>::type>
+    explicit any_range(Range && range, Directions const &... directions)
+    : implementation_(
+          wrap_view(range::view(std::forward<Range>(range), directions...)))
+    {}
 
     /** \brief
     Copy constructor.
@@ -211,14 +230,16 @@ public:
     This is only available if the underlying range allows copying, that is, if
     \c copy_construct is in the list of capabilities.
     */
-    any_range (any_range_if_copy_constructible const & other)
-    : implementation_ (other.implementation_->copy()) {}
+    any_range(any_range_if_copy_constructible const & other)
+    : implementation_(other.implementation_->copy())
+    {}
 
     /** \brief
     Move constructor.
     */
-    any_range (any_range && other)
-    : implementation_ (std::move (other.implementation_)) {}
+    any_range(any_range && other)
+    : implementation_(std::move(other.implementation_))
+    {}
 
     /** \brief
     Constructor that takes an any_range with the same Element type, but
@@ -233,23 +254,27 @@ public:
     This is useful if the underlying range can't be copied.
     This would require "lose_direction_move" to the interface.
     */
-    template <class OtherCapabilities, class CapabilityKeys = capability_keys,
-        class Enable1 = typename utility::disable_if_same_or_derived <
-            any_range <Element, OtherCapabilities>, any_range>::type,
-        class Enable2 = typename boost::enable_if <any_range_is_convertible <
-            OtherCapabilities>>::type,
-        class Enable3 = typename boost::enable_if <meta::has_key <
-            capability::copy_construct, CapabilityKeys>>::type>
-    any_range (any_range <Element, OtherCapabilities> const & other)
-    : implementation_ (convert_from <OtherCapabilities>() (other)) {}
+    template <
+        class OtherCapabilities, class CapabilityKeys = capability_keys,
+        class Enable1 = typename utility::disable_if_same_or_derived<
+            any_range<Element, OtherCapabilities>, any_range>::type,
+        class Enable2 = typename boost::enable_if<
+            any_range_is_convertible<OtherCapabilities>>::type,
+        class Enable3 = typename boost::enable_if<
+            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
+    any_range(any_range<Element, OtherCapabilities> const & other)
+    : implementation_(convert_from<OtherCapabilities>()(other))
+    {}
 
-    any_range & operator = (any_range const & other) {
+    any_range & operator=(any_range const & other)
+    {
         this->implementation_ = other.implementation_->copy();
         return *this;
     }
 
-    any_range & operator = (any_range && other) {
-        this->implementation_ = std::move (other.implementation_);
+    any_range & operator=(any_range && other)
+    {
+        this->implementation_ = std::move(other.implementation_);
         return *this;
     }
 
@@ -259,110 +284,145 @@ private:
     friend class helper::member_access;
 
     default_direction_type default_direction() const
-    { return implementation_->default_direction(); }
+    {
+        return implementation_->default_direction();
+    }
 
     template <class Capability, class Direction> struct is_implemented_helper
-    : meta::contains <Capability,
-        typename meta::at <Direction, capabilities>::type> {};
+    : meta::contains<
+          Capability, typename meta::at<Direction, capabilities>::type>
+    {};
 
     template <class Capability, class Direction> struct is_implemented
-    : boost::mpl::and_ <meta::has_key <Direction, capabilities>,
-        is_implemented_helper <Capability, Direction>> {};
+    : boost::mpl::and_<
+          meta::has_key<Direction, capabilities>,
+          is_implemented_helper<Capability, Direction>>
+    {};
 
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::empty, Direction>>::type>
-    bool empty (Direction const & direction) const
-    { return implementation_->empty (direction); }
-
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::size, Direction>>::type>
-    std::size_t size (Direction const & direction) const
-    { return implementation_->size (direction); }
-
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::first, Direction>>::type>
-    Element first (Direction const & direction) const
-    { return implementation_->first (direction); }
-
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::drop_one, Direction>>::type>
-    any_range drop_one (Direction const & direction) const
-    { return any_range (implementation_->drop_one (direction)); }
-
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::drop_n, Direction>>::type>
-    any_range drop (size_t increment, Direction const & direction) const
-    { return any_range (implementation_->drop_n (increment, direction)); }
-
-    template <class Direction, class Enable = typename boost::enable_if <
-        is_implemented <capability::chop_destructive, Direction>>::type>
-    Element chop_in_place (Direction const & direction)
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::empty, Direction>>::type>
+    bool empty(Direction const & direction) const
     {
-        auto chopped = implementation_->chop_destructive (
-            direction, implementation_);
+        return implementation_->empty(direction);
+    }
+
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::size, Direction>>::type>
+    std::size_t size(Direction const & direction) const
+    {
+        return implementation_->size(direction);
+    }
+
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::first, Direction>>::type>
+    Element first(Direction const & direction) const
+    {
+        return implementation_->first(direction);
+    }
+
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::drop_one, Direction>>::type>
+    any_range drop_one(Direction const & direction) const
+    {
+        return any_range(implementation_->drop_one(direction));
+    }
+
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::drop_n, Direction>>::type>
+    any_range drop(size_t increment, Direction const & direction) const
+    {
+        return any_range(implementation_->drop_n(increment, direction));
+    }
+
+    template <
+        class Direction,
+        class Enable = typename boost::enable_if<
+            is_implemented<capability::chop_destructive, Direction>>::type>
+    Element chop_in_place(Direction const & direction)
+    {
+        auto chopped =
+            implementation_->chop_destructive(direction, implementation_);
         return chopped.move_first();
     }
 };
 
 namespace any_range_operation {
 
-    template <class AnyRange, class Direction> inline
-        auto implement_chop (any_range_tag const & tag,
-            AnyRange && r, Direction const & direction)
-    RETURNS (helper::chop_by_chop_in_place (
-        std::forward <AnyRange> (r), direction));
+    template <class AnyRange, class Direction> inline auto implement_chop(
+        any_range_tag const & tag, AnyRange && r, Direction const & direction)
+        RETURNS(
+            helper::chop_by_chop_in_place(
+                std::forward<AnyRange>(r), direction));
 
-} // namespace any_range_operation
+}  // namespace any_range_operation
 
 namespace callable {
 
-    class make_any_range {
+    class make_any_range
+    {
     private:
         /// Compute the capabilities, using the directions, or not, if they are
         /// not given.
-        template <class View, class ... Directions> struct compute_capabilities
-        : capability::detect_capabilities <View,
-            typename capability::detect_copy_construct_key <View,
-                meta::set <Directions ...>>::type> {};
+        template <class View, class... Directions> struct compute_capabilities
+        : capability::detect_capabilities<
+              View,
+              typename capability::detect_copy_construct_key<
+                  View, meta::set<Directions...>>::type>
+        {};
 
-        struct apply {
-            template <class Range, class FirstDirection, class ... Directions,
-                class Capabilities = typename compute_capabilities <
-                    typename std::decay <Range>::type,
-                    FirstDirection, Directions ...>::type,
-                class Element = typename range::result_of <
-                    callable::first (Range &&, FirstDirection)>::type,
-                class AnyRange = any_range <Element, Capabilities>>
-            AnyRange operator() (Range && range,
-                FirstDirection const & first_direction,
-                Directions const & ... directions) const
+        struct apply
+        {
+            template <
+                class Range, class FirstDirection, class... Directions,
+                class Capabilities = typename compute_capabilities<
+                    typename std::decay<Range>::type, FirstDirection,
+                    Directions...>::type,
+                class Element = typename range::result_of<
+                    callable::first(Range &&, FirstDirection)>::type,
+                class AnyRange = any_range<Element, Capabilities>>
+            AnyRange operator()(
+                Range && range, FirstDirection const & first_direction,
+                Directions const &... directions) const
             {
-                return AnyRange (std::forward <Range> (range),
-                    first_direction, directions ...);
+                return AnyRange(
+                    std::forward<Range>(range), first_direction, directions...);
             }
 
             // Without directions: get first element type from the default
             // directions, and detect directions automatically.
-            template <class Range,
-                class Capabilities = typename capability::detect_capabilities <
-                    typename std::decay <Range>::type>::type,
-                class Element = typename range::result_of <
-                    callable::first (Range &&)>::type,
-                class AnyRange = any_range <Element, Capabilities>>
-            AnyRange operator() (Range && range) const
-            { return AnyRange (std::forward <Range> (range)); }
+            template <
+                class Range,
+                class Capabilities = typename capability::detect_capabilities<
+                    typename std::decay<Range>::type>::type,
+                class Element =
+                    typename range::result_of<callable::first(Range &&)>::type,
+                class AnyRange = any_range<Element, Capabilities>>
+            AnyRange operator()(Range && range) const
+            {
+                return AnyRange(std::forward<Range>(range));
+            }
         };
 
     public:
-        template <class Range, class ... Directions>
-            auto operator() (Range && range, Directions const & ... directions)
-            const
-        RETURNS (apply() (
-            range::view (std::forward <Range> (range), directions ...),
-            directions ...));
+        template <class Range, class... Directions>
+        auto operator()(Range && range, Directions const &... directions) const
+            RETURNS(
+                apply()(
+                    range::view(std::forward<Range>(range), directions...),
+                    directions...));
     };
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 Create an any_range object from a range, with best-guess type parameters.
@@ -386,6 +446,6 @@ make_any_range can only be used if this is implemented.
 */
 static auto constexpr make_any_range = callable::make_any_range();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_ANY_RANGE_HPP_INCLUDED
+#endif  // RANGE_ANY_RANGE_HPP_INCLUDED

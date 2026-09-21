@@ -27,17 +27,17 @@ sequences.
 
 #include <boost/utility/enable_if.hpp>
 
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/bool.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
-#include <boost/mpl/bool.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/not.hpp>
 
-#include "utility/returns.hpp"
 #include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
 
-#include "rime/core.hpp"
 #include "detail/callable_traits.hpp"
+#include "rime/core.hpp"
 
 #include "direction/tag.hpp"
 
@@ -54,111 +54,125 @@ Backward directions are by definition reversible.
 */
 
 namespace range {
-    using direction::is_direction;
-} // namespace range
+using direction::is_direction;
+}  // namespace range
 
 namespace direction {
 
-    using callable_traits::has;
-    using callable_traits::result_of;
+using callable_traits::has;
+using callable_traits::result_of;
 
-    namespace helper {
+namespace helper {
 
-        struct unusable;
+    struct unusable;
 
-        /** \brief
-        Convert direction into a forward direction.
+    /** \brief
+    Convert direction into a forward direction.
 
-        Provide this for a direction that is not a forward direction.
-        make_forward should not be implemented for the result type.
-        */
-        void implement_make_forward (unusable);
+    Provide this for a direction that is not a forward direction.
+    make_forward should not be implemented for the result type.
+    */
+    void implement_make_forward(unusable);
 
-        /** \brief
-        Convert direction into a backward direction.
+    /** \brief
+    Convert direction into a backward direction.
 
-        Specialise this for all forward directions.
-        Otherwise, this automatically forwards to make_forward (which may well
-        be unimplemented).
-        */
-        void implement_opposite (unusable);
+    Specialise this for all forward directions.
+    Otherwise, this automatically forwards to make_forward (which may well
+    be unimplemented).
+    */
+    void implement_opposite(unusable);
 
-    } // namespace helper
+}  // namespace helper
 
-    namespace callable {
+namespace callable {
 
-        namespace implementation {
+    namespace implementation {
 
-            using helper::implement_make_forward;
-            using helper::implement_opposite;
+        using helper::implement_make_forward;
+        using helper::implement_opposite;
 
-            struct make_forward {
-                template <class Direction, class Enable = typename
-                    std::enable_if <is_direction <Direction>::value>::type>
-                auto operator() (Direction const & direction) const
-                RETURNS (implement_make_forward (direction));
+        struct make_forward
+        {
+            template <
+                class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(Direction const & direction) const
+                RETURNS(implement_make_forward(direction));
+        };
+
+        struct opposite
+        {
+            // If the direction is a forward direction.
+            template <
+                class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(Direction const & direction) const
+                RETURNS(implement_opposite(direction));
+
+            // If the direction is a backward direction.
+            template <
+                class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(Direction const & direction) const
+                RETURNS(implement_make_forward(direction));
+        };
+
+        struct ensure_forward
+        {
+        private:
+            struct dispatch
+            {
+                template <class Direction> auto operator()(
+                    Direction const & direction,
+                    utility::overload_order<1> *) const
+                    RETURNS(implement_make_forward(direction));
+
+                template <class Direction> Direction operator()(
+                    Direction const & direction,
+                    utility::overload_order<2> *) const
+                {
+                    return direction;
+                }
             };
 
-            struct opposite {
-                // If the direction is a forward direction.
-                template <class Direction, class Enable = typename
-                    std::enable_if <is_direction <Direction>::value>::type>
-                auto operator() (Direction const & direction) const
-                RETURNS (implement_opposite (direction));
+        public:
+            template <
+                class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(Direction const & direction) const
+                RETURNS(dispatch()(direction, utility::pick_overload()));
+        };
 
-                // If the direction is a backward direction.
-                template <class Direction, class Enable = typename
-                    std::enable_if <is_direction <Direction>::value>::type>
-                auto operator() (Direction const & direction) const
-                RETURNS (implement_make_forward (direction));
-            };
+    }  // namespace implementation
 
-            struct ensure_forward {
-            private:
-                struct dispatch {
-                    template <class Direction>
-                        auto operator() (Direction const & direction,
-                            utility::overload_order <1> *) const
-                    RETURNS (implement_make_forward (direction));
+    using implementation::ensure_forward;
+    using implementation::make_forward;
+    using implementation::opposite;
 
-                    template <class Direction>
-                        Direction operator() (Direction const & direction,
-                            utility::overload_order <2> *) const
-                    { return direction; }
-                };
+}  // namespace callable
 
-            public:
-                template <class Direction, class Enable = typename
-                    std::enable_if <is_direction <Direction>::value>::type>
-                auto operator() (Direction const & direction) const
-                RETURNS (dispatch() (direction, utility::pick_overload()));
-            };
+/**
+\return The opposite of direction.
+*/
+static const auto opposite = callable::opposite();
 
-        } // namespace implementation
+/**
+\return The forward equivalent of a backward direction.
+*/
+static const auto make_forward = callable::make_forward();
 
-        using implementation::opposite;
-        using implementation::make_forward;
-        using implementation::ensure_forward;
+/**
+\return The opposite of the direction if it is backward.
+    Otherwise, return the argument.
+*/
+static const auto ensure_forward = callable::ensure_forward();
 
-    } // namespace callable
-
-    /**
-    \return The opposite of direction.
-    */
-    static const auto opposite = callable::opposite();
-
-    /**
-    \return The forward equivalent of a backward direction.
-    */
-    static const auto make_forward = callable::make_forward();
-
-    /**
-    \return The opposite of the direction if it is backward.
-        Otherwise, return the argument.
-    */
-    static const auto ensure_forward = callable::ensure_forward();
-
-} // namespace direction
+}  // namespace direction
 
 /*
 Predefine standard directions "front" and "back".
@@ -169,28 +183,32 @@ types direction::front and direction::back, respectively.
 */
 namespace direction {
 
-    struct front {
-        rime::true_type operator == (front const &) const
-        { return rime::true_; }
+struct front
+{
+    rime::true_type operator==(front const &) const { return rime::true_; }
 
-        template <class OtherDirection>
-            rime::false_type operator == (OtherDirection const &) const
-        { return rime::false_; }
-    };
+    template <class OtherDirection>
+    rime::false_type operator==(OtherDirection const &) const
+    {
+        return rime::false_;
+    }
+};
 
-    struct back {
-        rime::true_type operator == (back const &) const
-        { return rime::true_; }
+struct back
+{
+    rime::true_type operator==(back const &) const { return rime::true_; }
 
-        template <class OtherDirection>
-            rime::false_type operator == (OtherDirection const &) const
-        { return rime::false_; }
-    };
+    template <class OtherDirection>
+    rime::false_type operator==(OtherDirection const &) const
+    {
+        return rime::false_;
+    }
+};
 
-    inline back implement_opposite (front) { return back(); }
+inline back implement_opposite(front) { return back(); }
 
-    inline front implement_make_forward (back) { return front(); }
+inline front implement_make_forward(back) { return front(); }
 
-} // namespace direction
+}  // namespace direction
 
 #endif  // RANGE_DIRECTION_HPP_INCLUDED

@@ -35,38 +35,44 @@ namespace for_each_detail {
     (In a fold, the result of the function gets passed to the next function,
     so "void" would not work.)
     */
-    struct none {};
+    struct none
+    {};
 
     /**
     A function for "fold" accepts a state, but for "for_each" it doesn't.
     Therefore, forward to the function, leaving out "none".
     */
-    template <class Function> struct function_wrapper {
+    template <class Function> struct function_wrapper
+    {
         Function function;
 
-        function_wrapper (Function && function)
-        : function (std::forward <Function> (function)) {}
+        function_wrapper(Function && function)
+        : function(std::forward<Function>(function))
+        {}
 
-        template <class Element>
-            none operator() (none, Element && element) const
+        template <class Element> none operator()(none, Element && element) const
         {
-            function (std::forward <Element> (element));
+            function(std::forward<Element>(element));
             return none();
         }
     };
 
-    struct use_fold {
+    struct use_fold
+    {
         // This uses "auto" merely to enable SFINAE; the return type is always
         // void.
-        template <class Range, class Direction, class Function>
-            auto operator() (Range && range, Direction const & direction,
-                Function && function) const
-        RETURNS (rime::nothing (range::fold (
-            none(), std::forward <Range> (range), direction,
-            function_wrapper <Function> (std::forward <Function> (function)))));
+        template <class Range, class Direction, class Function> auto operator()(
+            Range && range, Direction const & direction,
+            Function && function) const
+            RETURNS(
+                rime::nothing(
+                    range::fold(
+                        none(), std::forward<Range>(range), direction,
+                        function_wrapper<Function>(
+                            std::forward<Function>(function)))));
     };
 
-} // namespace for_each_detail
+}  // namespace for_each_detail
 
 /* Interface. */
 
@@ -88,9 +94,9 @@ namespace helper {
     \param direction The direction in which the range is traversed.
     \param function The function to be called on each element.
     */
-    void implement_for_each (unusable);
+    void implement_for_each(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
@@ -98,59 +104,65 @@ namespace callable {
 
         using helper::implement_for_each;
 
-        class for_each {
-            struct dispatch {
+        class for_each
+        {
+            struct dispatch
+            {
                 // Use implement_for_each, if it is implemented.
                 template <class Range, class Direction, class Function>
-                    auto operator() (Range && range,
-                        Direction const & direction, Function && function,
-                        overload_order <1> *) const
-                RETURNS (implement_for_each (tag_of <Range>::type(),
-                    std::forward <Range> (range),
-                    direction, std::forward <Function> (function)));
+                auto operator()(
+                    Range && range, Direction const & direction,
+                    Function && function, overload_order<1> *) const
+                    RETURNS(implement_for_each(
+                        tag_of<Range>::type(), std::forward<Range>(range),
+                        direction, std::forward<Function>(function)));
 
                 // Use member function .for_each, if it is implemented.
                 template <class Range, class Direction, class Function>
-                    auto operator() (Range && range,
-                        Direction const & direction, Function && function,
-                        overload_order <2> *) const
-                RETURNS (helper::member_access::for_each (
-                    std::forward <Range> (range), direction,
-                    std::forward <Function> (function)));
+                auto operator()(
+                    Range && range, Direction const & direction,
+                    Function && function, overload_order<2> *) const
+                    RETURNS(
+                        helper::member_access::for_each(
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
 
                 // Use default implementation.
                 template <class Range, class Direction, class Function>
-                    auto operator() (Range && range,
-                        Direction const & direction, Function && function,
-                        overload_order <3> *) const
-                RETURNS (for_each_detail::use_fold() (
-                        std::forward <Range> (range), direction,
-                    std::forward <Function> (function)));
+                auto operator()(
+                    Range && range, Direction const & direction,
+                    Function && function, overload_order<3> *) const
+                    RETURNS(
+                        for_each_detail::use_fold()(
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
             };
 
         public:
             template <class Range, class Direction, class Function>
-            auto operator() (Range && range, Direction const & direction,
+            auto operator()(
+                Range && range, Direction const & direction,
                 Function && function) const
-            RETURNS (dispatch() (
-                range::view_once (std::forward <Range> (range), direction),
-                direction,
-                std::forward <Function> (function), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view_once(std::forward<Range>(range), direction),
+                        direction, std::forward<Function>(function),
+                        pick_overload()));
 
             // Without direction: use default_direction.
             template <class Range, class Function>
-                auto operator() (Range && range, Function && function) const
-            RETURNS (dispatch() (
-                range::view_once (std::forward <Range> (range)),
-                range::default_direction (range),
-                std::forward <Function> (function), pick_overload()));
+            auto operator()(Range && range, Function && function) const RETURNS(
+                dispatch()(
+                    range::view_once(std::forward<Range>(range)),
+                    range::default_direction(range),
+                    std::forward<Function>(function), pick_overload()));
         };
 
-    } // namespace implementation
+    }  // namespace implementation
 
     using implementation::for_each;
 
-} // namespace callable
+}  // namespace callable
 
 /**
 Call a unary function for each element of a range, traversing it along
@@ -168,6 +180,6 @@ Any result from the functions is ignored.
 */
 static const auto for_each = callable::for_each();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_FOR_EACH_HPP_INCLUDED
+#endif  // RANGE_FOR_EACH_HPP_INCLUDED

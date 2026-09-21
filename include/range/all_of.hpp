@@ -23,8 +23,9 @@ limitations under the License.
 namespace range {
 
 namespace callable {
-    struct all_of : find_bool_detail::find_bool <true> {};
-} // namespace callable
+    struct all_of : find_bool_detail::find_bool<true>
+    {};
+}  // namespace callable
 
 /**
 Return whether all elements of the range evaluate to true.
@@ -44,7 +45,6 @@ not evaluated.
 */
 static const auto all_of = callable::all_of();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_ALL_OF_HPP_INCLUDED
-
+#endif  // RANGE_ALL_OF_HPP_INCLUDED

@@ -28,16 +28,20 @@ This includes \c \<map>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Key, class Value, class Compare, class Allocator>
-    struct tag_of_qualified <std::map <Key, Value, Compare, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
+/// \cond DONT_DOCUMENT
+template <class Key, class Value, class Compare, class Allocator>
+struct tag_of_qualified<std::map<Key, Value, Compare, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
 
-    template <class Key, class Value, class Compare, class Allocator>
-    struct tag_of_qualified <std::multimap <Key, Value, Compare, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+template <class Key, class Value, class Compare, class Allocator>
+struct tag_of_qualified<std::multimap<Key, Value, Compare, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_MAP_HPP_INCLUDED
+#endif  // RANGE_STD_MAP_HPP_INCLUDED

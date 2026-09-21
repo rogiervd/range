@@ -28,8 +28,8 @@ Expose views as Python iterators.
 
 #include "utility/disable_if_same.hpp"
 
-#include "range/core.hpp"
 #include "range/any_range.hpp"
+#include "range/core.hpp"
 #include "range/transform.hpp"
 
 namespace range { namespace python {
@@ -43,24 +43,30 @@ namespace range { namespace python {
     If you want to use a full-fledged container, instead of using this, see
     the containers support in Nanobind (the headers in nanobind/stl).
     */
-    class python_iterator {
-        any_range <nanobind::object, capability::unique_capabilities> range;
+    class python_iterator
+    {
+        any_range<nanobind::object, capability::unique_capabilities> range;
 
         // Convert any object to Python.
-        struct to_python_object {
-            template <class Type>
-                nanobind::object operator() (Type && o) const
-            { return nanobind::cast (std::forward <Type> (o)); }
+        struct to_python_object
+        {
+            template <class Type> nanobind::object operator()(Type && o) const
+            {
+                return nanobind::cast(std::forward<Type>(o));
+            }
         };
 
     public:
-        template <class Range2, class Enable = typename
-            utility::disable_if_same_or_derived <python_iterator, Range2>::type>
-        python_iterator (Range2 && range)
-        : range (range::transform (std::forward <Range2> (range),
-            to_python_object())) {}
+        template <
+            class Range2,
+            class Enable = typename utility::disable_if_same_or_derived<
+                python_iterator, Range2>::type>
+        python_iterator(Range2 && range)
+        : range(
+              range::transform(std::forward<Range2>(range), to_python_object()))
+        {}
 
-        python_iterator (python_iterator &&) = default;
+        python_iterator(python_iterator &&) = default;
 
         /** \brief
         Return the next element of the view, as a nanobind::object, and
@@ -69,11 +75,12 @@ namespace range { namespace python {
         This is the behaviour of a Python iterator.
         Raises \c StopIteration if there are no more elements.
         */
-        nanobind::object next() {
-            if (empty (range))
-                throw nanobind::stop_iteration (
+        nanobind::object next()
+        {
+            if (empty(range))
+                throw nanobind::stop_iteration(
                     "No more elements in C++ range.");
-            return chop_in_place (range);
+            return chop_in_place(range);
         }
 
         python_iterator & iter() { return *this; }
@@ -85,11 +92,13 @@ namespace range { namespace python {
     This must be called once in your \c NB_MODULE, before any function that
     returns a view is called.
     */
-    inline void initialise_iterator (nanobind::module_ & module) {
-        nanobind::class_ <python_iterator> (module, "CppRangeIterator")
+    inline void initialise_iterator(nanobind::module_ & module)
+    {
+        nanobind::class_<python_iterator>(module, "CppRangeIterator")
             // If it quacks like a duck...
-            .def ("__next__", &python_iterator::next)
-            .def ("__iter__", &python_iterator::iter,
+            .def("__next__", &python_iterator::next)
+            .def(
+                "__iter__", &python_iterator::iter,
                 nanobind::rv_policy::reference);
     }
 
@@ -113,38 +122,48 @@ namespace range { namespace python {
     \c initialise_iterator must have been called, probably in your NB_MODULE
     function.
     */
-    template <class View> struct view_caster {
-        static_assert (is_view <View>::value,
-            "view_caster can only be used on views.");
+    template <class View> struct view_caster
+    {
+        static_assert(
+            is_view<View>::value, "view_caster can only be used on views.");
 
-        static_assert (std::is_same <View, typename std::decay <View>::type
-            >::value, "view_caster requires an unqualified type.");
+        static_assert(
+            std::is_same<View, typename std::decay<View>::type>::value,
+            "view_caster requires an unqualified type.");
 
-        static_assert (std::is_same <typename
-                decayed_result_of <callable::default_direction (View)>::type,
-                direction::front
-            >::value, "The default direction must be direction::front.");
+        static_assert(
+            std::is_same<
+                typename decayed_result_of<
+                    callable::default_direction(View)>::type,
+                direction::front>::value,
+            "The default direction must be direction::front.");
 
         using Value = View;
         static constexpr auto Name =
-            nanobind::detail::const_name ("CppRangeIterator");
+            nanobind::detail::const_name("CppRangeIterator");
 
         template <class T> using Cast = View;
         template <class T> static constexpr bool can_cast() { return true; }
 
-        bool from_python (nanobind::handle, std::uint8_t,
+        bool from_python(
+            nanobind::handle, std::uint8_t,
             nanobind::detail::cleanup_list *) noexcept
-        { return false; }
+        {
+            return false;
+        }
 
-        static nanobind::handle from_cpp (View const & view,
-            nanobind::rv_policy, nanobind::detail::cleanup_list *)
+        static nanobind::handle from_cpp(
+            View const & view, nanobind::rv_policy,
+            nanobind::detail::cleanup_list *)
         {
             // Make a typed iterator, owned by Python.
-            return nanobind::cast (python_iterator (range::view (view)),
-                nanobind::rv_policy::move).release();
+            return nanobind::cast(
+                       python_iterator(range::view(view)),
+                       nanobind::rv_policy::move)
+                .release();
         }
     };
 
-}} // namespace range::python
+}}  // namespace range::python
 
-#endif // RANGE_PYTHON_ITERATOR_HPP_INCLUDED
+#endif  // RANGE_PYTHON_ITERATOR_HPP_INCLUDED

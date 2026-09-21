@@ -19,38 +19,38 @@ limitations under the License.
 
 #include "range/zip.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "rime/check/check_equal.hpp"
 
-#include "range/tuple.hpp"
-#include "range/std/vector.hpp"
-#include "range/std/string.hpp"
 #include "range/for_each_macro.hpp"
+#include "range/std/string.hpp"
+#include "range/std/vector.hpp"
+#include "range/tuple.hpp"
 
-#include "weird_direction.hpp"
 #include "weird_count.hpp"
+#include "weird_direction.hpp"
 
 #include "unique_range.hpp"
 
 using range::tuple;
 
-template <class ... Types> struct show_types;
+template <class... Types> struct show_types;
 
+using range::view;
 using range::zip;
 using range::zip_from;
-using range::view;
 
 using range::empty;
-using range::size;
 using range::first;
 using range::second;
+using range::size;
 using range::third;
 
-using range::drop;
 using range::chop;
 using range::chop_in_place;
+using range::drop;
 
 using range::make_tuple;
 
@@ -59,52 +59,54 @@ namespace callable = range::callable;
 
 BOOST_AUTO_TEST_SUITE(test_range_zip)
 
-template <class ...> struct show_types;
+template <class...> struct show_types;
 
-BOOST_AUTO_TEST_CASE (example) {
-    std::vector <int> vi;
-    vi.push_back (2);
-    vi.push_back (7);
+BOOST_AUTO_TEST_CASE(example)
+{
+    std::vector<int> vi;
+    vi.push_back(2);
+    vi.push_back(7);
 
-    std::vector <std::string> vs;
-    vs.push_back ("Hello");
-    vs.push_back ("there!");
-    vs.push_back ("Never change");
+    std::vector<std::string> vs;
+    vs.push_back("Hello");
+    vs.push_back("there!");
+    vs.push_back("Never change");
 
     std::size_t count = 0;
 
-    auto z = zip (vi, vs);
-    RANGE_FOR_EACH (pair, z) {
-        if (first (pair) == 2) {
-            BOOST_CHECK_EQUAL (second (pair), "Hello");
+    auto z = zip(vi, vs);
+    RANGE_FOR_EACH(pair, z)
+    {
+        if (first(pair) == 2) {
+            BOOST_CHECK_EQUAL(second(pair), "Hello");
         } else {
-            BOOST_CHECK_EQUAL (first (pair), 7);
-            BOOST_CHECK_EQUAL (second (pair), "there!");
+            BOOST_CHECK_EQUAL(first(pair), 7);
+            BOOST_CHECK_EQUAL(second(pair), "there!");
         }
 
         // Set the first element to the length of the second element.
-        first (pair) = size (second (pair));
+        first(pair) = size(second(pair));
 
-        ++ count;
+        ++count;
     }
 
-    BOOST_CHECK_EQUAL (count, 2);
+    BOOST_CHECK_EQUAL(count, 2);
 
-    BOOST_CHECK_EQUAL (first (vi), 5);
-    BOOST_CHECK_EQUAL (second (vi), 6);
+    BOOST_CHECK_EQUAL(first(vi), 5);
+    BOOST_CHECK_EQUAL(second(vi), 6);
 
     // Mutate the whole pair, and thereby the underlying two vectors, at once.
-    RANGE_FOR_EACH (pair, z)
-        pair = make_tuple (77, "Something else");
+    RANGE_FOR_EACH(pair, z)
+    pair = make_tuple(77, "Something else");
 
-    BOOST_CHECK_EQUAL (first (vi), 77);
-    BOOST_CHECK_EQUAL (second (vi), 77);
+    BOOST_CHECK_EQUAL(first(vi), 77);
+    BOOST_CHECK_EQUAL(second(vi), 77);
 
-    BOOST_CHECK_EQUAL (first (vs), "Something else");
-    BOOST_CHECK_EQUAL (second (vs), "Something else");
+    BOOST_CHECK_EQUAL(first(vs), "Something else");
+    BOOST_CHECK_EQUAL(second(vs), "Something else");
 
     // The third element of vs is never seen since vi only has two elements.
-    BOOST_CHECK_EQUAL (third (vs), "Never change");
+    BOOST_CHECK_EQUAL(third(vs), "Never change");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

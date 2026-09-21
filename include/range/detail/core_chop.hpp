@@ -23,8 +23,8 @@ limitations under the License.
 #include "utility/storage.hpp"
 
 #include "core_base.hpp"
-#include "core_first.hpp"
 #include "core_drop.hpp"
+#include "core_first.hpp"
 
 namespace range {
 
@@ -43,33 +43,36 @@ array.
     The type of the rest of the range.
     This will often be an unqualified value.
 */
-template <class First, class Rest> class chopped {
+template <class First, class Rest> class chopped
+{
 public:
     typedef First first_type;
     typedef Rest rest_type;
 
 private:
-    typename utility::storage::store <First>::type first_;
+    typename utility::storage::store<First>::type first_;
     Rest rest_;
 
 public:
-    chopped (First && first, Rest && rest)
-    : first_ (std::forward <First> (first)), rest_ (std::forward <Rest> (rest))
+    chopped(First && first, Rest && rest)
+    : first_(std::forward<First>(first)), rest_(std::forward<Rest>(rest))
     {}
 
-    chopped (chopped const & that)
-    : first_ (that.first()), rest_ (that.rest()) {}
+    chopped(chopped const & that) : first_(that.first()), rest_(that.rest()) {}
 
-    chopped (chopped && that)
-    : first_ (that.forward_first()), rest_ (that.forward_rest()) {}
+    chopped(chopped && that)
+    : first_(that.forward_first()), rest_(that.forward_rest())
+    {}
 
-    chopped & operator = (chopped const & that) {
+    chopped & operator=(chopped const & that)
+    {
         first_ = that.first_;
         rest_ = that.rest_;
         return *this;
     }
 
-    chopped & operator = (chopped && that) {
+    chopped & operator=(chopped && that)
+    {
         first_ = that.forward_first();
         rest_ = that.forward_rest();
         return *this;
@@ -79,17 +82,20 @@ public:
     \return The first element of the range, as a const reference (depending on
     the type of \a First).
     */
-    typename utility::storage::get <First, chopped const &>::type first() const
-    { return first_; }
+    typename utility::storage::get<First, chopped const &>::type first() const
+    {
+        return first_;
+    }
 
     /**
     \return The first element of the range, as an rvalue reference (depending on
     the type of \a First).
     The lifetime of the result is restricted to the lifetime of this object.
     */
-    typename utility::storage::get <First, chopped &&>::type move_first() {
-        utility::storage::get <First, chopped &&> extract;
-        return extract (first_);
+    typename utility::storage::get<First, chopped &&>::type move_first()
+    {
+        utility::storage::get<First, chopped &&> extract;
+        return extract(first_);
     }
 
     /**
@@ -112,14 +118,14 @@ public:
     \return The rest of the range, as an rvalue reference.
     The lifetime of the result is restricted to the lifetime of this object.
     */
-    Rest && move_rest() { return std::forward <Rest> (rest_); }
+    Rest && move_rest() { return std::forward<Rest>(rest_); }
 
     /**
     \return The rest of the range, as an object of type \a Rest.
     The object is moved into the result.
     The lifetime of the result is not restricted to the lifetime of this object.
     */
-    Rest forward_rest() { return std::forward <Rest> (rest_); }
+    Rest forward_rest() { return std::forward<Rest>(rest_); }
 };
 
 namespace helper {
@@ -141,9 +147,9 @@ namespace helper {
     \param range The range.
     \param direction The direction.
     */
-    void implement_chop (unusable);
+    void implement_chop(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
@@ -162,26 +168,29 @@ namespace callable {
         \param direction
         \param overload_order
         */
-        struct chop_direct {
-            template <class Range, class Direction>
-                auto operator() (
-                    Range && range, Direction const & direction,
-                    overload_order <1> *) const
-            RETURNS (implement_chop (typename tag_of <Range>::type(),
-                std::forward <Range> (range), direction));
+        struct chop_direct
+        {
+            template <class Range, class Direction> auto operator()(
+                Range && range, Direction const & direction,
+                overload_order<1> *) const
+                RETURNS(implement_chop(
+                    typename tag_of<Range>::type(), std::forward<Range>(range),
+                    direction));
 
             // Forward to member if possible.
-            template <class Range, class Direction>
-                auto operator() (
-                    Range && range, Direction const & direction,
-                    overload_order <2> *) const
-            RETURNS (helper::member_access::chop (
-                std::forward <Range> (range), direction));
+            template <class Range, class Direction> auto operator()(
+                Range && range, Direction const & direction,
+                overload_order<2> *) const
+                RETURNS(
+                    helper::member_access::chop(
+                        std::forward<Range>(range), direction));
         };
 
-        struct chop {
+        struct chop
+        {
         private:
-            struct dispatch : chop_direct {
+            struct dispatch : chop_direct
+            {
                 using chop_direct::operator();
 
                 /**
@@ -200,57 +209,64 @@ namespace callable {
                 The call to \a first should not pilfer the range, but the call
                 to \a drop can.
                 */
-                template <class Range, class Direction,
-                    class Element = decltype (std::declval <first_direct>() (
-                        std::declval <Range const &>(),
-                        std::declval <Direction>(), pick_overload())),
-                    class Rest = decltype (std::declval <drop_direct>() (
-                        std::declval <Range>(), one_type(),
-                        std::declval <Direction>(), pick_overload()))>
-                    chopped <Element, Rest>
-                operator() (Range && range, Direction const & direction,
-                    overload_order <3> *) const
+                template <
+                    class Range, class Direction,
+                    class Element = decltype(std::declval<first_direct>()(
+                        std::declval<Range const &>(),
+                        std::declval<Direction>(), pick_overload())),
+                    class Rest = decltype(std::declval<drop_direct>()(
+                        std::declval<Range>(), one_type(),
+                        std::declval<Direction>(), pick_overload()))>
+                chopped<Element, Rest> operator()(
+                    Range && range, Direction const & direction,
+                    overload_order<3> *) const
                 {
                     // Don't do the following in one line: make sure that
                     // first_direct is called first.
-                    auto && element = first_direct() (range, direction,
-                        pick_overload());
+                    auto && element =
+                        first_direct()(range, direction, pick_overload());
                     // Then forward the range to drop.
                     // The static_cast is in case first returned an rvalue or
                     // rvalue reference.
                     // decltype (element) is then an rvalue reference.
-                    return chopped <Element, Rest> (
-                        static_cast <Element> (element),
-                        drop_direct() (std::forward <Range> (range),
-                            one_type(), direction, pick_overload()));
+                    return chopped<Element, Rest>(
+                        static_cast<Element>(element),
+                        drop_direct()(
+                            std::forward<Range>(range), one_type(), direction,
+                            pick_overload()));
                 }
             };
 
         public:
             // With direction.
-            template <class Range, class Direction, class Enable = typename
-                std::enable_if <is_range <Range>::value
-                    && is_direction <Direction>::value>::type>
-            auto operator() (Range && range, Direction const & direction)
-                const
-            RETURNS (dispatch() (std::forward <Range> (range), direction,
-                pick_overload()));
+            template <
+                class Range, class Direction,
+                class Enable = typename std::enable_if<
+                    is_range<Range>::value
+                    && is_direction<Direction>::value>::type>
+            auto operator()(Range && range, Direction const & direction) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), direction,
+                        pick_overload()));
 
             // Without direction: use default direction.
-            template <class Range, class Enable =
-                typename std::enable_if <is_range <Range>::value>::type>
-            auto operator() (Range && range) const
-            RETURNS (dispatch() (
-                std::forward <Range> (range), range::default_direction (range),
-                pick_overload()));
+            template <
+                class Range,
+                class Enable =
+                    typename std::enable_if<is_range<Range>::value>::type>
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    std::forward<Range>(range), range::default_direction(range),
+                    pick_overload()));
         };
 
-    } // namespace implementation
+    }  // namespace implementation
 
     using implementation::chop;
     using implementation::chop_direct;
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 Return the first element and the range without that first element, as an object
@@ -266,6 +282,6 @@ This is an operation that ranges that cannot be copied will often implement.
 */
 static const auto chop = callable::chop();
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_CHOP_HPP_INCLUDED

@@ -19,9 +19,9 @@ limitations under the License.
 
 #include <cstdio>
 
+#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 #include <boost/exception/errinfo_errno.hpp>
 #include <boost/exception/errinfo_file_name.hpp>
@@ -35,21 +35,19 @@ namespace range {
 /** \brief
 Exception that indicates an error while opening a file.
 */
-struct file_open_error
-: virtual std::ios_base::failure, virtual boost::exception
+struct file_open_error : virtual std::ios_base::failure,
+                         virtual boost::exception
 {
-    file_open_error()
-    : std::ios_base::failure ("Error opening file") {}
+    file_open_error() : std::ios_base::failure("Error opening file") {}
 };
 
 /** \brief
 Exception that indicates an error while reading from a file.
 */
-struct file_read_error
-: virtual std::ios_base::failure, virtual boost::exception
+struct file_read_error : virtual std::ios_base::failure,
+                         virtual boost::exception
 {
-    file_read_error()
-    : std::ios_base::failure ("Error reading from file") {}
+    file_read_error() : std::ios_base::failure("Error reading from file") {}
 };
 
 namespace file_producer_detail {
@@ -61,9 +59,10 @@ namespace file_producer_detail {
     object is constructed, the file is open; if an error occurs, an exception is
     thrown.
     */
-    class file_source {
+    class file_source
+    {
         std::string file_name_;
-        std::shared_ptr <FILE> handle_;
+        std::shared_ptr<FILE> handle_;
 
     public:
         /** \brief
@@ -72,16 +71,16 @@ namespace file_producer_detail {
         \throw file_open_error
             Iff an error occurs.
         */
-        file_source (std::string file_name) {
-            FILE * handle = std::fopen (file_name.c_str(), "rb");
+        file_source(std::string file_name)
+        {
+            FILE * handle = std::fopen(file_name.c_str(), "rb");
             if (handle)
-                this->handle_ = std::shared_ptr <FILE> (handle, std::fclose);
+                this->handle_ = std::shared_ptr<FILE>(handle, std::fclose);
             else
-                throw file_open_error() <<
-                    boost::errinfo_errno (errno) <<
-                    boost::errinfo_file_name (file_name);
+                throw file_open_error() << boost::errinfo_errno(errno)
+                                        << boost::errinfo_file_name(file_name);
 
-            file_name_ = std::move (file_name);
+            file_name_ = std::move(file_name);
         }
 
         typedef char char_type;
@@ -95,29 +94,32 @@ namespace file_producer_detail {
         \throw file_read_error
             Iff an error occurs.
         */
-        std::streamsize read (char * target, std::streamsize number) {
-            std::size_t actually_read_num = std::fread (
-                target, sizeof (char), number, handle_.get());
-            if (std::ferror (handle_.get()))
-                throw file_read_error() << boost::errinfo_errno (errno);
+        std::streamsize read(char * target, std::streamsize number)
+        {
+            std::size_t actually_read_num =
+                std::fread(target, sizeof(char), number, handle_.get());
+            if (std::ferror(handle_.get()))
+                throw file_read_error() << boost::errinfo_errno(errno);
             return actually_read_num;
         }
     };
 
     class gzip_file_stream
-    : public boost::iostreams::filtering_streambuf <boost::iostreams::input>
+    : public boost::iostreams::filtering_streambuf<boost::iostreams::input>
     {
-        boost::iostreams::stream_buffer <file_producer_detail::file_source>
+        boost::iostreams::stream_buffer<file_producer_detail::file_source>
             underlying_;
+
     public:
-        gzip_file_stream (std::string file_name)
-        : underlying_ (std::move (file_name)) {
-            this->push (boost::iostreams::gzip_decompressor());
-            this->push (underlying_);
+        gzip_file_stream(std::string file_name)
+        : underlying_(std::move(file_name))
+        {
+            this->push(boost::iostreams::gzip_decompressor());
+            this->push(underlying_);
         }
     };
 
-} // namespace file_producer_detail
+}  // namespace file_producer_detail
 
 template <class Char> class file_element_producer;
 
@@ -130,59 +132,65 @@ performed.
 This uses Boost.IOStreams, which you must explicitly link to if you use this
 function.
 */
-inline buffer <char> read_file (std::string const & file_name) {
-    auto stream_buffer = utility::make_unique <
-        boost::iostreams::stream_buffer <file_producer_detail::file_source>> (
-            file_name);
+inline buffer<char> read_file(std::string const & file_name)
+{
+    auto stream_buffer = utility::make_unique<
+        boost::iostreams::stream_buffer<file_producer_detail::file_source>>(
+        file_name);
 
-    return range::buffer <char> (
-        internal_element_producer <char, 256>::pointer::template
-        construct <file_element_producer <char>> (std::move (stream_buffer)));
+    return range::buffer<char>(
+        internal_element_producer<char, 256>::pointer::template construct<
+            file_element_producer<char>>(std::move(stream_buffer)));
 }
 
 /** \brief
 Open a file in Gzip format for reading and expose as a \ref buffer.
 */
-inline buffer <char> read_gzip_file (std::string const & file_name) {
-    auto stream_buffer = utility::make_unique <
-        file_producer_detail::gzip_file_stream> (file_name);
-    return range::buffer <char> (
-        internal_element_producer <char, 256>::pointer::template
-        construct <file_element_producer <char>> (std::move (stream_buffer)));
+inline buffer<char> read_gzip_file(std::string const & file_name)
+{
+    auto stream_buffer =
+        utility::make_unique<file_producer_detail::gzip_file_stream>(file_name);
+    return range::buffer<char>(
+        internal_element_producer<char, 256>::pointer::template construct<
+            file_element_producer<char>>(std::move(stream_buffer)));
 }
 
 template <class Char> class file_element_producer
-: public internal_element_producer <Char, 256>
+: public internal_element_producer<Char, 256>
 {
     static constexpr std::size_t buffer_size = 256;
-    typedef internal_element_producer <Char, buffer_size> base_type;
+    typedef internal_element_producer<Char, buffer_size> base_type;
     typedef typename base_type::pointer pointer;
 
-    typedef std::unique_ptr <std::basic_streambuf <Char>> stream_buffer_ptr;
+    typedef std::unique_ptr<std::basic_streambuf<Char>> stream_buffer_ptr;
 
     // Only the last producer needs and has access to the streambuf.
     stream_buffer_ptr stream_buffer_;
 
 protected:
-    virtual pointer get_next() {
-        return pointer::template construct <file_element_producer> (
-            std::move (stream_buffer_));
+    virtual pointer get_next()
+    {
+        return pointer::template construct<file_element_producer>(
+            std::move(stream_buffer_));
     }
 
-    void fill() {
-        auto count = stream_buffer_->sgetn (this->memory(), buffer_size);
-        this->end_  = this->memory() + count;
+    void fill()
+    {
+        auto count = stream_buffer_->sgetn(this->memory(), buffer_size);
+        this->end_ = this->memory() + count;
     }
 
 public:
     /**
     The buffer must be set to throw on errors.
     */
-    file_element_producer (std::unique_ptr <std::streambuf> && stream_buffer)
-    : stream_buffer_ (std::move (stream_buffer))
-    { fill(); }
+    file_element_producer(std::unique_ptr<std::streambuf> && stream_buffer)
+    : stream_buffer_(std::move(stream_buffer))
+    {
+        fill();
+    }
 };
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_FILE_BUFFER_HPP_INCLUDED
+#endif  // RANGE_FILE_BUFFER_HPP_INCLUDED

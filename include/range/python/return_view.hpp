@@ -54,39 +54,40 @@ namespace range { namespace python {
     That keeps the argument alive at least until the returned iterator goes out
     of scope.
     */
-    template <class Result, class ... Arguments>
-        inline auto return_view (Result (*function) (Arguments ...))
+    template <class Result, class... Arguments>
+    inline auto return_view(Result (*function)(Arguments...))
     {
-        return [function] (Arguments ... arguments) -> python_iterator {
-            return python_iterator (range::view (
-                function (std::forward <Arguments> (arguments) ...)));
+        return [function](Arguments... arguments) -> python_iterator {
+            return python_iterator(
+                range::view(function(std::forward<Arguments>(arguments)...)));
         };
     }
 
     /// \overload
-    template <class Result, class Class, class ... Arguments>
-        inline auto return_view (Result (Class::*function) (Arguments ...))
+    template <class Result, class Class, class... Arguments>
+    inline auto return_view(Result (Class::*function)(Arguments...))
     {
-        return [function] (Class & object, Arguments ... arguments)
-            -> python_iterator
-        {
-            return python_iterator (range::view (
-                (object.*function) (std::forward <Arguments> (arguments) ...)));
+        return [function](
+                   Class & object, Arguments... arguments) -> python_iterator {
+            return python_iterator(
+                range::view(
+                    (object.*function)(std::forward<Arguments>(arguments)...)));
         };
     }
 
     /// \overload
-    template <class Result, class Class, class ... Arguments>
-        inline auto return_view (Result (Class::*function) (Arguments ...) const)
+    template <class Result, class Class, class... Arguments>
+    inline auto return_view(Result (Class::*function)(Arguments...) const)
     {
-        return [function] (Class const & object, Arguments ... arguments)
-            -> python_iterator
-        {
-            return python_iterator (range::view (
-                (object.*function) (std::forward <Arguments> (arguments) ...)));
+        return [function](
+                   Class const & object,
+                   Arguments... arguments) -> python_iterator {
+            return python_iterator(
+                range::view(
+                    (object.*function)(std::forward<Arguments>(arguments)...)));
         };
     }
 
-}} // namespace range::python
+}}  // namespace range::python
 
-#endif // RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED
+#endif  // RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED

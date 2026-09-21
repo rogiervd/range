@@ -19,177 +19,211 @@ limitations under the License.
 
 #include "range/element_types.hpp"
 
-#include <type_traits>
-#include <vector>
 #include <list>
 #include <tuple>
+#include <type_traits>
+#include <vector>
 
 #include "meta/vector.hpp"
 
-#include "range/std/vector.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 #include "range/take.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_element_types)
 
-BOOST_AUTO_TEST_CASE (test_element_types_contents) {
+BOOST_AUTO_TEST_CASE(test_element_types_contents)
+{
     {
         typedef std::tuple<> tuple;
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple>>::type,
-            meta::vector<>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple>>::type,
+                meta::vector<>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple &>>::type,
-            meta::vector<>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple &>>::type,
+                meta::vector<>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple const &>>::type,
-            meta::vector<>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple const &>>::type,
+                meta::vector<>>::value,
+            "");
     }
     {
-        typedef std::tuple <int> tuple;
+        typedef std::tuple<int> tuple;
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple>>::type,
-            meta::vector <int &&>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple>>::type,
+                meta::vector<int &&>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple &>>::type,
-            meta::vector <int &>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple &>>::type,
+                meta::vector<int &>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple const &>>::type,
-            meta::vector <int const &>>::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple const &>>::type,
+                meta::vector<int const &>>::value,
+            "");
     }
     {
-        typedef std::tuple <int, int, int const &, float> tuple;
+        typedef std::tuple<int, int, int const &, float> tuple;
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple>>::type,
-            meta::vector <int &&, int &&, int const &, float &&>
-            >::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple>>::type,
+                meta::vector<int &&, int &&, int const &, float &&>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple &>>::type,
-            meta::vector <int &, int &, int const &, float &>
-            >::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple &>>::type,
+                meta::vector<int &, int &, int const &, float &>>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::as_vector <range::element_types <tuple const &>>::type,
-            meta::vector <
-                int const &, int const &, int const &, float const &>
-            >::value, "");
+        static_assert(
+            std::is_same<
+                meta::as_vector<range::element_types<tuple const &>>::type,
+                meta::vector<
+                    int const &, int const &, int const &,
+                    float const &>>::value,
+            "");
     }
 }
 
-BOOST_AUTO_TEST_CASE (test_element_types_behaviour) {
+BOOST_AUTO_TEST_CASE(test_element_types_behaviour)
+{
     {
-        typedef meta::as_vector <range::element_types <std::tuple<>>>::type
-            types;
+        typedef meta::as_vector<range::element_types<std::tuple<>>>::type types;
 
-        static_assert (meta::empty <types>::value, "");
-        static_assert (meta::size <types>::value == 0, "");
+        static_assert(meta::empty<types>::value, "");
+        static_assert(meta::size<types>::value == 0, "");
 
-        static_assert (meta::empty <direction::front, types>::value, "");
-        static_assert (meta::size <direction::front, types>::value == 0, "");
+        static_assert(meta::empty<direction::front, types>::value, "");
+        static_assert(meta::size<direction::front, types>::value == 0, "");
 
-        static_assert (meta::empty <direction::back, types>::value, "");
-        static_assert (meta::size <direction::back, types>::value == 0, "");
+        static_assert(meta::empty<direction::back, types>::value, "");
+        static_assert(meta::size<direction::back, types>::value == 0, "");
     }
     {
-        typedef range::element_types <std::tuple <float>> types;
+        typedef range::element_types<std::tuple<float>> types;
 
-        static_assert (!meta::empty <types>::value, "");
-        static_assert (meta::size <types>::value == 1, "");
+        static_assert(!meta::empty<types>::value, "");
+        static_assert(meta::size<types>::value == 1, "");
 
-        static_assert (!meta::empty <direction::front, types>::value, "");
-        static_assert (meta::size <direction::front, types>::value == 1, "");
+        static_assert(!meta::empty<direction::front, types>::value, "");
+        static_assert(meta::size<direction::front, types>::value == 1, "");
 
-        static_assert (!meta::empty <direction::back, types>::value, "");
-        static_assert (meta::size <direction::back, types>::value == 1, "");
+        static_assert(!meta::empty<direction::back, types>::value, "");
+        static_assert(meta::size<direction::back, types>::value == 1, "");
 
-        static_assert (std::is_same <
-            meta::first <types>::type, float &&>::value, "");
-        static_assert (std::is_same <
-            meta::first <direction::front, types>::type, float &&>::value, "");
-        static_assert (std::is_same <
-            meta::first <direction::back, types>::type, float &&>::value, "");
+        static_assert(
+            std::is_same<meta::first<types>::type, float &&>::value, "");
+        static_assert(
+            std::is_same<
+                meta::first<direction::front, types>::type, float &&>::value,
+            "");
+        static_assert(
+            std::is_same<
+                meta::first<direction::back, types>::type, float &&>::value,
+            "");
 
-        static_assert (meta::empty <meta::drop <types>::type>::value, "");
-        static_assert (meta::empty <
-            meta::drop <direction::front, types>::type>::value, "");
-        static_assert (meta::empty <
-            meta::drop <direction::back, types>::type>::value, "");
+        static_assert(meta::empty<meta::drop<types>::type>::value, "");
+        static_assert(
+            meta::empty<meta::drop<direction::front, types>::type>::value, "");
+        static_assert(
+            meta::empty<meta::drop<direction::back, types>::type>::value, "");
     }
     {
-        typedef range::element_types <std::tuple <float, bool, int>> types;
+        typedef range::element_types<std::tuple<float, bool, int>> types;
 
-        static_assert (!meta::empty <types>::value, "");
-        static_assert (meta::size <types>::value == 3, "");
+        static_assert(!meta::empty<types>::value, "");
+        static_assert(meta::size<types>::value == 3, "");
 
-        static_assert (!meta::empty <direction::front, types>::value, "");
-        static_assert (meta::size <direction::front, types>::value == 3, "");
+        static_assert(!meta::empty<direction::front, types>::value, "");
+        static_assert(meta::size<direction::front, types>::value == 3, "");
 
-        static_assert (!meta::empty <direction::back, types>::value, "");
-        static_assert (meta::size <direction::back, types>::value == 3, "");
+        static_assert(!meta::empty<direction::back, types>::value, "");
+        static_assert(meta::size<direction::back, types>::value == 3, "");
 
-        static_assert (std::is_same <
-            meta::first <types>::type, float &&>::value, "");
-        static_assert (std::is_same <
-            meta::first <direction::front, types>::type, float &&>::value, "");
-        static_assert (std::is_same <
-            meta::first <direction::back, types>::type, int &&>::value, "");
+        static_assert(
+            std::is_same<meta::first<types>::type, float &&>::value, "");
+        static_assert(
+            std::is_same<
+                meta::first<direction::front, types>::type, float &&>::value,
+            "");
+        static_assert(
+            std::is_same<
+                meta::first<direction::back, types>::type, int &&>::value,
+            "");
 
-        static_assert (!meta::empty <meta::drop <types>::type>::value, "");
-        static_assert (meta::empty <meta::drop <
-            direction::front, rime::size_t <3>, types>::type>::value, "");
+        static_assert(!meta::empty<meta::drop<types>::type>::value, "");
+        static_assert(
+            meta::empty<meta::drop<
+                direction::front, rime::size_t<3>, types>::type>::value,
+            "");
 
-        static_assert (std::is_same <
-            meta::first <meta::drop <types>::type>::type, bool &&>::value, "");
+        static_assert(
+            std::is_same<
+                meta::first<meta::drop<types>::type>::type, bool &&>::value,
+            "");
     }
 }
 
-template <class ... Types> struct show_types;
+template <class... Types> struct show_types;
 
 // Used on a homogeneous type, element_types becomes an infinite meta-range.
-BOOST_AUTO_TEST_CASE (test_element_types_homogeneous) {
+BOOST_AUTO_TEST_CASE(test_element_types_homogeneous)
+{
     {
-        typedef range::element_types <std::vector <int> &> types;
+        typedef range::element_types<std::vector<int> &> types;
 
-        static_assert (std::is_same <
-            meta::first <types>::type, int &>::value, "");
-        static_assert (std::is_same <
-            meta::first <meta::drop <types>::type>::type, int &>::value, "");
-        static_assert (std::is_same <
-            meta::first <meta::drop <rime::size_t <34>, types>::type>::type,
-            int &>::value, "");
+        static_assert(std::is_same<meta::first<types>::type, int &>::value, "");
+        static_assert(
+            std::is_same<
+                meta::first<meta::drop<types>::type>::type, int &>::value,
+            "");
+        static_assert(
+            std::is_same<
+                meta::first<meta::drop<rime::size_t<34>, types>::type>::type,
+                int &>::value,
+            "");
 
         // After one call to "drop", the range is turned into a view.
-        typedef meta::drop <types>::type view;
-        static_assert (std::is_same <meta::drop <view>::type, view>::value, "");
+        typedef meta::drop<types>::type view;
+        static_assert(std::is_same<meta::drop<view>::type, view>::value, "");
         // It then becomes heterogeneous.
-        static_assert (std::is_same <
-            meta::drop <view>::type, view>::value, "");
-        static_assert (std::is_same <
-            meta::drop <rime::size_t <3>, view>::type, view>::value, "");
+        static_assert(std::is_same<meta::drop<view>::type, view>::value, "");
+        static_assert(
+            std::is_same<meta::drop<rime::size_t<3>, view>::type, view>::value,
+            "");
     }
     {
-        std::list <int> l;
-        auto v = range::take (l, rime::size_t <2>());
-        typedef range::element_types <decltype (v)> types;
+        std::list<int> l;
+        auto v = range::take(l, rime::size_t<2>());
+        typedef range::element_types<decltype(v)> types;
 
-        static_assert (std::is_same <
-            meta::first <types>::type, int &>::value, "");
-        static_assert (std::is_same <
-            meta::first <meta::drop <types>::type>::type, int &>::value, "");
+        static_assert(std::is_same<meta::first<types>::type, int &>::value, "");
+        static_assert(
+            std::is_same<
+                meta::first<meta::drop<types>::type>::type, int &>::value,
+            "");
 
-        static_assert (!meta::empty <types>::value, "");
-        static_assert (!meta::empty <meta::drop <types>::type>::value, "");
-        static_assert (meta::empty <
-            meta::drop <meta::drop <types>::type>::type>::value, "");
+        static_assert(!meta::empty<types>::value, "");
+        static_assert(!meta::empty<meta::drop<types>::type>::value, "");
+        static_assert(
+            meta::empty<meta::drop<meta::drop<types>::type>::type>::value, "");
     }
 }
 

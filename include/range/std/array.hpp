@@ -28,12 +28,14 @@ This includes \c \<array>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Type, std::size_t Number>
-        struct tag_of_qualified <std::array <Type, Number>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+/// \cond DONT_DOCUMENT
+template <class Type, std::size_t Number>
+struct tag_of_qualified<std::array<Type, Number>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_ARRAY_HPP_INCLUDED
+#endif  // RANGE_STD_ARRAY_HPP_INCLUDED

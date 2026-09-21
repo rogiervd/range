@@ -24,7 +24,9 @@ limitations under the License.
 #include <vector>
 #include <tuple>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/list.hpp"
 #include "range/tuple.hpp"
 #include "range/function_range.hpp"
 

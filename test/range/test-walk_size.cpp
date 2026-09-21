@@ -21,9 +21,8 @@ limitations under the License.
 
 #include "range/core.hpp"
 
-#include "range/std.hpp"
-#include <vector>
-#include <list>
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_walk_size)
 

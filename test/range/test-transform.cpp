@@ -26,7 +26,9 @@ limitations under the License.
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/tuple.hpp"
 #include "range/for_each_macro.hpp"
 
 #include "rime/check/check_equal.hpp"

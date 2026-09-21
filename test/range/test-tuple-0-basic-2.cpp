@@ -22,6 +22,8 @@ limitations under the License.
 #include <tuple>
 #include "range/std/tuple.hpp"
 
+#include "utility/unique_ptr.hpp"
+
 #include "rime/check/check_equal.hpp"
 
 #include "tuple-basic_tests.hpp"
@@ -64,6 +66,11 @@ double convert_to_double (int i) { return double (i); }
 double convert_to_half_double (int i) { return double (i) / 2; }
 
 BOOST_AUTO_TEST_CASE (tuple_funny_types) {
+    // Noncopyable.
+    {
+        tuple <std::unique_ptr <int>> ten (utility::make_unique <int> (10));
+        BOOST_CHECK_EQUAL (*first (ten), 10);
+    }
     // Arrays.
     {
         int a [3] = {7, 77, 777};

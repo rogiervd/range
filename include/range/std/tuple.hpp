@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2015 Rogier van Dalen.
+Copyright 2013, 2015, 2017 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@ limitations under the License.
 /** \file
 Turn heterogeneous containers in std:: into ranges.
 This means: std::tuple and std::pair.
+This includes \<tuple>.
 */
 
 #ifndef RANGE_STD_TUPLE_HPP_INCLUDED
 #define RANGE_STD_TUPLE_HPP_INCLUDED
 
-// It is not obvious how to forward-declare std::get from in libstdc++.
-// So just include the headers.
-// This is an implementation detail and subject to change in future versions.
 #include <utility>
 #include <tuple>
 

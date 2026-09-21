@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ Test the RANGE_FOR_EACH macro.
 #include <iostream>
 #include "range/for_each_macro.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
 #include "range/function_range.hpp"
 
 #include <vector>
@@ -134,7 +134,12 @@ BOOST_AUTO_TEST_CASE (test_example) {
         // "auto &&" binds correctly to all kinds of types: lvalue or rvalue,
         // qualified or not.
                 for (auto && element = range::chop_in_place (v);
-                        !seen; seen = true)
+                        !seen;
+        // ((void) element) is a statement that returns "void".
+        // It prevents warnings about "element" being unused if it is unused.
+        // This happens if you want to execute something n times with:
+        // RANGE_FOR_EACH (_, range::count (n)) { ... }
+                        ((void) element), seen = true)
         // Inner loop, user-provided:
                 {
                     if (element < 0)
@@ -296,6 +301,18 @@ BOOST_AUTO_TEST_CASE (test_macro) {
             if_false_else_executed = true;
         }
         BOOST_CHECK (if_false_else_executed);
+    }
+
+    // The variable name could go unused.
+    {
+        std::size_t count = 0;
+        RANGE_FOR_EACH (_, is)
+            ++ count;
+        BOOST_CHECK_EQUAL (count, is.size());
+        RANGE_FOR_EACH (_, is) {
+            ++ count;
+        }
+        BOOST_CHECK_EQUAL (count, 2 * is.size());
     }
 }
 

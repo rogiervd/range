@@ -24,10 +24,10 @@ limitations under the License.
 #include <boost/mpl/assert.hpp>
 
 #include "range/core.hpp"
-#include "range/std.hpp"
-#include <vector>
-#include <list>
-#include <tuple>
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/tuple.hpp"
+
 #include "rime/check/check_equal.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_find)

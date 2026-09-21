@@ -24,7 +24,8 @@ limitations under the License.
 
 #include "utility/unique_ptr.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 #include "range/function_range.hpp"
 
 #include "range/take.hpp"

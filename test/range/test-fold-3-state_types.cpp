@@ -24,7 +24,8 @@ limitations under the License.
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 using range::fold;
 using range::at_c;

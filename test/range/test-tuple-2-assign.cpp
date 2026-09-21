@@ -22,13 +22,16 @@ limitations under the License.
 #include <string>
 #include <tuple>
 #include <vector>
+#include <memory>
 
 #include <boost/mpl/assert.hpp>
 
+#include "utility/unique_ptr.hpp"
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -47,6 +50,7 @@ using utility::is_assignable;
 
 using utility::tracked_registry;
 using utility::tracked;
+using utility::tracked_counts;
 
 struct source {};
 
@@ -132,6 +136,26 @@ BOOST_AUTO_TEST_CASE (tuple_assign_one) {
         tuple <long> tl (31l);
         tl = t;
         BOOST_CHECK_EQUAL (first (tl), 7l);
+    }
+    tracked_registry r;
+    {
+        tuple <tracked <int>> t (tracked <int> (r, 44));
+
+        auto before = r.counts();
+        tuple <tracked <int>> t_copy (t);
+        BOOST_CHECK_EQUAL (first (t_copy).content(), 44);
+        BOOST_CHECK_EQUAL (r.since (before), utility::copy_count (1));
+
+        before = r.counts();
+        tuple <tracked <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (first (t_moved).content(), 44);
+        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (1));
+    }
+    // Noncopyable
+    {
+        tuple <std::unique_ptr <int>> t (utility::make_unique <int> (66));
+        tuple <std::unique_ptr <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (*first (t_moved), 66);
     }
     {
         int i1 = 80;
@@ -249,14 +273,14 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         tracked <int> ci (c, 45);
         float f = 4.5f;
         tracked <double> cd (c, 6.7);
-        c.check_counts (2, 0, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 0, 0, 0, 0, 0, 0, 0));
 
         tuple <tracked <int> &, float &, tracked <double> &>
             tied (ci, f, cd);
         tuple <tracked <int>, float, tracked <double>>
             saved (ci, f, cd);
 
-        c.check_counts (2, 2, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
 
         // Values in "saved".
         first (saved).content() = 56;
@@ -271,7 +295,7 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (at_c <2> (saved).content(), 10.6);
         BOOST_CHECK_EQUAL (cd.content(), 6.7);
 
-        c.check_counts (2, 2, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
 
         // Assign values to the original objects.
         tied = saved;
@@ -279,7 +303,7 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (f, 7.6f);
         BOOST_CHECK_EQUAL (cd.content(), 10.6);
 
-        c.check_counts (2, 2, 0, 2, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 0, 0, 0, 0));
 
         // Move.
         // First change the values in "saved" so that it's noticeable.
@@ -293,9 +317,10 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
         BOOST_CHECK_EQUAL (cd.content(), 18.45);
 
         // If moveability is exploited, the result is:
-        c.check_counts (2, 2, 0, 2, 2, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 2, 0, 0, 0));
         // Otherwise it would be:
-        // c.check_counts (2, 2, 0, 4, 0, 0, 0, 0);
+        // BOOST_CHECK_EQUAL (c.counts(),
+        //     tracked_counts (2, 2, 0, 4, 0, 0, 0, 0));
     }
     // Check whether the implementation is better than Visual C++'s original
     // implementation of std::pair in handling rvalue references.
@@ -311,10 +336,12 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
 
             typedef tuple <tracked <int> &, tracked <double> &> pair;
             pair p (a1, a2);
-            r.check_counts (4, 0, 0, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (r.counts(),
+                utility::tracked_counts (4, 0, 0, 0, 0, 0, 0, 0));
             // This should copy-assign b1 into a1 and b2 into a2, not move it.
             p = pair (b1, b2);
-            r.check_counts (4, 0, 0, 2, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (r.counts(),
+                utility::tracked_counts (4, 0, 0, 2, 0, 0, 0, 0));
         }
     }
 }

@@ -20,12 +20,15 @@ limitations under the License.
 #include "range/element_types.hpp"
 
 #include <type_traits>
+#include <vector>
 #include <list>
 #include <tuple>
 
 #include "meta/vector.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/tuple.hpp"
 #include "range/take.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_element_types)

@@ -18,7 +18,7 @@ limitations under the License.
 #define RANGE_LAZY_HPP_INCLUDED
 
 #include "meta/vector.hpp"
-#include "meta/count.hpp"
+#include "meta/count_c.hpp"
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"
 
@@ -70,7 +70,7 @@ namespace callable {
         stored_indices_type provides a meta::vector <zero_type, one_type ...>
         for this exact purpose.
         */
-        typedef typename meta::count <sizeof ... (StoredArguments)>::type
+        typedef typename meta::count_c <sizeof ... (StoredArguments)>::type
             stored_indices_type;
 
         /**
@@ -81,13 +81,13 @@ namespace callable {
                 typename std::decay <NewArguments>::type ...> type;
         };
 
-        template <class ... StoredIndices, class ... NewArguments>
+        template <std::size_t ... StoredIndices, class ... NewArguments>
             typename next_type <NewArguments ...>::type
-            add_arguments (meta::vector <StoredIndices ...>,
+            add_arguments (meta::size_t_vector <StoredIndices ...>,
                 NewArguments && ... new_arguments) const
         {
             return typename next_type <NewArguments ...>::type (
-                ::range::at (stored_arguments_, StoredIndices()) ...,
+                ::range::at_c <StoredIndices> (stored_arguments_) ...,
                 std::forward <NewArguments> (new_arguments) ...);
         }
 
@@ -99,14 +99,14 @@ namespace callable {
         : result_of <Callable (Range, StoredArguments const & ...)> {};
 
         template <class Range,
-            class StoredArgumentsTuple, class ... StoredIndices>
+            class StoredArgumentsTuple, std::size_t ... StoredIndices>
         static typename call_result <Range>::type
         call_with (Range && range,
             StoredArgumentsTuple const & stored_arguments,
-            meta::vector <StoredIndices ...>)
+            meta::size_t_vector <StoredIndices ...>)
         {
             return Callable() (std::forward <Range> (range),
-                ::range::at (stored_arguments, StoredIndices()) ...);
+                ::range::at_c <StoredIndices> (stored_arguments) ...);
         }
 
     public:

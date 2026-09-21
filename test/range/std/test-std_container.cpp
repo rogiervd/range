@@ -1,5 +1,5 @@
 /*
-Copyright 2013-2015 Rogier van Dalen.
+Copyright 2013-2015, 2017 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,17 +17,16 @@ limitations under the License.
 #define BOOST_TEST_MODULE test_container_std_adaptor
 #include "utility/test/boost_unit_test.hpp"
 
-#include "range/std/container.hpp"
-
-#include <vector>
-#include <string>
-#include <deque>
-#include <forward_list>
-#include <list>
-#include <set>
-#include <map>
-#include <unordered_set>
-#include <unordered_map>
+#include <range/std/array.hpp>
+#include <range/std/vector.hpp>
+#include <range/std/string.hpp>
+#include <range/std/deque.hpp>
+#include <range/std/forward_list.hpp>
+#include <range/std/list.hpp>
+#include <range/std/set.hpp>
+#include <range/std/map.hpp>
+#include <range/std/unordered_set.hpp>
+#include <range/std/unordered_map.hpp>
 
 #include <type_traits>
 
@@ -73,6 +72,7 @@ using rime::false_type;
 using rime::true_type;
 
 using utility::tracked;
+using utility::tracked_counts;
 
 BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
     std::vector <int> v;
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         // Check the status quo.
         RIME_CHECK_EQUAL (first (c).content(), 7);
         RIME_CHECK_EQUAL (first (c, back).content(), 45);
-        r.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 2, 0, 0, 0, 0, 2));
         auto v = view_once (std::move (c));
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (first (v)), tracked <int> &&>));
@@ -210,11 +210,11 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         // The elements should be moved out.
         tracked <int> i = at (v, 0);
         BOOST_CHECK_EQUAL (i.content(), 7);
-        r.check_counts (2, 0, 3, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 3, 0, 0, 0, 0, 2));
 
         tracked <int> d = at (v, 1);
         BOOST_CHECK_EQUAL (d.content(), 45);
-        r.check_counts (2, 0, 4, 0, 0, 0, 0, 2);
+        BOOST_CHECK_EQUAL (r.counts(), tracked_counts (2, 0, 4, 0, 0, 0, 0, 2));
     }
 }
 
@@ -233,6 +233,20 @@ BOOST_AUTO_TEST_CASE (test_std_list_adaptor) {
     static_assert (!has <callable::seventh (decltype (view))>::value, "");
 
     static_assert (!has <callable::at (decltype (view))>::value, "");
+}
+
+template <std::size_t Number, class Type>
+    void compare_array (std::vector <Type> const & v,
+        std::array <Type, Number> const & a)
+{
+    typedef std::array <Type, Number> array_type;
+
+    BOOST_MPL_ASSERT_NOT ((is_view <array_type>));
+    BOOST_MPL_ASSERT_NOT ((is_homogeneous <array_type>));
+    BOOST_MPL_ASSERT ((is_view <decltype (view (a))>));
+    BOOST_MPL_ASSERT ((is_homogeneous <decltype (view (a)) &>));
+
+    check_equal_behaviour <true_type, true_type, false_type, true_type> (a, v);
 }
 
 template <class Type>
@@ -296,18 +310,23 @@ template <class HasBack, class OtherContainer, class MultiContainer>
 BOOST_AUTO_TEST_CASE (test_other_homogeneous_containers) {
     {
         std::vector <int> v;
+        compare_array <0> (v, {});
         compare_sequence_containers (v);
 
         v.push_back (12);
+        compare_array <1> (v, {{12}});
         compare_sequence_containers (v);
 
         v.push_back (14);
+        compare_array <2> (v, {{12, 14}});
         compare_sequence_containers (v);
 
         v.push_back (17);
+        compare_array <3> (v, {{12, 14, 17}});
         compare_sequence_containers (v);
 
         v.push_back (20);
+        compare_array <4> (v, {{12, 14, 17, 20}});
         compare_sequence_containers (v);
     }
     {

@@ -27,8 +27,10 @@ limitations under the License.
 #include <boost/mpl/assert.hpp>
 
 #include "utility/test/tracked.hpp"
+#include "utility/unique_ptr.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -60,6 +62,7 @@ rime::size_t <4> four;
 
 using utility::tracked_registry;
 using utility::tracked;
+using utility::tracked_counts;
 
 struct source {};
 
@@ -172,7 +175,8 @@ BOOST_AUTO_TEST_CASE (tuple_construct_one_element) {
             BOOST_CHECK_EQUAL (first (t).content(), 5);
             // value_construct, copy, move, copy_assign, move_assign, swap,
             // destruct, destruct_moved
-            c.check_counts (1, 1, 0, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 1, 0, 0, 0, 0, 0, 0));
         }
     }
 
@@ -183,7 +187,13 @@ BOOST_AUTO_TEST_CASE (tuple_construct_one_element) {
             tracked <int> o (c, 7);
             tuple <tracked <int>> t (std::move (o));
             BOOST_CHECK_EQUAL (first (t).content(), 7);
-            c.check_counts (1, 0, 1, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 0, 1, 0, 0, 0, 0, 0));
+        }
+        {
+            auto i = utility::make_unique <int> (7);
+            tuple <std::unique_ptr <int>> t (std::move (i));
+            BOOST_CHECK_EQUAL (*first (t), 7);
         }
     }
 
@@ -346,7 +356,8 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
             tuple <tracked <int>, float, tracked <std::string>> t (
                 tracked <int> (c, 45), .475,
                 tracked <std::string> (c, "Hello"));
-            c.check_counts (2, 0, 2, 0, 0, 0, 0, 2);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (2, 0, 2, 0, 0, 0, 0, 2));
             BOOST_CHECK_EQUAL (first (t).content(), 45);
             BOOST_CHECK_EQUAL (first (t, back).content(), "Hello");
         }
@@ -403,6 +414,38 @@ BOOST_AUTO_TEST_CASE (tuple_construct_more_elements) {
         BOOST_CHECK_EQUAL (first (t2, back), 67);
         i2 = 23;
         BOOST_CHECK_EQUAL (first (t2, back), 23);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (copy_construction) {
+    utility::tracked_registry r;
+    {
+        tuple <tracked <int>, tracked <char>> t (
+            tracked <int> (r, 77), tracked <char> (r, 'c'));
+
+        // Copy-construct.
+        auto before = r.counts();
+        tuple <tracked <int>, tracked <char>> t_copy (t);
+        BOOST_CHECK_EQUAL (first (t_copy).content(), 77);
+        BOOST_CHECK_EQUAL (second (t_copy).content(), 'c');
+        BOOST_CHECK_EQUAL (r.since (before), utility::copy_count (2));
+
+        // Move-construct.
+        before = r.counts();
+        tuple <tracked <int>, tracked <char>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (first (t_moved).content(), 77);
+        BOOST_CHECK_EQUAL (second (t_moved).content(), 'c');
+        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (2));
+    }
+    {
+        // Move-construct from noncopyable.
+        tuple <std::unique_ptr <int>> t (utility::make_unique <int> (55));
+
+        // This causes a compile error:
+        // tuple <std::unique_ptr <int>> t_copy (t);
+
+        tuple <std::unique_ptr <int>> t_moved (std::move (t));
+        BOOST_CHECK_EQUAL (*first (t_moved), 55);
     }
 }
 
@@ -563,9 +606,11 @@ BOOST_AUTO_TEST_CASE (range_to_tuple_conversion_one) {
         tracked_registry c;
         {
             std::tuple <tracked <int>> t (tracked <int> (c, 39));
-            c.check_counts (1, 0, 1, 0, 0, 0, 0, 1);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 0, 1, 0, 0, 0, 0, 1));
             tuple <tracked <int>> t2 (std::move (t));
-            c.check_counts (1, 0, 2, 0, 0, 0, 0, 1);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 0, 2, 0, 0, 0, 0, 1));
         }
     }
     {
@@ -583,9 +628,11 @@ BOOST_AUTO_TEST_CASE (range_to_tuple_conversion_one) {
         {
             std::vector <tracked <int>> v;
             v.push_back (tracked <int> (c, 39));
-            c.check_counts (1, 0, 1, 0, 0, 0, 0, 1);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 0, 1, 0, 0, 0, 0, 1));
             tuple <tracked <int>> t2 (std::move (v));
-            c.check_counts (1, 0, 2, 0, 0, 0, 0, 1);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (1, 0, 2, 0, 0, 0, 0, 1));
         }
     }
 }
@@ -670,9 +717,9 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
     {
         tracked_registry c;
         tuple <tracked <int>> t (tracked <int> (c, 39));
-        c.check_counts (1, 0, 1, 0, 0, 0, 0, 1);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (1, 0, 1, 0, 0, 0, 0, 1));
         tuple <tracked <int>> t2 (std::move (t));
-        c.check_counts (1, 0, 2, 0, 0, 0, 0, 1);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (1, 0, 2, 0, 0, 0, 0, 1));
     }
 
     // More than one element.
@@ -682,16 +729,20 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
             tracked <int> ci (c, 50);
             tracked <float> cf (c, 23.);
             tuple <tracked <int>, char, tracked <float>> t (ci, 'Z', cf);
-            c.check_counts (2, 2, 0, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
 
             tuple <tracked <void>, int, tracked <void>> t2 (t);
-            c.check_counts (2, 4, 0, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (2, 4, 0, 0, 0, 0, 0, 0));
             BOOST_CHECK_EQUAL (at_c <1> (t2), int ('Z'));
 
             tuple <tracked <void>, int, tracked <void>> t3 (std::move (t));
-            c.check_counts (2, 4, 2, 0, 0, 0, 0, 0);
+            BOOST_CHECK_EQUAL (c.counts(),
+                tracked_counts (2, 4, 2, 0, 0, 0, 0, 0));
             // If moveability was not exploited, it would be this:
-            // c.check_counts (2, 6, 0, 0, 0, 0, 0, 0);
+            // BOOST_CHECK_EQUAL (c.counts(),
+            //     tracked_counts (2, 6, 0, 0, 0, 0, 0, 0));
             BOOST_CHECK_EQUAL (at_c <1> (t3), int ('Z'));
         }
     }
@@ -710,7 +761,7 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
         tuple_type t1 (7, false, f, d, std::move (o), l);
         // For d, and o, the object has not been moved: only the reference has
         // been copied.
-        c.check_counts (3, 1, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (3, 1, 0, 0, 0, 0, 0, 0));
 
         tuple_type t2 (t1);
         RIME_CHECK_EQUAL (first (t2), 7);
@@ -721,7 +772,7 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
         RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <4>())).content(), 25);
         RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <5>())).content(), 27l);
 
-        c.check_counts (3, 2, 0, 0, 0, 0, 0, 0);
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (3, 2, 0, 0, 0, 0, 0, 0));
 
         f = -3.75;
         RIME_CHECK_EQUAL (first (drop (t2, rime::size_t <2>())), -3.75f);
@@ -746,8 +797,9 @@ BOOST_AUTO_TEST_CASE (tuple_to_tuple_conversion_two) {
         RIME_CHECK_EQUAL (first (drop (t3, rime::size_t <5>())).content(), 27l);
 
         // If moveability was not exploited, it would be this:
-        // c.check_counts (3, 3, 0, 0, 0, 0, 0, 0);
-        c.check_counts (3, 2, 1, 0, 0, 0, 0, 0);
+        // BOOST_CHECK_EQUAL (c.counts(),
+        //     tracked_counts (3, 3, 0, 0, 0, 0, 0, 0));
+        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (3, 2, 1, 0, 0, 0, 0, 0));
     }
 }
 

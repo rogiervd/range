@@ -29,7 +29,9 @@ limitations under the License.
 
 #include "rime/check/check_equal.hpp"
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/tuple.hpp"
 
 #include "weird_count.hpp"
 #include "unique_range.hpp"

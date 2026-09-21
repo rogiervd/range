@@ -23,14 +23,18 @@ limitations under the License.
 #include <string>
 #include <vector>
 #include <list>
+#include <memory>
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/list.hpp"
+#include "range/std/tuple.hpp"
 #include "range/take.hpp"
 
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
+#include "utility/unique_ptr.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -54,10 +58,12 @@ using range::third;
 
 using utility::tracked_registry;
 using utility::tracked;
+using utility::tracked_counts;
 
 BOOST_AUTO_TEST_SUITE(test_range_tuple)
 
 BOOST_AUTO_TEST_CASE (test_range_make_tuple) {
+    tracked_registry r;
     {
         auto t = make_tuple();
         BOOST_MPL_ASSERT ((std::is_same <decltype (t), range::tuple<>>));
@@ -81,10 +87,21 @@ BOOST_AUTO_TEST_CASE (test_range_make_tuple) {
         BOOST_CHECK_EQUAL (first (t), 7);
     }
     {
-        int i = 9;
+        tracked <int> i (r, 9);
+        auto before = r.counts();
         auto t = make_tuple (std::move (i));
-        BOOST_MPL_ASSERT ((std::is_same <decltype (t), range::tuple <int>>));
-        BOOST_CHECK_EQUAL (first (t), 9);
+        BOOST_MPL_ASSERT ((std::is_same <decltype (t),
+            range::tuple <tracked <int>>>));
+        BOOST_CHECK_EQUAL (first (t).content(), 9);
+        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (1));
+    }
+    // Noncopyable: must move.
+    {
+        auto i = utility::make_unique <int> (11);
+        auto t = make_tuple (std::move (i));
+        BOOST_MPL_ASSERT ((std::is_same <decltype (t),
+            range::tuple <std::unique_ptr <int>>>));
+        BOOST_CHECK_EQUAL (*first (t), 11);
     }
     // More elements.
     {
@@ -630,10 +647,12 @@ BOOST_AUTO_TEST_CASE (test_range_tuple_swap) {
             tracked <int> (c, 10), 'b',
             tracked <float> (c, 12.5f));
 
-        c.check_counts (4, 0, 4, 0, 0, 0, 0, 4);
+        BOOST_CHECK_EQUAL (c.counts(),
+            utility::tracked_counts (4, 0, 4, 0, 0, 0, 0, 4));
 
         swap (t1, t2);
-        c.check_counts (4, 0, 4, 0, 0, 2, 0, 4);
+        BOOST_CHECK_EQUAL (c.counts(),
+            utility::tracked_counts (4, 0, 4, 0, 0, 2, 0, 4));
 
         BOOST_CHECK_EQUAL (first (t1).content(), 10);
         BOOST_CHECK_EQUAL (at_c <1> (t1), 'b');

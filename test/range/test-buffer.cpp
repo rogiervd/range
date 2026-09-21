@@ -23,7 +23,7 @@ limitations under the License.
 
 #include "range/count.hpp"
 #include "range/for_each_macro.hpp"
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 
 #include "unique_range.hpp"
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE (tracked) {
                 // Check the number of elements alive at each time.
                 // This should be the size of v plus the size of the buffer.
                 // Only one buffer should be alive at any time.
-                BOOST_CHECK (r.alive_count() <= int (size + 7));
+                BOOST_CHECK (r.counts().alive_count() <= int (size + 7));
             }
             BOOST_CHECK (empty (b));
         }

@@ -3,7 +3,6 @@ This test builds four Python extensions, each tested with a .py test.
 """
 
 load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
-load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 
 test_names = [
@@ -17,11 +16,11 @@ test_names = [
     nanobind_extension(
         name = test_name + "_example",
         srcs = [test_name + "_example.cpp"],
+        local_defines = ["NB_ABORT_ON_LEAK"],
         deps = [
             "@nanobind_bazel//:nanobind",
             "@range",
         ],
-        local_defines = ["NB_ABORT_ON_LEAK"]
     )
     for test_name in test_names
 ]

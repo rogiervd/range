@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 1);
+        BOOST_CHECK_EQUAL (size (acc), 1u);
         BOOST_CHECK_EQUAL (first (acc), 0);
         BOOST_CHECK (empty (drop (acc)));
     }
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
         // properly when necessary.
         auto acc = scan (0, one_time_view (v), plus());
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 2);
+        BOOST_CHECK_EQUAL (size (acc), 2u);
         BOOST_CHECK_EQUAL (first (acc), 0);
 
         auto acc2 = drop (std::move (acc));
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
     {
         auto acc = scan (0, v, plus());
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 3);
+        BOOST_CHECK_EQUAL (size (acc), 3u);
         BOOST_CHECK_EQUAL (first (acc), 0);
 
         auto chopped2 = chop (acc);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
 
         // chop_in_place.
         chop_in_place (acc);
-        BOOST_CHECK_EQUAL (size (acc), 2);
+        BOOST_CHECK_EQUAL (size (acc), 2u);
         BOOST_CHECK_EQUAL (first (acc), 1);
     }
     // The same, but from the back.
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
             rime::true_);
 
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 3);
+        BOOST_CHECK_EQUAL (size (acc), 3u);
         BOOST_CHECK_EQUAL (first (acc), 0);
 
         auto chopped2 = chop (acc);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE (test_scan_homogeneous) {
 
         // chop_in_place.
         chop_in_place (acc);
-        BOOST_CHECK_EQUAL (size (acc), 2);
+        BOOST_CHECK_EQUAL (size (acc), 2u);
         BOOST_CHECK_EQUAL (first (acc), 2);
     }
 
@@ -278,15 +278,15 @@ BOOST_AUTO_TEST_CASE (scan_unique_range) {
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 3);
+        BOOST_CHECK_EQUAL (size (acc), 3u);
 
         auto first = chop_in_place (acc);
         RIME_CHECK_EQUAL (first, 0);
-        BOOST_CHECK_EQUAL (size (acc), 2);
+        BOOST_CHECK_EQUAL (size (acc), 2u);
 
         auto chopped = chop (std::move (acc));
         RIME_CHECK_EQUAL (chopped.first(), 1);
-        BOOST_CHECK_EQUAL (size (chopped.rest()), 1);
+        BOOST_CHECK_EQUAL (size (chopped.rest()), 1u);
 
         auto acc3 = drop (chopped.move_rest());
         BOOST_CHECK (empty (acc3));

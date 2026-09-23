@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
         BOOST_MPL_ASSERT_NOT ((never_empty <decltype (v), direction::front>));
 
         BOOST_CHECK (empty (v));
-        BOOST_CHECK_EQUAL (size (v), 0);
+        BOOST_CHECK_EQUAL (size (v), 0u);
 
         BOOST_MPL_ASSERT_NOT ((has <callable::chop_in_place (decltype (v))>));
         BOOST_MPL_ASSERT_NOT ((
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
 
     {
         BOOST_CHECK (!empty (v));
-        BOOST_CHECK_EQUAL (size (v), 1);
+        BOOST_CHECK_EQUAL (size (v), 1u);
 
         BOOST_CHECK_EQUAL (first (v), 5);
         BOOST_CHECK_EQUAL (first (v, front), 5);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE (test_std_vector_adaptor) {
 
     {
         BOOST_CHECK (!empty (v));
-        BOOST_CHECK_EQUAL (size (v), 3);
+        BOOST_CHECK_EQUAL (size (v), 3u);
         BOOST_CHECK_EQUAL (first (v), 5);
         BOOST_CHECK (!empty (drop (v)));
         BOOST_CHECK (empty (drop (v, 3)));

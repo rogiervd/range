@@ -20,10 +20,12 @@ The functions defined here are exported to Python, and used by
 test-python_range.py.
 */
 
-#include <string>
-
+// Include Python headers before C++ headers
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
+
+#include <string>
+
 
 #include "range/python/range.hpp"
 

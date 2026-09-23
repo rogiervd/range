@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         // In theory this could be known to be 0 at compile time.
         // It is not currently, and it is not clear that that is overly
         // valuable anyway.
-        BOOST_CHECK_EQUAL (size (z), 0);
+        BOOST_CHECK_EQUAL (size (z), 0u);
     }
     {
         std::tuple <int> t;

@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         std::tuple <double, std::string> t (4.5, "");
         auto z = zip (v, t);
         BOOST_CHECK (!empty (z));
-        BOOST_CHECK_EQUAL (size (z), 1);
+        BOOST_CHECK_EQUAL (size (z), 1u);
         RIME_CHECK_EQUAL (first (first (z)), 5);
         RIME_CHECK_EQUAL (second (first (z)), 4.5);
         // Only known at run-time that this is empty.
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         std::tuple <double, std::string> t (27.5, "Test");
         auto z = zip (t, v);
 
-        BOOST_CHECK_EQUAL (size (z), 2);
+        BOOST_CHECK_EQUAL (size (z), 2u);
 
         RIME_CHECK_EQUAL (first (first (z)), 27.5);
         RIME_CHECK_EQUAL (first (second (z)), std::string ("Test"));

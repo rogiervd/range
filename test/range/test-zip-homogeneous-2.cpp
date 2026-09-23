@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
         BOOST_CHECK (range::empty (z));
         BOOST_CHECK (range::empty (z, range::front));
 
-        BOOST_CHECK_EQUAL (range::size (z), 0);
-        BOOST_CHECK_EQUAL (range::size (z, range::front), 0);
+        BOOST_CHECK_EQUAL (range::size (z), 0u);
+        BOOST_CHECK_EQUAL (range::size (z, range::front), 0u);
 
         static_assert (has <callable::drop (decltype (z))>::value, "");
         static_assert (has <callable::drop (decltype (z), direction::front)
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
         auto first_element = first (z);
 
-        BOOST_CHECK_EQUAL (range::size (z), 1);
+        BOOST_CHECK_EQUAL (range::size (z), 1u);
 
         BOOST_CHECK_EQUAL (first (first_element), 1);
         BOOST_CHECK_EQUAL (second (first_element), 2.5);
@@ -193,10 +193,10 @@ BOOST_AUTO_TEST_CASE (homogeneous) {
 
         auto first_element = first (z);
 
-        BOOST_CHECK_EQUAL (range::size (first (z.underlying())), 3);
-        BOOST_CHECK_EQUAL (range::size (second (z.underlying())), 4);
+        BOOST_CHECK_EQUAL (range::size (first (z.underlying())), 3u);
+        BOOST_CHECK_EQUAL (range::size (second (z.underlying())), 4u);
 
-        BOOST_CHECK_EQUAL (range::size (z), 3);
+        BOOST_CHECK_EQUAL (range::size (z), 3u);
 
         BOOST_CHECK_EQUAL (first (first_element), 1);
         BOOST_CHECK_EQUAL (second (first_element), 2.5);

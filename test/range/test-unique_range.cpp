@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         // Run-time.
         BOOST_MPL_ASSERT ((never_empty <decltype (view), direction::front>));
-        BOOST_CHECK_EQUAL (size (view), 2);
+        BOOST_CHECK_EQUAL (size (view), 2u);
         BOOST_CHECK_EQUAL (first (view), 5);
 
         auto view2 = drop (std::move (view));

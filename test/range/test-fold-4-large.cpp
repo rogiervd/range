@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE (test_fold_non_assignable) {
     std::vector <non_assignable> v (element_num, non_assignable (1));
 
     BOOST_CHECK_EQUAL (
-        fold (non_assignable (0), v, plus()).i, element_num);
+        fold (non_assignable (0), v, plus()).i, int(element_num));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

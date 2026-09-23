@@ -18,9 +18,9 @@ build --cxxopt=-Wall
 # GCC Configuration
 build:gcc --repo_env=CC=gcc
 
-# Clang Configuration using your custom suite
-build:clang --crosstool_top=//toolchain:clang_suite
-build:clang --compiler=clang
+# Clang Configuration
+build:clang --repo_env=CC=clang
+build:clang --repo_env=CXX=clang++
 
 # Configuration for builds with address sanitiser.
 # This can be selected with

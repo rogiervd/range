@@ -13,6 +13,8 @@ common --registry https://bcr.bazel.build/
 # TODO does this work on Windows?
 build --cxxopt=-std=c++17
 build --cxxopt=-Werror
+# But ignore warnings in external dependencies.
+build --per_file_copt=external/.*@-Wno-error
 build --cxxopt=-Wall
 
 # GCC Configuration

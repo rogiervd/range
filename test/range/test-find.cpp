@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE (test_range_find_short_circuit) {
     std::vector <int> v (4, 5);
     {
         auto result = find (v, c);
-        BOOST_CHECK_EQUAL (size (result), 2);
+        BOOST_CHECK_EQUAL (size (result), 2u);
         BOOST_CHECK_EQUAL (c.current(), 0);
     }
 

@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE range_test_less_lexicographical_heterogeneous
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/less_lexicographical.hpp"
 

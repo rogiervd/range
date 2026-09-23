@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_make_any_range
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/any_range.hpp"
 

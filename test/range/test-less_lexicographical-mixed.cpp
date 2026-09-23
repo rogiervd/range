@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE range_test_less_lexicographical_mixed
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/less_lexicographical.hpp"
 
@@ -23,8 +23,6 @@ limitations under the License.
 #include <vector>
 #include <tuple>
 #include <string>
-
-#include "utility/config.hpp"
 
 #include "range/std/vector.hpp"
 #include "range/std/tuple.hpp"

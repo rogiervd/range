@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_iterator_range
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/iterator_range.hpp"
 
@@ -823,7 +823,7 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
 
         first (drop (b, back), back) = 123.4;
         BOOST_CHECK_EQUAL (
-            *boost::prior (boost::prior (bidirectional_container.end())),
+            *std::prev (std::prev (bidirectional_container.end())),
             123.4);
 
         // Spot checks on forward_type.
@@ -840,7 +840,7 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_range_dynamic) {
         BOOST_CHECK (empty (drop (drop (drop (drop (f))))));
 
         first (drop (f)) = 'a';
-        BOOST_CHECK_EQUAL (*boost::next (forward_container.begin()), 'a');
+        BOOST_CHECK_EQUAL (*std::next (forward_container.begin()), 'a');
 
         // Check assignable without changing original container.
         random_access_container_type random_access_container_2 (

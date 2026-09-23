@@ -21,7 +21,7 @@ It is therefore quite thorough.
 */
 
 #define BOOST_TEST_MODULE test_range_member_view
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/member_view.hpp"
 

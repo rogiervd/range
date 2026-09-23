@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE (test_macro) {
         sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 16);
+        BOOST_CHECK_EQUAL (sum, 16u);
     }
 
     // Function that returns a reference.
@@ -266,12 +266,12 @@ BOOST_AUTO_TEST_CASE (test_macro) {
         size_t sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer_reference())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 15);
+        BOOST_CHECK_EQUAL (sum, 15u);
 
         sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer_reference())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 20);
+        BOOST_CHECK_EQUAL (sum, 20u);
     }
 
     // Const-ness

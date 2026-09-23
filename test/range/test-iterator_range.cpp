@@ -972,7 +972,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     BOOST_CHECK (v.begin() == ir2.begin());
     BOOST_CHECK (v.end() == ir2.end());
 
-    BOOST_CHECK_EQUAL (size (ir2), 3);
+    BOOST_CHECK_EQUAL (size (ir2), 3u);
     BOOST_CHECK_EQUAL (first (ir2), 4);
     BOOST_CHECK_EQUAL (at (ir2, 1), 7);
     BOOST_CHECK_EQUAL (at (ir2, 2), 27);
@@ -981,7 +981,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     auto initializer_list = {6, 32};
     auto ilir = range::make_iterator_range (initializer_list);
 
-    BOOST_CHECK_EQUAL (size (ilir), 2);
+    BOOST_CHECK_EQUAL (size (ilir), 2u);
     BOOST_CHECK_EQUAL (first (ilir), 6);
     BOOST_CHECK_EQUAL (at (ilir, 1), 32);
 #endif

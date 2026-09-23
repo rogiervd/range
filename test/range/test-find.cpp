@@ -125,11 +125,11 @@ BOOST_AUTO_TEST_CASE (test_range_find_homogeneous) {
     {
         // Return the size if non-empty, or end_marker() if empty.
         auto result = find (v, less_than_4, size, return_end_marker());
-        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 1);
+        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 1u);
     }
     {
         auto result = find (v, back, less_than_4, size, return_end_marker());
-        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 2);
+        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 2u);
     }
 
     // With actors.

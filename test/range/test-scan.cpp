@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE (scan_unique_range) {
         static_assert (is_homogeneous <decltype (acc)>::value, "");
 
         RIME_CHECK_EQUAL (empty (acc), false);
-        BOOST_CHECK_EQUAL (size (acc), 1);
+        BOOST_CHECK_EQUAL (size (acc), 1u);
 
 
         static_assert (has <callable::first (decltype (acc) &&)>::value, "");

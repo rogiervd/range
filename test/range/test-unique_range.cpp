@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_unique_range
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "unique_range.hpp"
 
@@ -134,35 +134,35 @@ BOOST_AUTO_TEST_CASE (vector) {
 
         // Run-time.
         BOOST_CHECK (!empty (view));
-        BOOST_CHECK_EQUAL (size (view), 3);
+        BOOST_CHECK_EQUAL (size (view), 3u);
         BOOST_CHECK_EQUAL (first (view), 5);
 
         view = drop (std::move (view));
 
         BOOST_CHECK (!empty (view));
-        BOOST_CHECK_EQUAL (size (view), 2);
+        BOOST_CHECK_EQUAL (size (view), 2u);
         BOOST_CHECK_EQUAL (first (view), 6);
 
         // Check that you can call "empty", "size", and "first" on these all day
         // without invalidating the object.
         BOOST_CHECK (!empty (std::move (view)));
         BOOST_CHECK (!empty (std::move (view)));
-        BOOST_CHECK_EQUAL (size (std::move (view)), 2);
-        BOOST_CHECK_EQUAL (size (std::move (view)), 2);
+        BOOST_CHECK_EQUAL (size (std::move (view)), 2u);
+        BOOST_CHECK_EQUAL (size (std::move (view)), 2u);
         BOOST_CHECK_EQUAL (first (std::move (view)), 6);
         BOOST_CHECK_EQUAL (first (std::move (view)), 6);
 
         chop_in_place (view);
 
         BOOST_CHECK (!empty (view));
-        BOOST_CHECK_EQUAL (size (view), 1);
+        BOOST_CHECK_EQUAL (size (view), 1u);
         BOOST_CHECK_EQUAL (first (view), 7);
 
         auto chopped = chop (std::move (view));
 
         BOOST_CHECK_EQUAL (chopped.first(), 7);
         BOOST_CHECK (empty (chopped.rest()));
-        BOOST_CHECK_EQUAL (size (chopped.rest()), 0);
+        BOOST_CHECK_EQUAL (size (chopped.rest()), 0u);
     }
 
     // Test one_time_view.
@@ -252,19 +252,19 @@ BOOST_AUTO_TEST_CASE (vector) {
 
         // Run-time.
         BOOST_CHECK (!empty (view));
-        BOOST_CHECK_EQUAL (size (view), 3);
+        BOOST_CHECK_EQUAL (size (view), 3u);
 
         auto element = chop_in_place (view);
 
         BOOST_CHECK (!empty (view));
-        BOOST_CHECK_EQUAL (size (view), 2);
+        BOOST_CHECK_EQUAL (size (view), 2u);
         BOOST_CHECK_EQUAL (element, 5);
 
         auto chopped = chop (std::move (view));
 
         BOOST_CHECK_EQUAL (chopped.first(), 6);
         BOOST_CHECK (!empty (chopped.rest()));
-        BOOST_CHECK_EQUAL (size (chopped.rest()), 1);
+        BOOST_CHECK_EQUAL (size (chopped.rest()), 1u);
 
         // You can only call "first" by moving.
         BOOST_CHECK_EQUAL (first (chopped.move_rest()), 7);
@@ -362,13 +362,13 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         // Run-time.
         BOOST_MPL_ASSERT ((never_empty <decltype (view), direction::front>));
-        BOOST_CHECK_EQUAL (size (view), 2);
+        BOOST_CHECK_EQUAL (size (view), 2u);
         BOOST_CHECK_EQUAL (first (view), 5);
 
         auto view2 = drop (std::move (view));
 
         BOOST_MPL_ASSERT ((never_empty <decltype (view2), direction::front>));
-        BOOST_CHECK_EQUAL (size (view2), 1);
+        BOOST_CHECK_EQUAL (size (view2), 1u);
         BOOST_CHECK_EQUAL (first (view2), 6);
 
         auto chopped = chop (std::move (view2));
@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE (tuple) {
         BOOST_CHECK_EQUAL (chopped.first(), 6);
         BOOST_MPL_ASSERT ((
             always_empty <decltype (chopped.rest()), direction::front>));
-        BOOST_CHECK_EQUAL (size (chopped.rest()), 0);
+        BOOST_CHECK_EQUAL (size (chopped.rest()), 0u);
     }
 
     // Test one_time_view.
@@ -466,21 +466,21 @@ BOOST_AUTO_TEST_CASE (tuple) {
 
         // Run-time.
         BOOST_MPL_ASSERT ((never_empty <decltype (view), direction::front>));
-        BOOST_CHECK_EQUAL (size (view), 2);
+        BOOST_CHECK_EQUAL (size (view), 2u);
 
         auto chopped1 = chop (std::move (view));
 
         BOOST_CHECK_EQUAL (chopped1.first(), 5);
         BOOST_MPL_ASSERT ((
             never_empty <decltype (chopped1.rest()), direction::front>));
-        BOOST_CHECK_EQUAL (size (chopped1.rest()), 1);
+        BOOST_CHECK_EQUAL (size (chopped1.rest()), 1u);
 
         auto chopped2 = chop (chopped1.move_rest());
 
         BOOST_CHECK_EQUAL (chopped2.first(), 6);
         BOOST_MPL_ASSERT ((
             always_empty <decltype (chopped2.rest()), direction::front>));
-        BOOST_CHECK_EQUAL (size (chopped2.rest()), 0);
+        BOOST_CHECK_EQUAL (size (chopped2.rest()), 0u);
     }
 }
 

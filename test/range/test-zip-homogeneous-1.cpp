@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_zip
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/zip.hpp"
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE (example) {
         ++ count;
     }
 
-    BOOST_CHECK_EQUAL (count, 2);
+    BOOST_CHECK_EQUAL (count, 2u);
 
     BOOST_CHECK_EQUAL (first (vi), 5);
     BOOST_CHECK_EQUAL (second (vi), 6);

@@ -1,0 +1,22 @@
+# Define the tests.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+        ],
+        deps = [
+            "//:range",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-fold_result",
+        "test-meta_is_linear_subset",
+        "test-underlying",
+    ]
+]

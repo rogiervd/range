@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_for_each
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/for_each.hpp"
 
@@ -122,14 +122,14 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple<> t;
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 0);
+        BOOST_CHECK_EQUAL (c.elements.size(), 0u);
     }
     // Tuple with 1 elements.
     {
         tuple <double> t (87.5);
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 1);
+        BOOST_CHECK_EQUAL (c.elements.size(), 1u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements[0]), 87.5);
     }
     // Tuple with 2 elements.
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple <double, short> t (87.5, 43);
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 2);
+        BOOST_CHECK_EQUAL (c.elements.size(), 2u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
     }
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple <double, short, bool> const t (87.5, 43, true);
         collect_any c;
         for_each (t, range::back, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 3);
+        BOOST_CHECK_EQUAL (c.elements.size(), 3u);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [0]), true);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [2]), 87.5);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple <double, short, bool, int> t (87.5, 43, true, -5);
         collect_any c;
         for_each (t, range::front, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 4);
+        BOOST_CHECK_EQUAL (c.elements.size(), 4u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [2]), true);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple <double, short, bool, int, unsigned> t (87.5, 43, true, -5, 900u);
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 5);
+        BOOST_CHECK_EQUAL (c.elements.size(), 5u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [2]), true);
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
             t (87.5, 43, true, -5, 900u, 30u, 4.5, 'A');
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 8);
+        BOOST_CHECK_EQUAL (c.elements.size(), 8u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [2]), true);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
             t (87.5, 43, true, -5, 900u, 30u, 4.5, 'A', 'q');
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 9);
+        BOOST_CHECK_EQUAL (c.elements.size(), 9u);
         BOOST_CHECK_EQUAL (boost::any_cast <double> (c.elements [0]), 87.5);
         BOOST_CHECK_EQUAL (boost::any_cast <short> (c.elements [1]), 43);
         BOOST_CHECK_EQUAL (boost::any_cast <bool> (c.elements [2]), true);

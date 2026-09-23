@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_hash_range
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/hash_range.hpp"
 
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE (test_range_hash_homogeneous) {
         std::size_t seed = 27;
 
         hash_range_combine (v, range::front, seed);
-        BOOST_CHECK_EQUAL (seed, 27);
+        BOOST_CHECK_EQUAL (seed, 27u);
 
         hash_range_combine (v, seed);
-        BOOST_CHECK_EQUAL (seed, 27);
+        BOOST_CHECK_EQUAL (seed, 27u);
     }
 
     v.push_back (7.5);

@@ -19,7 +19,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_fold_large
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/fold.hpp"
 
@@ -79,14 +79,14 @@ BOOST_AUTO_TEST_CASE (test_fold_homogeneous_stack_overflow) {
     std::size_t const element_num = 300000;
 
     std::vector <int> v (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (0, v, plus()), element_num);
+    BOOST_CHECK_EQUAL (fold (0, v, plus()), int(element_num));
 
     std::list <int> l (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (0, l, plus()), element_num);
+    BOOST_CHECK_EQUAL (fold (0, l, plus()), int(element_num));
 
     {
         auto result = fold (char (0), v, settling_plus());
-        BOOST_CHECK_EQUAL (rime::get <int> (result), element_num);
+        BOOST_CHECK_EQUAL (rime::get <int> (result), int(element_num));
     }
 }
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE (test_fold_non_assignable) {
     std::vector <non_assignable> v (element_num, non_assignable (1));
 
     BOOST_CHECK_EQUAL (
-        fold (non_assignable (0), v, plus()).i, element_num);
+        fold (non_assignable (0), v, plus()).i, int(element_num));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

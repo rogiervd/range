@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_zip_heterogeneous
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/zip.hpp"
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         // In theory this could be known to be 0 at compile time.
         // It is not currently, and it is not clear that that is overly
         // valuable anyway.
-        BOOST_CHECK_EQUAL (size (z), 0);
+        BOOST_CHECK_EQUAL (size (z), 0u);
     }
     {
         std::tuple <int> t;
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE (homogeneous_and_heterogeneous) {
         std::tuple <double> t (4.5);
         auto z = zip (v, t);
         BOOST_CHECK (!empty (z));
-        BOOST_CHECK_EQUAL (size (z), 1);
+        BOOST_CHECK_EQUAL (size (z), 1u);
         RIME_CHECK_EQUAL (first (first (z)), 5);
         RIME_CHECK_EQUAL (second (first (z)), 4.5);
         // It is known at compile-time that t is empty.

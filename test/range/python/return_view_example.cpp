@@ -20,14 +20,15 @@ The functions defined here are exported to Python, and used by
 test-return_view.py.
 */
 
+// Include Python headers before C++ headers
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+
 #include "range/python/return_view.hpp"
 
 #include <vector>
 
 #include <string>
-
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
 
 #include "range/count.hpp"
 #include "range/function_range.hpp"

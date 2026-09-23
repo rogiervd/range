@@ -20,14 +20,16 @@ The functions defined here are exported to Python, and used by
 test-python_range.py.
 */
 
+// Include Python headers before C++ headers
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/string.h>
+
 #include "range/python/iterator.hpp"
 
 #include <list>
 
 #include <string>
 
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
 
 #include <boost/optional.hpp>
 

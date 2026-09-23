@@ -21,13 +21,14 @@ Allow interaction with Python iterables.
 #ifndef RANGE_PYTHON_PYTHON_RANGE_HPP_INCLUDED
 #define RANGE_PYTHON_PYTHON_RANGE_HPP_INCLUDED
 
+// Include Python headers before C++ headers
+#include <nanobind/nanobind.h>
+
 #include <cassert>
 #include <cstdint>
 #include <optional>
 #include <type_traits>
 #include <utility>
-
-#include <nanobind/nanobind.h>
 
 #include "range/core.hpp"
 

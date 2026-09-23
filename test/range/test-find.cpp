@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #define BOOST_TEST_MODULE test_range_find
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/find.hpp"
 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE (test_range_find_homogeneous) {
     {
         auto result = find (v, back, less_than_4);
         BOOST_CHECK (!empty (result));
-        BOOST_CHECK_EQUAL (size (result), 2);
+        BOOST_CHECK_EQUAL (size (result), 2u);
         BOOST_CHECK_EQUAL (first (result, front), 5);
         BOOST_CHECK_EQUAL (first (result, back), 3);
     }
@@ -125,11 +125,11 @@ BOOST_AUTO_TEST_CASE (test_range_find_homogeneous) {
     {
         // Return the size if non-empty, or end_marker() if empty.
         auto result = find (v, less_than_4, size, return_end_marker());
-        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 1);
+        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 1u);
     }
     {
         auto result = find (v, back, less_than_4, size, return_end_marker());
-        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 2);
+        BOOST_CHECK_EQUAL (rime::get <std::size_t> (result), 2u);
     }
 
     // With actors.
@@ -173,12 +173,12 @@ BOOST_AUTO_TEST_CASE (test_range_find_homogeneous) {
 
     {
         auto result = find (v_minus_one, less_than_four);
-        BOOST_CHECK_EQUAL (size (result), 20);
+        BOOST_CHECK_EQUAL (size (result), 20u);
         BOOST_CHECK_EQUAL (&first (result), &v_minus_one.front());
     }
     {
         auto result = find (v_minus_one, back, less_than_four);
-        BOOST_CHECK_EQUAL (size (result, back), 20);
+        BOOST_CHECK_EQUAL (size (result, back), 20u);
         BOOST_CHECK_EQUAL (&first (result, back), &v_minus_one.back());
     }
 }
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE (test_range_find_short_circuit) {
     std::vector <int> v (4, 5);
     {
         auto result = find (v, c);
-        BOOST_CHECK_EQUAL (size (result), 2);
+        BOOST_CHECK_EQUAL (size (result), 2u);
         BOOST_CHECK_EQUAL (c.current(), 0);
     }
 

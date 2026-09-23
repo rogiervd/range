@@ -19,7 +19,7 @@ Test the RANGE_FOR_EACH macro.
 */
 
 #define BOOST_TEST_MODULE test_range_for_each_macro
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include <iostream>
 #include "range/for_each_macro.hpp"
@@ -248,12 +248,12 @@ BOOST_AUTO_TEST_CASE (test_macro) {
             // So its elements should be lvalues.
             static_assert (std::is_reference <decltype (i)>::value, "");
         }
-        BOOST_CHECK_EQUAL (sum, 12);
+        BOOST_CHECK_EQUAL (sum, 12u);
 
         sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 16);
+        BOOST_CHECK_EQUAL (sum, 16u);
     }
 
     // Function that returns a reference.
@@ -266,12 +266,12 @@ BOOST_AUTO_TEST_CASE (test_macro) {
         size_t sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer_reference())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 15);
+        BOOST_CHECK_EQUAL (sum, 15u);
 
         sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer_reference())
             sum += i;
-        BOOST_CHECK_EQUAL (sum, 20);
+        BOOST_CHECK_EQUAL (sum, 20u);
     }
 
     // Const-ness

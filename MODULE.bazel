@@ -6,7 +6,7 @@ module(
 bazel_dep(name = "rules_cc", version = "0.2.22")
 bazel_dep(name = "meta", version = "1.1.1")
 bazel_dep(name = "utility", version = "1.0.0")
-bazel_dep(name = "rime", version = "1.1.0")
+bazel_dep(name = "rime", version = "1.1.1")
 bazel_dep(name = "boost.any", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.iostreams", version = "1.90.0.bcr.2")
 bazel_dep(name = "boost.filesystem", version = "1.90.0.bcr.1")

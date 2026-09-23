@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE (count) {
     RANGE_FOR_EACH (iteration, range::count (3)) {
         auto count2 = count;
         RANGE_FOR_EACH (i, range::count (1000)) {
-            BOOST_CHECK_EQUAL (first (count2), i);
+            BOOST_CHECK_EQUAL (int(first (count2)), i);
             count2 = drop (count2);
         }
         (void) iteration;

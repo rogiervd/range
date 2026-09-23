@@ -21,10 +21,11 @@ Expose views as Python iterators.
 #ifndef RANGE_PYTHON_ITERATOR_HPP_INCLUDED
 #define RANGE_PYTHON_ITERATOR_HPP_INCLUDED
 
+// Include Python headers before C++ headers
+#include <nanobind/nanobind.h>
+
 #include <cstdint>
 #include <type_traits>
-
-#include <nanobind/nanobind.h>
 
 #include "utility/disable_if_same.hpp"
 

@@ -79,14 +79,14 @@ BOOST_AUTO_TEST_CASE (test_fold_homogeneous_stack_overflow) {
     std::size_t const element_num = 300000;
 
     std::vector <int> v (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (0, v, plus()), element_num);
+    BOOST_CHECK_EQUAL (fold (0, v, plus()), int(element_num));
 
     std::list <int> l (element_num, 1);
-    BOOST_CHECK_EQUAL (fold (0, l, plus()), element_num);
+    BOOST_CHECK_EQUAL (fold (0, l, plus()), int(element_num));
 
     {
         auto result = fold (char (0), v, settling_plus());
-        BOOST_CHECK_EQUAL (rime::get <int> (result), element_num);
+        BOOST_CHECK_EQUAL (rime::get <int> (result), int(element_num));
     }
 }
 

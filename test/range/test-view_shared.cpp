@@ -81,10 +81,10 @@ inline range::view_of_shared <std::vector <int>> return_2_6_3() {
 BOOST_AUTO_TEST_CASE (test_range_view_shared_2) {
     auto v = return_2_6_3();
 
-    BOOST_CHECK_EQUAL (size (v), 3);
+    BOOST_CHECK_EQUAL (size (v), 3u);
     BOOST_CHECK_EQUAL (first (v), 2);
     v = drop (v);
-    BOOST_CHECK_EQUAL (size (v), 2);
+    BOOST_CHECK_EQUAL (size (v), 2u);
     BOOST_CHECK_EQUAL (chop_in_place (v), 6);
     BOOST_CHECK_EQUAL (chop_in_place (v), 3);
     BOOST_CHECK (empty (v));

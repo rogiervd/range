@@ -962,7 +962,7 @@ BOOST_AUTO_TEST_CASE (test_make_iterator_range) {
     BOOST_CHECK (v.begin() == ir.begin());
     BOOST_CHECK (v.end() == ir.end());
 
-    BOOST_CHECK_EQUAL (size (ir), 2);
+    BOOST_CHECK_EQUAL (size (ir), 2u);
     BOOST_CHECK_EQUAL (first (ir), 4);
     BOOST_CHECK_EQUAL (at (ir, 1), 7);
 

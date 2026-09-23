@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE (test_any_range_copy_move) {
 
     range_with_size r (v);
     range_with_size r2 (std::move (r));
-    BOOST_CHECK_EQUAL (size (r2), 1);
+    BOOST_CHECK_EQUAL (size (r2), 1u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

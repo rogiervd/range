@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE (test_macro) {
             // So its elements should be lvalues.
             static_assert (std::is_reference <decltype (i)>::value, "");
         }
-        BOOST_CHECK_EQUAL (sum, 12);
+        BOOST_CHECK_EQUAL (sum, 12u);
 
         sum = 0;
         RANGE_FOR_EACH (i, longer_and_longer())

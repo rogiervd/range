@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE (count) {
     static_assert (std::is_same <decltype (first (count)), std::size_t>::value,
         "");
 
-    BOOST_CHECK_EQUAL (first (count), 0);
-    BOOST_CHECK_EQUAL (first (drop (count)), 1);
-    BOOST_CHECK_EQUAL (first (drop (drop (count))), 2);
+    BOOST_CHECK_EQUAL (first (count), 0u);
+    BOOST_CHECK_EQUAL (first (drop (count)), 1u);
+    BOOST_CHECK_EQUAL (first (drop (drop (count))), 2u);
 
     RANGE_FOR_EACH (iteration, range::count (3)) {
         auto count2 = count;

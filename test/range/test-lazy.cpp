@@ -89,9 +89,9 @@ BOOST_AUTO_TEST_CASE (test_range_lazy) {
     BOOST_CHECK (empty_back (v));
 
     auto size_back = range::lazy::size (range::back);
-    BOOST_CHECK_EQUAL (size_back (v), 0);
+    BOOST_CHECK_EQUAL (size_back (v), 0u);
     v.push_back (1);
-    BOOST_CHECK_EQUAL (size_back (v), 1);
+    BOOST_CHECK_EQUAL (size_back (v), 1u);
 
     v.push_back (7);
     auto first_back = range::lazy::first (range::back);

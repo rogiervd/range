@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE (test_range_find_homogeneous) {
     {
         auto result = find (v, back, less_than_4);
         BOOST_CHECK (!empty (result));
-        BOOST_CHECK_EQUAL (size (result), 2);
+        BOOST_CHECK_EQUAL (size (result), 2u);
         BOOST_CHECK_EQUAL (first (result, front), 5);
         BOOST_CHECK_EQUAL (first (result, back), 3);
     }

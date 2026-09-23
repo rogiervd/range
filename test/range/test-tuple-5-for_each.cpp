@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE (unrolled) {
         tuple<> t;
         collect_any c;
         for_each (t, c);
-        BOOST_CHECK_EQUAL (c.elements.size(), 0);
+        BOOST_CHECK_EQUAL (c.elements.size(), 0u);
     }
     // Tuple with 1 elements.
     {

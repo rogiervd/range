@@ -28,12 +28,14 @@ This includes \c \<deque>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Type, class Allocator>
-        struct tag_of_qualified <std::deque <Type, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+/// \cond DONT_DOCUMENT
+template <class Type, class Allocator>
+struct tag_of_qualified<std::deque<Type, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_DEQUE_HPP_INCLUDED
+#endif  // RANGE_STD_DEQUE_HPP_INCLUDED

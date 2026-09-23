@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef RANGE_LAZY_HPP_INCLUDED
 #define RANGE_LAZY_HPP_INCLUDED
 
-#include "meta/vector.hpp"
-#include "meta/count_c.hpp"
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"
+#include "meta/count_c.hpp"
+#include "meta/vector.hpp"
 
 #include "utility/disable_if_same.hpp"
 #include "utility/returns.hpp"
@@ -53,14 +53,15 @@ namespace callable {
     \tparam StoredArguments
         The arguments stored so far.
     */
-    template <class Callable, class ... StoredArguments> class lazy {
-        static_assert (meta::all_of_c <
-                std::is_same <StoredArguments,
-                    typename std::decay <StoredArguments>::type>::value ...
-            >::value,
+    template <class Callable, class... StoredArguments> class lazy
+    {
+        static_assert(
+            meta::all_of_c<std::is_same<
+                StoredArguments,
+                typename std::decay<StoredArguments>::type>::value...>::value,
             "Only unqualified types can be stored.");
 
-        range::tuple <StoredArguments ...> stored_arguments_;
+        range::tuple<StoredArguments...> stored_arguments_;
 
         /**
         \internal
@@ -70,25 +71,28 @@ namespace callable {
         stored_indices_type provides a meta::vector <zero_type, one_type ...>
         for this exact purpose.
         */
-        typedef typename meta::count_c <sizeof ... (StoredArguments)>::type
+        typedef typename meta::count_c<sizeof...(StoredArguments)>::type
             stored_indices_type;
 
         /**
         The type this but then with extra arguments.
         */
-        template <class ... NewArguments> struct next_type {
-            typedef lazy <Callable, StoredArguments ...,
-                typename std::decay <NewArguments>::type ...> type;
+        template <class... NewArguments> struct next_type
+        {
+            typedef lazy<
+                Callable, StoredArguments...,
+                typename std::decay<NewArguments>::type...>
+                type;
         };
 
-        template <std::size_t ... StoredIndices, class ... NewArguments>
-            typename next_type <NewArguments ...>::type
-            add_arguments (meta::size_t_vector <StoredIndices ...>,
-                NewArguments && ... new_arguments) const
+        template <std::size_t... StoredIndices, class... NewArguments>
+        typename next_type<NewArguments...>::type add_arguments(
+            meta::size_t_vector<StoredIndices...>,
+            NewArguments &&... new_arguments) const
         {
-            return typename next_type <NewArguments ...>::type (
-                ::range::at_c <StoredIndices> (stored_arguments_) ...,
-                std::forward <NewArguments> (new_arguments) ...);
+            return typename next_type<NewArguments...>::type(
+                ::range::at_c<StoredIndices>(stored_arguments_)...,
+                std::forward<NewArguments>(new_arguments)...);
         }
 
         /**
@@ -96,26 +100,30 @@ namespace callable {
         Callable.
         */
         template <class Range> struct call_result
-        : result_of <Callable (Range, StoredArguments const & ...)> {};
+        : result_of<Callable(Range, StoredArguments const &...)>
+        {};
 
-        template <class Range,
-            class StoredArgumentsTuple, std::size_t ... StoredIndices>
-        static typename call_result <Range>::type
-        call_with (Range && range,
-            StoredArgumentsTuple const & stored_arguments,
-            meta::size_t_vector <StoredIndices ...>)
+        template <
+            class Range, class StoredArgumentsTuple,
+            std::size_t... StoredIndices>
+        static typename call_result<Range>::type call_with(
+            Range && range, StoredArgumentsTuple const & stored_arguments,
+            meta::size_t_vector<StoredIndices...>)
         {
-            return Callable() (std::forward <Range> (range),
-                ::range::at_c <StoredIndices> (stored_arguments) ...);
+            return Callable()(
+                std::forward<Range>(range),
+                ::range::at_c<StoredIndices>(stored_arguments)...);
         }
 
     public:
-        template <class ... QStoredArguments, class Enable =
-            typename utility::disable_if_variadic_same_or_derived <
-                lazy, QStoredArguments ...>::type>
-        lazy (QStoredArguments && ... stored_arguments)
-        : stored_arguments_ (
-            std::forward <QStoredArguments> (stored_arguments) ...) {}
+        template <
+            class... QStoredArguments,
+            class Enable =
+                typename utility::disable_if_variadic_same_or_derived<
+                    lazy, QStoredArguments...>::type>
+        lazy(QStoredArguments &&... stored_arguments)
+        : stored_arguments_(std::forward<QStoredArguments>(stored_arguments)...)
+        {}
 
         /**
         Call a newly constructed <c>Callable()</c> with the additional
@@ -125,11 +133,13 @@ namespace callable {
         \param new_arguments
             The arguments to be used in the call behind the stored arguments.
         */
-        template <class Range> typename
-            boost::lazy_enable_if <is_range <Range>, call_result <Range>>::type
-        operator() (Range && range) const {
-            return (call_with (std::forward <Range> (range),
-                stored_arguments_, stored_indices_type()));
+        template <class Range> typename boost::lazy_enable_if<
+            is_range<Range>, call_result<Range>>::type
+            operator()(Range && range) const
+        {
+            return (call_with(
+                std::forward<Range>(range), stored_arguments_,
+                stored_indices_type()));
         }
 
         /**
@@ -138,39 +148,38 @@ namespace callable {
         \param new_arguments
             The arguments to be appended to the currently stored arguments.
         */
-        template <class ... NewArguments>
-            typename boost::lazy_disable_if <meta::any_of_c <
-                is_range <NewArguments>::value ...>,
-            next_type <NewArguments ...>>::type
-        operator() (NewArguments && ... new_arguments) const {
-            return add_arguments (stored_indices_type(),
-                std::forward <NewArguments> (new_arguments) ...);
+        template <class... NewArguments> typename boost::lazy_disable_if<
+            meta::any_of_c<is_range<NewArguments>::value...>,
+            next_type<NewArguments...>>::type
+            operator()(NewArguments &&... new_arguments) const
+        {
+            return add_arguments(
+                stored_indices_type(),
+                std::forward<NewArguments>(new_arguments)...);
         }
     };
 
-} // namespace callable
+}  // namespace callable
 
 namespace lazy {
 
-    static auto const default_direction
-        = callable::lazy <callable::default_direction>();
+    static auto const default_direction =
+        callable::lazy<callable::default_direction>();
 
-    static auto const empty = callable::lazy <callable::empty>();
-    static auto const size = callable::lazy <callable::size>();
-    static auto const first = callable::lazy <callable::first>();
-    static auto const at = callable::lazy <callable::at>();
-    static auto const drop = callable::lazy <callable::drop>();
-    static auto const chop = callable::lazy <callable::chop>();
-    static auto const chop_in_place
-        = callable::lazy <callable::chop_in_place>();
+    static auto const empty = callable::lazy<callable::empty>();
+    static auto const size = callable::lazy<callable::size>();
+    static auto const first = callable::lazy<callable::first>();
+    static auto const at = callable::lazy<callable::at>();
+    static auto const drop = callable::lazy<callable::drop>();
+    static auto const chop = callable::lazy<callable::chop>();
+    static auto const chop_in_place = callable::lazy<callable::chop_in_place>();
 
-    static auto const view = callable::lazy <callable::view>();
-    static auto const forward_view
-        = callable::lazy <callable::forward_view>();
-    static auto const view_once = callable::lazy <callable::view_once>();
+    static auto const view = callable::lazy<callable::view>();
+    static auto const forward_view = callable::lazy<callable::forward_view>();
+    static auto const view_once = callable::lazy<callable::view_once>();
 
-} // namespace lazy
+}  // namespace lazy
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_LAZY_HPP_INCLUDED
+#endif  // RANGE_LAZY_HPP_INCLUDED

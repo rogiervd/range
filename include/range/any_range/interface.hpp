@@ -38,15 +38,15 @@ the same structure.
 #ifndef RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 #define RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 
-#include <type_traits>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 
 #include <boost/mpl/placeholders.hpp>
 #include <boost/utility/enable_if.hpp>
 
-#include "meta/range.hpp"
 #include "meta/fold.hpp"
+#include "meta/range.hpp"
 #include "meta/vector.hpp"
 
 #include "capability.hpp"
@@ -66,31 +66,33 @@ namespace range { namespace any_range_interface {
     capabilities.
     */
     template <class Element, class CapabilityKeys, class DefaultDirection>
-        struct interface;
+    struct interface;
 
     /** \brief
     Provide the first element of a range, and a pointer to the type-erased
     interface with the rest of the range.
     */
-    template <class Element, class InterfacePtr> struct chopped {
+    template <class Element, class InterfacePtr> struct chopped
+    {
         Element first_;
         // InterfacePtr new_interface_;
         InterfacePtr discardable_;
 
         // OriginalElement must be convertible to Element.
         template <class OriginalElement>
-        chopped (OriginalElement && first, InterfacePtr && discardable)
-        : first_ (std::forward <OriginalElement> (first)),
-            discardable_ (std::move (discardable)) {}
+        chopped(OriginalElement && first, InterfacePtr && discardable)
+        : first_(std::forward<OriginalElement>(first)),
+          discardable_(std::move(discardable))
+        {}
 
         // This needs to be explicit; first_ may throw, but discardable_ cannot
         // be copied.
-        chopped (chopped && that)
-        : first_ (std::forward <Element> (that.first_)),
-            discardable_ (std::move (that.discardable_)) {}
+        chopped(chopped && that)
+        : first_(std::forward<Element>(that.first_)),
+          discardable_(std::move(that.discardable_))
+        {}
 
-        Element && move_first()
-        { return std::forward <Element> (first_); }
+        Element && move_first() { return std::forward<Element>(first_); }
     };
 
     /** \brief
@@ -103,10 +105,10 @@ namespace range { namespace any_range_interface {
     \c Base has a meaningful \c empty or a not-so-meaningful one.
     */
     template <class Element, class CapabilityKeys, class DefaultDirection>
-        struct base
+    struct base
     {
-        static_assert (capability::is_capability_keys <CapabilityKeys>::value,
-            "");
+        static_assert(
+            capability::is_capability_keys<CapabilityKeys>::value, "");
 
         void lose_capability();
 
@@ -117,27 +119,32 @@ namespace range { namespace any_range_interface {
         void drop_n();
         void chop_destructive();
 
-        typedef interface <Element, CapabilityKeys, DefaultDirection>
+        typedef interface<Element, CapabilityKeys, DefaultDirection>
             interface_type;
-        typedef std::unique_ptr <interface_type> interface_ptr;
+        typedef std::unique_ptr<interface_type> interface_ptr;
 
-        template <class CapabilityKey> struct interface_type_without {
-            typedef interface <Element,
-                typename meta::remove <CapabilityKey, CapabilityKeys>::type,
-                DefaultDirection> type;
+        template <class CapabilityKey> struct interface_type_without
+        {
+            typedef interface<
+                Element,
+                typename meta::remove<CapabilityKey, CapabilityKeys>::type,
+                DefaultDirection>
+                type;
         };
 
-        template <class CapabilityKey> struct interface_ptr_without {
-            typedef std::unique_ptr <
-                typename interface_type_without <CapabilityKey>::type> type;
+        template <class CapabilityKey> struct interface_ptr_without
+        {
+            typedef std::unique_ptr<
+                typename interface_type_without<CapabilityKey>::type>
+                type;
         };
 
         virtual ~base() {}
     };
 
-    template <class Element, class CapabilityKey, class Base,
-            class Enable = void>
-        struct implement;
+    template <
+        class Element, class CapabilityKey, class Base, class Enable = void>
+    struct implement;
 
     /**
     Implement default_direction.
@@ -149,35 +156,37 @@ namespace range { namespace any_range_interface {
     virtual, that does not work.)
     */
     template <class Direction, class Base, class Enable = void>
-        struct implement_default_direction;
+    struct implement_default_direction;
 
     // Direction cannot be default-constructed.
-    template <class Direction, class Base>
-        struct implement_default_direction <Direction, Base,
-            typename boost::disable_if <
-                capability::default_construct_direction <Direction>>::type>
-    : Base
-    { virtual Direction default_direction() const = 0; };
+    template <class Direction, class Base> struct implement_default_direction<
+        Direction, Base,
+        typename boost::disable_if<
+            capability::default_construct_direction<Direction>>::type> : Base
+    {
+        virtual Direction default_direction() const = 0;
+    };
 
     // Direction can be default-constructed.
     // (And the method does not need to be virtual.)
-    template <class Direction, class Base>
-        struct implement_default_direction <Direction, Base,
-            typename boost::enable_if <
-                capability::default_construct_direction <Direction>>::type>
-    : Base
-    { Direction default_direction() const { return Direction(); } };
+    template <class Direction, class Base> struct implement_default_direction<
+        Direction, Base,
+        typename boost::enable_if<
+            capability::default_construct_direction<Direction>>::type> : Base
+    {
+        Direction default_direction() const { return Direction(); }
+    };
 
     // Provide interface for copying a range.
     template <class Element, class Base>
-        struct implement <Element, capability::copy_construct, Base>
-    : Base
+    struct implement<Element, capability::copy_construct, Base> : Base
     {
-        virtual typename Base::template
-            interface_ptr_without <capability::copy_construct>::type
-                lose_capability (capability::type <capability::copy_construct>)
-                const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual typename Base::template interface_ptr_without<
+            capability::copy_construct>::type
+            lose_capability(capability::type<capability::copy_construct>) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         virtual typename Base::interface_ptr copy() const = 0;
     };
@@ -188,43 +197,50 @@ namespace range { namespace any_range_interface {
     instantiations.
     */
     template <class Element, class Direction, class Base>
-        struct implement <Element, Direction, Base>
-    : Base
+    struct implement<Element, Direction, Base> : Base
     {
         using Base::lose_capability;
 
-        using Base::empty;
-        using Base::size;
-        using Base::first;
-        using Base::drop_one;
-        using Base::drop_n;
         using Base::chop_destructive;
+        using Base::drop_n;
+        using Base::drop_one;
+        using Base::empty;
+        using Base::first;
+        using Base::size;
 
         /** \brief
         Return a pointer to a newly constructed object that provides the same
         capabilities, except for \a Direction.
         */
-        virtual typename Base::template interface_ptr_without <Direction>::type
-            lose_capability (capability::type <Direction>) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual typename Base::template interface_ptr_without<Direction>::type
+            lose_capability(capability::type<Direction>) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         /** \brief
         Return the result of applying \c empty to the underlying range.
         */
-        virtual bool empty (Direction const &) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual bool empty(Direction const &) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         /** \brief
         Return the result of applying \c size to the underlying range.
         */
-        virtual std::size_t size (Direction const &) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual std::size_t size(Direction const &) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         /** \brief
         Return the result of applying \c first to the underlying range.
         */
-        virtual Element first (Direction const &) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual Element first(Direction const &) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         typedef typename Base::interface_ptr interface_ptr;
 
@@ -232,15 +248,19 @@ namespace range { namespace any_range_interface {
         Return a pointer to a newly constructed object that represents the
         result of calling \c drop on the underlying range.
         */
-        virtual interface_ptr drop_one (Direction const &) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual interface_ptr drop_one(Direction const &) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         /** \brief
         Return a pointer to a newly constructed object that represents the
         result of calling \c drop with an increment on the underlying range.
         */
-        virtual interface_ptr drop_n (std::size_t, Direction const &) const
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual interface_ptr drop_n(std::size_t, Direction const &) const
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
 
         /**
         Return the first element of the range, and make this object start at the
@@ -251,69 +271,79 @@ namespace range { namespace any_range_interface {
         a pointer that owns this object back to the caller, so this is
         destructed only after the call has finished.
         */
-        virtual chopped <Element, interface_ptr>
-            chop_destructive (Direction const &, interface_ptr & this_)
-        { throw std::logic_error ("Bug in any_range."); }
+        virtual chopped<Element, interface_ptr> chop_destructive(
+            Direction const &, interface_ptr & this_)
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
     };
 
     template <class Element, class CapabilityKeys, class DefaultDirection>
-        struct interface
+    struct interface
     // Linearly inherit from the appropriate base types.
-    : meta::fold <
-        implement <Element, boost::mpl::_2, boost::mpl::_1>,
-        implement_default_direction <DefaultDirection,
-            base <Element, CapabilityKeys, DefaultDirection>>,
-        CapabilityKeys>::type
+    : meta::fold<
+          implement<Element, boost::mpl::_2, boost::mpl::_1>,
+          implement_default_direction<
+              DefaultDirection,
+              base<Element, CapabilityKeys, DefaultDirection>>,
+          CapabilityKeys>::type
     {};
 
     /**
     Function object that converts an interface.
     */
-    template <class TargetInterfacePtr, class TargetCapabilityKeysLeft,
+    template <
+        class TargetInterfacePtr, class TargetCapabilityKeysLeft,
         class CurrentCapabilityKeysLeft>
     struct convert_interface;
 
     // This direction can remain.
-    template <class TargetInterfacePtr, class First, class ... RestOne,
-            class ... RestTwo>
-        struct convert_interface <TargetInterfacePtr,
-            meta::set <First, RestOne ...>,
-            meta::set <First, RestTwo ...>>
-    : convert_interface <TargetInterfacePtr,
-        meta::set <RestOne ...>, meta::set <RestTwo ...>> {};
+    template <
+        class TargetInterfacePtr, class First, class... RestOne,
+        class... RestTwo>
+    struct convert_interface<
+        TargetInterfacePtr, meta::set<First, RestOne...>,
+        meta::set<First, RestTwo...>>
+    : convert_interface<
+          TargetInterfacePtr, meta::set<RestOne...>, meta::set<RestTwo...>>
+    {};
 
     // Remove this direction.
-    template <class TargetInterfacePtr, class ... TargetCapabilityKeysLeft,
-            class First, class ... Rest>
-        struct convert_interface <TargetInterfacePtr,
-            meta::set <TargetCapabilityKeysLeft ...>,
-            meta::set <First, Rest ...>>
-     {
-        convert_interface <TargetInterfacePtr,
-            meta::set <TargetCapabilityKeysLeft ...>,
-            meta::set <Rest ...>> recursive;
+    template <
+        class TargetInterfacePtr, class... TargetCapabilityKeysLeft,
+        class First, class... Rest>
+    struct convert_interface<
+        TargetInterfacePtr, meta::set<TargetCapabilityKeysLeft...>,
+        meta::set<First, Rest...>>
+    {
+        convert_interface<
+            TargetInterfacePtr, meta::set<TargetCapabilityKeysLeft...>,
+            meta::set<Rest...>>
+            recursive;
 
         template <class OtherInterfacePtr>
-            TargetInterfacePtr operator() (OtherInterfacePtr const & input)
-            const
+        TargetInterfacePtr operator()(OtherInterfacePtr const & input) const
         {
-            return recursive (
-                input->lose_capability (capability::type <First>()));
+            return recursive(input->lose_capability(capability::type<First>()));
         }
     };
 
     // Finished.
     template <class TargetInterfacePtr>
-        struct convert_interface <TargetInterfacePtr, meta::set<>, meta::set<>>
+    struct convert_interface<TargetInterfacePtr, meta::set<>, meta::set<>>
     {
-        TargetInterfacePtr operator() (TargetInterfacePtr && interface) const
-        { return std::move (interface); }
+        TargetInterfacePtr operator()(TargetInterfacePtr && interface) const
+        {
+            return std::move(interface);
+        }
 
-        TargetInterfacePtr operator() (TargetInterfacePtr const & interface)
-            const
-        { return interface->copy(); }
+        TargetInterfacePtr operator()(
+            TargetInterfacePtr const & interface) const
+        {
+            return interface->copy();
+        }
     };
 
-}} // namespace range::any_range_interface
+}}  // namespace range::any_range_interface
 
-#endif // RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
+#endif  // RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED

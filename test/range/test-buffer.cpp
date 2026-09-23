@@ -29,82 +29,86 @@ limitations under the License.
 
 using range::make_buffer;
 
-using range::empty;
-using range::first;
-using range::drop;
 using range::chop;
 using range::chop_in_place;
+using range::drop;
+using range::empty;
+using range::first;
 
 BOOST_AUTO_TEST_SUITE(test_range_buffer)
 
-BOOST_AUTO_TEST_CASE (count) {
-    auto count = make_buffer (one_time_view (range::count()));
+BOOST_AUTO_TEST_CASE(count)
+{
+    auto count = make_buffer(one_time_view(range::count()));
 
-    static_assert (std::is_same <decltype (first (count)), std::size_t>::value,
-        "");
+    static_assert(std::is_same<decltype(first(count)), std::size_t>::value, "");
 
-    BOOST_CHECK_EQUAL (first (count), 0);
-    BOOST_CHECK_EQUAL (first (drop (count)), 1);
-    BOOST_CHECK_EQUAL (first (drop (drop (count))), 2);
+    BOOST_CHECK_EQUAL(first(count), 0);
+    BOOST_CHECK_EQUAL(first(drop(count)), 1);
+    BOOST_CHECK_EQUAL(first(drop(drop(count))), 2);
 
-    RANGE_FOR_EACH (iteration, range::count (3)) {
+    RANGE_FOR_EACH(iteration, range::count(3))
+    {
         auto count2 = count;
-        RANGE_FOR_EACH (i, range::count (1000)) {
-            BOOST_CHECK_EQUAL (first (count2), i);
-            count2 = drop (count2);
+        RANGE_FOR_EACH(i, range::count(1000))
+        {
+            BOOST_CHECK_EQUAL(first(count2), i);
+            count2 = drop(count2);
         }
         (void) iteration;
     }
 }
 
-BOOST_AUTO_TEST_CASE (tracked) {
-    typedef utility::tracked <std::size_t> tracked;
-    RANGE_FOR_EACH (size_step, range::count (20)) {
+BOOST_AUTO_TEST_CASE(tracked)
+{
+    typedef utility::tracked<std::size_t> tracked;
+    RANGE_FOR_EACH(size_step, range::count(20))
+    {
         std::size_t size = size_step * 5;
         utility::tracked_registry r;
         {
-            std::vector <tracked> v;
-            RANGE_FOR_EACH (i, range::count (size))
-                v.push_back (tracked (r, i));
+            std::vector<tracked> v;
+            RANGE_FOR_EACH(i, range::count(size))
+            v.push_back(tracked(r, i));
 
-            auto b = make_buffer <tracked, 7> (v);
-            RANGE_FOR_EACH (i, range::count (size)) {
-                BOOST_CHECK_EQUAL (first (b).content(), i);
-                switch (i % 3)
-                {
+            auto b = make_buffer<tracked, 7>(v);
+            RANGE_FOR_EACH(i, range::count(size))
+            {
+                BOOST_CHECK_EQUAL(first(b).content(), i);
+                switch (i % 3) {
                 case 0:
-                    b = drop (b);
+                    b = drop(b);
                     break;
-                case 1:
-                    {
-                        auto chopped = chop (std::move (b));
-                        BOOST_CHECK_EQUAL (chopped.first().content(), i);
-                        b = chopped.move_rest();
-                    }
-                    break;
+                case 1: {
+                    auto chopped = chop(std::move(b));
+                    BOOST_CHECK_EQUAL(chopped.first().content(), i);
+                    b = chopped.move_rest();
+                } break;
                 default:
-                    auto f = chop_in_place (b);
-                    BOOST_CHECK_EQUAL (f.content(), i);
+                    auto f = chop_in_place(b);
+                    BOOST_CHECK_EQUAL(f.content(), i);
                     break;
                 }
 
                 // Check the number of elements alive at each time.
                 // This should be the size of v plus the size of the buffer.
                 // Only one buffer should be alive at any time.
-                BOOST_CHECK (r.counts().alive_count() <= int (size + 7));
+                BOOST_CHECK(r.counts().alive_count() <= int(size + 7));
             }
-            BOOST_CHECK (empty (b));
+            BOOST_CHECK(empty(b));
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE (stack_overflow) {
-    auto count = make_buffer <std::size_t, 1> (range::count());
+BOOST_AUTO_TEST_CASE(stack_overflow)
+{
+    auto count = make_buffer<std::size_t, 1>(range::count());
     auto count2 = count;
     // Reserve 100000 buffers.
     // It will break the stack if they are destructed recursively.
-    RANGE_FOR_EACH (iteration, range::count (100000)) {
-        count2 = drop (count2);
+    RANGE_FOR_EACH(iteration, range::count(100000))
+    {
+        count2 = drop(count2);
         (void) iteration;
     }
 }

@@ -43,9 +43,9 @@ namespace helper {
         The range itself, qualified (as an rvalue reference if an rvalue).
     \param direction The direction.
     */
-    void implement_empty (unusable);
+    void implement_empty(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
@@ -53,64 +53,66 @@ namespace callable {
 
         using helper::implement_empty;
 
-        struct empty {
+        struct empty
+        {
         private:
-            struct dispatch {
-                template <class Range, class Direction>
-                    auto operator() (
-                        Range const & range, Direction const & direction,
-                        overload_order <1> *) const
-                RETURNS (implement_empty (typename tag_of <Range>::type(),
-                    range, direction));
+            struct dispatch
+            {
+                template <class Range, class Direction> auto operator()(
+                    Range const & range, Direction const & direction,
+                    overload_order<1> *) const
+                    RETURNS(implement_empty(
+                        typename tag_of<Range>::type(), range, direction));
 
                 // Forward to member if possible.
-                template <class Range, class Direction>
-                    auto operator() (
-                        Range const & range, Direction const & direction,
-                        overload_order <2> *) const
-                RETURNS (helper::member_access::empty (
-                    range, direction));
+                template <class Range, class Direction> auto operator()(
+                    Range const & range, Direction const & direction,
+                    overload_order<2> *) const
+                    RETURNS(helper::member_access::empty(range, direction));
 
                 // Use direction::make_forward in case "implement_empty" is only
                 // provided for the forward direction.
-                template <class Range, class Direction>
-                    auto operator() (
-                        Range const & range, Direction const & direction,
-                        overload_order <3> *) const
-                RETURNS (implement_empty (typename tag_of <Range>::type(),
-                    range, direction::make_forward (direction)));
+                template <class Range, class Direction> auto operator()(
+                    Range const & range, Direction const & direction,
+                    overload_order<3> *) const
+                    RETURNS(implement_empty(
+                        typename tag_of<Range>::type(), range,
+                        direction::make_forward(direction)));
 
                 // Member with make_forward.
-                template <class Range, class Direction>
-                    auto operator() (
-                        Range const & range, Direction const & direction,
-                        overload_order <4> *) const
-                RETURNS (helper::member_access::empty (
-                    range, direction::make_forward (direction)));
+                template <class Range, class Direction> auto operator()(
+                    Range const & range, Direction const & direction,
+                    overload_order<4> *) const
+                    RETURNS(
+                        helper::member_access::empty(
+                            range, direction::make_forward(direction)));
             };
 
         public:
             // With direction.
-            template <class Range, class Direction, class Enable = typename
-                std::enable_if <is_range <Range>::value
-                    && is_direction <Direction>::value>::type>
-            auto operator() (Range const & range, Direction const & direction)
-                const
-            RETURNS (dispatch() (range, direction, pick_overload()));
+            template <
+                class Range, class Direction,
+                class Enable = typename std::enable_if<
+                    is_range<Range>::value
+                    && is_direction<Direction>::value>::type>
+            auto operator()(Range const & range, Direction const & direction)
+                const RETURNS(dispatch()(range, direction, pick_overload()));
 
             // Without direction: use default direction.
-            template <class Range, class Enable =
-                typename std::enable_if <is_range <Range>::value>::type>
-            auto operator() (Range const & range) const
-            RETURNS (dispatch() (
-                range, range::default_direction (range), pick_overload()));
+            template <
+                class Range,
+                class Enable =
+                    typename std::enable_if<is_range<Range>::value>::type>
+            auto operator()(Range const & range) const RETURNS(
+                dispatch()(
+                    range, range::default_direction(range), pick_overload()));
         };
 
-    } // namespace implementation
+    }  // namespace implementation
 
     using implementation::empty;
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 Return whether the range is empty in a direction.
@@ -131,9 +133,10 @@ If this evaluates to \c false, it is still possible for the range to be empty at
 run time.
 */
 template <class Range, class Direction> struct always_empty
-: rime::equal_constant <
-    decltype (empty (std::declval <Range>(), std::declval <Direction>())),
-    rime::true_type> {};
+: rime::equal_constant<
+      decltype(empty(std::declval<Range>(), std::declval<Direction>())),
+      rime::true_type>
+{};
 
 /**
 Evaluate to \c true iff the range is known at compile time to be not empty.
@@ -144,10 +147,11 @@ If this evaluates to \c false, it is still possible for the range to be
 non-empty at run time.
 */
 template <class Range, class Direction> struct never_empty
-: rime::equal_constant <
-    decltype (empty (std::declval <Range>(), std::declval <Direction>())),
-    rime::false_type> {};
+: rime::equal_constant<
+      decltype(empty(std::declval<Range>(), std::declval<Direction>())),
+      rime::false_type>
+{};
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_EMPTY_HPP_INCLUDED

@@ -22,14 +22,17 @@ limitations under the License.
 
 namespace range {
 
-struct not_a_range_tag {};
+struct not_a_range_tag
+{};
 
 /**
 Helper for tag_of.
 Specialise this for an unqualified range to assign it a tag.
 */
 template <class Range> struct tag_of_qualified
-{ typedef not_a_range_tag type; };
+{
+    typedef not_a_range_tag type;
+};
 
 /**
 Evaluate the range tag of the type Range.
@@ -38,10 +41,12 @@ The tag should not depend on the qualifier.
 tag_of should be used to retrieve the range tag for a type.
 To assign tags to ranges, it is easiest to specialise tag_of_qualified.
 */
-template <class Range> struct tag_of {
-    typedef typename tag_of_qualified <typename std::decay <Range>::type>::type
-        type;
-    static_assert (std::is_constructible <type>::value,
+template <class Range> struct tag_of
+{
+    typedef
+        typename tag_of_qualified<typename std::decay<Range>::type>::type type;
+    static_assert(
+        std::is_constructible<type>::value,
         "The range tag must be constructible with no parameters.");
 };
 
@@ -49,9 +54,9 @@ template <class Range> struct tag_of {
 Evaluate to true if Range is a range type.
 */
 template <class Range> struct is_range
-: boost::mpl::not_ <std::is_same <
-    typename tag_of <Range>::type, not_a_range_tag>> {};
+: boost::mpl::not_<std::is_same<typename tag_of<Range>::type, not_a_range_tag>>
+{};
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_TAG_HPP_INCLUDED

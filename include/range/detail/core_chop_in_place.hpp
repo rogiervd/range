@@ -19,8 +19,8 @@ limitations under the License.
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
+#include <boost/mpl/if.hpp>
 
 #include "meta/vector.hpp"
 
@@ -45,9 +45,9 @@ namespace helper {
     \param range The range.
     \param direction The direction.
     */
-    void implement_chop_in_place (unusable);
+    void implement_chop_in_place(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
@@ -65,70 +65,79 @@ namespace callable {
         \param direction
         \param overload_order
         */
-        struct chop_in_place_direct {
-            template <class Range, class Direction>
-                auto operator() (Range & range, Direction const & direction,
-                    overload_order <1> *) const
-            RETURNS (implement_chop_in_place (typename tag_of <Range>::type(),
-                range, direction));
+        struct chop_in_place_direct
+        {
+            template <class Range, class Direction> auto operator()(
+                Range & range, Direction const & direction,
+                overload_order<1> *) const
+                RETURNS(implement_chop_in_place(
+                    typename tag_of<Range>::type(), range, direction));
 
             // Forward to member if possible.
-            template <class Range, class Direction>
-                auto operator() (Range & range, Direction const & direction,
-                    overload_order <2> *) const
-            RETURNS (helper::member_access::chop_in_place (range, direction));
+            template <class Range, class Direction> auto operator()(
+                Range & range, Direction const & direction,
+                overload_order<2> *) const
+                RETURNS(helper::member_access::chop_in_place(range, direction));
         };
 
-        struct chop_in_place {
+        struct chop_in_place
+        {
         private:
-            struct dispatch : public chop_in_place_direct {
+            struct dispatch : public chop_in_place_direct
+            {
                 using chop_in_place_direct::operator();
 
                 // Use "first" and "drop".
                 // Only enabled if "drop" returns a range of the same type.
-                template <class Range, class Direction,
-                    class Result = decltype (std::declval <first_direct>() (
-                        std::declval <Range &>(), std::declval <Direction>(),
+                template <
+                    class Range, class Direction,
+                    class Result = decltype(std::declval<first_direct>()(
+                        std::declval<Range &>(), std::declval<Direction>(),
                         pick_overload())),
-                    class Enable = typename std::enable_if <std::is_same <
-                        typename std::decay <Range>::type,
-                        typename std::decay <decltype (
-                            std::declval <drop_direct>() (
-                                std::declval <Range>(), one_type(),
-                                std::declval <Direction>(), pick_overload()))
-                        >::type
-                    >::value>::type>
-                Result operator() (Range & range, Direction const & direction,
-                    overload_order <3> *) const
+                    class Enable = typename std::enable_if<std::is_same<
+                        typename std::decay<Range>::type,
+                        typename std::decay<
+                            decltype(std::declval<drop_direct>()(
+                                std::declval<Range>(), one_type(),
+                                std::declval<Direction>(),
+                                pick_overload()))>::type>::value>::type>
+                Result operator()(
+                    Range & range, Direction const & direction,
+                    overload_order<3> *) const
                 {
-                    Result element = first_direct() (range, direction,
+                    Result element =
+                        first_direct()(range, direction, pick_overload());
+                    range = drop_direct()(
+                        std::move(range), one_type(), direction,
                         pick_overload());
-                    range = drop_direct() (std::move (range),
-                        one_type(), direction, pick_overload());
-                    return static_cast <Result &&> (element);
+                    return static_cast<Result &&>(element);
                 }
 
                 // Use "chop".
                 // Only enabled if "drop" returns a range of the same type.
                 // This is less preferred than using "first" and "drop", since
                 // this is usually slightly slower.
-                template <class Range, class Direction,
-                    class Result = decltype (std::declval <chop_direct>() (
-                        std::declval <Range &&>(), std::declval <Direction>(),
-                        pick_overload()).forward_first()),
-                    class Enable = typename std::enable_if <std::is_same <
-                        typename std::decay <Range>::type,
-                        typename std::decay <decltype (
-                            std::declval <chop_direct>() (
-                                std::declval <Range>(),
-                                std::declval <Direction>(), pick_overload()
-                            ).forward_rest())>::type
-                        >::value>::type>
-                Result operator() (Range & range, Direction const & direction,
-                    overload_order <4> *) const
+                template <
+                    class Range, class Direction,
+                    class Result = decltype(std::declval<chop_direct>()(
+                                                std::declval<Range &&>(),
+                                                std::declval<Direction>(),
+                                                pick_overload())
+                                                .forward_first()),
+                    class Enable = typename std::enable_if<std::is_same<
+                        typename std::decay<Range>::type,
+                        typename std::decay<
+                            decltype(std::declval<chop_direct>()(
+                                         std::declval<Range>(),
+                                         std::declval<Direction>(),
+                                         pick_overload())
+                                         .forward_rest())>::type>::value>::type>
+                Result operator()(
+                    Range & range, Direction const & direction,
+                    overload_order<4> *) const
                 {
-                    auto chopped = chop_direct() (
-                        std::move (range), direction, pick_overload());
+                    auto chopped = chop_direct()(
+                        std::move(range), direction, pick_overload());
                     range = chopped.move_rest();
                     return chopped.move_first();
                 }
@@ -136,28 +145,30 @@ namespace callable {
 
         public:
             // With direction.
-            template <class Range, class Direction, class Enable = typename
-                std::enable_if <is_range <Range>::value
-                    && !std::is_const <Range>::value
-                    && is_direction <Direction>::value>::type>
-            auto operator() (Range & range, Direction const & direction)
-                const
-            RETURNS (dispatch() (range, direction, pick_overload()));
+            template <
+                class Range, class Direction,
+                class Enable = typename std::enable_if<
+                    is_range<Range>::value && !std::is_const<Range>::value
+                    && is_direction<Direction>::value>::type>
+            auto operator()(Range & range, Direction const & direction) const
+                RETURNS(dispatch()(range, direction, pick_overload()));
 
             // Without direction: use default direction.
-            template <class Range, class Enable =
-                typename std::enable_if <is_range <Range>::value>::type>
-            auto operator() (Range & range) const
-            RETURNS (dispatch() (
-                range, range::default_direction (range), pick_overload()));
+            template <
+                class Range,
+                class Enable =
+                    typename std::enable_if<is_range<Range>::value>::type>
+            auto operator()(Range & range) const RETURNS(
+                dispatch()(
+                    range, range::default_direction(range), pick_overload()));
         };
 
-    } // namespace implementation
+    }  // namespace implementation
 
-    using implementation::chop_in_place_direct;
     using implementation::chop_in_place;
+    using implementation::chop_in_place_direct;
 
-} // namespace callable
+}  // namespace callable
 
 /**
 Return the first element of the range, and remove this element from the range
@@ -192,26 +203,26 @@ namespace helper {
         tag, std::move (range), direction, pick_overload()));
     \endcode
     */
-    template <class Range, class Direction,
-        class DecayedRange = typename std::decay <Range>::type,
-        class First = decltype (
-            callable::chop_in_place_direct() (
-                std::declval <DecayedRange &>(), std::declval <Direction>(),
-                pick_overload())),
-        class Result = chopped <First, DecayedRange>,
-        class Enable = typename std::enable_if <
-            !std::is_reference <Range>::value>::type>
-    inline Result chop_by_chop_in_place (
+    template <
+        class Range, class Direction,
+        class DecayedRange = typename std::decay<Range>::type,
+        class First = decltype(callable::chop_in_place_direct()(
+            std::declval<DecayedRange &>(), std::declval<Direction>(),
+            pick_overload())),
+        class Result = chopped<First, DecayedRange>,
+        class Enable =
+            typename std::enable_if<!std::is_reference<Range>::value>::type>
+    inline Result chop_by_chop_in_place(
         Range && range, Direction const & direction)
     {
-        auto new_range = std::move (range);
-        auto && first = callable::chop_in_place_direct() (
+        auto new_range = std::move(range);
+        auto && first = callable::chop_in_place_direct()(
             new_range, direction, pick_overload());
-        return Result (static_cast <First &&> (first), std::move (new_range));
+        return Result(static_cast<First &&>(first), std::move(new_range));
     }
 
-} // namespace helper
+}  // namespace helper
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_CHOP_IN_PLACE_HPP_INCLUDED

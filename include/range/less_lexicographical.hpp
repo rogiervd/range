@@ -17,12 +17,12 @@ limitations under the License.
 #ifndef RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 #define RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
 #include <boost/mpl/and.hpp>
+#include <boost/utility/enable_if.hpp>
 
 #include "rime/always.hpp"
-#include "rime/core.hpp"
 #include "rime/call_if.hpp"
+#include "rime/core.hpp"
 
 #include "core.hpp"
 
@@ -30,30 +30,31 @@ namespace range {
 
 namespace less_lexicographical_detail {
 
-    template <class Direction, class Less>
-        struct less_lexicographical_default
+    template <class Direction, class Less> struct less_lexicographical_default
     {
     private:
         // Homogeneous implementation.
-        struct when_homogeneous {
-            template <class Range1, class Range2>
-            bool operator() (Range1 range1, Range2 range2,
-                Direction const & direction, Less && less)
+        struct when_homogeneous
+        {
+            template <class Range1, class Range2> bool operator()(
+                Range1 range1, Range2 range2, Direction const & direction,
+                Less && less)
             {
-                while (!range::empty (range1, direction)
-                    && !range::empty (range2, direction))
-                {
-                    if (less (range::first (range1, direction),
-                            range::first (range2, direction)))
+                while (!range::empty(range1, direction)
+                       && !range::empty(range2, direction)) {
+                    if (less(
+                            range::first(range1, direction),
+                            range::first(range2, direction)))
                         return true;
-                    if (less (range::first (range2, direction),
-                            range::first (range1, direction)))
+                    if (less(
+                            range::first(range2, direction),
+                            range::first(range1, direction)))
                         return false;
                     // Else continue to the next element.
-                    range1 = range::drop (std::move (range1), direction);
-                    range2 = range::drop (std::move (range2), direction);
+                    range1 = range::drop(std::move(range1), direction);
+                    range2 = range::drop(std::move(range2), direction);
                 }
-                return !range::empty (range2, direction);
+                return !range::empty(range2, direction);
             }
         };
 
@@ -64,98 +65,118 @@ namespace less_lexicographical_detail {
         template <class Dummy> struct next;
 
         // Heterogeneous implementation: recursive.
-        struct when_heterogeneous {
-            template <class Range1, class Range2>
-            auto operator() (Range1 && range1, Range2 && range2,
-                Direction const & direction, Less && less) const
-            // This is the run-time recursive implementation:
-            /*{
-                if (range::empty (range2, direction))
-                    // Also if both are empty.
-                    return false;
-                else if (range::empty (range1, direction))
-                    return true;
-                else if (range::first (range1, direction)
-                        < range::first (range2, direction))
-                    return true;
-                else if (range::first (range2, direction)
-                        < range::first (range1, direction))
-                    return false;
-                else {
-                    return (*this) (range::drop (range1, direction),
-                        range::drop (range2, direction), direction);
-                }
-            }*/
-            RETURNS (rime::call_if (range::empty (range2, direction),
-                rime::always <rime::false_type>(),
-                when_range2_not_empty(),
-                std::forward <Range1> (range1), std::forward <Range2> (range2),
-                direction, std::forward <Less> (less)));
+        struct when_heterogeneous
+        {
+            template <class Range1, class Range2> auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Less && less) const
+                // This is the run-time recursive implementation:
+                /*{
+                    if (range::empty (range2, direction))
+                        // Also if both are empty.
+                        return false;
+                    else if (range::empty (range1, direction))
+                        return true;
+                    else if (range::first (range1, direction)
+                            < range::first (range2, direction))
+                        return true;
+                    else if (range::first (range2, direction)
+                            < range::first (range1, direction))
+                        return false;
+                    else {
+                        return (*this) (range::drop (range1, direction),
+                            range::drop (range2, direction), direction);
+                    }
+                }*/
+                RETURNS(
+                    rime::call_if(
+                        range::empty(range2, direction),
+                        rime::always<rime::false_type>(),
+                        when_range2_not_empty(), std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Less>(less)));
         };
 
-        struct when_range2_not_empty {
-            template <class Range1, class Range2> auto operator() (
-                Range1 && range1, Range2 && range2,
-                Direction const & direction, Less && less) const
-            RETURNS (rime::call_if (range::empty (range1, direction),
-                rime::always <rime::true_type>(), when_neither_empty(),
-                std::forward <Range1> (range1), std::forward <Range2> (range2),
-                direction, std::forward <Less> (less)));
+        struct when_range2_not_empty
+        {
+            template <class Range1, class Range2> auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Less && less) const
+                RETURNS(
+                    rime::call_if(
+                        range::empty(range1, direction),
+                        rime::always<rime::true_type>(), when_neither_empty(),
+                        std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Less>(less)));
         };
 
-        struct when_neither_empty {
-            template <class Range1, class Range2>
-                auto operator() (Range1 && range1, Range2 && range2,
-                    Direction const & direction, Less && less) const
-            RETURNS (rime::call_if (
-                less (range::first (range1, direction),
-                    range::first (range2, direction)),
-                rime::always <rime::true_type>(), when_range1_not_less(),
-                std::forward <Range1> (range1), std::forward <Range2> (range2),
-                direction, std::forward <Less> (less)));
+        struct when_neither_empty
+        {
+            template <class Range1, class Range2> auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Less && less) const
+                RETURNS(
+                    rime::call_if(
+                        less(
+                            range::first(range1, direction),
+                            range::first(range2, direction)),
+                        rime::always<rime::true_type>(), when_range1_not_less(),
+                        std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Less>(less)));
         };
 
-        struct when_range1_not_less {
-            template <class Range1, class Range2>
-                auto operator() (Range1 && range1, Range2 && range2,
-                    Direction const & direction, Less && less) const
-            RETURNS (rime::call_if (
-                less (range::first (range2, direction),
-                    range::first (range1, direction)),
-                rime::always <rime::false_type>(), next <Range1>(),
-                std::forward <Range1> (range1), std::forward <Range2> (range2),
-                direction, std::forward <Less> (less)));
+        struct when_range1_not_less
+        {
+            template <class Range1, class Range2> auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Less && less) const
+                RETURNS(
+                    rime::call_if(
+                        less(
+                            range::first(range2, direction),
+                            range::first(range1, direction)),
+                        rime::always<rime::false_type>(), next<Range1>(),
+                        std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Less>(less)));
         };
 
-        template <class Dummy> struct next {
-            template <class Range1, class Range2>
-                auto operator() (Range1 && range1, Range2 && range2,
-                    Direction const & direction, Less && less) const
-            RETURNS (less_lexicographical_default() (
-                range::drop (std::forward <Range1> (range1), direction),
-                range::drop (std::forward <Range2> (range2), direction),
-                direction, std::forward <Less> (less)));
+        template <class Dummy> struct next
+        {
+            template <class Range1, class Range2> auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Less && less) const
+                RETURNS(
+                    less_lexicographical_default()(
+                        range::drop(std::forward<Range1>(range1), direction),
+                        range::drop(std::forward<Range2>(range2), direction),
+                        direction, std::forward<Less>(less)));
         };
 
     public:
-        template <class Range1, class Range2>
-        auto operator() (Range1 && range1, Range2 && range2,
-            Direction const & direction, Less && less) const
-        RETURNS (rime::call_if (rime::and_ (
-                is_homogeneous <Range1, Direction>(),
-                is_homogeneous <Range2, Direction>()),
-            when_homogeneous(), when_heterogeneous(),
-            std::forward <Range1> (range1), std::forward <Range2> (range2),
-            direction, std::forward <Less> (less)));
+        template <class Range1, class Range2> auto operator()(
+            Range1 && range1, Range2 && range2, Direction const & direction,
+            Less && less) const
+            RETURNS(
+                rime::call_if(
+                    rime::and_(
+                        is_homogeneous<Range1, Direction>(),
+                        is_homogeneous<Range2, Direction>()),
+                    when_homogeneous(), when_heterogeneous(),
+                    std::forward<Range1>(range1), std::forward<Range2>(range2),
+                    direction, std::forward<Less>(less)));
     };
 
-    struct less {
+    struct less
+    {
         template <class Left, class Right>
-        auto operator() (Left && left, Right && right) const
-        RETURNS (std::forward <Left> (left) < std::forward <Right> (right));
+        auto operator()(Left && left, Right && right) const
+            RETURNS(std::forward<Left>(left) < std::forward<Right>(right));
     };
 
-} // namespace less_lexicographical_detail
+}  // namespace less_lexicographical_detail
 
 namespace helper {
 
@@ -176,9 +197,9 @@ namespace helper {
 
     \todo Test
     */
-    void implement_less_lexicographical (unusable);
+    void implement_less_lexicographical(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
@@ -186,96 +207,113 @@ namespace callable {
 
         using helper::implement_less_lexicographical;
 
-        class less_lexicographical {
-            struct dispatch {
-                template <class Range1, class Range2,
-                    class Direction, class Predicate>
-                auto operator() (Range1 && range1, Range2 && range2,
+        class less_lexicographical
+        {
+            struct dispatch
+            {
+                template <
+                    class Range1, class Range2, class Direction,
+                    class Predicate>
+                auto operator()(
+                    Range1 && range1, Range2 && range2,
                     Direction const & direction, Predicate && predicate,
-                    overload_order <1> *) const
-                RETURNS (implement_less_lexicographical (
-                    typename tag_of <Range1>::type(),
-                    typename tag_of <Range2>::type(),
-                    std::forward <Range1> (range1),
-                    std::forward <Range2> (range2), direction,
-                    std::forward <Predicate> (predicate)));
+                    overload_order<1> *) const
+                    RETURNS(implement_less_lexicographical(
+                        typename tag_of<Range1>::type(),
+                        typename tag_of<Range2>::type(),
+                        std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Predicate>(predicate)));
 
-                template <class Range1, class Range2,
-                    class Direction, class Predicate>
-                auto operator() (Range1 && range1, Range2 && range2,
+                template <
+                    class Range1, class Range2, class Direction,
+                    class Predicate>
+                auto operator()(
+                    Range1 && range1, Range2 && range2,
                     Direction const & direction, Predicate && predicate,
-                    overload_order <2> *) const
-                RETURNS (
-                    less_lexicographical_detail::less_lexicographical_default <
-                        Direction, Predicate>() (
-                            std::forward <Range1> (range1),
-                            std::forward <Range2> (range2), direction,
-                            std::forward <Predicate> (predicate)));
+                    overload_order<2> *) const
+                    RETURNS(
+                        less_lexicographical_detail::
+                            less_lexicographical_default<
+                                Direction, Predicate>()(
+                                std::forward<Range1>(range1),
+                                std::forward<Range2>(range2), direction,
+                                std::forward<Predicate>(predicate)));
             };
 
         public:
             // With direction; with predicate.
-            template <class Range1, class Range2,
-                class Direction, class Predicate,
-                class Enable = typename std::enable_if <
-                    is_direction <Direction>::value>::type>
-            auto operator() (Range1 && range1, Range2 && range2,
-                Direction const & direction, Predicate && predicate) const
-            RETURNS (dispatch() (
-                range::view (std::forward <Range1> (range1), direction),
-                range::view (std::forward <Range2> (range2), direction),
-                direction, std::forward <Predicate> (predicate),
-                pick_overload()));
+            template <
+                class Range1, class Range2, class Direction, class Predicate,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(
+                Range1 && range1, Range2 && range2, Direction const & direction,
+                Predicate && predicate) const
+                RETURNS(
+                    dispatch()(
+                        range::view(std::forward<Range1>(range1), direction),
+                        range::view(std::forward<Range2>(range2), direction),
+                        direction, std::forward<Predicate>(predicate),
+                        pick_overload()));
 
             // Without direction; with predicate.
             // Use the default direction of the first range.
-            template <class Range1, class Range2, class Predicate,
-                class Enable = typename std::enable_if <
-                    !is_direction <Predicate>::value>::type>
-            auto operator() (Range1 && range1, Range2 && range2,
+            template <
+                class Range1, class Range2, class Predicate,
+                class Enable = typename std::enable_if<
+                    !is_direction<Predicate>::value>::type>
+            auto operator()(
+                Range1 && range1, Range2 && range2,
                 Predicate && predicate) const
-            RETURNS (dispatch() (
-                range::view (std::forward <Range1> (range1),
-                    range::default_direction (range1)),
-                range::view (std::forward <Range2> (range2),
-                    range::default_direction (range1)),
-                range::default_direction (range1),
-                std::forward <Predicate> (predicate), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view(
+                            std::forward<Range1>(range1),
+                            range::default_direction(range1)),
+                        range::view(
+                            std::forward<Range2>(range2),
+                            range::default_direction(range1)),
+                        range::default_direction(range1),
+                        std::forward<Predicate>(predicate), pick_overload()));
 
             // With direction; without predicate.
             // Use less().
-            template <class Range1, class Range2, class Direction,
-                class Enable = typename std::enable_if <
-                    is_direction <Direction>::value>::type>
-            auto operator() (Range1 && range1, Range2 && range2,
+            template <
+                class Range1, class Range2, class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(
+                Range1 && range1, Range2 && range2,
                 Direction const & direction) const
-            RETURNS (dispatch() (
-                range::view (std::forward <Range1> (range1), direction),
-                range::view (std::forward <Range2> (range2), direction),
-                direction,
-                less_lexicographical_detail::less(),
-                pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view(std::forward<Range1>(range1), direction),
+                        range::view(std::forward<Range2>(range2), direction),
+                        direction, less_lexicographical_detail::less(),
+                        pick_overload()));
 
 
             // Without direction, and without predicate.
             // Use the default direction of the first range and less.
             template <class Range1, class Range2>
-                auto operator() (Range1 && range1, Range2 && range2) const
-            RETURNS (dispatch() (
-                range::view (std::forward <Range1> (range1),
-                    range::default_direction (range1)),
-                range::view (std::forward <Range2> (range2),
-                    range::default_direction (range1)),
-                range::default_direction (range1),
-                less_lexicographical_detail::less(),
-                pick_overload()));
+            auto operator()(Range1 && range1, Range2 && range2) const RETURNS(
+                dispatch()(
+                    range::view(
+                        std::forward<Range1>(range1),
+                        range::default_direction(range1)),
+                    range::view(
+                        std::forward<Range2>(range2),
+                        range::default_direction(range1)),
+                    range::default_direction(range1),
+                    less_lexicographical_detail::less(), pick_overload()));
         };
 
-    } // namespace implementation
+    }  // namespace implementation
 
     using implementation::less_lexicographical;
 
-} // namespace callable
+}  // namespace callable
 
 /**
 Compare two ranges lexicographically.
@@ -296,6 +334,6 @@ lexicographical ordering.
 */
 static const auto less_lexicographical = callable::less_lexicographical();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
+#endif  // RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED

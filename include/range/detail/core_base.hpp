@@ -27,24 +27,24 @@ too.
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/and.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/not.hpp>
-#include <boost/mpl/and.hpp>
 
 #include <boost/utility/enable_if.hpp>
 
-#include "meta/vector.hpp"
 #include "meta/transform.hpp"
+#include "meta/vector.hpp"
 
 #include "rime/core.hpp"
 
-#include "utility/returns.hpp"
 #include "utility/nested_callable.hpp"
+#include "utility/returns.hpp"
 
-#include "callable_traits.hpp"
 #include "../direction.hpp"
+#include "callable_traits.hpp"
 
 #include "core_tag.hpp"
 
@@ -53,9 +53,9 @@ namespace range {
 using utility::overload_order;
 using utility::pick_overload;
 
+using ::callable_traits::decayed_result_of;
 using ::callable_traits::has;
 using ::callable_traits::result_of;
-using ::callable_traits::decayed_result_of;
 
 /** \brief
 Contain names for operations on ranges, and helpers.
@@ -67,26 +67,27 @@ namespace helper {
     struct unusable;
 
     // Forward declarations for operations so they can refer to each other.
-    void implement_default_direction (unusable);
-    void implement_empty (unusable);
-    void implement_size (unusable);
-    void implement_first (unusable);
-    void implement_drop (unusable);
-    void implement_chop (unusable);
-    void implement_chop_in_place (unusable);
-    void implement_at (unusable);
+    void implement_default_direction(unusable);
+    void implement_empty(unusable);
+    void implement_size(unusable);
+    void implement_first(unusable);
+    void implement_drop(unusable);
+    void implement_chop(unusable);
+    void implement_chop_in_place(unusable);
+    void implement_at(unusable);
 
     /** \brief
     Class that is convertible from direction::front and direction::back.
     */
-    struct front_or_back {
+    struct front_or_back
+    {
         front_or_back() {}
 
-        front_or_back (direction::front) {}
-        front_or_back (direction::back) {}
+        front_or_back(direction::front) {}
+        front_or_back(direction::back) {}
     };
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable { namespace implementation {
 
@@ -99,11 +100,11 @@ namespace callable { namespace implementation {
     struct chop;
     struct chop_in_place;
 
-}} // namespace callable::implementation
+}}  // namespace callable::implementation
 
 static const direction::front front = {};
 static const direction::back back = {};
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_BASE_HPP_INCLUDED

@@ -36,18 +36,18 @@ namespace is_homogeneous_detail {
     \c drop or \c chop.
     */
     template <class Range, class Direction, class Enable = void>
-        struct is_homogeneous
-    : rime::false_type {};
+    struct is_homogeneous : rime::false_type
+    {};
 
-    template <class Range, class Direction>
-        struct is_homogeneous <Range, Direction,
-            typename utility::enable_if_compiles <
-                decltype (std::declval <callable::chop_in_place>() (
-                    std::declval <Range &>(), std::declval <Direction>()))
-                >::type>
-    : rime::true_type {};
+    template <class Range, class Direction> struct is_homogeneous<
+        Range, Direction,
+        typename utility::enable_if_compiles<
+            decltype(std::declval<callable::chop_in_place>()(
+                std::declval<Range &>(), std::declval<Direction>()))>::type>
+    : rime::true_type
+    {};
 
-} // namespace is_homogeneous_detail
+}  // namespace is_homogeneous_detail
 
 /** \brief
 Metafunction that returns true iff <c>drop (range, direction)</c> returns a
@@ -64,17 +64,18 @@ number of times, a homogeneous range cannot become heterogeneous.
     The direction.
     If left out, the default direction is used.
 */
-template <class Range, class Direction = decltype (
-        callable::default_direction() (std::declval <Range>()))>
-    struct is_homogeneous
-: is_homogeneous_detail::is_homogeneous <
-    typename std::decay <Range>::type, Direction>
+template <
+    class Range,
+    class Direction =
+        decltype(callable::default_direction()(std::declval<Range>()))>
+struct is_homogeneous : is_homogeneous_detail::is_homogeneous<
+                            typename std::decay<Range>::type, Direction>
 {
-    static_assert (is_range <Range>::value, "Range must be a range.");
-    static_assert (is_direction <Direction>::value,
-        "Direction must be a direction.");
+    static_assert(is_range<Range>::value, "Range must be a range.");
+    static_assert(
+        is_direction<Direction>::value, "Direction must be a direction.");
 };
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED

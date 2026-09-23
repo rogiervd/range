@@ -34,51 +34,58 @@ test-return_view.py.
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
-auto count (int size) RETURNS (range::count (size));
+auto count(int size) RETURNS(range::count(size));
 
-int get_next_count() {
+int get_next_count()
+{
     static int i = 0;
-    return i ++;
+    return i++;
 }
 
-range::function_range <int()> count2() {
-    return range::function_range <int()> (get_next_count);
+range::function_range<int()> count2()
+{
+    return range::function_range<int()>(get_next_count);
 }
 
-class container_container {
-    std::vector <int> v;
+class container_container
+{
+    std::vector<int> v;
 
-    range::tuple <double, std::string, bool> t;
+    range::tuple<double, std::string, bool> t;
 
 public:
-    container_container()
-    : t (13.5, "Great!", false)
+    container_container() : t(13.5, "Great!", false)
     {
-        v.push_back (17);
-        v.push_back (19);
+        v.push_back(17);
+        v.push_back(19);
     }
 
-    std::vector <int> const & get_17_19() const { return v; }
+    std::vector<int> const & get_17_19() const { return v; }
 
-    range::tuple <double, std::string, bool> const & get_tuple() const
-    { return t; }
+    range::tuple<double, std::string, bool> const & get_tuple() const
+    {
+        return t;
+    }
 };
 
-NB_MODULE (return_view_example, m) {
+NB_MODULE(return_view_example, m)
+{
     namespace nb = nanobind;
 
-    range::python::initialise_iterator (m);
+    range::python::initialise_iterator(m);
 
-    m.def ("count", range::python::return_view (&count));
+    m.def("count", range::python::return_view(&count));
 
-    m.def ("count2", range::python::return_view (&count2));
+    m.def("count2", range::python::return_view(&count2));
 
-    nb::class_ <container_container> (m, "ContainerContainer")
-        .def (nb::init<>())
-        .def ("get_17_19",
-            range::python::return_view (&container_container::get_17_19),
-            nb::keep_alive <0, 1>())
-        .def ("get_tuple",
-            range::python::return_view (&container_container::get_tuple),
-            nb::keep_alive <0, 1>());
+    nb::class_<container_container>(m, "ContainerContainer")
+        .def(nb::init<>())
+        .def(
+            "get_17_19",
+            range::python::return_view(&container_container::get_17_19),
+            nb::keep_alive<0, 1>())
+        .def(
+            "get_tuple",
+            range::python::return_view(&container_container::get_tuple),
+            nb::keep_alive<0, 1>());
 }

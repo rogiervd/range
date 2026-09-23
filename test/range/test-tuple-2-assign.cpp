@@ -19,19 +19,19 @@ limitations under the License.
 
 #include "range/tuple.hpp"
 
+#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
-#include <memory>
 
 #include <boost/mpl/assert.hpp>
 
-#include "utility/unique_ptr.hpp"
 #include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
+#include "utility/unique_ptr.hpp"
 
-#include "range/std/vector.hpp"
 #include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 
 #include "rime/check/check_equal.hpp"
 
@@ -41,43 +41,46 @@ using range::tuple;
 
 using range::back;
 
-using range::first;
 using range::at_c;
+using range::first;
 
 using range::size_mismatch;
 
 using utility::is_assignable;
 
-using utility::tracked_registry;
 using utility::tracked;
 using utility::tracked_counts;
+using utility::tracked_registry;
 
-struct source {};
+struct source
+{};
 
-struct assignable {
-    assignable & operator = (source const &) { return *this; }
+struct assignable
+{
+    assignable & operator=(source const &) { return *this; }
 };
 
-struct unassignable {
-    unassignable & operator = (unassignable const &) = delete;
+struct unassignable
+{
+    unassignable & operator=(unassignable const &) = delete;
 };
 
-BOOST_AUTO_TEST_CASE (tuple_assign_test_test) {
+BOOST_AUTO_TEST_CASE(tuple_assign_test_test)
+{
     // Check whether the tests make sense.
-    static_assert (
-        is_assignable <assignable, source>::value, "");
-    static_assert (
-        !is_assignable <unassignable, source>::value, "");
+    static_assert(is_assignable<assignable, source>::value, "");
+    static_assert(!is_assignable<unassignable, source>::value, "");
 }
 
 /* Default-assignion from elements. */
 
-BOOST_AUTO_TEST_CASE (tuple_assign_zero) {
-    static_assert (is_assignable <tuple<>, tuple<>>::value, "");
+BOOST_AUTO_TEST_CASE(tuple_assign_zero)
+{
+    static_assert(is_assignable<tuple<>, tuple<>>::value, "");
 
     // Wrong size.
-    static_assert (!is_assignable <tuple<>, tuple <source>>::value, "");
-    static_assert (!is_assignable <tuple<>, tuple <source, source>>::value, "");
+    static_assert(!is_assignable<tuple<>, tuple<source>>::value, "");
+    static_assert(!is_assignable<tuple<>, tuple<source, source>>::value, "");
 
     {
         tuple<> t1;
@@ -86,17 +89,18 @@ BOOST_AUTO_TEST_CASE (tuple_assign_zero) {
     }
 }
 
-BOOST_AUTO_TEST_CASE (tuple_assign_from_range_zero) {
+BOOST_AUTO_TEST_CASE(tuple_assign_from_range_zero)
+{
     // std::tuple.
-    static_assert (is_assignable <tuple<>, std::tuple<>>::value, "");
+    static_assert(is_assignable<tuple<>, std::tuple<>>::value, "");
 
     // Wrong size.
-    static_assert (!is_assignable <tuple<>, std::tuple <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple<>, std::tuple <source, source>>::value, "");
+    static_assert(!is_assignable<tuple<>, std::tuple<source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<>, std::tuple<source, source>>::value, "");
 
     // std::vector
-    static_assert (is_assignable <tuple<>, std::vector <int>>::value, "");
+    static_assert(is_assignable<tuple<>, std::vector<int>>::value, "");
 
     {
         std::tuple<> t1;
@@ -104,220 +108,230 @@ BOOST_AUTO_TEST_CASE (tuple_assign_from_range_zero) {
         t2 = t1;
     }
     {
-        std::vector <int> v;
+        std::vector<int> v;
         tuple<> t;
         t = v;
 
-        v.push_back (7);
-        BOOST_CHECK_THROW (t = v, size_mismatch);
+        v.push_back(7);
+        BOOST_CHECK_THROW(t = v, size_mismatch);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE (tuple_assign_one) {
-    static_assert (is_assignable <
-        tuple <assignable>, tuple <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <unassignable>, tuple <source>>::value, "");
+BOOST_AUTO_TEST_CASE(tuple_assign_one)
+{
+    static_assert(is_assignable<tuple<assignable>, tuple<source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<unassignable>, tuple<source>>::value, "");
 
     // Wrong size.
-    static_assert (!is_assignable <
-        tuple <assignable>, tuple<>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable>, tuple <source, source>>::value, "");
+    static_assert(!is_assignable<tuple<assignable>, tuple<>>::value, "");
+    static_assert(
+        !is_assignable<tuple<assignable>, tuple<source, source>>::value, "");
 
     {
-        tuple <int> t (7);
+        tuple<int> t(7);
 
-        tuple <int> ti (21);
+        tuple<int> ti(21);
         ti = t;
-        BOOST_CHECK_EQUAL (first (ti), 7);
+        BOOST_CHECK_EQUAL(first(ti), 7);
 
-        tuple <long> tl (31l);
+        tuple<long> tl(31l);
         tl = t;
-        BOOST_CHECK_EQUAL (first (tl), 7l);
+        BOOST_CHECK_EQUAL(first(tl), 7l);
     }
     tracked_registry r;
     {
-        tuple <tracked <int>> t (tracked <int> (r, 44));
+        tuple<tracked<int>> t(tracked<int>(r, 44));
 
         auto before = r.counts();
-        tuple <tracked <int>> t_copy (t);
-        BOOST_CHECK_EQUAL (first (t_copy).content(), 44);
-        BOOST_CHECK_EQUAL (r.since (before), utility::copy_count (1));
+        tuple<tracked<int>> t_copy(t);
+        BOOST_CHECK_EQUAL(first(t_copy).content(), 44);
+        BOOST_CHECK_EQUAL(r.since(before), utility::copy_count(1));
 
         before = r.counts();
-        tuple <tracked <int>> t_moved (std::move (t));
-        BOOST_CHECK_EQUAL (first (t_moved).content(), 44);
-        BOOST_CHECK_EQUAL (r.since (before), utility::move_count (1));
+        tuple<tracked<int>> t_moved(std::move(t));
+        BOOST_CHECK_EQUAL(first(t_moved).content(), 44);
+        BOOST_CHECK_EQUAL(r.since(before), utility::move_count(1));
     }
     // Noncopyable
     {
-        tuple <std::unique_ptr <int>> t (utility::make_unique <int> (66));
-        tuple <std::unique_ptr <int>> t_moved (std::move (t));
-        BOOST_CHECK_EQUAL (*first (t_moved), 66);
+        tuple<std::unique_ptr<int>> t(utility::make_unique<int>(66));
+        tuple<std::unique_ptr<int>> t_moved(std::move(t));
+        BOOST_CHECK_EQUAL(*first(t_moved), 66);
     }
     {
         int i1 = 80;
         int i2 = 32;
-        tuple <int &> t1 (i1);
-        tuple <int &> t2 (i2);
+        tuple<int &> t1(i1);
+        tuple<int &> t2(i2);
 
-        BOOST_CHECK_EQUAL (first (t1), i1);
-        BOOST_CHECK_EQUAL (&first (t1), &i1);
+        BOOST_CHECK_EQUAL(first(t1), i1);
+        BOOST_CHECK_EQUAL(&first(t1), &i1);
 
-        BOOST_CHECK_EQUAL (first (t2), i2);
-        BOOST_CHECK_EQUAL (&first (t2), &i2);
+        BOOST_CHECK_EQUAL(first(t2), i2);
+        BOOST_CHECK_EQUAL(&first(t2), &i2);
 
         // Set i2 through the reference to it in i1.
         t2 = t1;
-        BOOST_CHECK_EQUAL (i2, 80);
-        BOOST_CHECK_EQUAL (first (t2), 80);
+        BOOST_CHECK_EQUAL(i2, 80);
+        BOOST_CHECK_EQUAL(first(t2), 80);
 
         // But i2 must be set.
         i1 = 73;
-        BOOST_CHECK_EQUAL (first (t2), 80);
-        BOOST_CHECK_EQUAL (&first (t2), &i2);
+        BOOST_CHECK_EQUAL(first(t2), 80);
+        BOOST_CHECK_EQUAL(&first(t2), &i2);
     }
 }
 
-BOOST_AUTO_TEST_CASE (tuple_assign_from_range_one) {
-    static_assert (is_assignable <
-        tuple <assignable>, std::tuple <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <unassignable>, std::tuple <source>>::value, "");
+BOOST_AUTO_TEST_CASE(tuple_assign_from_range_one)
+{
+    static_assert(
+        is_assignable<tuple<assignable>, std::tuple<source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<unassignable>, std::tuple<source>>::value, "");
 
     // Wrong size.
-    static_assert (!is_assignable <
-        tuple <assignable>, std::tuple<>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable>, std::tuple <source, source>>::value, "");
+    static_assert(!is_assignable<tuple<assignable>, std::tuple<>>::value, "");
+    static_assert(
+        !is_assignable<tuple<assignable>, std::tuple<source, source>>::value,
+        "");
 
     // std::vector
-    static_assert (is_assignable <
-        tuple <assignable>, std::vector <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <unassignable>, std::vector <source>>::value, "");
+    static_assert(
+        is_assignable<tuple<assignable>, std::vector<source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<unassignable>, std::vector<source>>::value, "");
 
     {
-        std::tuple <int> t (7);
+        std::tuple<int> t(7);
 
-        tuple <int> ti (21);
+        tuple<int> ti(21);
         ti = t;
-        BOOST_CHECK_EQUAL (first (ti), 7);
+        BOOST_CHECK_EQUAL(first(ti), 7);
 
-        tuple <long> tl (31l);
+        tuple<long> tl(31l);
         tl = t;
-        BOOST_CHECK_EQUAL (first (tl), 7l);
+        BOOST_CHECK_EQUAL(first(tl), 7l);
     }
     {
         int i1 = 80;
         int i2 = 32;
-        std::tuple <int &> t1 (i1);
-        tuple <int &> t2 (i2);
+        std::tuple<int &> t1(i1);
+        tuple<int &> t2(i2);
 
-        BOOST_CHECK_EQUAL (first (t1), i1);
-        BOOST_CHECK_EQUAL (&first (t1), &i1);
+        BOOST_CHECK_EQUAL(first(t1), i1);
+        BOOST_CHECK_EQUAL(&first(t1), &i1);
 
-        BOOST_CHECK_EQUAL (first (t2), i2);
-        BOOST_CHECK_EQUAL (&first (t2), &i2);
+        BOOST_CHECK_EQUAL(first(t2), i2);
+        BOOST_CHECK_EQUAL(&first(t2), &i2);
 
         // Set i2 through the reference to it in i1.
         t2 = t1;
-        BOOST_CHECK_EQUAL (i2, 80);
-        BOOST_CHECK_EQUAL (first (t2), 80);
+        BOOST_CHECK_EQUAL(i2, 80);
+        BOOST_CHECK_EQUAL(first(t2), 80);
 
         // But i2 must be set.
         i1 = 73;
-        BOOST_CHECK_EQUAL (first (t2), 80);
-        BOOST_CHECK_EQUAL (&first (t2), &i2);
+        BOOST_CHECK_EQUAL(first(t2), 80);
+        BOOST_CHECK_EQUAL(&first(t2), &i2);
     }
     {
-        std::vector <int> v;
-        tuple <int> t (6);
-        BOOST_CHECK_EQUAL (first (t), 6);
+        std::vector<int> v;
+        tuple<int> t(6);
+        BOOST_CHECK_EQUAL(first(t), 6);
 
         // Throw if the size is mismatched at run time.
-        BOOST_CHECK_THROW (t = v, size_mismatch);
+        BOOST_CHECK_THROW(t = v, size_mismatch);
 
-        v.push_back (7);
+        v.push_back(7);
         t = v;
-        BOOST_CHECK_EQUAL (first (t), 7);
+        BOOST_CHECK_EQUAL(first(t), 7);
 
-        v.push_back (7);
-        BOOST_CHECK_THROW (t = v, size_mismatch);
+        v.push_back(7);
+        BOOST_CHECK_THROW(t = v, size_mismatch);
     }
 }
 
-BOOST_AUTO_TEST_CASE (tuple_assign_more) {
-    static_assert (is_assignable <
-        tuple <assignable, assignable>, tuple <source, source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable, unassignable>, tuple <source, source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <unassignable, assignable>, tuple <source, source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <unassignable, unassignable>, tuple <source, source>>::value, "");
+BOOST_AUTO_TEST_CASE(tuple_assign_more)
+{
+    static_assert(
+        is_assignable<
+            tuple<assignable, assignable>, tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, unassignable>, tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, assignable>, tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, unassignable>, tuple<source, source>>::value,
+        "");
 
     // Wrong size.
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>, tuple<>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>, tuple <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>,
-        tuple <source, source, source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<assignable, assignable>, tuple<>>::value, "");
+    static_assert(
+        !is_assignable<tuple<assignable, assignable>, tuple<source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, assignable>,
+            tuple<source, source, source>>::value,
+        "");
 
     {
         tracked_registry c;
-        tracked <int> ci (c, 45);
+        tracked<int> ci(c, 45);
         float f = 4.5f;
-        tracked <double> cd (c, 6.7);
-        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 0, 0, 0, 0, 0, 0, 0));
+        tracked<double> cd(c, 6.7);
+        BOOST_CHECK_EQUAL(c.counts(), tracked_counts(2, 0, 0, 0, 0, 0, 0, 0));
 
-        tuple <tracked <int> &, float &, tracked <double> &>
-            tied (ci, f, cd);
-        tuple <tracked <int>, float, tracked <double>>
-            saved (ci, f, cd);
+        tuple<tracked<int> &, float &, tracked<double> &> tied(ci, f, cd);
+        tuple<tracked<int>, float, tracked<double>> saved(ci, f, cd);
 
-        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
+        BOOST_CHECK_EQUAL(c.counts(), tracked_counts(2, 2, 0, 0, 0, 0, 0, 0));
 
         // Values in "saved".
-        first (saved).content() = 56;
-        BOOST_CHECK_EQUAL (first (saved).content(), 56);
-        BOOST_CHECK_EQUAL (ci.content(), 45);
+        first(saved).content() = 56;
+        BOOST_CHECK_EQUAL(first(saved).content(), 56);
+        BOOST_CHECK_EQUAL(ci.content(), 45);
 
-        at_c <1> (saved) = 7.6f;
-        BOOST_CHECK_EQUAL (at_c <1> (saved), 7.6f);
-        BOOST_CHECK_EQUAL (f, 4.5f);
+        at_c<1>(saved) = 7.6f;
+        BOOST_CHECK_EQUAL(at_c<1>(saved), 7.6f);
+        BOOST_CHECK_EQUAL(f, 4.5f);
 
-        at_c <2> (saved).content() = 10.6;
-        BOOST_CHECK_EQUAL (at_c <2> (saved).content(), 10.6);
-        BOOST_CHECK_EQUAL (cd.content(), 6.7);
+        at_c<2>(saved).content() = 10.6;
+        BOOST_CHECK_EQUAL(at_c<2>(saved).content(), 10.6);
+        BOOST_CHECK_EQUAL(cd.content(), 6.7);
 
-        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 0, 0, 0, 0, 0));
+        BOOST_CHECK_EQUAL(c.counts(), tracked_counts(2, 2, 0, 0, 0, 0, 0, 0));
 
         // Assign values to the original objects.
         tied = saved;
-        BOOST_CHECK_EQUAL (ci.content(), 56);
-        BOOST_CHECK_EQUAL (f, 7.6f);
-        BOOST_CHECK_EQUAL (cd.content(), 10.6);
+        BOOST_CHECK_EQUAL(ci.content(), 56);
+        BOOST_CHECK_EQUAL(f, 7.6f);
+        BOOST_CHECK_EQUAL(cd.content(), 10.6);
 
-        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 0, 0, 0, 0));
+        BOOST_CHECK_EQUAL(c.counts(), tracked_counts(2, 2, 0, 2, 0, 0, 0, 0));
 
         // Move.
         // First change the values in "saved" so that it's noticeable.
-        at_c <0> (saved).content() = 78;
-        at_c <1> (saved) = 17.45f;
-        at_c <2> (saved).content() = 18.45;
-        tied = std::move (saved);
+        at_c<0>(saved).content() = 78;
+        at_c<1>(saved) = 17.45f;
+        at_c<2>(saved).content() = 18.45;
+        tied = std::move(saved);
 
-        BOOST_CHECK_EQUAL (ci.content(), 78);
-        BOOST_CHECK_EQUAL (f, 17.45f);
-        BOOST_CHECK_EQUAL (cd.content(), 18.45);
+        BOOST_CHECK_EQUAL(ci.content(), 78);
+        BOOST_CHECK_EQUAL(f, 17.45f);
+        BOOST_CHECK_EQUAL(cd.content(), 18.45);
 
         // If moveability is exploited, the result is:
-        BOOST_CHECK_EQUAL (c.counts(), tracked_counts (2, 2, 0, 2, 2, 0, 0, 0));
+        BOOST_CHECK_EQUAL(c.counts(), tracked_counts(2, 2, 0, 2, 2, 0, 0, 0));
         // Otherwise it would be:
         // BOOST_CHECK_EQUAL (c.counts(),
         //     tracked_counts (2, 2, 0, 4, 0, 0, 0, 0));
@@ -328,123 +342,156 @@ BOOST_AUTO_TEST_CASE (tuple_assign_more) {
     {
         tracked_registry r;
         {
-            tracked <int> a1 (r, 7);
-            tracked <double> a2 (r, 9);
+            tracked<int> a1(r, 7);
+            tracked<double> a2(r, 9);
 
-            tracked <int> b1 (r, 8.25);
-            tracked <double> b2 (r, 10.5);
+            tracked<int> b1(r, 8.25);
+            tracked<double> b2(r, 10.5);
 
-            typedef tuple <tracked <int> &, tracked <double> &> pair;
-            pair p (a1, a2);
-            BOOST_CHECK_EQUAL (r.counts(),
-                utility::tracked_counts (4, 0, 0, 0, 0, 0, 0, 0));
+            typedef tuple<tracked<int> &, tracked<double> &> pair;
+            pair p(a1, a2);
+            BOOST_CHECK_EQUAL(
+                r.counts(), utility::tracked_counts(4, 0, 0, 0, 0, 0, 0, 0));
             // This should copy-assign b1 into a1 and b2 into a2, not move it.
-            p = pair (b1, b2);
-            BOOST_CHECK_EQUAL (r.counts(),
-                utility::tracked_counts (4, 0, 0, 2, 0, 0, 0, 0));
+            p = pair(b1, b2);
+            BOOST_CHECK_EQUAL(
+                r.counts(), utility::tracked_counts(4, 0, 0, 2, 0, 0, 0, 0));
         }
     }
 }
 
-BOOST_AUTO_TEST_CASE (tuple_assign_from_range_more) {
+BOOST_AUTO_TEST_CASE(tuple_assign_from_range_more)
+{
     // std::tuple.
-    static_assert (is_assignable <tuple <assignable, assignable>,
-        std::tuple <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <assignable, unassignable>,
-        std::tuple <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, assignable>,
-        std::tuple <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, unassignable>,
-        std::tuple <source, source>>::value, "");
+    static_assert(
+        is_assignable<
+            tuple<assignable, assignable>, std::tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, unassignable>, std::tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, assignable>, std::tuple<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, unassignable>,
+            std::tuple<source, source>>::value,
+        "");
 
     // std::pair.
-    static_assert (is_assignable <tuple <assignable, assignable>,
-        std::pair <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <assignable, unassignable>,
-        std::pair <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, assignable>,
-        std::pair <source, source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, unassignable>,
-        std::pair <source, source>>::value, "");
+    static_assert(
+        is_assignable<
+            tuple<assignable, assignable>, std::pair<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, unassignable>, std::pair<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, assignable>, std::pair<source, source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, unassignable>,
+            std::pair<source, source>>::value,
+        "");
 
     // Wrong size.
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>, std::tuple<>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>, std::tuple <source>>::value, "");
-    static_assert (!is_assignable <
-        tuple <assignable, assignable>,
-        std::tuple <source, source, source>>::value, "");
+    static_assert(
+        !is_assignable<tuple<assignable, assignable>, std::tuple<>>::value, "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, assignable>, std::tuple<source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, assignable>,
+            std::tuple<source, source, source>>::value,
+        "");
 
-    static_assert (is_assignable <tuple <assignable, assignable>,
-        std::vector <source>>::value, "");
-    static_assert (!is_assignable <tuple <assignable, unassignable>,
-        std::vector <source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, assignable>,
-        std::vector <source>>::value, "");
-    static_assert (!is_assignable <tuple <unassignable, unassignable>,
-        std::vector <source>>::value, "");
+    static_assert(
+        is_assignable<
+            tuple<assignable, assignable>, std::vector<source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<assignable, unassignable>, std::vector<source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, assignable>, std::vector<source>>::value,
+        "");
+    static_assert(
+        !is_assignable<
+            tuple<unassignable, unassignable>, std::vector<source>>::value,
+        "");
 
     {
         int i = 89;
         float f = 5.5;
-        tuple <int &, float &> tied (i, f);
+        tuple<int &, float &> tied(i, f);
 
-        std::tuple <int, float> original (101, 77.5);
+        std::tuple<int, float> original(101, 77.5);
         tied = original;
-        BOOST_CHECK_EQUAL (i, 101);
-        BOOST_CHECK_EQUAL (f, 77.5);
+        BOOST_CHECK_EQUAL(i, 101);
+        BOOST_CHECK_EQUAL(f, 77.5);
 
-        std::pair <int, float> original2 (720, -3.5);
+        std::pair<int, float> original2(720, -3.5);
         tied = original2;
-        BOOST_CHECK_EQUAL (i, 720);
-        BOOST_CHECK_EQUAL (f, -3.5);
+        BOOST_CHECK_EQUAL(i, 720);
+        BOOST_CHECK_EQUAL(f, -3.5);
     }
     {
-        std::vector <float> v;
-        BOOST_CHECK_THROW ((tuple <float, double> (v)), size_mismatch);
+        std::vector<float> v;
+        BOOST_CHECK_THROW((tuple<float, double>(v)), size_mismatch);
 
-        v.push_back (7.5);
-        BOOST_CHECK_THROW ((tuple <float, double> (v)), size_mismatch);
+        v.push_back(7.5);
+        BOOST_CHECK_THROW((tuple<float, double>(v)), size_mismatch);
 
-        v.push_back (9.5);
+        v.push_back(9.5);
 
-        tuple <float, double> t (v);
-        BOOST_CHECK_EQUAL (first (t), 7.5);
-        BOOST_CHECK_EQUAL (first (t, back), 9.5);
+        tuple<float, double> t(v);
+        BOOST_CHECK_EQUAL(first(t), 7.5);
+        BOOST_CHECK_EQUAL(first(t, back), 9.5);
 
         // Change the original vector.
         // This is not in general recommended: there is the risk of dangling
         // references if the vector changes.
         {
-            tuple <float &, float &> tied (v);
-            first (tied) = 3456;
-            BOOST_CHECK_EQUAL (first (v), 3456);
+            tuple<float &, float &> tied(v);
+            first(tied) = 3456;
+            BOOST_CHECK_EQUAL(first(v), 3456);
         }
 
-        v.push_back (12.25);
-        BOOST_CHECK_THROW ((tuple <float, double> (v)), size_mismatch);
+        v.push_back(12.25);
+        BOOST_CHECK_THROW((tuple<float, double>(v)), size_mismatch);
     }
 }
 
 // Type that contains a tuple, and default-generated assignment operators.
-struct product_type {
-    tuple <int, float> t;
+struct product_type
+{
+    tuple<int, float> t;
 
-    product_type (int i, float f) : t (i, f) {}
+    product_type(int i, float f) : t(i, f) {}
 
-    product_type & operator = (product_type const &) = default;
-    product_type & operator = (product_type &&) = default;
+    product_type & operator=(product_type const &) = default;
+    product_type & operator=(product_type &&) = default;
 };
 
-BOOST_AUTO_TEST_CASE (contained_assign) {
-    product_type p1 (5, 6.7);
+BOOST_AUTO_TEST_CASE(contained_assign)
+{
+    product_type p1(5, 6.7);
 
-    product_type p2 (12, 13.5);
-    product_type p3 (17, 18.5);
+    product_type p2(12, 13.5);
+    product_type p3(17, 18.5);
 
     p3 = p1;
-    p3 = std::move (p2);
+    p3 = std::move(p2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

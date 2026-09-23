@@ -28,16 +28,20 @@ This includes \c \<set>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Key, class Compare, class Allocator>
-        struct tag_of_qualified <std::set <Key, Compare, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
+/// \cond DONT_DOCUMENT
+template <class Key, class Compare, class Allocator>
+struct tag_of_qualified<std::set<Key, Compare, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
 
-    template <class Key, class Compare, class Allocator>
-        struct tag_of_qualified <std::multiset <Key, Compare, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+template <class Key, class Compare, class Allocator>
+struct tag_of_qualified<std::multiset<Key, Compare, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_SET_HPP_INCLUDED
+#endif  // RANGE_STD_SET_HPP_INCLUDED

@@ -28,12 +28,14 @@ This includes \c \<list>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Type, class Allocator>
-        struct tag_of_qualified <std::list <Type, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+/// \cond DONT_DOCUMENT
+template <class Type, class Allocator>
+struct tag_of_qualified<std::list<Type, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_LIST_HPP_INCLUDED
+#endif  // RANGE_STD_LIST_HPP_INCLUDED

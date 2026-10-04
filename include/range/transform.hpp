@@ -61,9 +61,8 @@ public:
 
     transform_view(transform_view && that)
     : underlying_(std::move(that.underlying_)),
-      function_(
-          utility::storage::get<Function, transform_view &&>()(
-              that.function_.content()))
+      function_(utility::storage::get<Function, transform_view &&>()(
+          that.function_.content()))
     {}
 
     transform_view & operator=(transform_view const & that)
@@ -118,9 +117,8 @@ private:
     }
 
     template <class Direction> struct chop_in_place_result
-    : result_of<Function(
-          typename result_of<callable::chop_in_place(
-              Direction, Underlying &)>::type)>
+    : result_of<Function(typename result_of<callable::chop_in_place(
+                             Direction, Underlying &)>::type)>
     {};
 
     template <class Direction> auto chop_in_place(Direction const & direction)
@@ -136,10 +134,10 @@ namespace callable {
         struct dispatch
         {
             template <class View, class Function, class... Directions>
-            auto operator()(View && view, Function && function) const RETURNS(
-                range::transform_view<
-                    typename std::decay<View>::type,
-                    typename std::decay<Function>::type>(
+            auto operator()(View && view, Function && function) const
+                RETURNS(range::transform_view<
+                        typename std::decay<View>::type,
+                        typename std::decay<Function>::type>(
                     std::forward<View>(view),
                     std::forward<Function>(function)));
         };
@@ -149,10 +147,9 @@ namespace callable {
         auto operator()(
             Range && range, Function && function,
             Directions const &... directions) const
-            RETURNS(
-                dispatch()(
-                    range::view(std::forward<Range>(range), directions...),
-                    std::forward<Function>(function)));
+            RETURNS(dispatch()(
+                range::view(std::forward<Range>(range), directions...),
+                std::forward<Function>(function)));
     };
 
 }  // namespace callable
@@ -188,12 +185,11 @@ namespace transform_operation {
     inline auto implement_drop(
         transform_view_tag const &, View && view, Increment const & increment,
         Direction const & direction)
-        RETURNS(
-            range::transform(
-                range::drop(
-                    range::helper::get_underlying<View>(view), increment,
-                    direction),
-                view.function(), direction));
+        RETURNS(range::transform(
+            range::drop(
+                range::helper::get_underlying<View>(view), increment,
+                direction),
+            view.function(), direction));
 
     // chop: forward to underlying and re-wrap.
     // Note that this is only implemented if chop<> is implemented natively for

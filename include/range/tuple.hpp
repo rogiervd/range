@@ -1264,8 +1264,8 @@ namespace tuple_detail {
             Function && function, meta::size_t_vector<Indices...>) const
         {
             call_function<Function> call(std::forward<Function>(function));
-            int dummy[] = {call(
-                extract<((tuple_size - begin_position - 1) - Indices)>()(
+            int dummy[] = {
+                call(extract<((tuple_size - begin_position - 1) - Indices)>()(
                     tuple()))...};
             (void) dummy;
         }

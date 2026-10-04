@@ -86,9 +86,8 @@ namespace callable {
                 template <class Range, class Direction> auto operator()(
                     Range const & range, Direction const & direction,
                     overload_order<4> *) const
-                    RETURNS(
-                        helper::member_access::size(
-                            range, direction::make_forward(direction)));
+                    RETURNS(helper::member_access::size(
+                        range, direction::make_forward(direction)));
             };
 
         public:
@@ -105,9 +104,8 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range const & range) const RETURNS(
-                dispatch()(
-                    range, range::default_direction(range), pick_overload()));
+            auto operator()(Range const & range) const RETURNS(dispatch()(
+                range, range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation

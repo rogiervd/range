@@ -566,11 +566,10 @@ namespace callable {
         auto operator()(
             State && state, Range && range, Direction const & direction,
             Function && function) const
-            RETURNS(
-                apply()(
-                    std::forward<State>(state),
-                    range::view(std::forward<Range>(range), direction),
-                    direction, std::forward<Function>(function)));
+            RETURNS(apply()(
+                std::forward<State>(state),
+                range::view(std::forward<Range>(range), direction), direction,
+                std::forward<Function>(function)));
 
         // Without direction: use default_direction.
         template <
@@ -578,12 +577,11 @@ namespace callable {
             // Implemented if "empty" is implemented.
             class Enable = decltype(range::empty(std::declval<Range>()))>
         auto operator()(State && state, Range && range, Function && function)
-            const RETURNS(
-                apply()(
-                    std::forward<State>(state),
-                    range::view(std::forward<Range>(range)),
-                    range::default_direction(range),
-                    std::forward<Function>(function)));
+            const RETURNS(apply()(
+                std::forward<State>(state),
+                range::view(std::forward<Range>(range)),
+                range::default_direction(range),
+                std::forward<Function>(function)));
     };
 
 }  // namespace callable

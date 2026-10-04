@@ -158,9 +158,8 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range & range) const RETURNS(
-                dispatch()(
-                    range, range::default_direction(range), pick_overload()));
+            auto operator()(Range & range) const RETURNS(dispatch()(
+                range, range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation

@@ -54,9 +54,8 @@ template <class Underlying, class Limit, class Direction> class take_range;
 template <class Underlying, class Limit, class Direction>
 inline auto make_take_range(
     Underlying && underlying, Limit const & limit, Direction const & direction)
-    RETURNS(
-        take_range<typename std::decay<Underlying>::type, Limit, Direction>(
-            std::forward<Underlying>(underlying), limit, direction));
+    RETURNS(take_range<typename std::decay<Underlying>::type, Limit, Direction>(
+        std::forward<Underlying>(underlying), limit, direction));
 
 /* take_range, which limits the underlying range. */
 
@@ -97,10 +96,9 @@ private:
     auto default_direction() const
         RETURNS(range::default_direction(underlying_));
 
-    auto empty(Direction const & direction) const RETURNS(
-        rime::or_(
-            limit_ == rime::make_zero(limit_),
-            range::empty(underlying_, direction)));
+    auto empty(Direction const & direction) const RETURNS(rime::or_(
+        limit_ == rime::make_zero(limit_),
+        range::empty(underlying_, direction)));
 
     template <
         class Underlying2 = Underlying, class Limit2 = Limit,
@@ -262,13 +260,12 @@ namespace callable {
             auto operator()(
                 Range && range, Limit const & limit,
                 Direction const & direction) const
-                RETURNS(
-                    rime::call_if(
-                        is_take_range_with_same_direction()(range, direction),
-                        when_take_range(), when_not_take_range(),
-                        std::forward<Range>(range),
-                        check_limit_non_negative()(limit), direction,
-                        pick_overload()));
+                RETURNS(rime::call_if(
+                    is_take_range_with_same_direction()(range, direction),
+                    when_take_range(), when_not_take_range(),
+                    std::forward<Range>(range),
+                    check_limit_non_negative()(limit), direction,
+                    pick_overload()));
         };
 
         /* The main implementation of "take". */
@@ -292,9 +289,8 @@ namespace callable {
                 auto operator()(
                     Range && range, Limit const & limit,
                     Direction const & direction, overload_order<2> *) const
-                    RETURNS(
-                        implement_take_default()(
-                            std::forward<Range>(range), limit, direction));
+                    RETURNS(implement_take_default()(
+                        std::forward<Range>(range), limit, direction));
             };
 
         public:
@@ -306,10 +302,9 @@ namespace callable {
             auto operator()(
                 Range && range, Limit const & limit,
                 Direction const & direction) const
-                RETURNS(
-                    dispatch()(
-                        range::view(std::forward<Range>(range), direction),
-                        limit, direction, pick_overload()));
+                RETURNS(dispatch()(
+                    range::view(std::forward<Range>(range), direction), limit,
+                    direction, pick_overload()));
 
             // With limit but without direction: use default direction.
             template <
@@ -317,8 +312,8 @@ namespace callable {
                 class Enable = typename std::enable_if<
                     is_range<Range>::value
                     && !is_direction<Limit>::value>::type>
-            auto operator()(Range && range, Limit const & limit) const RETURNS(
-                dispatch()(
+            auto operator()(Range && range, Limit const & limit) const
+                RETURNS(dispatch()(
                     range::view(
                         std::forward<Range>(range),
                         range::default_direction(range)),
@@ -358,11 +353,10 @@ namespace take_operation {
 
     template <class TakeRange, class Direction> inline auto implement_size(
         take_range_tag const &, TakeRange && r, Direction const & direction)
-        RETURNS(
-            rime::min_<take_detail::limit_merge_policy>(
-                r.limit(),
-                range::size(
-                    range::helper::get_underlying<TakeRange>(r), direction)));
+        RETURNS(rime::min_<take_detail::limit_merge_policy>(
+            r.limit(),
+            range::size(
+                range::helper::get_underlying<TakeRange>(r), direction)));
 
     template <class TakeRange, class Direction> inline auto implement_first(
         take_range_tag const &, TakeRange && r, Direction const & direction)

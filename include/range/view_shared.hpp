@@ -153,21 +153,19 @@ namespace view_of_shared_operation {
 
     template <class Range, class Direction> inline auto implement_first(
         view_of_shared_tag const &, Range && range, Direction const & direction)
-        RETURNS(
-            range::first(
-                range::helper::get_underlying<Range>(range), direction));
+        RETURNS(range::first(
+            range::helper::get_underlying<Range>(range), direction));
 
     template <class Range, class Increment, class Direction>
     inline auto implement_drop(
         view_of_shared_tag const &, Range && range, Increment const & increment,
         Direction const & direction)
-        RETURNS(
-            view_shared_detail::make_view_of_shared()(
-                view_shared_detail::get_heavyweight_pointer()(
-                    std::forward<Range>(range)),
-                range::drop(
-                    range::helper::get_underlying<Range>(range), increment,
-                    direction)));
+        RETURNS(view_shared_detail::make_view_of_shared()(
+            view_shared_detail::get_heavyweight_pointer()(
+                std::forward<Range>(range)),
+            range::drop(
+                range::helper::get_underlying<Range>(range), increment,
+                direction)));
 
     template <
         class Range, class Direction,

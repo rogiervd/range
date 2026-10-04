@@ -114,18 +114,14 @@ inline Result view_stl_container(
 template <class Once, class Container> inline auto implement_make_view(
     std_forward_list_tag, Once once, Container && container,
     direction::front const &)
-    RETURNS(
-        view_stl_container<typename std::decay<Container>::type>(
-            once, std::forward<Container>(container),
-            utility::pick_overload()));
+    RETURNS(view_stl_container<typename std::decay<Container>::type>(
+        once, std::forward<Container>(container), utility::pick_overload()));
 
 template <class Once, class Container> inline auto implement_make_view(
     std_vector_tag, Once once, Container && container,
     range::helper::front_or_back const &)
-    RETURNS(
-        view_stl_container<typename std::decay<Container>::type>(
-            once, std::forward<Container>(container),
-            utility::pick_overload()));
+    RETURNS(view_stl_container<typename std::decay<Container>::type>(
+        once, std::forward<Container>(container), utility::pick_overload()));
 
 BOOST_AUTO_TEST_SUITE(test_range_heavyweight)
 

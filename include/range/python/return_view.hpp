@@ -70,9 +70,8 @@ namespace range { namespace python {
     {
         return [function](
                    Class & object, Arguments... arguments) -> python_iterator {
-            return python_iterator(
-                range::view(
-                    (object.*function)(std::forward<Arguments>(arguments)...)));
+            return python_iterator(range::view(
+                (object.*function)(std::forward<Arguments>(arguments)...)));
         };
     }
 
@@ -83,9 +82,8 @@ namespace range { namespace python {
         return [function](
                    Class const & object,
                    Arguments... arguments) -> python_iterator {
-            return python_iterator(
-                range::view(
-                    (object.*function)(std::forward<Arguments>(arguments)...)));
+            return python_iterator(range::view(
+                (object.*function)(std::forward<Arguments>(arguments)...)));
         };
     }
 

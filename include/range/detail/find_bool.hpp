@@ -59,13 +59,12 @@ namespace range { namespace callable { namespace find_bool_detail {
 
         template <class Range, class Direction>
         auto operator()(Range && range, Direction const & direction) const
-            RETURNS(
-                range::find(
-                    std::forward<Range>(range), direction, equals_value,
-                    when_not_empty, when_empty));
+            RETURNS(range::find(
+                std::forward<Range>(range), direction, equals_value,
+                when_not_empty, when_empty));
 
-        template <class Range> auto operator()(Range && range) const RETURNS(
-            range::find(
+        template <class Range> auto operator()(Range && range) const
+            RETURNS(range::find(
                 std::forward<Range>(range), equals_value, when_not_empty,
                 when_empty));
     };

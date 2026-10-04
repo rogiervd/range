@@ -103,8 +103,8 @@ namespace callable {
     private:
         struct make_reverse_view
         {
-            template <class View> auto operator()(View && view) const RETURNS(
-                range::reverse_view<typename std::decay<View>::type>(
+            template <class View> auto operator()(View && view) const
+                RETURNS(range::reverse_view<typename std::decay<View>::type>(
                     std::forward<View>(view)));
         };
 
@@ -112,9 +112,8 @@ namespace callable {
         // Turn the range into a view, and then wrap it in a reverse_view.
         template <class Range, class... Directions>
         auto operator()(Range && range, Directions const &... directions) const
-            RETURNS(
-                make_reverse_view()(
-                    range::view(std::forward<Range>(range), directions...)));
+            RETURNS(make_reverse_view()(
+                range::view(std::forward<Range>(range), directions...)));
     };
 
 }  // namespace callable
@@ -139,20 +138,17 @@ namespace reverse_operation {
 
     template <class ReverseView, class Direction> inline auto implement_first(
         reverse_view_tag, ReverseView && r, Direction const & direction)
-        RETURNS(
-            range::first(
-                helper::get_underlying<ReverseView>(r),
-                direction::opposite(direction)));
+        RETURNS(range::first(
+            helper::get_underlying<ReverseView>(r),
+            direction::opposite(direction)));
 
     template <class ReverseView, class Increment, class Direction>
     inline auto implement_drop(
         reverse_view_tag, ReverseView && r, Increment const & increment,
         Direction const & direction)
-        RETURNS(
-            range::reverse(
-                range::drop(
-                    helper::get_underlying<ReverseView>(r), increment,
-                    direction::opposite(direction))));
+        RETURNS(range::reverse(range::drop(
+            helper::get_underlying<ReverseView>(r), increment,
+            direction::opposite(direction))));
 
 }  // namespace reverse_operation
 

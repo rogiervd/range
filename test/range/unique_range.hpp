@@ -155,10 +155,9 @@ Result implement_drop(
     unique_range_tag<OneTime> const &, unique_range<Underlying, OneTime> && r,
     Increment const & increment, Direction const & direction)
 {
-    return Result(
-        range::drop(
-            range::helper::get_underlying<unique_range<Underlying, OneTime>>(r),
-            increment, direction));
+    return Result(range::drop(
+        range::helper::get_underlying<unique_range<Underlying, OneTime>>(r),
+        increment, direction));
 }
 
 // chop() only takes an rvalue range, pilfers it, and deactivates the original

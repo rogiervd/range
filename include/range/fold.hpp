@@ -313,11 +313,9 @@ namespace callable {
                 auto operator()(
                     State && state, Range && range, Direction const & direction,
                     Function && function, overload_order<2> *) const
-                    RETURNS(
-                        helper::member_access::fold(
-                            std::forward<State>(state),
-                            std::forward<Range>(range), direction,
-                            std::forward<Function>(function)));
+                    RETURNS(helper::member_access::fold(
+                        std::forward<State>(state), std::forward<Range>(range),
+                        direction, std::forward<Function>(function)));
 
                 // Use default implementation.
                 template <
@@ -325,12 +323,10 @@ namespace callable {
                 auto operator()(
                     State && state, Range && range, Direction const & direction,
                     Function && function, overload_order<3> *) const
-                    RETURNS(
-                        fold_detail::default_implementation<
+                    RETURNS(fold_detail::default_implementation<
                             State, Range, Direction, Function>()(
-                            std::forward<State>(state),
-                            std::forward<Range>(range), direction,
-                            std::forward<Function>(function)));
+                        std::forward<State>(state), std::forward<Range>(range),
+                        direction, std::forward<Function>(function)));
             };
 
         public:
@@ -342,12 +338,11 @@ namespace callable {
             auto operator()(
                 State && state, Range && range, Direction const & direction,
                 Function && function) const
-                RETURNS(
-                    dispatch()(
-                        std::forward<State>(state),
-                        range::view_once(std::forward<Range>(range), direction),
-                        direction, std::forward<Function>(function),
-                        pick_overload()));
+                RETURNS(dispatch()(
+                    std::forward<State>(state),
+                    range::view_once(std::forward<Range>(range), direction),
+                    direction, std::forward<Function>(function),
+                    pick_overload()));
 
             // Without direction: use default_direction.
             template <
@@ -356,12 +351,11 @@ namespace callable {
                 class Enable = decltype(range::empty(std::declval<Range>()))>
             auto operator()(
                 State && state, Range && range, Function && function) const
-                RETURNS(
-                    dispatch()(
-                        std::forward<State>(state),
-                        range::view_once(std::forward<Range>(range)),
-                        range::default_direction(range),
-                        std::forward<Function>(function), pick_overload()));
+                RETURNS(dispatch()(
+                    std::forward<State>(state),
+                    range::view_once(std::forward<Range>(range)),
+                    range::default_direction(range),
+                    std::forward<Function>(function), pick_overload()));
         };
 
     }  // namespace implementation

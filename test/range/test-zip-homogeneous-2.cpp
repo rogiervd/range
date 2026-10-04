@@ -159,8 +159,8 @@ BOOST_AUTO_TEST_CASE(homogeneous)
             auto first_element = first(z);
 
             static_assert(
-                range::has<range::callable::chop(
-                    decltype(drop(z)) const &)>::value,
+                range::has<range::callable::chop(decltype(drop(z))
+                                                     const &)>::value,
                 "");
 
             BOOST_CHECK_EQUAL(first(first_element), 1);

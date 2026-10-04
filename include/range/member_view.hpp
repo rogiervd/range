@@ -69,7 +69,7 @@ However, I do not think this is possible for compile-time values.
 template <typename Member, Member> struct member_extractor;
 
 // Specialisation for a member variable.
-template <typename Structure, typename Type, Type Structure::* member>
+template <typename Structure, typename Type, Type Structure::*member>
 struct member_extractor<Type Structure::*, member>
 {
     Type & operator()(Structure & structure) const { return structure.*member; }

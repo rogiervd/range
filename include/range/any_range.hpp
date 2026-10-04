@@ -360,9 +360,8 @@ namespace any_range_operation {
 
     template <class AnyRange, class Direction> inline auto implement_chop(
         any_range_tag const & tag, AnyRange && r, Direction const & direction)
-        RETURNS(
-            helper::chop_by_chop_in_place(
-                std::forward<AnyRange>(r), direction));
+        RETURNS(helper::chop_by_chop_in_place(
+            std::forward<AnyRange>(r), direction));
 
 }  // namespace any_range_operation
 
@@ -416,10 +415,9 @@ namespace callable {
     public:
         template <class Range, class... Directions>
         auto operator()(Range && range, Directions const &... directions) const
-            RETURNS(
-                apply()(
-                    range::view(std::forward<Range>(range), directions...),
-                    directions...));
+            RETURNS(apply()(
+                range::view(std::forward<Range>(range), directions...),
+                directions...));
     };
 
 }  // namespace callable

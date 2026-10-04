@@ -238,15 +238,14 @@ private:
     friend class helper::member_access;
 
     // Makes decltype complain.
-    auto empty(Direction const & direction) const -> decltype(range::any_of(
-        range::transform(
+    auto empty(Direction const & direction) const
+        -> decltype(range::any_of(range::transform(
             std::declval<underlying_type>(),
             lazy::empty(std::declval<Direction>()))))
     {
-        return range::any_of(
-            range::transform(
-                underlying_,
-                lazy::empty(this->direction_must_be_equal(direction))));
+        return range::any_of(range::transform(
+            underlying_,
+            lazy::empty(this->direction_must_be_equal(direction))));
     }
 
     // size.
@@ -258,8 +257,8 @@ private:
     struct reduce
     {
         template <class Range, class Function>
-        auto operator()(Range && range, Function && function) const RETURNS(
-            range::fold(
+        auto operator()(Range && range, Function && function) const
+            RETURNS(range::fold(
                 range::first(range), range::drop(std::forward<Range>(range)),
                 front, std::forward<Function>(function)));
     };
@@ -280,9 +279,8 @@ private:
             std::is_same<Direction2, Direction>>::type,
         class Enable2 = typename boost::enable_if<meta::all_of_c<
             has<callable::size(Ranges, Direction2)>::value...>>::type>
-    auto size(Direction2 const & direction) const RETURNS(
-        reduce()(
-            range::transform(underlying_, lazy::size(direction)), rime::min));
+    auto size(Direction2 const & direction) const RETURNS(reduce()(
+        range::transform(underlying_, lazy::size(direction)), rime::min));
 };
 
 namespace zip_operation {

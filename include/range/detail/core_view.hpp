@@ -110,20 +110,18 @@ namespace callable {
             auto operator()(
                 Range && range, FirstDirection const & first_direction,
                 OtherDirections const &... other_directions) const
-                RETURNS(
-                    dispatch()(
-                        pick_overload(), std::forward<Range>(range),
-                        first_direction, other_directions...));
+                RETURNS(dispatch()(
+                    pick_overload(), std::forward<Range>(range),
+                    first_direction, other_directions...));
 
             // Without any direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(
-                dispatch()(
-                    pick_overload(), std::forward<Range>(range),
-                    range::default_direction(range)));
+            auto operator()(Range && range) const RETURNS(dispatch()(
+                pick_overload(), std::forward<Range>(range),
+                range::default_direction(range)));
         };
 
     }  // namespace implementation

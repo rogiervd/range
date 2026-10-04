@@ -181,9 +181,8 @@ namespace callable {
             template <class Range, class Direction> auto operator()(
                 Range && range, Direction const & direction,
                 overload_order<2> *) const
-                RETURNS(
-                    helper::member_access::chop(
-                        std::forward<Range>(range), direction));
+                RETURNS(helper::member_access::chop(
+                    std::forward<Range>(range), direction));
         };
 
         struct chop
@@ -245,20 +244,17 @@ namespace callable {
                     is_range<Range>::value
                     && is_direction<Direction>::value>::type>
             auto operator()(Range && range, Direction const & direction) const
-                RETURNS(
-                    dispatch()(
-                        std::forward<Range>(range), direction,
-                        pick_overload()));
+                RETURNS(dispatch()(
+                    std::forward<Range>(range), direction, pick_overload()));
 
             // Without direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(
-                dispatch()(
-                    std::forward<Range>(range), range::default_direction(range),
-                    pick_overload()));
+            auto operator()(Range && range) const RETURNS(dispatch()(
+                std::forward<Range>(range), range::default_direction(range),
+                pick_overload()));
         };
 
     }  // namespace implementation

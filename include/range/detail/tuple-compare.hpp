@@ -235,8 +235,7 @@ namespace range { namespace tuple_detail {
     inline auto implement_equal(
         tuple_view_tag<Size>, tuple_view_tag<Size>, LeftView const & left,
         RightView const & right, direction::front, Predicate && predicate)
-        RETURNS(
-            equal_detail::equal<
+        RETURNS(equal_detail::equal<
                 typename types<LeftView>::type, typename types<RightView>::type,
                 Predicate>()(left, right, std::forward<Predicate>(predicate)));
 
@@ -633,8 +632,7 @@ namespace range { namespace tuple_detail {
     inline auto implement_less_lexicographical(
         tuple_view_tag<Size>, tuple_view_tag<Size>, LeftView const & left,
         RightView const & right, direction::front, Predicate && predicate)
-        RETURNS(
-            less_lexicographical_detail::less_lexicographical<
+        RETURNS(less_lexicographical_detail::less_lexicographical<
                 typename types<LeftView>::type, typename types<RightView>::type,
                 Predicate>()(left, right, std::forward<Predicate>(predicate)));
 

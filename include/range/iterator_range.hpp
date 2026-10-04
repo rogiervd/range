@@ -396,9 +396,8 @@ namespace iterator_range_operation {
     template <class IteratorTag, class Range> inline auto implement_chop(
         iterator_range_tag<IteratorTag> const & tag, Range && range,
         direction::front const & direction)
-        RETURNS(
-            helper::chop_by_chop_in_place(
-                std::forward<Range>(range), direction));
+        RETURNS(helper::chop_by_chop_in_place(
+            std::forward<Range>(range), direction));
 
 }  // namespace iterator_range_operation
 

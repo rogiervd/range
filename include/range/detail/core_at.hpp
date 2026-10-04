@@ -105,9 +105,8 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<2> *) const
-                RETURNS(
-                    helper::member_access::at_constant(
-                        std::forward<Range>(range), position, direction));
+                RETURNS(helper::member_access::at_constant(
+                    std::forward<Range>(range), position, direction));
 
             /* If position is anything. */
             // Use free function.
@@ -124,21 +123,19 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<2> *) const
-                RETURNS(
-                    helper::member_access::at(
-                        std::forward<Range>(range), position, direction));
+                RETURNS(helper::member_access::at(
+                    std::forward<Range>(range), position, direction));
 
             /* Use drop and first. */
             template <class Range, class Position, class Direction>
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<3> *) const
-                RETURNS(
-                    first_direct()(
-                        drop_direct()(
-                            std::forward<Range>(range), position, direction,
-                            pick_overload()),
-                        direction, pick_overload()));
+                RETURNS(first_direct()(
+                    drop_direct()(
+                        std::forward<Range>(range), position, direction,
+                        pick_overload()),
+                    direction, pick_overload()));
         };
 
         struct at
@@ -151,10 +148,9 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction) const
-                RETURNS(
-                    at_dispatch()(
-                        std::forward<Range>(range), position, direction,
-                        pick_overload()));
+                RETURNS(at_dispatch()(
+                    std::forward<Range>(range), position, direction,
+                    pick_overload()));
 
             // Without direction: use default direction.
             template <
@@ -162,10 +158,9 @@ namespace callable {
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
             auto operator()(Range && range, Position const & position) const
-                RETURNS(
-                    at_dispatch()(
-                        std::forward<Range>(range), position,
-                        range::default_direction(range), pick_overload()));
+                RETURNS(at_dispatch()(
+                    std::forward<Range>(range), position,
+                    range::default_direction(range), pick_overload()));
         };
 
         template <std::size_t Position> struct at_c
@@ -176,20 +171,18 @@ namespace callable {
                 class Enable = typename std::enable_if<
                     is_direction<Direction>::value>::type>
             auto operator()(Range && range, Direction const & direction) const
-                RETURNS(
-                    at_dispatch()(
-                        std::forward<Range>(range), rime::size_t<Position>(),
-                        direction, pick_overload()));
+                RETURNS(at_dispatch()(
+                    std::forward<Range>(range), rime::size_t<Position>(),
+                    direction, pick_overload()));
 
             // Without direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(
-                at_dispatch()(
-                    std::forward<Range>(range), rime::size_t<Position>(),
-                    range::default_direction(range), pick_overload()));
+            auto operator()(Range && range) const RETURNS(at_dispatch()(
+                std::forward<Range>(range), rime::size_t<Position>(),
+                range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation

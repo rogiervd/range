@@ -56,271 +56,319 @@ namespace range {
 
 namespace fold_detail {
 
-/**
-The result type is given because it might otherwise become different
-throughout the fold.
-This can only lead to a string of conversions, and nothing good.
+    /**
+    The result type is given because it might otherwise become different
+    throughout the fold.
+    This can only lead to a string of conversions, and nothing good.
 
-The state type is given here so that the exact result of the function
-(including "&&") can be passed in.
-This makes a difference if the range turns out to be empty.
-*/
-template <class Result, class State, class Direction, class Function>
-struct fold {
-  /**
-  Evaluate to the result of the function applied to the state and the
-  first element of the range.
-  */
-  template <class Range>
-  struct result_of_function
-      : result_of<Function(State, typename result_of<callable::first(
-                                      Range, Direction)>::type)> {};
+    The state type is given here so that the exact result of the function
+    (including "&&") can be passed in.
+    This makes a difference if the range turns out to be empty.
+    */
+    template <class Result, class State, class Direction, class Function>
+    struct fold
+    {
+        /**
+        Evaluate to the result of the function applied to the state and the
+        first element of the range.
+        */
+        template <class Range> struct result_of_function
+        : result_of<Function(
+              State,
+              typename result_of<callable::first(Range, Direction)>::type)>
+        {};
 
-  /**
-  Evaluate to \c true iff the result type of the first function call
-  is exactly the same as the current state type.
-  */
-  template <class Range>
-  struct is_stable_state
-      : std::is_same<State, typename result_of_function<Range>::type> {};
+        /**
+        Evaluate to \c true iff the result type of the first function call
+        is exactly the same as the current state type.
+        */
+        template <class Range> struct is_stable_state
+        : std::is_same<State, typename result_of_function<Range>::type>
+        {};
 
-  /**
-  Evaluate to \c true iff the fold is homogeneous.
-  This always compiles, because boost::mpl::and_ evaluates its
-  arguments lazily.
-  If the range is not homogeneous, then is_stable_state is never
-  instantiated.
-  */
-  template <class Range>
-  struct is_homogeneous_fold
-      : boost::mpl::and_<is_homogeneous<Range, Direction>,
-                         is_stable_state<Range>> {};
+        /**
+        Evaluate to \c true iff the fold is homogeneous.
+        This always compiles, because boost::mpl::and_ evaluates its
+        arguments lazily.
+        If the range is not homogeneous, then is_stable_state is never
+        instantiated.
+        */
+        template <class Range> struct is_homogeneous_fold
+        : boost::mpl::and_<
+              is_homogeneous<Range, Direction>, is_stable_state<Range>>
+        {};
 
-  template <class Range>
-  struct has_first : has<callable::first(Range &, Direction)> {};
+        template <class Range> struct has_first
+        : has<callable::first(Range &, Direction)>
+        {};
 
-  /*
-  Four cases.
-  This uses overload_order to go through them one by one.
-  */
+        /*
+        Four cases.
+        This uses overload_order to go through them one by one.
+        */
 
-  /**
-  The fold is homogeneous, and "first" and "drop" are available.
-  */
-  template <class Range,
+        /**
+        The fold is homogeneous, and "first" and "drop" are available.
+        */
+        template <
+            class Range,
             class Enable = typename boost::enable_if<has_first<Range>>::type,
             class Enable2 =
                 typename boost::enable_if<is_homogeneous_fold<Range>>::type>
-  Result operator()(State &&state_, Range &&range_, Direction const &direction,
-                    Function &&function, overload_order<1> *) const {
-    utility::assignable<State> state(std::forward<State>(state_));
-    auto range = std::forward<Range>(range_);
-    while (!range::empty(range, direction)) {
-      state = function(state.move_content(), range::first(range, direction));
-      range = range::drop(std::move(range), direction);
-    }
-    return state.move_content();
-  }
+        Result operator()(
+            State && state_, Range && range_, Direction const & direction,
+            Function && function, overload_order<1> *) const
+        {
+            utility::assignable<State> state(std::forward<State>(state_));
+            auto range = std::forward<Range>(range_);
+            while (!range::empty(range, direction)) {
+                state = function(
+                    state.move_content(), range::first(range, direction));
+                range = range::drop(std::move(range), direction);
+            }
+            return state.move_content();
+        }
 
-  /**
-  The fold is homogeneous, but only "chop" is available.
-  */
-  template <class Range,
+        /**
+        The fold is homogeneous, but only "chop" is available.
+        */
+        template <
+            class Range,
             class Enable = typename boost::disable_if<has_first<Range>>::type,
             class Enable2 =
                 typename boost::enable_if<is_homogeneous_fold<Range>>::type>
-  Result operator()(State &&state_, Range &&range_, Direction const &direction,
-                    Function &&function, overload_order<2> *) const {
-    utility::assignable<State> state(std::forward<State>(state_));
-    auto range = std::forward<Range>(range_);
-    while (!range::empty(range, direction)) {
-      auto chopped = range::chop(std::move(range), direction);
-      state = function(state.move_content(), chopped.move_first());
-      range = chopped.move_rest();
-    }
-    return state.move_content();
-  }
+        Result operator()(
+            State && state_, Range && range_, Direction const & direction,
+            Function && function, overload_order<2> *) const
+        {
+            utility::assignable<State> state(std::forward<State>(state_));
+            auto range = std::forward<Range>(range_);
+            while (!range::empty(range, direction)) {
+                auto chopped = range::chop(std::move(range), direction);
+                state = function(state.move_content(), chopped.move_first());
+                range = chopped.move_rest();
+            }
+            return state.move_content();
+        }
 
-  /**
-  The fold is heterogeneous.
-  The range is always empty: return "state".
-  */
-  template <class Range, class Enable = typename boost::enable_if<
-                             always_empty<Range, Direction>>::type>
-  Result operator()(State &&state, Range &&, Direction const &, Function &&,
-                    overload_order<3> *) const {
-    return std::forward<State>(state);
-  }
+        /**
+        The fold is heterogeneous.
+        The range is always empty: return "state".
+        */
+        template <
+            class Range,
+            class Enable =
+                typename boost::enable_if<always_empty<Range, Direction>>::type>
+        Result operator()(
+            State && state, Range &&, Direction const &, Function &&,
+            overload_order<3> *) const
+        {
+            return std::forward<State>(state);
+        }
 
-  // Heterogeneous: if the range is non-empty.
-  // Using first() and drop().
-  template <class Range>
-  typename boost::enable_if<has_first<Range>, Result>::type
-  apply_non_empty(State &&state, Range &&range, Direction const &direction,
-                  Function &&function) const {
-    // rime::assert_ (!range::empty (direction, range));
-    fold<Result, typename result_of_function<Range>::type, Direction, Function>
-        recursive;
-    return recursive(
-        function(std::forward<State>(state), range::first(range, direction)),
-        range::drop(std::forward<Range>(range), direction), direction,
-        std::forward<Function>(function), pick_overload());
-  }
+        // Heterogeneous: if the range is non-empty.
+        // Using first() and drop().
+        template <class Range>
+        typename boost::enable_if<has_first<Range>, Result>::type
+            apply_non_empty(
+                State && state, Range && range, Direction const & direction,
+                Function && function) const
+        {
+            // rime::assert_ (!range::empty (direction, range));
+            fold<
+                Result, typename result_of_function<Range>::type, Direction,
+                Function>
+                recursive;
+            return recursive(
+                function(
+                    std::forward<State>(state), range::first(range, direction)),
+                range::drop(std::forward<Range>(range), direction), direction,
+                std::forward<Function>(function), pick_overload());
+        }
 
-  // Using chop().
-  template <class Range>
-  typename boost::disable_if<has_first<Range>, Result>::type
-  apply_non_empty(State &&state, Range &&range, Direction const &direction,
-                  Function &&function) const {
-    // rime::assert_ (!range::empty (direction, range));
-    fold<Result, typename result_of_function<Range>::type, Direction, Function>
-        recursive;
-    auto chopped = range::chop(std::forward<Range>(range), direction);
-    return recursive(function(std::forward<State>(state), chopped.move_first()),
-                     chopped.move_rest(), direction,
-                     std::forward<Function>(function), pick_overload());
-  }
+        // Using chop().
+        template <class Range>
+        typename boost::disable_if<has_first<Range>, Result>::type
+            apply_non_empty(
+                State && state, Range && range, Direction const & direction,
+                Function && function) const
+        {
+            // rime::assert_ (!range::empty (direction, range));
+            fold<
+                Result, typename result_of_function<Range>::type, Direction,
+                Function>
+                recursive;
+            auto chopped = range::chop(std::forward<Range>(range), direction);
+            return recursive(
+                function(std::forward<State>(state), chopped.move_first()),
+                chopped.move_rest(), direction,
+                std::forward<Function>(function), pick_overload());
+        }
 
-  /**
-  The fold is heterogeneous.
-  The range is never empty: call the implementation recursively.
-  */
-  template <class Range>
-  typename boost::enable_if<never_empty<Range, Direction>, Result>::type
-  operator()(State &&state, Range &&range, Direction const &direction,
-             Function &&function, overload_order<3> *) const {
-    return apply_non_empty(std::forward<State>(state),
-                           std::forward<Range>(range), direction,
-                           std::forward<Function>(function));
-  }
+        /**
+        The fold is heterogeneous.
+        The range is never empty: call the implementation recursively.
+        */
+        template <class Range>
+        typename boost::enable_if<never_empty<Range, Direction>, Result>::type
+            operator()(
+                State && state, Range && range, Direction const & direction,
+                Function && function, overload_order<3> *) const
+        {
+            return apply_non_empty(
+                std::forward<State>(state), std::forward<Range>(range),
+                direction, std::forward<Function>(function));
+        }
 
-  /**
-  The fold is heterogeneous, and the range may or may not be
-  empty.
-  Depending on which one it is, call one of the above.
-  */
-  template <class Range>
-  Result operator()(State &&state, Range &&range, Direction const &direction,
-                    Function &&function, overload_order<4> *) const {
-    if (range::empty(range, direction))
-      return std::forward<State>(state);
-    return apply_non_empty(std::forward<State>(state),
-                           std::forward<Range>(range), direction,
-                           std::forward<Function>(function));
-  }
-};
+        /**
+        The fold is heterogeneous, and the range may or may not be
+        empty.
+        Depending on which one it is, call one of the above.
+        */
+        template <class Range> Result operator()(
+            State && state, Range && range, Direction const & direction,
+            Function && function, overload_order<4> *) const
+        {
+            if (range::empty(range, direction))
+                return std::forward<State>(state);
+            return apply_non_empty(
+                std::forward<State>(state), std::forward<Range>(range),
+                direction, std::forward<Function>(function));
+        }
+    };
 
-template <class State, class Range, class Direction, class Function>
-class default_implementation {
-  typedef typename range::fold_detail::all_result_types<
-      State, Range, Direction, Function>::type result_types;
-  typedef typename rime::make_variant_over<
-      result_types, rime::merge_policy::collapse>::type result_type;
+    template <class State, class Range, class Direction, class Function>
+    class default_implementation
+    {
+        typedef typename range::fold_detail::all_result_types<
+            State, Range, Direction, Function>::type result_types;
+        typedef typename rime::make_variant_over<
+            result_types, rime::merge_policy::collapse>::type result_type;
 
-public:
-  result_type operator()(State &&state, Range &&range,
-                         Direction const &direction,
-                         Function &&function) const {
-    static_assert(range::is_view<Range, Direction>::value,
-                  "Internal error: the range must be a view here.");
+    public:
+        result_type operator()(
+            State && state, Range && range, Direction const & direction,
+            Function && function) const
+        {
+            static_assert(
+                range::is_view<Range, Direction>::value,
+                "Internal error: the range must be a view here.");
 
-    fold<result_type, State, Direction, Function> implementation;
-    return implementation(std::forward<State>(state),
-                          std::forward<Range>(range), direction,
-                          std::forward<Function>(function), pick_overload());
-  }
-};
+            fold<result_type, State, Direction, Function> implementation;
+            return implementation(
+                std::forward<State>(state), std::forward<Range>(range),
+                direction, std::forward<Function>(function), pick_overload());
+        }
+    };
 
-} // namespace fold_detail
+}  // namespace fold_detail
 
 namespace helper {
 
-/** \brief
-Hook for implementing fold() for a type of range.
+    /** \brief
+    Hook for implementing fold() for a type of range.
 
-This does normally not have to be implemented, unless the default
-implementation does not suffice.
+    This does normally not have to be implemented, unless the default
+    implementation does not suffice.
 
-To provide an implementation of fold() specific to a range, implement either
-member function fold() on the range, or free function implement_fold().
-If both of these are defined, then the free function will be preferred.
+    To provide an implementation of fold() specific to a range, implement either
+    member function fold() on the range, or free function implement_fold().
+    If both of these are defined, then the free function will be preferred.
 
-\param tag The range tag.
-\param state The initial state.
-\param range The range to get the elements from.
-\param direction The direction in which the range is traversed.
-\param function The function to be called on each element.
-*/
-void implement_fold(unusable);
+    \param tag The range tag.
+    \param state The initial state.
+    \param range The range to get the elements from.
+    \param direction The direction in which the range is traversed.
+    \param function The function to be called on each element.
+    */
+    void implement_fold(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
-namespace implementation {
+    namespace implementation {
 
-using helper::implement_fold;
+        using helper::implement_fold;
 
-struct fold {
-private:
-  struct dispatch {
-    // Use implement_fold, if it is implemented.
-    template <class State, class Range, class Direction, class Function>
-    auto operator()(State &&state, Range &&range, Direction const &direction,
-                    Function &&function, overload_order<1> *) const
-        RETURNS(implement_fold(typename tag_of<Range>::type(),
-                               std::forward<State>(state),
-                               std::forward<Range>(range), direction,
-                               std::forward<Function>(function)));
+        struct fold
+        {
+        private:
+            struct dispatch
+            {
+                // Use implement_fold, if it is implemented.
+                template <
+                    class State, class Range, class Direction, class Function>
+                auto operator()(
+                    State && state, Range && range, Direction const & direction,
+                    Function && function, overload_order<1> *) const
+                    RETURNS(implement_fold(
+                        typename tag_of<Range>::type(),
+                        std::forward<State>(state), std::forward<Range>(range),
+                        direction, std::forward<Function>(function)));
 
-    // Use member function .fold, if it is implemented.
-    template <class State, class Range, class Direction, class Function>
-    auto operator()(State &&state, Range &&range, Direction const &direction,
-                    Function &&function, overload_order<2> *) const
-        RETURNS(helper::member_access::fold(std::forward<State>(state),
-                                            std::forward<Range>(range),
-                                            direction,
-                                            std::forward<Function>(function)));
+                // Use member function .fold, if it is implemented.
+                template <
+                    class State, class Range, class Direction, class Function>
+                auto operator()(
+                    State && state, Range && range, Direction const & direction,
+                    Function && function, overload_order<2> *) const
+                    RETURNS(
+                        helper::member_access::fold(
+                            std::forward<State>(state),
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
 
-    // Use default implementation.
-    template <class State, class Range, class Direction, class Function>
-    auto operator()(State &&state, Range &&range, Direction const &direction,
-                    Function &&function, overload_order<3> *) const
-        RETURNS(fold_detail::default_implementation<State, Range, Direction,
-                                                    Function>()(
-            std::forward<State>(state), std::forward<Range>(range), direction,
-            std::forward<Function>(function)));
-  };
+                // Use default implementation.
+                template <
+                    class State, class Range, class Direction, class Function>
+                auto operator()(
+                    State && state, Range && range, Direction const & direction,
+                    Function && function, overload_order<3> *) const
+                    RETURNS(
+                        fold_detail::default_implementation<
+                            State, Range, Direction, Function>()(
+                            std::forward<State>(state),
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
+            };
 
-public:
-  template <class State, class Range, class Direction, class Function,
-            // Implemented if "empty" is implemented.
-            class Enable = decltype(range::empty(std::declval<Range>(),
-                                                 std::declval<Direction>()))>
-  auto operator()(State &&state, Range &&range, Direction const &direction,
-                  Function &&function) const
-      RETURNS(dispatch()(std::forward<State>(state),
-                         range::view_once(std::forward<Range>(range),
-                                          direction),
-                         direction, std::forward<Function>(function),
-                         pick_overload()));
+        public:
+            template <
+                class State, class Range, class Direction, class Function,
+                // Implemented if "empty" is implemented.
+                class Enable = decltype(range::empty(
+                    std::declval<Range>(), std::declval<Direction>()))>
+            auto operator()(
+                State && state, Range && range, Direction const & direction,
+                Function && function) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<State>(state),
+                        range::view_once(std::forward<Range>(range), direction),
+                        direction, std::forward<Function>(function),
+                        pick_overload()));
 
-  // Without direction: use default_direction.
-  template <class State, class Range, class Function,
-            // Implemented if "empty" is implemented.
-            class Enable = decltype(range::empty(std::declval<Range>()))>
-  auto operator()(State &&state, Range &&range, Function &&function) const
-      RETURNS(dispatch()(std::forward<State>(state),
-                         range::view_once(std::forward<Range>(range)),
-                         range::default_direction(range),
-                         std::forward<Function>(function), pick_overload()));
-};
+            // Without direction: use default_direction.
+            template <
+                class State, class Range, class Function,
+                // Implemented if "empty" is implemented.
+                class Enable = decltype(range::empty(std::declval<Range>()))>
+            auto operator()(
+                State && state, Range && range, Function && function) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<State>(state),
+                        range::view_once(std::forward<Range>(range)),
+                        range::default_direction(range),
+                        std::forward<Function>(function), pick_overload()));
+        };
 
-} // namespace implementation
+    }  // namespace implementation
 
-using implementation::fold;
+    using implementation::fold;
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 Traverse a range and accumulate a value.
@@ -392,6 +440,6 @@ instantiations.
 */
 static const auto fold = callable::fold();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_FOLD_HPP_INCLUDED
+#endif  // RANGE_FOLD_HPP_INCLUDED

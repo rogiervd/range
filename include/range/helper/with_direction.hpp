@@ -19,45 +19,50 @@ limitations under the License.
 
 #include "rime/assert.hpp"
 
-namespace range {
-namespace helper {
+namespace range { namespace helper {
 
-/**
-Ranges often have to hold directions; but they should not take up unnecessary
-space.
-This class compresses empty \a Direction objects by deriving from the
-\a Direction class.
-*/
-template <class Direction> class with_direction : Direction {
-public:
-  with_direction(Direction const &direction) : Direction(direction) {}
+    /**
+    Ranges often have to hold directions; but they should not take up
+    unnecessary space. This class compresses empty \a Direction objects by
+    deriving from the
+    \a Direction class.
+    */
+    template <class Direction> class with_direction : Direction
+    {
+    public:
+        with_direction(Direction const & direction) : Direction(direction) {}
 
-  Direction const &direction() const { return *this; }
+        Direction const & direction() const { return *this; }
 
-  Direction const &
-  direction_must_be_equal(Direction const &that_direction) const {
-    rime::assert_(this->direction() == that_direction);
-    return that_direction;
-  }
-};
+        Direction const & direction_must_be_equal(
+            Direction const & that_direction) const
+        {
+            rime::assert_(this->direction() == that_direction);
+            return that_direction;
+        }
+    };
 
-/**
-Hold a \a Direction object (and optimise space if it is empty).
-Additionally, implement default_direction to return that direction.
+    /**
+    Hold a \a Direction object (and optimise space if it is empty).
+    Additionally, implement default_direction to return that direction.
 
-To implement a range that holds its default direction, simply derive from this
-class.
-*/
-template <class Direction>
-class with_default_direction : public with_direction<Direction> {
-public:
-  with_default_direction(Direction const &direction)
-      : with_direction<Direction>(direction) {}
+    To implement a range that holds its default direction, simply derive from
+    this class.
+    */
+    template <class Direction> class with_default_direction
+    : public with_direction<Direction>
+    {
+    public:
+        with_default_direction(Direction const & direction)
+        : with_direction<Direction>(direction)
+        {}
 
-  Direction const &default_direction() const { return this->direction(); }
-};
+        Direction const & default_direction() const
+        {
+            return this->direction();
+        }
+    };
 
-} // namespace helper
-} // namespace range
+}}  // namespace range::helper
 
-#endif // RANGE_DETAIL_WITH_DIRECTION_HPP_INCLUDED
+#endif  // RANGE_DETAIL_WITH_DIRECTION_HPP_INCLUDED

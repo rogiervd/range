@@ -46,4 +46,4 @@ For compile speed, prefer to include the headers from \c ./std/.
 // view_optional.
 #include "std/view_optional.hpp"
 
-#endif // RANGE_STD_HPP_INCLUDED
+#endif  // RANGE_STD_HPP_INCLUDED

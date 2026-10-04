@@ -57,35 +57,36 @@ namespace callable = range::callable;
 
 BOOST_AUTO_TEST_SUITE(test_range_zip)
 
-BOOST_AUTO_TEST_CASE(homogeneous_and_heterogeneous) {
-  std::vector<int> v;
+BOOST_AUTO_TEST_CASE(homogeneous_and_heterogeneous)
+{
+    std::vector<int> v;
 
-  v.push_back(5);
-  {
-    std::tuple<double, std::string> t(4.5, "");
-    auto z = zip(v, t);
-    BOOST_CHECK(!empty(z));
-    BOOST_CHECK_EQUAL(size(z), 1u);
-    RIME_CHECK_EQUAL(first(first(z)), 5);
-    RIME_CHECK_EQUAL(second(first(z)), 4.5);
-    // Only known at run-time that this is empty.
-    RIME_CHECK_EQUAL(empty(drop(z)), true);
-  }
+    v.push_back(5);
+    {
+        std::tuple<double, std::string> t(4.5, "");
+        auto z = zip(v, t);
+        BOOST_CHECK(!empty(z));
+        BOOST_CHECK_EQUAL(size(z), 1u);
+        RIME_CHECK_EQUAL(first(first(z)), 5);
+        RIME_CHECK_EQUAL(second(first(z)), 4.5);
+        // Only known at run-time that this is empty.
+        RIME_CHECK_EQUAL(empty(drop(z)), true);
+    }
 
-  v.push_back(7);
-  {
-    std::tuple<double, std::string> t(27.5, "Test");
-    auto z = zip(t, v);
+    v.push_back(7);
+    {
+        std::tuple<double, std::string> t(27.5, "Test");
+        auto z = zip(t, v);
 
-    BOOST_CHECK_EQUAL(size(z), 2u);
+        BOOST_CHECK_EQUAL(size(z), 2u);
 
-    RIME_CHECK_EQUAL(first(first(z)), 27.5);
-    RIME_CHECK_EQUAL(first(second(z)), std::string("Test"));
-    RIME_CHECK_EQUAL(second(first(z)), 5);
-    RIME_CHECK_EQUAL(second(second(z)), 7);
+        RIME_CHECK_EQUAL(first(first(z)), 27.5);
+        RIME_CHECK_EQUAL(first(second(z)), std::string("Test"));
+        RIME_CHECK_EQUAL(second(first(z)), 5);
+        RIME_CHECK_EQUAL(second(second(z)), 7);
 
-    RIME_CHECK_EQUAL(empty(drop(z, rime::size_t<2>())), rime::true_);
-  }
+        RIME_CHECK_EQUAL(empty(drop(z, rime::size_t<2>())), rime::true_);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

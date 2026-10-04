@@ -30,4 +30,4 @@ limitations under the License.
 #include "detail/core_size.hpp"
 #include "detail/core_view.hpp"
 
-#endif // RANGE_CORE_HPP_INCLUDED
+#endif  // RANGE_CORE_HPP_INCLUDED

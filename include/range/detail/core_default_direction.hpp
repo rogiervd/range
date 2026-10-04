@@ -30,48 +30,46 @@ namespace range {
 
 namespace helper {
 
-    inline void implement_default_direction (unusable);
+inline void implement_default_direction(unusable);
 
 } // namespace helper
 
 namespace callable {
 
-    namespace implementation {
+namespace implementation {
 
-        using helper::implement_default_direction;
+using helper::implement_default_direction;
 
-        struct default_direction {
-        private:
-            struct dispatch {
-                template <class Range>
-                    auto operator() (Range const & range, overload_order <1> *)
-                    const
-                RETURNS (implement_default_direction (
-                    typename tag_of <Range>::type(), range));
+struct default_direction {
+private:
+  struct dispatch {
+    template <class Range>
+    auto operator()(Range const &range, overload_order<1> *) const
+        RETURNS(implement_default_direction(typename tag_of<Range>::type(),
+                                            range));
 
-                template <class Range>
-                    auto operator() (Range const & range, overload_order <2> *)
-                    const
-                RETURNS (helper::member_access
-                    ::default_direction (range));
+    template <class Range>
+    auto operator()(Range const &range, overload_order<2> *) const
+        RETURNS(helper::member_access ::default_direction(range));
 
-                // If no function or member is defined, return range::front.
-                template <class Range>
-                    direction::front operator() (
-                        Range const & range, overload_order <16> *) const
-                { return range::front; }
-            };
+    // If no function or member is defined, return range::front.
+    template <class Range>
+    direction::front operator()(Range const &range,
+                                overload_order<16> *) const {
+      return range::front;
+    }
+  };
 
-        public:
-            template <class Range, class Enable =
-                typename std::enable_if <is_range <Range>::value>::type>
-            auto operator() (Range const & range) const
-            RETURNS (dispatch() (range, pick_overload()));
-        };
+public:
+  template <class Range, class Enable = typename std::enable_if<
+                             is_range<Range>::value>::type>
+  auto operator()(Range const &range) const
+      RETURNS(dispatch()(range, pick_overload()));
+};
 
-    } // namespace implementation
+} // namespace implementation
 
-    using implementation::default_direction;
+using implementation::default_direction;
 
 } // namespace callable
 
@@ -88,4 +86,4 @@ static const auto default_direction = callable::default_direction();
 
 } // namespace range
 
-#endif  // RANGE_DETAIL_CORE_DEFAULT_DIRECTION_HPP_INCLUDED
+#endif // RANGE_DETAIL_CORE_DEFAULT_DIRECTION_HPP_INCLUDED

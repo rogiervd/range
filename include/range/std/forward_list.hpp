@@ -28,11 +28,12 @@ This includes \c \<forward_list>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Type, class Allocator>
-        struct tag_of_qualified <std::forward_list <Type, Allocator>>
-    { typedef std_container_operation::std_front_container_tag type; };
-    /// \endcond
+/// \cond DONT_DOCUMENT
+template <class Type, class Allocator>
+struct tag_of_qualified<std::forward_list<Type, Allocator>> {
+  typedef std_container_operation::std_front_container_tag type;
+};
+/// \endcond
 
 } // namespace range
 

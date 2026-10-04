@@ -23,7 +23,7 @@ limitations under the License.
 namespace range {
 
 namespace callable {
-    struct any_of : find_bool_detail::find_bool <false> {};
+struct any_of : find_bool_detail::find_bool<false> {};
 } // namespace callable
 
 /**
@@ -47,4 +47,3 @@ static const auto any_of = callable::any_of();
 } // namespace range
 
 #endif // RANGE_ANY_OF_HPP_INCLUDED
-

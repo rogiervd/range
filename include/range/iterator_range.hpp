@@ -78,261 +78,291 @@ template <class Iterator, class Enable = void> class iterator_range;
 
 namespace iterator_range_detail {
 
-/**
-Base class for both iterator_range's that can be copied, and ones that
-can't.
-*/
-template <class Iterator> class iterator_range_base {
-  typedef
-      typename std::iterator_traits<Iterator>::iterator_category iterator_tag;
-  static_assert(
-      std::is_base_of<std::input_iterator_tag, iterator_tag>::value ||
-          std::is_base_of<std::forward_iterator_tag, iterator_tag>::value,
-      "The iterator must be an input iterator or a forward iterator.");
+    /**
+    Base class for both iterator_range's that can be copied, and ones that
+    can't.
+    */
+    template <class Iterator> class iterator_range_base
+    {
+        typedef typename std::iterator_traits<Iterator>::iterator_category
+            iterator_tag;
+        static_assert(
+            std::is_base_of<std::input_iterator_tag, iterator_tag>::value
+                || std::is_base_of<
+                    std::forward_iterator_tag, iterator_tag>::value,
+            "The iterator must be an input iterator or a forward iterator.");
 
-public:
-  typedef Iterator iterator_type;
+    public:
+        typedef Iterator iterator_type;
 
-  typedef typename std::make_unsigned<
-      typename std::iterator_traits<Iterator>::difference_type>::type size_type;
+        typedef typename std::make_unsigned<
+            typename std::iterator_traits<Iterator>::difference_type>::type
+            size_type;
 
-  typedef typename std::iterator_traits<Iterator>::value_type value_type;
+        typedef typename std::iterator_traits<Iterator>::value_type value_type;
 
-  iterator_range_base(Iterator const &begin, Iterator const &end)
-      : begin_(begin), end_(end) {}
+        iterator_range_base(Iterator const & begin, Iterator const & end)
+        : begin_(begin), end_(end)
+        {}
 
-  iterator_range_base() = default;
+        iterator_range_base() = default;
 
-  iterator_range_base(iterator_range_base const &) = default;
+        iterator_range_base(iterator_range_base const &) = default;
 
-  // Use any move or copy constructor available, to make sure that moving
-  // is defined.
-  iterator_range_base(iterator_range_base &&that)
-      : begin_(std::move(that.begin())), end_(std::move(that.end())) {}
+        // Use any move or copy constructor available, to make sure that moving
+        // is defined.
+        iterator_range_base(iterator_range_base && that)
+        : begin_(std::move(that.begin())), end_(std::move(that.end()))
+        {}
 
-  iterator_range_base &operator=(iterator_range_base const &) = default;
+        iterator_range_base & operator=(iterator_range_base const &) = default;
 
-  iterator_range_base &operator=(iterator_range_base &&that) {
-    this->begin_ = std::move(that.begin());
-    this->end_ = std::move(that.end());
-    return *this;
-  }
+        iterator_range_base & operator=(iterator_range_base && that)
+        {
+            this->begin_ = std::move(that.begin());
+            this->end_ = std::move(that.end());
+            return *this;
+        }
 
-  Iterator const &begin() const { return begin_; }
-  Iterator &begin() { return begin_; }
+        Iterator const & begin() const { return begin_; }
+        Iterator & begin() { return begin_; }
 
-  Iterator const &end() const { return end_; }
-  Iterator &end() { return end_; }
+        Iterator const & end() const { return end_; }
+        Iterator & end() { return end_; }
 
-private:
-  friend class helper::member_access;
-  bool empty(direction::front) const { return begin_ == end_; }
+    private:
+        friend class helper::member_access;
+        bool empty(direction::front) const { return begin_ == end_; }
 
-  Iterator begin_;
-  Iterator end_;
-};
+        Iterator begin_;
+        Iterator end_;
+    };
 
-} // namespace iterator_range_detail
+}  // namespace iterator_range_detail
 
 /// \cond DONT_DOCUMENT
 // Implementation for forward and higher iterators: copy is possible.
-template <class Iterator>
-class iterator_range<
+template <class Iterator> class iterator_range<
     Iterator,
     typename boost::enable_if<std::is_base_of<
         std::forward_iterator_tag,
         typename std::iterator_traits<Iterator>::iterator_category>>::type>
-    : public iterator_range_detail::iterator_range_base<Iterator> {
-  typedef iterator_range_detail::iterator_range_base<Iterator> base;
-  typedef typename base::size_type size_type;
-  typedef
-      typename std::iterator_traits<Iterator>::iterator_category iterator_tag;
+: public iterator_range_detail::iterator_range_base<Iterator>
+{
+    typedef iterator_range_detail::iterator_range_base<Iterator> base;
+    typedef typename base::size_type size_type;
+    typedef
+        typename std::iterator_traits<Iterator>::iterator_category iterator_tag;
 
-  // Types that can't be used, to effectively disable overloads.
-  struct private_type;
-  struct private_type_2;
+    // Types that can't be used, to effectively disable overloads.
+    struct private_type;
+    struct private_type_2;
 
-  /// direction::back if the iterator is bidirectional, disabled otherwise.
-  typedef typename boost::mpl::if_<
-      std::is_base_of<std::bidirectional_iterator_tag, iterator_tag>,
-      direction::back, private_type>::type back_if_bidirectional;
+    /// direction::back if the iterator is bidirectional, disabled otherwise.
+    typedef typename boost::mpl::if_<
+        std::is_base_of<std::bidirectional_iterator_tag, iterator_tag>,
+        direction::back, private_type>::type back_if_bidirectional;
 
-  /// direction::front if the iterator is random access, disabled otherwise.
-  typedef typename boost::mpl::if_<
-      std::is_base_of<std::random_access_iterator_tag, iterator_tag>,
-      direction::front, private_type>::type front_if_random_access;
+    /// direction::front if the iterator is random access, disabled otherwise.
+    typedef typename boost::mpl::if_<
+        std::is_base_of<std::random_access_iterator_tag, iterator_tag>,
+        direction::front, private_type>::type front_if_random_access;
 
-  /// direction::back if the iterator is random access, disabled otherwise.
-  typedef typename boost::mpl::if_<
-      std::is_base_of<std::random_access_iterator_tag, iterator_tag>,
-      direction::back, private_type_2>::type back_if_random_access;
+    /// direction::back if the iterator is random access, disabled otherwise.
+    typedef typename boost::mpl::if_<
+        std::is_base_of<std::random_access_iterator_tag, iterator_tag>,
+        direction::back, private_type_2>::type back_if_random_access;
 
-  typedef decltype(*std::declval<Iterator const &>()) dereference_type;
+    typedef decltype(*std::declval<Iterator const &>()) dereference_type;
 
 public:
-  iterator_range() = default;
-  iterator_range(iterator_range const &) = default;
-  iterator_range(iterator_range &&) = default;
+    iterator_range() = default;
+    iterator_range(iterator_range const &) = default;
+    iterator_range(iterator_range &&) = default;
 
-  iterator_range(Iterator const &begin, Iterator const &end)
-      : base(begin, end) {}
+    iterator_range(Iterator const & begin, Iterator const & end)
+    : base(begin, end)
+    {}
 
-  iterator_range &operator=(iterator_range const &) = default;
-  iterator_range &operator=(iterator_range &&) = default;
+    iterator_range & operator=(iterator_range const &) = default;
+    iterator_range & operator=(iterator_range &&) = default;
 
 private:
-  friend class helper::member_access;
+    friend class helper::member_access;
 
-  // first.
-  dereference_type first(direction::front) const { return *this->begin(); }
+    // first.
+    dereference_type first(direction::front) const { return *this->begin(); }
 
-  dereference_type first(back_if_bidirectional) const {
-    return *std::prev(this->end());
-  }
+    dereference_type first(back_if_bidirectional) const
+    {
+        return *std::prev(this->end());
+    }
 
-  // size.
-  size_type size(front_if_random_access) const {
-    auto distance = this->end() - this->begin();
-    assert(distance >= 0);
-    return typename base::size_type(distance);
-  };
+    // size.
+    size_type size(front_if_random_access) const
+    {
+        auto distance = this->end() - this->begin();
+        assert(distance >= 0);
+        return typename base::size_type(distance);
+    };
 
-  // drop.
-  iterator_range drop_one(direction::front) const {
-    return iterator_range(std::next(this->begin()), this->end());
-  }
+    // drop.
+    iterator_range drop_one(direction::front) const
+    {
+        return iterator_range(std::next(this->begin()), this->end());
+    }
 
-  iterator_range drop_one(back_if_bidirectional) const {
-    return iterator_range(this->begin(), std::prev(this->end()));
-  }
+    iterator_range drop_one(back_if_bidirectional) const
+    {
+        return iterator_range(this->begin(), std::prev(this->end()));
+    }
 
-  iterator_range drop(size_type increment, front_if_random_access) const {
-    assert(increment <= size(front));
-    return iterator_range<Iterator>(this->begin() + increment, this->end());
-  }
+    iterator_range drop(size_type increment, front_if_random_access) const
+    {
+        assert(increment <= size(front));
+        return iterator_range<Iterator>(this->begin() + increment, this->end());
+    }
 
-  iterator_range drop(size_type increment, back_if_random_access) const {
-    assert(increment <= size(front));
-    return iterator_range<Iterator>(this->begin(), this->end() - increment);
-  }
+    iterator_range drop(size_type increment, back_if_random_access) const
+    {
+        assert(increment <= size(front));
+        return iterator_range<Iterator>(this->begin(), this->end() - increment);
+    }
 
-  // chop_in_place.
-  /*
-  For forward iterators and up, the return type from dereferencing the
-  iterator, possibly a reference type, is the appropriate return type.
+    // chop_in_place.
+    /*
+    For forward iterators and up, the return type from dereferencing the
+    iterator, possibly a reference type, is the appropriate return type.
 
-  This is in contrast to chop_in_place for input iterators, below, which
-  returns the value type.
-  */
-  dereference_type chop_in_place(direction::front) { return *this->begin()++; }
+    This is in contrast to chop_in_place for input iterators, below, which
+    returns the value type.
+    */
+    dereference_type chop_in_place(direction::front)
+    {
+        return *this->begin()++;
+    }
 
-  dereference_type chop_in_place(back_if_bidirectional) {
-    return *--this->end();
-  }
+    dereference_type chop_in_place(back_if_bidirectional)
+    {
+        return *--this->end();
+    }
 };
 
 // Implementation for input iterators: copy is not possible; move is.
-template <class Iterator>
-class iterator_range<
+template <class Iterator> class iterator_range<
     Iterator,
     typename boost::enable_if<boost::mpl::and_<
         std::is_base_of<
             std::input_iterator_tag,
             typename std::iterator_traits<Iterator>::iterator_category>,
         boost::mpl::not_<std::is_base_of<
-            std::forward_iterator_tag, typename std::iterator_traits<Iterator>::
-                                           iterator_category>>>>::type>
-    : public iterator_range_detail::iterator_range_base<Iterator> {
-  typedef iterator_range_detail::iterator_range_base<Iterator> base;
+            std::forward_iterator_tag,
+            typename std::iterator_traits<Iterator>::iterator_category>>>>::
+        type> : public iterator_range_detail::iterator_range_base<Iterator>
+{
+    typedef iterator_range_detail::iterator_range_base<Iterator> base;
 
 public:
-  iterator_range() = default;
-  // For input iterators, delete the copy constructor and provide only a
-  // move constructor.
-  iterator_range(iterator_range const &) = delete;
-  iterator_range(iterator_range &&) = default;
+    iterator_range() = default;
+    // For input iterators, delete the copy constructor and provide only a
+    // move constructor.
+    iterator_range(iterator_range const &) = delete;
+    iterator_range(iterator_range &&) = default;
 
-  iterator_range(Iterator const &begin, Iterator const &end)
-      : base(begin, end) {}
+    iterator_range(Iterator const & begin, Iterator const & end)
+    : base(begin, end)
+    {}
 
-  iterator_range &operator=(iterator_range const &) = delete;
-  iterator_range &operator=(iterator_range &&) = default;
+    iterator_range & operator=(iterator_range const &) = delete;
+    iterator_range & operator=(iterator_range &&) = default;
 
-  // Only "chop" is implemented, in namespace iterator_range_operation.
+    // Only "chop" is implemented, in namespace iterator_range_operation.
 
-  /*
-  Input iterators need special handling.
-  Dereferencing an input iterator returns something that can be
-  convertible to the value_type, which may apparently become impossible to
-  use after it is incremented.
-  Therefore, it should be converted to the value type straight away.
-  */
-  typename std::iterator_traits<Iterator>::value_type
-  chop_in_place(direction::front) {
-    return *this->begin()++;
-  }
+    /*
+    Input iterators need special handling.
+    Dereferencing an input iterator returns something that can be
+    convertible to the value_type, which may apparently become impossible to
+    use after it is incremented.
+    Therefore, it should be converted to the value type straight away.
+    */
+    typename std::iterator_traits<Iterator>::value_type chop_in_place(
+        direction::front)
+    {
+        return *this->begin()++;
+    }
 };
 /// \endcond
 
 namespace iterator_range_operation {
-template <class IteratorTag> struct iterator_range_tag {};
-} // namespace iterator_range_operation
+    template <class IteratorTag> struct iterator_range_tag
+    {};
+}  // namespace iterator_range_operation
 
-template <class Iterator> struct tag_of_qualified<iterator_range<Iterator>> {
-  typedef iterator_range_operation::iterator_range_tag<
-      typename std::iterator_traits<Iterator>::iterator_category>
-      type;
+template <class Iterator> struct tag_of_qualified<iterator_range<Iterator>>
+{
+    typedef iterator_range_operation::iterator_range_tag<
+        typename std::iterator_traits<Iterator>::iterator_category>
+        type;
 };
 
 /* make_iterator_range */
 
 namespace callable {
 
-/// Start a new namespace so "using std::begin" does not pollute the
-/// namespace.
-namespace make_iterator_range_detail {
+    /// Start a new namespace so "using std::begin" does not pollute the
+    /// namespace.
+    namespace make_iterator_range_detail {
 
-using std::begin;
-using std::end;
+        using std::begin;
+        using std::end;
 
-// From two iterators or a container.
-struct make_iterator_range {
-  // IteratorCategory is merely to check that Iterator is an iterator.
-  template <class Iterator,
-            class IteratorCategory =
-                typename std::iterator_traits<Iterator>::iterator_category>
-  iterator_range<Iterator> operator()(Iterator const &begin,
-                                      Iterator const &end) const {
-    return iterator_range<Iterator>(begin, end);
-  }
+        // From two iterators or a container.
+        struct make_iterator_range
+        {
+            // IteratorCategory is merely to check that Iterator is an iterator.
+            template <
+                class Iterator,
+                class IteratorCategory =
+                    typename std::iterator_traits<Iterator>::iterator_category>
+            iterator_range<Iterator> operator()(
+                Iterator const & begin, Iterator const & end) const
+            {
+                return iterator_range<Iterator>(begin, end);
+            }
 
-  template <class Container,
-            class Iterator = decltype(begin(std::declval<Container &&>()))>
-  iterator_range<Iterator> operator()(Container &&container) const {
-    return iterator_range<Iterator>(begin(container), end(container));
-  }
-};
+            template <
+                class Container,
+                class Iterator = decltype(begin(std::declval<Container &&>()))>
+            iterator_range<Iterator> operator()(Container && container) const
+            {
+                return iterator_range<Iterator>(
+                    begin(container), end(container));
+            }
+        };
 
-struct make_move_iterator_range {
-  template <
-      class Container,
-      class RawIterator = typename std::decay<
-          decltype(begin(std::declval<Container &>()))>::type,
-      class Iterator = typename std::conditional<
-          std::is_same<Container, typename std::decay<Container>::type>::value,
-          std::move_iterator<RawIterator>, RawIterator>::type>
-  iterator_range<Iterator> operator()(Container &&container) const {
-    return iterator_range<Iterator>(Iterator(begin(container)),
-                                    Iterator(end(container)));
-  }
-};
+        struct make_move_iterator_range
+        {
+            template <
+                class Container,
+                class RawIterator = typename std::decay<
+                    decltype(begin(std::declval<Container &>()))>::type,
+                class Iterator = typename std::conditional<
+                    std::is_same<
+                        Container, typename std::decay<Container>::type>::value,
+                    std::move_iterator<RawIterator>, RawIterator>::type>
+            iterator_range<Iterator> operator()(Container && container) const
+            {
+                return iterator_range<Iterator>(
+                    Iterator(begin(container)), Iterator(end(container)));
+            }
+        };
 
-} // namespace make_iterator_range_detail
+    }  // namespace make_iterator_range_detail
 
-using make_iterator_range_detail::make_iterator_range;
-using make_iterator_range_detail::make_move_iterator_range;
+    using make_iterator_range_detail::make_iterator_range;
+    using make_iterator_range_detail::make_move_iterator_range;
 
-} // namespace callable
+}  // namespace callable
 
 /**
 Make an iterator_range from begin and end iterators or from a container.
@@ -363,14 +393,15 @@ static constexpr auto make_move_iterator_range =
 
 namespace iterator_range_operation {
 
-template <class IteratorTag, class Range>
-inline auto implement_chop(iterator_range_tag<IteratorTag> const &tag,
-                           Range &&range, direction::front const &direction)
-    RETURNS(helper::chop_by_chop_in_place(std::forward<Range>(range),
-                                          direction));
+    template <class IteratorTag, class Range> inline auto implement_chop(
+        iterator_range_tag<IteratorTag> const & tag, Range && range,
+        direction::front const & direction)
+        RETURNS(
+            helper::chop_by_chop_in_place(
+                std::forward<Range>(range), direction));
 
-} // namespace iterator_range_operation
+}  // namespace iterator_range_operation
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_ITERATOR_RANGE_HPP_INCLUDED
+#endif  // RANGE_ITERATOR_RANGE_HPP_INCLUDED

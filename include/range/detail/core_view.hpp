@@ -32,95 +32,107 @@ namespace range {
 
 namespace helper {
 
-/** \brief
-Produce a lightweight range, a "view", on a heavyweight range such as a
-container.
+    /** \brief
+    Produce a lightweight range, a "view", on a heavyweight range such as a
+    container.
 
-The resulting type must be assignable without changing any underlying
-container.
-If possible, the resulting type should be homogeneous.
-make_view must not be defined for the resulting type.
-If the range is already a lightweight range, then make_view should not be
-defined for it.
-view (range, directions...) will then return range unchanged.
+    The resulting type must be assignable without changing any underlying
+    container.
+    If possible, the resulting type should be homogeneous.
+    make_view must not be defined for the resulting type.
+    If the range is already a lightweight range, then make_view should not be
+    defined for it.
+    view (range, directions...) will then return range unchanged.
 
-If \a once is true, then view_once was called, and each element in the view
-can be assumed to be seen only once.
-Therefore, if a container is passed in that owns the elements, they can be
-viewed as rvalue references.
+    If \a once is true, then view_once was called, and each element in the view
+    can be assumed to be seen only once.
+    Therefore, if a container is passed in that owns the elements, they can be
+    viewed as rvalue references.
 
-Not that even when an rvalue is passed in, the view should not contain a
-copy of the heavyweight range.
-The view should still assume that the reference remains usable as long as
-the view is used.
+    Not that even when an rvalue is passed in, the view should not contain a
+    copy of the heavyweight range.
+    The view should still assume that the reference remains usable as long as
+    the view is used.
 
-\tparam once A boolean constant.
-    Iff \c true, assume that each element in the view will be seen
-    only once, and it is possible to pilfer the underlying container.
-\tparam tag The range tag.
-\tparam range The range itself, qualified (as an rvalue reference if an
-    rvalue).
-\tparam directions The directions that the range should be viewed in.
-*/
-void implement_make_view(unusable);
+    \tparam once A boolean constant.
+        Iff \c true, assume that each element in the view will be seen
+        only once, and it is possible to pilfer the underlying container.
+    \tparam tag The range tag.
+    \tparam range The range itself, qualified (as an rvalue reference if an
+        rvalue).
+    \tparam directions The directions that the range should be viewed in.
+    */
+    void implement_make_view(unusable);
 
-} // namespace helper
+}  // namespace helper
 
 namespace callable {
 
-namespace implementation {
+    namespace implementation {
 
-using helper::implement_make_view;
+        using helper::implement_make_view;
 
-template <bool Once, bool Forward> struct view {
-private:
-  struct dispatch {
-    template <class Range, class... Directions>
-    auto operator()(overload_order<1> *, Range &&range,
-                    Directions const &...directions) const
-        RETURNS(implement_make_view(typename tag_of<Range>::type(),
-                                    rime::bool_<Once>(),
-                                    std::forward<Range>(range), directions...));
+        template <bool Once, bool Forward> struct view
+        {
+        private:
+            struct dispatch
+            {
+                template <class Range, class... Directions> auto operator()(
+                    overload_order<1> *, Range && range,
+                    Directions const &... directions) const
+                    RETURNS(implement_make_view(
+                        typename tag_of<Range>::type(), rime::bool_<Once>(),
+                        std::forward<Range>(range), directions...));
 
-    // If implement_make_view is not implemented, and empty() is
-    // implemented for each of the directions, then return the
-    // range as-is.
-    template <class Range, class... Directions,
-              class Enable = meta::vector<decltype(std::declval<empty>()(
-                  std::declval<Range>(), std::declval<Directions>()))...>>
-    typename std::conditional<Forward, Range &&, Range>::type
-    operator()(overload_order<16> *, Range &&range,
-               Directions const &...directions) const {
-      return std::forward<Range>(range);
-    }
-  };
+                // If implement_make_view is not implemented, and empty() is
+                // implemented for each of the directions, then return the
+                // range as-is.
+                template <
+                    class Range, class... Directions,
+                    class Enable = meta::vector<decltype(std::declval<empty>()(
+                        std::declval<Range>(), std::declval<Directions>()))...>>
+                typename std::conditional<Forward, Range &&, Range>::type
+                    operator()(
+                        overload_order<16> *, Range && range,
+                        Directions const &... directions) const
+                {
+                    return std::forward<Range>(range);
+                }
+            };
 
-public:
-  // At least one direction.
-  template <class Range, class FirstDirection, class... OtherDirections,
-            class Enable = typename std::enable_if<meta::all_of_c<
-                is_range<Range>::value, is_direction<FirstDirection>::value,
-                is_direction<OtherDirections>::value...>::value>::type>
-  auto operator()(Range &&range, FirstDirection const &first_direction,
-                  OtherDirections const &...other_directions) const
-      RETURNS(dispatch()(pick_overload(), std::forward<Range>(range),
-                         first_direction, other_directions...));
+        public:
+            // At least one direction.
+            template <
+                class Range, class FirstDirection, class... OtherDirections,
+                class Enable = typename std::enable_if<meta::all_of_c<
+                    is_range<Range>::value, is_direction<FirstDirection>::value,
+                    is_direction<OtherDirections>::value...>::value>::type>
+            auto operator()(
+                Range && range, FirstDirection const & first_direction,
+                OtherDirections const &... other_directions) const
+                RETURNS(
+                    dispatch()(
+                        pick_overload(), std::forward<Range>(range),
+                        first_direction, other_directions...));
 
-  // Without any direction: use default direction.
-  template <class Range, class Enable = typename std::enable_if<
-                             is_range<Range>::value>::type>
-  auto operator()(Range &&range) const
-      RETURNS(dispatch()(pick_overload(), std::forward<Range>(range),
-                         range::default_direction(range)));
-};
+            // Without any direction: use default direction.
+            template <
+                class Range,
+                class Enable =
+                    typename std::enable_if<is_range<Range>::value>::type>
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    pick_overload(), std::forward<Range>(range),
+                    range::default_direction(range)));
+        };
 
-} // namespace implementation
+    }  // namespace implementation
 
-typedef implementation::view<false, false> view;
-typedef implementation::view<false, true> forward_view;
-typedef implementation::view<true, false> view_once;
+    typedef implementation::view<false, false> view;
+    typedef implementation::view<false, true> forward_view;
+    typedef implementation::view<true, false> view_once;
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 Turn a range into a view.
@@ -176,13 +188,14 @@ static const auto view_once = callable::view_once();
 
 namespace is_view_detail {
 
-template <class Range, class... Directions>
-struct is_view
-    : std::is_same<typename std::decay<Range>::type,
-                   typename std::decay<typename result_of<callable::view(
-                       Range, Directions...)>::type>::type> {};
+    template <class Range, class... Directions> struct is_view
+    : std::is_same<
+          typename std::decay<Range>::type,
+          typename std::decay<typename result_of<callable::view(
+              Range, Directions...)>::type>::type>
+    {};
 
-} // namespace is_view_detail
+}  // namespace is_view_detail
 
 /** \brief
 Metafunction that returns true iff Range is a view.
@@ -193,11 +206,11 @@ That is, <c>view (range, directions...)</c> returns range itself.
 \tparam Directions Zero or more directions.
     If no directions are given, the range's default direction is used.
 */
-template <class Range, class... Directions>
-struct is_view
-    : boost::mpl::and_<is_range<Range>,
-                       is_view_detail::is_view<Range, Directions...>> {};
+template <class Range, class... Directions> struct is_view
+: boost::mpl::and_<
+      is_range<Range>, is_view_detail::is_view<Range, Directions...>>
+{};
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_DETAIL_CORE_VIEW_HPP_INCLUDED
+#endif  // RANGE_DETAIL_CORE_VIEW_HPP_INCLUDED

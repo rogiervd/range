@@ -64,48 +64,47 @@ Real implementations must be found through argument-dependent lookup.
 */
 namespace helper {
 
-struct unusable;
+    struct unusable;
 
-// Forward declarations for operations so they can refer to each other.
-void implement_default_direction(unusable);
-void implement_empty(unusable);
-void implement_size(unusable);
-void implement_first(unusable);
-void implement_drop(unusable);
-void implement_chop(unusable);
-void implement_chop_in_place(unusable);
-void implement_at(unusable);
+    // Forward declarations for operations so they can refer to each other.
+    void implement_default_direction(unusable);
+    void implement_empty(unusable);
+    void implement_size(unusable);
+    void implement_first(unusable);
+    void implement_drop(unusable);
+    void implement_chop(unusable);
+    void implement_chop_in_place(unusable);
+    void implement_at(unusable);
 
-/** \brief
-Class that is convertible from direction::front and direction::back.
-*/
-struct front_or_back {
-  front_or_back() {}
+    /** \brief
+    Class that is convertible from direction::front and direction::back.
+    */
+    struct front_or_back
+    {
+        front_or_back() {}
 
-  front_or_back(direction::front) {}
-  front_or_back(direction::back) {}
-};
+        front_or_back(direction::front) {}
+        front_or_back(direction::back) {}
+    };
 
-} // namespace helper
+}  // namespace helper
 
-namespace callable {
-namespace implementation {
+namespace callable { namespace implementation {
 
-// Forward declarations
-struct default_direction;
-struct empty;
-struct first;
-struct size;
-struct drop;
-struct chop;
-struct chop_in_place;
+    // Forward declarations
+    struct default_direction;
+    struct empty;
+    struct first;
+    struct size;
+    struct drop;
+    struct chop;
+    struct chop_in_place;
 
-} // namespace implementation
-} // namespace callable
+}}  // namespace callable::implementation
 
 static const direction::front front = {};
 static const direction::back back = {};
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_DETAIL_CORE_BASE_HPP_INCLUDED
+#endif  // RANGE_DETAIL_CORE_BASE_HPP_INCLUDED

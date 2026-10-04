@@ -61,50 +61,52 @@ BOOST_AUTO_TEST_SUITE(test_range_zip)
 
 template <class...> struct show_types;
 
-BOOST_AUTO_TEST_CASE(example) {
-  std::vector<int> vi;
-  vi.push_back(2);
-  vi.push_back(7);
+BOOST_AUTO_TEST_CASE(example)
+{
+    std::vector<int> vi;
+    vi.push_back(2);
+    vi.push_back(7);
 
-  std::vector<std::string> vs;
-  vs.push_back("Hello");
-  vs.push_back("there!");
-  vs.push_back("Never change");
+    std::vector<std::string> vs;
+    vs.push_back("Hello");
+    vs.push_back("there!");
+    vs.push_back("Never change");
 
-  std::size_t count = 0;
+    std::size_t count = 0;
 
-  auto z = zip(vi, vs);
-  RANGE_FOR_EACH(pair, z) {
-    if (first(pair) == 2) {
-      BOOST_CHECK_EQUAL(second(pair), "Hello");
-    } else {
-      BOOST_CHECK_EQUAL(first(pair), 7);
-      BOOST_CHECK_EQUAL(second(pair), "there!");
+    auto z = zip(vi, vs);
+    RANGE_FOR_EACH(pair, z)
+    {
+        if (first(pair) == 2) {
+            BOOST_CHECK_EQUAL(second(pair), "Hello");
+        } else {
+            BOOST_CHECK_EQUAL(first(pair), 7);
+            BOOST_CHECK_EQUAL(second(pair), "there!");
+        }
+
+        // Set the first element to the length of the second element.
+        first(pair) = size(second(pair));
+
+        ++count;
     }
 
-    // Set the first element to the length of the second element.
-    first(pair) = size(second(pair));
+    BOOST_CHECK_EQUAL(count, 2u);
 
-    ++count;
-  }
+    BOOST_CHECK_EQUAL(first(vi), 5);
+    BOOST_CHECK_EQUAL(second(vi), 6);
 
-  BOOST_CHECK_EQUAL(count, 2u);
+    // Mutate the whole pair, and thereby the underlying two vectors, at once.
+    RANGE_FOR_EACH(pair, z)
+    pair = make_tuple(77, "Something else");
 
-  BOOST_CHECK_EQUAL(first(vi), 5);
-  BOOST_CHECK_EQUAL(second(vi), 6);
+    BOOST_CHECK_EQUAL(first(vi), 77);
+    BOOST_CHECK_EQUAL(second(vi), 77);
 
-  // Mutate the whole pair, and thereby the underlying two vectors, at once.
-  RANGE_FOR_EACH(pair, z)
-  pair = make_tuple(77, "Something else");
+    BOOST_CHECK_EQUAL(first(vs), "Something else");
+    BOOST_CHECK_EQUAL(second(vs), "Something else");
 
-  BOOST_CHECK_EQUAL(first(vi), 77);
-  BOOST_CHECK_EQUAL(second(vi), 77);
-
-  BOOST_CHECK_EQUAL(first(vs), "Something else");
-  BOOST_CHECK_EQUAL(second(vs), "Something else");
-
-  // The third element of vs is never seen since vi only has two elements.
-  BOOST_CHECK_EQUAL(third(vs), "Never change");
+    // The third element of vs is never seen since vi only has two elements.
+    BOOST_CHECK_EQUAL(third(vs), "Never change");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

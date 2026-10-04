@@ -59,160 +59,166 @@ namespace callable = range::callable;
 
 BOOST_AUTO_TEST_SUITE(test_range_zip)
 
-BOOST_AUTO_TEST_CASE(homogeneous) {
-  std::vector<int> vi;
-  std::vector<double> vd;
+BOOST_AUTO_TEST_CASE(homogeneous)
+{
+    std::vector<int> vi;
+    std::vector<double> vd;
 
-  {
-    auto z = range::zip(vi, vd);
-
-    static_assert(
-        std::is_same<decltype(z),
-                     range::zip_range<direction::front, decltype(view(vi)),
-                                      decltype(view(vd))>>::value,
-        "");
-
-    static_assert(range::is_range<decltype(z)>::value, "");
-    static_assert(range::is_homogeneous<decltype(z), direction::front>::value,
-                  "");
-    BOOST_CHECK(range::default_direction(z) == range::front);
-
-    BOOST_CHECK(range::empty(z));
-    BOOST_CHECK(range::empty(z, range::front));
-
-    BOOST_CHECK_EQUAL(range::size(z), 0u);
-    BOOST_CHECK_EQUAL(range::size(z, range::front), 0u);
-
-    static_assert(has<callable::drop(decltype(z))>::value, "");
-    static_assert(has<callable::drop(decltype(z), direction::front)>::value,
-                  "");
-    static_assert(!has<callable::drop(decltype(z), direction::back)>::value,
-                  "");
-
-    static_assert(has<callable::chop(decltype(z))>::value, "");
-    static_assert(has<callable::chop(decltype(z), direction::front)>::value,
-                  "");
-    static_assert(!has<callable::chop(decltype(z), direction::back)>::value,
-                  "");
-  }
-
-  vi.push_back(1);
-  vd.push_back(2.5);
-
-  BOOST_CHECK_EQUAL(first(vi), 1);
-
-  {
-    auto z = zip(vi, vd);
-
-    auto first_element = first(z);
-
-    BOOST_CHECK_EQUAL(range::size(z), 1u);
-
-    BOOST_CHECK_EQUAL(first(first_element), 1);
-    BOOST_CHECK_EQUAL(second(first_element), 2.5);
-
-    auto z2 = drop(z);
-
-    BOOST_CHECK(empty(first(z2.underlying())));
-    BOOST_CHECK(empty(second(z2.underlying())));
-
-    BOOST_CHECK(empty(z2));
-
-    auto z3 = drop(z, 1);
-    BOOST_CHECK(empty(first(z3.underlying())));
-    BOOST_CHECK(empty(second(z3.underlying())));
-
-    BOOST_CHECK(empty(z3));
-
-    // auto chopped = chop (z);
-    // RIME_CHECK_EQUAL (first (chopped.first()), 1);
-    // RIME_CHECK_EQUAL (second (chopped.first()), 2.5);
-    // BOOST_CHECK (empty (chopped.rest()));
-  }
-
-  vi.push_back(3);
-  vi.push_back(27);
-
-  vd.push_back(5.5);
-  vd.push_back(27.5);
-  // This makes vd one longer than vi, so it is never seen from the front.
-  vd.push_back(43.5);
-
-  // Test zip_from.
-  {
-    std::tuple<std::vector<int>, std::vector<double>> t(vi, vd);
     {
-      auto z = zip_from(t);
+        auto z = range::zip(vi, vd);
 
-      auto first_element = first(z);
+        static_assert(
+            std::is_same<
+                decltype(z),
+                range::zip_range<
+                    direction::front, decltype(view(vi)),
+                    decltype(view(vd))>>::value,
+            "");
 
-      BOOST_CHECK_EQUAL(first(first_element), 1);
-      BOOST_CHECK_EQUAL(second(first_element), 2.5);
+        static_assert(range::is_range<decltype(z)>::value, "");
+        static_assert(
+            range::is_homogeneous<decltype(z), direction::front>::value, "");
+        BOOST_CHECK(range::default_direction(z) == range::front);
+
+        BOOST_CHECK(range::empty(z));
+        BOOST_CHECK(range::empty(z, range::front));
+
+        BOOST_CHECK_EQUAL(range::size(z), 0u);
+        BOOST_CHECK_EQUAL(range::size(z, range::front), 0u);
+
+        static_assert(has<callable::drop(decltype(z))>::value, "");
+        static_assert(
+            has<callable::drop(decltype(z), direction::front)>::value, "");
+        static_assert(
+            !has<callable::drop(decltype(z), direction::back)>::value, "");
+
+        static_assert(has<callable::chop(decltype(z))>::value, "");
+        static_assert(
+            has<callable::chop(decltype(z), direction::front)>::value, "");
+        static_assert(
+            !has<callable::chop(decltype(z), direction::back)>::value, "");
     }
-    // front explicitly specified.
+
+    vi.push_back(1);
+    vd.push_back(2.5);
+
+    BOOST_CHECK_EQUAL(first(vi), 1);
+
     {
-      auto z = zip_from(t, range::front);
+        auto z = zip(vi, vd);
 
-      auto first_element = first(z);
+        auto first_element = first(z);
 
-      static_assert(
-          range::has<range::callable::chop(decltype(drop(z)) const &)>::value,
-          "");
+        BOOST_CHECK_EQUAL(range::size(z), 1u);
 
-      BOOST_CHECK_EQUAL(first(first_element), 1);
-      BOOST_CHECK_EQUAL(second(first_element), 2.5);
+        BOOST_CHECK_EQUAL(first(first_element), 1);
+        BOOST_CHECK_EQUAL(second(first_element), 2.5);
+
+        auto z2 = drop(z);
+
+        BOOST_CHECK(empty(first(z2.underlying())));
+        BOOST_CHECK(empty(second(z2.underlying())));
+
+        BOOST_CHECK(empty(z2));
+
+        auto z3 = drop(z, 1);
+        BOOST_CHECK(empty(first(z3.underlying())));
+        BOOST_CHECK(empty(second(z3.underlying())));
+
+        BOOST_CHECK(empty(z3));
+
+        // auto chopped = chop (z);
+        // RIME_CHECK_EQUAL (first (chopped.first()), 1);
+        // RIME_CHECK_EQUAL (second (chopped.first()), 2.5);
+        // BOOST_CHECK (empty (chopped.rest()));
     }
-    // From the back.
+
+    vi.push_back(3);
+    vi.push_back(27);
+
+    vd.push_back(5.5);
+    vd.push_back(27.5);
+    // This makes vd one longer than vi, so it is never seen from the front.
+    vd.push_back(43.5);
+
+    // Test zip_from.
     {
-      auto z = zip_from(t, range::back);
+        std::tuple<std::vector<int>, std::vector<double>> t(vi, vd);
+        {
+            auto z = zip_from(t);
 
-      auto first_element = first(z);
+            auto first_element = first(z);
 
-      BOOST_CHECK_EQUAL(first(first_element), 27);
-      BOOST_CHECK_EQUAL(second(first_element), 43.5);
+            BOOST_CHECK_EQUAL(first(first_element), 1);
+            BOOST_CHECK_EQUAL(second(first_element), 2.5);
+        }
+        // front explicitly specified.
+        {
+            auto z = zip_from(t, range::front);
 
-      auto chopped = chop(drop(z));
+            auto first_element = first(z);
 
-      static_assert(
-          range::has<range::callable::chop(decltype(zip_from(t)))>::value, "");
-      // show_types <decltype (z)> st;
-      // show_types <decltype (range::default_direction (z))> st2;
-      static_assert(range::has<range::callable::chop(
-                        decltype(zip_from(t, range::back)))>::value,
-                    "");
+            static_assert(
+                range::has<range::callable::chop(
+                    decltype(drop(z)) const &)>::value,
+                "");
 
-      BOOST_CHECK_EQUAL(first(chopped.first()), 3);
-      BOOST_CHECK_EQUAL(second(chopped.first()), 27.5);
+            BOOST_CHECK_EQUAL(first(first_element), 1);
+            BOOST_CHECK_EQUAL(second(first_element), 2.5);
+        }
+        // From the back.
+        {
+            auto z = zip_from(t, range::back);
 
-      BOOST_CHECK(empty(drop(chopped.rest())));
+            auto first_element = first(z);
+
+            BOOST_CHECK_EQUAL(first(first_element), 27);
+            BOOST_CHECK_EQUAL(second(first_element), 43.5);
+
+            auto chopped = chop(drop(z));
+
+            static_assert(
+                range::has<range::callable::chop(decltype(zip_from(t)))>::value,
+                "");
+            // show_types <decltype (z)> st;
+            // show_types <decltype (range::default_direction (z))> st2;
+            static_assert(
+                range::has<range::callable::chop(
+                    decltype(zip_from(t, range::back)))>::value,
+                "");
+
+            BOOST_CHECK_EQUAL(first(chopped.first()), 3);
+            BOOST_CHECK_EQUAL(second(chopped.first()), 27.5);
+
+            BOOST_CHECK(empty(drop(chopped.rest())));
+        }
     }
-  }
 
-  {
-    auto z = zip(vi, vd);
+    {
+        auto z = zip(vi, vd);
 
-    auto first_element = first(z);
+        auto first_element = first(z);
 
-    BOOST_CHECK_EQUAL(range::size(first(z.underlying())), 3u);
-    BOOST_CHECK_EQUAL(range::size(second(z.underlying())), 4u);
+        BOOST_CHECK_EQUAL(range::size(first(z.underlying())), 3u);
+        BOOST_CHECK_EQUAL(range::size(second(z.underlying())), 4u);
 
-    BOOST_CHECK_EQUAL(range::size(z), 3u);
+        BOOST_CHECK_EQUAL(range::size(z), 3u);
 
-    BOOST_CHECK_EQUAL(first(first_element), 1);
-    BOOST_CHECK_EQUAL(second(first_element), 2.5);
+        BOOST_CHECK_EQUAL(first(first_element), 1);
+        BOOST_CHECK_EQUAL(second(first_element), 2.5);
 
-    BOOST_CHECK_EQUAL(first(second(z)), 3);
-    BOOST_CHECK_EQUAL(second(second(z)), 5.5);
+        BOOST_CHECK_EQUAL(first(second(z)), 3);
+        BOOST_CHECK_EQUAL(second(second(z)), 5.5);
 
-    BOOST_CHECK_EQUAL(first(third(z)), 27);
-    BOOST_CHECK_EQUAL(second(third(z)), 27.5);
+        BOOST_CHECK_EQUAL(first(third(z)), 27);
+        BOOST_CHECK_EQUAL(second(third(z)), 27.5);
 
-    auto z2 = drop(z, 2);
-    BOOST_CHECK_EQUAL(first(first(z2)), 27);
-    BOOST_CHECK_EQUAL(second(first(z2)), 27.5);
+        auto z2 = drop(z, 2);
+        BOOST_CHECK_EQUAL(first(first(z2)), 27);
+        BOOST_CHECK_EQUAL(second(first(z2)), 27.5);
 
-    BOOST_CHECK(empty(drop(z, 3)));
-  }
+        BOOST_CHECK(empty(drop(z, 3)));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

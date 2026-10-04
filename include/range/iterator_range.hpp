@@ -188,7 +188,7 @@ private:
     dereference_type first (direction::front) const { return *this->begin(); }
 
     dereference_type first (back_if_bidirectional) const
-    { return *boost::prior (this->end()); }
+    { return *std::prev (this->end()); }
 
     // size.
     size_type size (front_if_random_access) const {
@@ -199,10 +199,10 @@ private:
 
     // drop.
     iterator_range drop_one (direction::front) const
-    { return iterator_range (boost::next (this->begin()), this->end()); }
+    { return iterator_range (std::next (this->begin()), this->end()); }
 
     iterator_range drop_one (back_if_bidirectional) const
-    { return iterator_range (this->begin(), boost::prior (this->end())); }
+    { return iterator_range (this->begin(), std::prev (this->end())); }
 
     iterator_range drop (size_type increment, front_if_random_access) const {
         assert (increment <= size (front));

@@ -25,6 +25,7 @@ limitations under the License.
 #include "rime/core.hpp"
 
 #include "core_base.hpp"
+#include "core_default_direction.hpp"
 
 namespace range {
 

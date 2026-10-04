@@ -22,19 +22,22 @@ limitations under the License.
 #include "utility/returns.hpp"
 #include "utility/storage.hpp"
 
-namespace range { namespace helper {
+namespace range {
+namespace helper {
 
 namespace callable {
 
-    template <class Wrapper> class get_underlying {
-    public:
-        template <class Wrapper2 = Wrapper, class Get = utility::storage::get <
-            typename std::decay <Wrapper2>::type::underlying_type,
-            Wrapper &&>>
-        typename Get::type operator() (
-            typename std::remove_reference <Wrapper>::type & wrapper) const
-        { return Get() (wrapper.underlying_); }
-    };
+template <class Wrapper> class get_underlying {
+public:
+  template <
+      class Wrapper2 = Wrapper,
+      class Get = utility::storage::get<
+          typename std::decay<Wrapper2>::type::underlying_type, Wrapper &&>>
+  typename Get::type
+  operator()(typename std::remove_reference<Wrapper>::type &wrapper) const {
+    return Get()(wrapper.underlying_);
+  }
+};
 
 } // namespace callable
 
@@ -57,14 +60,17 @@ template <class Wrapper> friend class helper::callable::get_underlying;
 
 \tparam Wrapper The qualified type of the parameter is passed in.
 */
-template <class Wrapper> inline auto
-    get_underlying (typename std::remove_reference <Wrapper>::type & wrapper)
-RETURNS (callable::get_underlying <Wrapper>() (wrapper));
+template <class Wrapper>
+inline auto
+get_underlying(typename std::remove_reference<Wrapper>::type &wrapper)
+    RETURNS(callable::get_underlying<Wrapper>()(wrapper));
 
-template <class Wrapper> struct underlying_type
-: utility::storage::get <
-    typename std::decay <Wrapper>::type::underlying_type, Wrapper &&> {};
+template <class Wrapper>
+struct underlying_type
+    : utility::storage::get<typename std::decay<Wrapper>::type::underlying_type,
+                            Wrapper &&> {};
 
-}} // namespace range::helper
+} // namespace helper
+} // namespace range
 
-#endif  // RANGE_RANGE_DETAIL_UNDERLYING_HPP_INCLUDED
+#endif // RANGE_RANGE_DETAIL_UNDERLYING_HPP_INCLUDED

@@ -28,17 +28,18 @@ This includes \c \<unordered_set>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Key, class Hash, class KeyEqual, class Allocator>
-        struct tag_of_qualified <
-            std::unordered_set <Key, Hash, KeyEqual, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
+/// \cond DONT_DOCUMENT
+template <class Key, class Hash, class KeyEqual, class Allocator>
+struct tag_of_qualified<std::unordered_set<Key, Hash, KeyEqual, Allocator>> {
+  typedef std_container_operation::std_front_back_container_tag type;
+};
 
-    template <class Key, class Hash, class KeyEqual, class Allocator>
-        struct tag_of_qualified <
-            std::unordered_multiset <Key, Hash, KeyEqual, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+template <class Key, class Hash, class KeyEqual, class Allocator>
+struct tag_of_qualified<
+    std::unordered_multiset<Key, Hash, KeyEqual, Allocator>> {
+  typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
 } // namespace range
 

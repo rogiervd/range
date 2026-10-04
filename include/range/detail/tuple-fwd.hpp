@@ -27,10 +27,10 @@ template <class Tuple> struct tuple_size;
 
 namespace tuple_detail {
 
-    template <std::size_t Index> class extract;
-    template <std::size_t Size> struct tuple_view_tag;
-    template <std::size_t Begin, std::size_t End, class TupleReference>
-        class tuple_view;
+template <std::size_t Index> class extract;
+template <std::size_t Size> struct tuple_view_tag;
+template <std::size_t Begin, std::size_t End, class TupleReference>
+class tuple_view;
 
 } // namespace tuple_detail
 

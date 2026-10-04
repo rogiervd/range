@@ -29,6 +29,12 @@ range.
 
 #include "meta/vector.hpp"
 
+#include "core_base.hpp"
+#include "core_member_access.hpp"
+#include "core_first.hpp"
+#include "core_drop.hpp"
+
+
 namespace range {
 
 namespace helper {

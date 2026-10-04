@@ -24,6 +24,7 @@ limitations under the License.
 #include "meta/vector.hpp"
 
 #include "core_base.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 

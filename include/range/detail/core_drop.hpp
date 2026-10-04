@@ -26,8 +26,8 @@ limitations under the License.
 #include "utility/returns.hpp"
 
 #include "core_base.hpp"
-#include "core_member_access.hpp"
 #include "core_default_direction.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 

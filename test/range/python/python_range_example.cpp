@@ -26,7 +26,6 @@ test-python_range.py.
 
 #include <string>
 
-
 #include "range/python/range.hpp"
 
 using range::python_range;

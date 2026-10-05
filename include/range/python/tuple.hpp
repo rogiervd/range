@@ -21,11 +21,12 @@ Expose views as Python iterators.
 #ifndef RANGE_PYTHON_TUPLE_HPP_INCLUDED
 #define RANGE_PYTHON_TUPLE_HPP_INCLUDED
 
+// Include Python headers before C++ headers
+#include <nanobind/nanobind.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-
-#include <nanobind/nanobind.h>
 
 #include <meta/count_c.hpp>
 #include <meta/vector.hpp>

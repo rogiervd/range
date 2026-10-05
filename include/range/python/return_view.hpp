@@ -21,9 +21,10 @@ Expose return values that are ranges as Python iterators.
 #ifndef RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED
 #define RANGE_PYTHON_RETURN_VIEW_HPP_INCLUDED
 
-#include <utility>
-
+// Include Python headers before C++ headers
 #include <nanobind/nanobind.h>
+
+#include <utility>
 
 #include "iterator.hpp"
 

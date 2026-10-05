@@ -19,7 +19,7 @@ Example to be used in the documentation.
 */
 
 #define BOOST_TEST_MODULE example_std_adaptor
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/std/vector.hpp"
 #include "range/std/string.hpp"

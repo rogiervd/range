@@ -20,7 +20,7 @@ by splitting it up, the compiler requires less memory.
 */
 
 #define BOOST_TEST_MODULE range_test_less_lexicographical_constant
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "range/less_lexicographical.hpp"
 

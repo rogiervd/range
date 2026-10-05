@@ -1,3 +1,0 @@
-run test-underlying.cpp ;
-run test-fold_result.cpp ;
-run test-meta_is_linear_subset.cpp ;

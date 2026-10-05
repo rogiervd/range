@@ -28,20 +28,22 @@ This includes \c \<unordered_map>.
 
 namespace range {
 
-    /// \cond DONT_DOCUMENT
-    template <class Key, class Value, class Hash, class KeyEqual,
-            class Allocator>
-        struct tag_of_qualified <
-            std::unordered_map <Key, Value, Hash, KeyEqual, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
+/// \cond DONT_DOCUMENT
+template <class Key, class Value, class Hash, class KeyEqual, class Allocator>
+struct tag_of_qualified<
+    std::unordered_map<Key, Value, Hash, KeyEqual, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
 
-    template <class Key, class Value, class Hash, class KeyEqual,
-            class Allocator>
-        struct tag_of_qualified <
-            std::unordered_multimap <Key, Value, Hash, KeyEqual, Allocator>>
-    { typedef std_container_operation::std_front_back_container_tag type; };
-    /// \endcond
+template <class Key, class Value, class Hash, class KeyEqual, class Allocator>
+struct tag_of_qualified<
+    std::unordered_multimap<Key, Value, Hash, KeyEqual, Allocator>>
+{
+    typedef std_container_operation::std_front_back_container_tag type;
+};
+/// \endcond
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_STD_UNORDERED_MAP_HPP_INCLUDED
+#endif  // RANGE_STD_UNORDERED_MAP_HPP_INCLUDED

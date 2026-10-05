@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef RANGE_EMPTY_VIEW_HPP_INCLUDED
 #define RANGE_EMPTY_VIEW_HPP_INCLUDED
 
-#include "rime/core.hpp"
 #include "rime/always.hpp"
+#include "rime/core.hpp"
 
 #include "core.hpp"
 
@@ -33,23 +33,31 @@ intention.
 class empty_view;
 
 namespace empty_view_operation {
-    struct empty_view_tag {};
-} // namespace empty_view_operation
+    struct empty_view_tag
+    {};
+}  // namespace empty_view_operation
 
-template <> struct tag_of_qualified <empty_view>
-{ typedef empty_view_operation::empty_view_tag type; };
+template <> struct tag_of_qualified<empty_view>
+{
+    typedef empty_view_operation::empty_view_tag type;
+};
 
-class empty_view {
+class empty_view
+{
 private:
     friend class helper::member_access;
 
-    template <class Direction> rime::true_type empty (Direction const &) const
-    { return rime::true_; }
+    template <class Direction> rime::true_type empty(Direction const &) const
+    {
+        return rime::true_;
+    }
 
-    template <class Direction> rime::size_t <0> size (Direction const &) const
-    { return rime::size_t <0>(); }
+    template <class Direction> rime::size_t<0> size(Direction const &) const
+    {
+        return rime::size_t<0>();
+    }
 };
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_EMPTY_VIEW_HPP_INCLUDED
+#endif  // RANGE_EMPTY_VIEW_HPP_INCLUDED

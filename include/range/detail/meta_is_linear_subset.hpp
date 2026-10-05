@@ -28,39 +28,47 @@ namespace range { namespace detail {
     order.
     */
     template <class Subset, class Superset> struct is_linear_subset
-    : is_linear_subset <
-        typename meta::as_vector <Subset>::type,
-        typename meta::as_vector <Superset>::type> {};
+    : is_linear_subset<
+          typename meta::as_vector<Subset>::type,
+          typename meta::as_vector<Superset>::type>
+    {};
 
     // Base cases.
-    template <> struct is_linear_subset <meta::vector <>, meta::vector <>>
-    : boost::mpl::true_ {};
+    template <> struct is_linear_subset<meta::vector<>, meta::vector<>>
+    : boost::mpl::true_
+    {};
 
-    template <class ... Types> struct is_linear_subset <
-        meta::vector<>, meta::vector <Types ...>>
-    : boost::mpl::true_ {};
+    template <class... Types>
+    struct is_linear_subset<meta::vector<>, meta::vector<Types...>>
+    : boost::mpl::true_
+    {};
 
-    template <class ... Types> struct is_linear_subset <
-        meta::vector <Types ...>, meta::vector<>>
-    : boost::mpl::false_ {};
+    template <class... Types>
+    struct is_linear_subset<meta::vector<Types...>, meta::vector<>>
+    : boost::mpl::false_
+    {};
 
     // Type found.
-    template <class First, class ... RestSubset, class ... RestSuperset>
-        struct is_linear_subset <
-            meta::vector <First, RestSubset ...>,
-            meta::vector <First, RestSuperset ...>>
-    : is_linear_subset <meta::vector <RestSubset ...>,
-        meta::vector <RestSuperset ...>> {};
+    template <class First, class... RestSubset, class... RestSuperset>
+    struct is_linear_subset<
+        meta::vector<First, RestSubset...>,
+        meta::vector<First, RestSuperset...>>
+    : is_linear_subset<
+          meta::vector<RestSubset...>, meta::vector<RestSuperset...>>
+    {};
 
     // Type not found.
-    template <class FirstSubset, class ... RestSubset,
-            class FirstSuperset, class ... RestSuperset>
-        struct is_linear_subset <
-            meta::vector <FirstSubset, RestSubset ...>,
-            meta::vector <FirstSuperset, RestSuperset ...>>
-    : is_linear_subset <meta::vector <FirstSubset, RestSubset ...>,
-        meta::vector <RestSuperset ...>> {};
+    template <
+        class FirstSubset, class... RestSubset, class FirstSuperset,
+        class... RestSuperset>
+    struct is_linear_subset<
+        meta::vector<FirstSubset, RestSubset...>,
+        meta::vector<FirstSuperset, RestSuperset...>>
+    : is_linear_subset<
+          meta::vector<FirstSubset, RestSubset...>,
+          meta::vector<RestSuperset...>>
+    {};
 
-}} // namespace range::detail
+}}  // namespace range::detail
 
-#endif // RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED
+#endif  // RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED

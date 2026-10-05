@@ -30,19 +30,19 @@ implementation linearly inherits from all of them.
 #ifndef RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
 #define RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
 
-#include <utility>
 #include <stdexcept>
+#include <utility>
 
 #include <boost/mpl/placeholders.hpp>
 
 #include "utility/unique_ptr.hpp"
 
-#include "meta/range.hpp"
 #include "meta/fold.hpp"
+#include "meta/range.hpp"
 
-#include "range/core.hpp"
 #include "capability.hpp"
 #include "interface.hpp"
+#include "range/core.hpp"
 
 namespace range { namespace any_range_implementation {
 
@@ -54,252 +54,272 @@ namespace range { namespace any_range_implementation {
     behaviour when called.
     */
     template <class Element, class CapabilityKeys, class Underlying>
-        class implementation;
+    class implementation;
 
-    template <class Element, class CapabilityKeys, class Underlying>
-        class base
-    : public any_range_interface::interface <Element, CapabilityKeys,
-        typename capability::detect_default_direction <Underlying>::type>
+    template <class Element, class CapabilityKeys, class Underlying> class base
+    : public any_range_interface::interface<
+          Element, CapabilityKeys,
+          typename capability::detect_default_direction<Underlying>::type>
     {
-        static_assert (capability::is_capability_keys <CapabilityKeys>::value,
-            "");
+        static_assert(
+            capability::is_capability_keys<CapabilityKeys>::value, "");
 
         Underlying underlying_;
 
     public:
         typedef Underlying underlying_type;
-        typedef implementation <Element, CapabilityKeys, Underlying>
+        typedef implementation<Element, CapabilityKeys, Underlying>
             implementation_type;
 
-        template <class OtherUnderlying> struct implementation_for {
-            typedef implementation <Element, CapabilityKeys, OtherUnderlying>
+        template <class OtherUnderlying> struct implementation_for
+        {
+            typedef implementation<Element, CapabilityKeys, OtherUnderlying>
                 type;
         };
 
-        template <class Argument> base (Argument && argument)
-        : underlying_ (std::forward <Argument> (argument)) {}
+        template <class Argument> base(Argument && argument)
+        : underlying_(std::forward<Argument>(argument))
+        {}
 
-        base (base const & other) : underlying_ (other.underlying_) {}
-        base (base && other) : underlying_ (std::move (other.underlying_)) {}
+        base(base const & other) : underlying_(other.underlying_) {}
+        base(base && other) : underlying_(std::move(other.underlying_)) {}
 
         Underlying & underlying() { return underlying_; }
         Underlying const & underlying() const { return underlying_; }
     };
 
     /** Implement the losing of a capability. */
-    template <class Element, class CapabilityKeys, class KeyToRemove,
-            class Base, class Enable = void>
-        struct implement_lose_capability;
+    template <
+        class Element, class CapabilityKeys, class KeyToRemove, class Base,
+        class Enable = void>
+    struct implement_lose_capability;
 
     // Without copy construction: can not be implemented.
-    template <class Element, class CapabilityKeys, class KeyToRemove,
-            class Base>
-        struct implement_lose_capability <Element, CapabilityKeys, KeyToRemove,
-            Base, typename boost::disable_if <
-                meta::has_key <capability::copy_construct, CapabilityKeys>
-            >::type>
+    template <
+        class Element, class CapabilityKeys, class KeyToRemove, class Base>
+    struct implement_lose_capability<
+        Element, CapabilityKeys, KeyToRemove, Base,
+        typename boost::disable_if<
+            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
     : Base
     {
-        static_assert (capability::is_capability_keys <CapabilityKeys>::value,
-            "");
+        static_assert(
+            capability::is_capability_keys<CapabilityKeys>::value, "");
 
-        template <class Argument> implement_lose_capability (
-            Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument>
+        implement_lose_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
     };
 
     // With copy construction: can be implemented.
-    template <class Element, class CapabilityKeys, class KeyToRemove,
-            class Base>
-        struct implement_lose_capability <Element, CapabilityKeys, KeyToRemove,
-            Base, typename boost::enable_if <
-                meta::has_key <capability::copy_construct, CapabilityKeys>
-            >::type>
+    template <
+        class Element, class CapabilityKeys, class KeyToRemove, class Base>
+    struct implement_lose_capability<
+        Element, CapabilityKeys, KeyToRemove, Base,
+        typename boost::enable_if<
+            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
     : Base
     {
-        static_assert (capability::is_capability_keys <CapabilityKeys>::value,
-            "");
+        static_assert(
+            capability::is_capability_keys<CapabilityKeys>::value, "");
 
-        template <class Argument> implement_lose_capability (
-            Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument>
+        implement_lose_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::lose_capability;
 
-        virtual typename Base::template
-            interface_ptr_without <KeyToRemove>::type
-                lose_capability (capability::type <KeyToRemove>) const
+        virtual typename Base::template interface_ptr_without<KeyToRemove>::type
+            lose_capability(capability::type<KeyToRemove>) const
         {
-            typedef typename meta::remove <KeyToRemove, CapabilityKeys>::type
+            typedef typename meta::remove<KeyToRemove, CapabilityKeys>::type
                 new_capability_keys;
-            typedef implementation <Element, new_capability_keys,
-                typename Base::underlying_type> new_implementation_type;
+            typedef implementation<
+                Element, new_capability_keys, typename Base::underlying_type>
+                new_implementation_type;
 
-            return utility::make_unique <new_implementation_type> (
+            return utility::make_unique<new_implementation_type>(
                 this->underlying());
         }
     };
 
     /* Implement capabilities. */
     template <class Element, class Capability, class Base, class Enable = void>
-        struct implement;
+    struct implement;
 
-    template <class Element, class Base>
-        struct implement <Element,
-            meta::map_element <capability::copy_construct, void>,
-            Base>
+    template <class Element, class Base> struct implement<
+        Element, meta::map_element<capability::copy_construct, void>, Base>
     : Base
     {
-        template <class Argument> implement (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
-        virtual typename Base::interface_ptr copy() const {
-            return utility::make_unique <typename Base::implementation_type> (
+        virtual typename Base::interface_ptr copy() const
+        {
+            return utility::make_unique<typename Base::implementation_type>(
                 this->underlying());
         }
     };
 
     // default_direction
-    template <class Element, class Direction, class Base>
-        struct implement <Element,
-            meta::map_element <capability::default_direction, Direction>,
-            Base>
-    : Base
+    template <class Element, class Direction, class Base> struct implement<
+        Element, meta::map_element<capability::default_direction, Direction>,
+        Base> : Base
     {
-        template <class Argument> implement (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         // Sometimes this overrides something, but if the default direction
         // is default-constructible, the method is not virtual in the interface.
         virtual Direction default_direction() const
-        { throw std::logic_error ("Bug in any_range."); }
+        {
+            throw std::logic_error("Bug in any_range.");
+        }
     };
 
     template <class Element, class Capability, class Direction, class Base>
-        struct implement_capability;
+    struct implement_capability;
 
     // Farm out to implement_capability for each capability.
     template <class Element, class Direction, class Capabilities, class Base>
-        struct implement <Element,
-            meta::map_element <Direction, Capabilities>, Base>
-    : meta::fold <implement_capability <
-            Element, boost::mpl::_2, Direction, boost::mpl::_1>,
-        Base, Capabilities>::type
+    struct implement<Element, meta::map_element<Direction, Capabilities>, Base>
+    : meta::fold<
+          implement_capability<
+              Element, boost::mpl::_2, Direction, boost::mpl::_1>,
+          Base, Capabilities>::type
     {
-        typedef typename meta::fold <implement_capability <
+        typedef typename meta::fold<
+            implement_capability<
                 Element, boost::mpl::_2, Direction, boost::mpl::_1>,
             Base, Capabilities>::type base_type;
 
-        template <class Argument> implement (Argument && argument)
-        : base_type (std::forward <Argument> (argument)) {}
+        template <class Argument> implement(Argument && argument)
+        : base_type(std::forward<Argument>(argument))
+        {}
     };
 
     // empty.
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::empty, Direction, Base>
+    struct implement_capability<Element, capability::empty, Direction, Base>
     : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::empty;
 
-        virtual bool empty (Direction const & direction) const
-        { return range::empty (this->underlying(), direction); }
+        virtual bool empty(Direction const & direction) const
+        {
+            return range::empty(this->underlying(), direction);
+        }
     };
 
     // size.
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::size, Direction, Base>
+    struct implement_capability<Element, capability::size, Direction, Base>
     : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::size;
 
-        virtual std::size_t size (Direction const & direction) const
-        { return range::size (this->underlying(), direction); }
+        virtual std::size_t size(Direction const & direction) const
+        {
+            return range::size(this->underlying(), direction);
+        }
     };
 
     // first.
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::first, Direction, Base>
+    struct implement_capability<Element, capability::first, Direction, Base>
     : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::first;
 
     private:
-        Element implementation (
+        Element implementation(
             Direction const & direction, rime::false_type) const
-        { return range::first (this->underlying(), direction); }
+        {
+            return range::first(this->underlying(), direction);
+        }
 
-        Element implementation (Direction const &, rime::true_type) const
-        { throw std::logic_error ("first() not implemented for empty range."); }
+        Element implementation(Direction const &, rime::true_type) const
+        {
+            throw std::logic_error("first() not implemented for empty range.");
+        }
 
     public:
-        virtual Element first (Direction const & direction) const {
-            return implementation (direction,
-                always_empty <typename Base::underlying_type, Direction>());
+        virtual Element first(Direction const & direction) const
+        {
+            return implementation(
+                direction,
+                always_empty<typename Base::underlying_type, Direction>());
         }
     };
 
     // drop_one.
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::drop_one, Direction, Base>
+    struct implement_capability<Element, capability::drop_one, Direction, Base>
     : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::drop_one;
 
         typedef typename Base::interface_ptr interface_ptr;
 
     private:
-        interface_ptr implementation (
+        interface_ptr implementation(
             Direction const & direction, rime::false_type) const
         {
             typedef typename Base::underlying_type underlying_type;
             // If the range is heterogeneous, the new underlying type will be
             // different.
             // It is assumed it has the same capabilities.
-            typedef typename result_of <callable::drop (
+            typedef typename result_of<callable::drop(
                 underlying_type, Direction)>::type new_underlying_type;
 
-            typedef typename Base::template implementation_for <
+            typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
-            return utility::make_unique <new_implementation_type> (
-                range::drop (this->underlying(), direction));
+            return utility::make_unique<new_implementation_type>(
+                range::drop(this->underlying(), direction));
         }
 
-        interface_ptr implementation (Direction const &, rime::true_type) const
-        { throw std::logic_error ("drop() not implemented for empty range."); }
+        interface_ptr implementation(Direction const &, rime::true_type) const
+        {
+            throw std::logic_error("drop() not implemented for empty range.");
+        }
 
     public:
-        virtual interface_ptr drop_one (
-            Direction const & direction) const
+        virtual interface_ptr drop_one(Direction const & direction) const
         {
-            return implementation (direction,
-                always_empty <typename Base::underlying_type, Direction>());
+            return implementation(
+                direction,
+                always_empty<typename Base::underlying_type, Direction>());
         }
     };
 
     // drop_n.
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::drop_n, Direction, Base>
+    struct implement_capability<Element, capability::drop_n, Direction, Base>
     : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::drop_n;
 
@@ -307,40 +327,44 @@ namespace range { namespace any_range_implementation {
 
     private:
         // Not always empty.
-        interface_ptr implementation (std::size_t increment,
-            Direction const & direction, rime::false_type) const
+        interface_ptr implementation(
+            std::size_t increment, Direction const & direction,
+            rime::false_type) const
         {
             typedef typename Base::underlying_type underlying_type;
-            typedef typename result_of <callable::drop (
-                    underlying_type, std::size_t, Direction)>::type
+            typedef typename result_of<callable::drop(
+                underlying_type, std::size_t, Direction)>::type
                 new_underlying_type;
-            typedef typename Base::template implementation_for <
+            typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
-            return utility::make_unique <new_implementation_type> (
-                range::drop (this->underlying(), increment, direction));
+            return utility::make_unique<new_implementation_type>(
+                range::drop(this->underlying(), increment, direction));
         }
 
         // Always empty.
-        interface_ptr implementation (
+        interface_ptr implementation(
             std::size_t, Direction const &, rime::true_type) const
-        { throw std::logic_error ("drop() not implemented for empty range."); }
+        {
+            throw std::logic_error("drop() not implemented for empty range.");
+        }
 
     public:
-        virtual interface_ptr drop_n (
+        virtual interface_ptr drop_n(
             std::size_t increment, Direction const & direction) const
         {
-            return implementation (increment, direction,
-                always_empty <typename Base::underlying_type, Direction>());
+            return implementation(
+                increment, direction,
+                always_empty<typename Base::underlying_type, Direction>());
         }
     };
 
     template <class Element, class Direction, class Base>
-        struct implement_capability <Element,
-            capability::chop_destructive, Direction, Base>
-    : Base
+    struct implement_capability<
+        Element, capability::chop_destructive, Direction, Base> : Base
     {
-        template <class Argument> implement_capability (Argument && argument)
-        : Base (std::forward <Argument> (argument)) {}
+        template <class Argument> implement_capability(Argument && argument)
+        : Base(std::forward<Argument>(argument))
+        {}
 
         using Base::chop_destructive;
 
@@ -351,89 +375,91 @@ namespace range { namespace any_range_implementation {
         typedef typename Base::underlying_type underlying_type;
 
     private:
-        typedef any_range_interface::chopped <Element, interface_ptr>
+        typedef any_range_interface::chopped<Element, interface_ptr>
             chop_destructive_result;
 
         // Dispatch based on: has <chop_in_place>, always_empty.
-        chop_destructive_result implementation (
-            Direction const & direction, interface_ptr & this_,
-            rime::true_type, rime::false_type)
+        chop_destructive_result implementation(
+            Direction const & direction, interface_ptr & this_, rime::true_type,
+            rime::false_type)
         {
-            return chop_destructive_result (
-                range::chop_in_place (this->underlying(), direction),
+            return chop_destructive_result(
+                range::chop_in_place(this->underlying(), direction),
                 interface_ptr());
         }
 
-        chop_destructive_result implementation (
+        chop_destructive_result implementation(
             Direction const & direction, interface_ptr & this_,
             rime::false_type, rime::false_type)
         {
-            auto c = range::chop (std::move (this->underlying()), direction);
-            typedef typename std::decay <decltype (c.forward_rest())>::type
+            auto c = range::chop(std::move(this->underlying()), direction);
+            typedef typename std::decay<decltype(c.forward_rest())>::type
                 new_underlying_type;
-            typedef typename Base::template implementation_for <
+            typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
-            interface_ptr discardable = std::move (this_);
+            interface_ptr discardable = std::move(this_);
             this_ =
-                utility::make_unique <new_implementation_type> (c.move_rest());
-            return chop_destructive_result (
-                c.move_first(), std::move (discardable));
+                utility::make_unique<new_implementation_type>(c.move_rest());
+            return chop_destructive_result(
+                c.move_first(), std::move(discardable));
         }
 
-        template <class Bool>
-            chop_destructive_result implementation (
-                Direction const &, interface_ptr &, Bool, rime::true_type)
-        { throw std::logic_error ("chop() not implemented for empty range."); }
+        template <class Bool> chop_destructive_result implementation(
+            Direction const &, interface_ptr &, Bool, rime::true_type)
+        {
+            throw std::logic_error("chop() not implemented for empty range.");
+        }
 
     public:
-        virtual chop_destructive_result chop_destructive (
+        virtual chop_destructive_result chop_destructive(
             Direction const & direction, interface_ptr & this_)
         {
-            return implementation (direction, this_,
-                has <callable::chop_in_place (underlying_type &, Direction)>(),
-                always_empty <typename Base::underlying_type, Direction>());
+            return implementation(
+                direction, this_,
+                has<callable::chop_in_place(underlying_type &, Direction)>(),
+                always_empty<typename Base::underlying_type, Direction>());
         }
     };
 
     // Types for implementation class.
 
     template <class Element, class CapabilityKeys, class Underlying>
-        struct implementation_types
+    struct implementation_types
     {
-        typedef typename capability::detect_capabilities <
+        typedef typename capability::detect_capabilities<
             Underlying, CapabilityKeys>::type capabilities;
 
-        typedef typename meta::fold <
-                implement_lose_capability <Element, CapabilityKeys,
-                    boost::mpl::_2, boost::mpl::_1>,
-                base <Element, CapabilityKeys, Underlying>,
-                CapabilityKeys>::type lose_capabilities_type;
+        typedef typename meta::fold<
+            implement_lose_capability<
+                Element, CapabilityKeys, boost::mpl::_2, boost::mpl::_1>,
+            base<Element, CapabilityKeys, Underlying>, CapabilityKeys>::type
+            lose_capabilities_type;
 
-        typedef typename meta::fold <
-            implement <Element, boost::mpl::_2, boost::mpl::_1>,
-            lose_capabilities_type,
-            capabilities>::type base_type;
+        typedef typename meta::fold<
+            implement<Element, boost::mpl::_2, boost::mpl::_1>,
+            lose_capabilities_type, capabilities>::type base_type;
     };
 
     /* Main implementation class. */
 
     template <class Element, class CapabilityKeys, class Underlying>
-        class implementation
-    : public implementation_types <
-        Element, CapabilityKeys, Underlying>::base_type
+    class implementation : public implementation_types<
+                               Element, CapabilityKeys, Underlying>::base_type
     {
-        typedef implementation_types <Element, CapabilityKeys, Underlying>
-            types;
+        typedef implementation_types<Element, CapabilityKeys, Underlying> types;
+
     public:
         typedef typename types::capabilities capabilities;
+
     private:
         typedef typename types::base_type base_type;
 
     public:
-        template <class Argument> implementation (Argument && argument)
-        : base_type (std::forward <Argument> (argument)) {}
+        template <class Argument> implementation(Argument && argument)
+        : base_type(std::forward<Argument>(argument))
+        {}
     };
 
-}} // namespace range::any_range_implementation
+}}  // namespace range::any_range_implementation
 
-#endif // RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
+#endif  // RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED

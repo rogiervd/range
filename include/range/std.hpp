@@ -26,19 +26,19 @@ For compile speed, prefer to include the headers from \c ./std/.
 
 // Sequence containers.
 #include "std/array.hpp"
-#include "std/vector.hpp"
 #include "std/deque.hpp"
 #include "std/forward_list.hpp"
 #include "std/list.hpp"
 #include "std/string.hpp"
+#include "std/vector.hpp"
 
 // Associative containers.
-#include "std/set.hpp"
 #include "std/map.hpp"
+#include "std/set.hpp"
 
 // Unordered (hashed) associative containers.
-#include "std/unordered_set.hpp"
 #include "std/unordered_map.hpp"
+#include "std/unordered_set.hpp"
 
 // tuple.
 #include "std/tuple.hpp"

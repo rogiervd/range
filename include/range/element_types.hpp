@@ -23,91 +23,97 @@ limitations under the License.
 
 namespace range {
 
-    struct element_types_tag;
+struct element_types_tag;
 
-    /**
-    Meta-range with the types that traversing over \a Range result in.
-    If the range is homogeneous, this has infinite length.
-    The direction that this range is traversed in should be the direction of
-    interest of the underlying range.
-    The default direction is that of the underlying range.
+/**
+Meta-range with the types that traversing over \a Range result in.
+If the range is homogeneous, this has infinite length.
+The direction that this range is traversed in should be the direction of
+interest of the underlying range.
+The default direction is that of the underlying range.
 
-    view_once() is called on the range first.
-    The resulting types will often be reference types.
-    For example, this is the case when \a Range is a container.
-    */
-    template <class Range> struct element_types {
-        typedef Range underlying_type;
+view_once() is called on the range first.
+The resulting types will often be reference types.
+For example, this is the case when \a Range is a container.
+*/
+template <class Range> struct element_types
+{
+    typedef Range underlying_type;
 
-        template <class Direction> struct view_once
-        : result_of < ::range::callable::view_once (Range, Direction)>
-        {};
+    template <class Direction> struct view_once
+    : result_of<::range::callable::view_once(Range, Direction)>
+    {};
 
-        typedef element_types type;
-    };
+    typedef element_types type;
+};
 
-} // namespace range
+}  // namespace range
 
 namespace meta {
 
-    template <class Range> struct range_tag <range::element_types <Range>>
-    { typedef range::element_types_tag type; };
+template <class Range> struct range_tag<range::element_types<Range>>
+{
+    typedef range::element_types_tag type;
+};
 
-    namespace operation {
+namespace operation {
 
-        // default_direction.
-        template <> struct default_direction <range::element_types_tag> {
-            template <class TypesFrom> struct apply
-            : ::range::result_of < ::range::callable::default_direction (
-                typename TypesFrom::underlying_type)> {};
-        };
+    // default_direction.
+    template <> struct default_direction<range::element_types_tag>
+    {
+        template <class TypesFrom> struct apply
+        : ::range::result_of<::range::callable::default_direction(
+              typename TypesFrom::underlying_type)>
+        {};
+    };
 
-        // empty.
-        template <class Direction>
-            struct empty <range::element_types_tag, Direction>
+    // empty.
+    template <class Direction> struct empty<range::element_types_tag, Direction>
+    {
+        template <class TypesFrom> struct apply
+        : ::range::always_empty<
+              typename TypesFrom::template view_once<Direction>::type,
+              Direction>
+        {};
+    };
+
+    // size.
+    template <class Direction> struct size<range::element_types_tag, Direction>
+    {
+        // Expect an error here if the size of the underlying range is not
+        // known at compile time.
+        template <class TypesFrom> struct apply
+        : ::range::result_of<::range::callable::size(
+              typename TypesFrom::template view_once<Direction>::type,
+              Direction)>::type
+        {};
+    };
+
+    // first.
+    template <class Direction> struct first<range::element_types_tag, Direction>
+    {
+        template <class TypesFrom> struct apply
+        : ::range::result_of<::range::callable::first(
+              typename TypesFrom::template view_once<Direction>::type,
+              Direction)>
+        {};
+    };
+
+    // drop.
+    template <typename Direction, typename Increment>
+    struct drop<range::element_types_tag, Direction, Increment>
+    {
+        template <class TypesFrom> struct apply
         {
-            template <class TypesFrom> struct apply
-            : ::range::always_empty <
-                typename TypesFrom::template view_once <Direction>::type,
-                Direction> {};
+            typedef ::range::element_types<
+                typename ::range::decayed_result_of<::range::callable::drop(
+                    typename TypesFrom::template view_once<Direction>::type,
+                    Increment, Direction)>::type>
+                type;
         };
+    };
 
-        // size.
-        template <class Direction>
-            struct size <range::element_types_tag, Direction>
-        {
-            // Expect an error here if the size of the underlying range is not
-            // known at compile time.
-            template <class TypesFrom> struct apply
-            : ::range::result_of < ::range::callable::size (
-                typename TypesFrom::template view_once <Direction>::type,
-                Direction)>::type
-            {};
-        };
+}  // namespace operation
+}  // namespace meta
 
-        // first.
-        template <class Direction>
-            struct first <range::element_types_tag, Direction>
-        {
-            template <class TypesFrom> struct apply
-            : ::range::result_of < ::range::callable::first (
-                typename TypesFrom::template view_once <Direction>::type,
-                Direction)> {};
-        };
-
-        // drop.
-        template <typename Direction, typename Increment>
-            struct drop <range::element_types_tag, Direction, Increment>
-        {
-            template <class TypesFrom> struct apply {
-                typedef ::range::element_types <typename
-                    ::range::decayed_result_of < ::range::callable::drop (
-                        typename TypesFrom::template view_once <Direction
-                            >::type, Increment, Direction)>::type>
-                    type;
-            };
-        };
-
-}} // namespace meta::operation
-
-#endif // RANGE_ELEMENT_TYPES_HPP_INCLUDED
+#endif  // RANGE_ELEMENT_TYPES_HPP_INCLUDED

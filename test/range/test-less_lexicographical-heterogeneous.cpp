@@ -20,97 +20,112 @@ limitations under the License.
 #include "range/less_lexicographical.hpp"
 
 #include <functional>
-#include <vector>
-#include <tuple>
 #include <string>
+#include <tuple>
+#include <vector>
 
-#include "range/std/vector.hpp"
-#include "range/std/tuple.hpp"
 #include "range/reverse.hpp"
+#include "range/std/tuple.hpp"
+#include "range/std/vector.hpp"
 #include "range/transform.hpp"
 
 #include "rime/check/check_equal.hpp"
 
-struct negate { int operator() (int i) const { return -i; } };
+struct negate
+{
+    int operator()(int i) const { return -i; }
+};
 
 BOOST_AUTO_TEST_SUITE(range_test_less_lexicographical_heterogeneous)
 
-#define CHECK_range_less_lexicographical(r1, r2, value) \
-    RIME_CHECK_EQUAL (range::less_lexicographical (r1, r2), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        r1, r2, range::front), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::reverse (r1), range::reverse (r2), range::back), value); \
-    \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        r1, r2, std::less <int>()), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        r1, r2, range::front, std::less <int>()), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::reverse (r1), range::reverse (r2), \
-        range::back, std::less <int>()), value); \
-    \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::transform (r1, negate()), \
-        range::transform (r2, negate()), std::greater <int>()), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::transform (r1, negate()), \
-        range::transform (r2, negate()), \
-        range::front, std::greater <int>()), value); \
-    RIME_CHECK_EQUAL (range::less_lexicographical ( \
-        range::transform (range::reverse (r1), negate()), \
-        range::transform (range::reverse (r2), negate()), \
-        range::back, std::greater <int>()), value)
+#define CHECK_range_less_lexicographical(r1, r2, value)                      \
+    RIME_CHECK_EQUAL(range::less_lexicographical(r1, r2), value);            \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(r1, r2, range::front), value);           \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(                                         \
+            range::reverse(r1), range::reverse(r2), range::back),            \
+        value);                                                              \
+                                                                             \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(r1, r2, std::less<int>()), value);       \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(r1, r2, range::front, std::less<int>()), \
+        value);                                                              \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(                                         \
+            range::reverse(r1), range::reverse(r2), range::back,             \
+            std::less<int>()),                                               \
+        value);                                                              \
+                                                                             \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(                                         \
+            range::transform(r1, negate()), range::transform(r2, negate()),  \
+            std::greater<int>()),                                            \
+        value);                                                              \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(                                         \
+            range::transform(r1, negate()), range::transform(r2, negate()),  \
+            range::front, std::greater<int>()),                              \
+        value);                                                              \
+    RIME_CHECK_EQUAL(                                                        \
+        range::less_lexicographical(                                         \
+            range::transform(range::reverse(r1), negate()),                  \
+            range::transform(range::reverse(r2), negate()), range::back,     \
+            std::greater<int>()),                                            \
+        value)
 
-BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_heterogeneous) {
-    CHECK_range_less_lexicographical (
+BOOST_AUTO_TEST_CASE(test_range_less_lexicographical_heterogeneous)
+{
+    CHECK_range_less_lexicographical(
         std::make_tuple(), std::make_tuple(), rime::false_);
 
     // Different lengths: known at compile-time.
-    CHECK_range_less_lexicographical (
-        std::make_tuple(), std::make_tuple (1), rime::true_);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1), std::make_tuple(), rime::false_);
-    CHECK_range_less_lexicographical (
-        std::make_tuple(), std::make_tuple (1, 2), rime::true_);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple(), rime::false_);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(), std::make_tuple(1), rime::true_);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1), std::make_tuple(), rime::false_);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(), std::make_tuple(1, 2), rime::true_);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1, 2), std::make_tuple(), rime::false_);
 
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple (1), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1), std::make_tuple (1, 2), true);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2, 3), std::make_tuple (1, 2), false);
-    CHECK_range_less_lexicographical (
-        std::make_tuple (1, 2), std::make_tuple (1, 2, 3), true);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1, 2), std::make_tuple(1), false);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1), std::make_tuple(1, 2), true);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1, 2, 3), std::make_tuple(1, 2), false);
+    CHECK_range_less_lexicographical(
+        std::make_tuple(1, 2), std::make_tuple(1, 2, 3), true);
 }
 
-BOOST_AUTO_TEST_CASE (test_range_less_lexicographical_types) {
-    std::tuple <char> t1 ('a');
-    std::tuple <char, std::string> t2 ('a', "bye");
-    std::tuple <char, char const *> t3 ('a', "hello");
-    std::tuple <char, std::string> t4 ('r', "hello");
+BOOST_AUTO_TEST_CASE(test_range_less_lexicographical_types)
+{
+    std::tuple<char> t1('a');
+    std::tuple<char, std::string> t2('a', "bye");
+    std::tuple<char, char const *> t3('a', "hello");
+    std::tuple<char, std::string> t4('r', "hello");
 
-    RIME_CHECK_EQUAL (range::less_lexicographical (t1, t1), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t1, t2), true);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t1, t3), true);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t1, t4), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t1, t1), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t1, t2), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t1, t3), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t1, t4), true);
 
-    RIME_CHECK_EQUAL (range::less_lexicographical (t2, t1), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t2, t2), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t2, t3), true);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t2, t4), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t2, t1), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t2, t2), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t2, t3), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t2, t4), true);
 
-    RIME_CHECK_EQUAL (range::less_lexicographical (t3, t1), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t3, t2), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t3, t3), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t3, t4), true);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t3, t1), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t3, t2), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t3, t3), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t3, t4), true);
 
-    RIME_CHECK_EQUAL (range::less_lexicographical (t4, t1), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t4, t2), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t4, t3), false);
-    RIME_CHECK_EQUAL (range::less_lexicographical (t4, t4), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t4, t1), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t4, t2), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t4, t3), false);
+    RIME_CHECK_EQUAL(range::less_lexicographical(t4, t4), false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

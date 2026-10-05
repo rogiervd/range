@@ -30,35 +30,46 @@ algorithms actually propagate the direction.
 /**
 Test range that uses weird_direction.
 */
-struct weird_count {
+struct weird_count
+{
     int current;
 
-    weird_count() : current (0) {}
-    weird_count (int current) : current (current) {}
+    weird_count() : current(0) {}
+    weird_count(int current) : current(current) {}
 };
 
-struct weird_count_tag {};
+struct weird_count_tag
+{};
 
 namespace range {
-    template<> struct tag_of_qualified <weird_count>
-    { typedef weird_count_tag type; };
-} // namespace range
+template <> struct tag_of_qualified<weird_count>
+{
+    typedef weird_count_tag type;
+};
+}  // namespace range
 
-inline forgotten_to_define_direction implement_default_direction (
+inline forgotten_to_define_direction implement_default_direction(
     weird_count_tag, weird_count const &);
 
-inline rime::false_type implement_empty (
+inline rime::false_type implement_empty(
     weird_count_tag, weird_count const &, weird_direction)
-{ return rime::false_; }
+{
+    return rime::false_;
+}
 
 // size is not defined.
 
-inline int implement_first (
+inline int implement_first(
     weird_count_tag, weird_count const & c, weird_direction)
-{ return c.current; }
+{
+    return c.current;
+}
 
-inline weird_count implement_drop (weird_count_tag, weird_count const & c,
-    std::size_t increment, weird_direction)
-{ return weird_count (c.current + increment); }
+inline weird_count implement_drop(
+    weird_count_tag, weird_count const & c, std::size_t increment,
+    weird_direction)
+{
+    return weird_count(c.current + increment);
+}
 
-#endif // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED
+#endif  // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED

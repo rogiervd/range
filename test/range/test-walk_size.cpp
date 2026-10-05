@@ -21,42 +21,43 @@ limitations under the License.
 
 #include "range/core.hpp"
 
-#include "range/std/vector.hpp"
 #include "range/std/list.hpp"
+#include "range/std/vector.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_walk_size)
 
-void check (std::vector <int> const & v) {
+void check(std::vector<int> const & v)
+{
     // Sanity.
-    BOOST_CHECK_EQUAL (range::size (v), v.size());
+    BOOST_CHECK_EQUAL(range::size(v), v.size());
     // Test implementation that forwards to size.
-    BOOST_CHECK_EQUAL (range::walk_size (v), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (v, range::front), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (v, range::back), range::size (v));
+    BOOST_CHECK_EQUAL(range::walk_size(v), range::size(v));
+    BOOST_CHECK_EQUAL(range::walk_size(v, range::front), range::size(v));
+    BOOST_CHECK_EQUAL(range::walk_size(v, range::back), range::size(v));
 
-    std::list <int> l (v.begin(), v.end());
+    std::list<int> l(v.begin(), v.end());
     // Test slow implementation.
-    BOOST_CHECK_EQUAL (range::walk_size (l), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (l, range::front), range::size (v));
-    BOOST_CHECK_EQUAL (range::walk_size (l, range::back), range::size (v));
+    BOOST_CHECK_EQUAL(range::walk_size(l), range::size(v));
+    BOOST_CHECK_EQUAL(range::walk_size(l, range::front), range::size(v));
+    BOOST_CHECK_EQUAL(range::walk_size(l, range::back), range::size(v));
 }
 
-BOOST_AUTO_TEST_CASE (test_range_walk_size) {
+BOOST_AUTO_TEST_CASE(test_range_walk_size)
+{
     using range::size;
     using range::walk_size;
 
-    std::vector <int> v;
-    check (v);
+    std::vector<int> v;
+    check(v);
 
-    v.push_back (2);
-    check (v);
+    v.push_back(2);
+    check(v);
 
-    v.push_back (7);
-    check (v);
+    v.push_back(7);
+    check(v);
 
-    v.push_back (27);
-    check (v);
+    v.push_back(27);
+    check(v);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

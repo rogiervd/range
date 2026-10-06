@@ -35,8 +35,7 @@ namespace range {
 template <class Optional> class optional_view;
 
 namespace view_optional_operation {
-    struct optional_view_tag
-    {};
+    struct optional_view_tag {};
 }  // namespace view_optional_operation
 
 template <class Optional> struct tag_of_qualified<optional_view<Optional>>

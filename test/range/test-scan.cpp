@@ -335,8 +335,7 @@ template <> struct parse_outcome<void>
     bool success() const { return success_; }
 };
 
-struct any_char_parser
-{};
+struct any_char_parser {};
 struct char_parser
 {
     char c;
@@ -349,8 +348,9 @@ struct parse
     Result operator()(
         parse_outcome<LastOutput> const & state, any_char_parser) const
     {
-        if (range::empty(state.rest))
+        if (range::empty(state.rest)) {
             return Result(state.rest);
+        }
         return Result(first(state.rest), drop(state.rest));
     }
 
@@ -358,8 +358,9 @@ struct parse
     Result operator()(
         parse_outcome<LastOutput> const & state, char_parser const parser) const
     {
-        if (range::empty(state.rest) || range::first(state.rest) != parser.c)
+        if (range::empty(state.rest) || range::first(state.rest) != parser.c) {
             return Result(state.rest);
+        }
         return Result(true, drop(state.rest));
     }
 };

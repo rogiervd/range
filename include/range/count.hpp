@@ -130,13 +130,13 @@ private:
         RETURNS(rime::cast_value<End>(rime::minus(end_, rime::size_t<1>())));
 
     template <class Increment>
-    auto drop(Increment const & increment, direction::front) const
-        RETURNS(range::count(
+    auto drop(Increment const & increment, direction::front) const RETURNS(
+        range::count(
             rime::cast_value<Begin>(rime::plus(begin_, increment)), end_));
 
     template <class Increment>
-    auto drop(Increment const & increment, direction::back) const
-        RETURNS(range::count(
+    auto drop(Increment const & increment, direction::back) const RETURNS(
+        range::count(
             begin_, rime::cast_value<End>(rime::minus(end_, increment))));
 };
 
@@ -164,14 +164,13 @@ private:
     Begin first(direction::front) const { return begin_; }
 
     template <class Increment>
-    auto drop(Increment const & increment, direction::front) const
-        RETURNS(range::count_from(
+    auto drop(Increment const & increment, direction::front) const RETURNS(
+        range::count_from(
             rime::cast_value<Begin>(rime::plus(begin_, increment))));
 };
 
 namespace count_operation {
-    struct count_range_tag
-    {};
+    struct count_range_tag {};
 }  // namespace count_operation
 
 template <class Begin, class End>

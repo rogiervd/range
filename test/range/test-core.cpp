@@ -35,10 +35,8 @@ Other aspects are tested on different types of ranges by
 #include "weird_count.hpp"
 #include "weird_direction.hpp"
 
-struct fake_range_1
-{};
-struct fake_range_1_tag
-{};
+struct fake_range_1 {};
+struct fake_range_1_tag {};
 
 namespace range {
 

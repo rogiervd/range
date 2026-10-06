@@ -78,9 +78,10 @@ namespace range { namespace python {
         */
         nanobind::object next()
         {
-            if (empty(range))
+            if (empty(range)) {
                 throw nanobind::stop_iteration(
                     "No more elements in C++ range.");
+            }
             return chop_in_place(range);
         }
 

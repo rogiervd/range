@@ -73,11 +73,12 @@ namespace file_producer_detail {
         file_source(std::string file_name)
         {
             FILE * handle = std::fopen(file_name.c_str(), "rb");
-            if (handle)
+            if (handle) {
                 this->handle_ = std::shared_ptr<FILE>(handle, std::fclose);
-            else
+            } else {
                 throw file_open_error() << boost::errinfo_errno(errno)
                                         << boost::errinfo_file_name(file_name);
+            }
 
             file_name_ = std::move(file_name);
         }
@@ -97,8 +98,9 @@ namespace file_producer_detail {
         {
             std::size_t actually_read_num =
                 std::fread(target, sizeof(char), number, handle_.get());
-            if (std::ferror(handle_.get()))
+            if (std::ferror(handle_.get())) {
                 throw file_read_error() << boost::errinfo_errno(errno);
+            }
             return actually_read_num;
         }
     };

@@ -101,19 +101,16 @@ namespace range { namespace tuple_detail {
                       rime::is_constant_true<PredicateResults>::value...>,
                   rime::true_type,
                   // Else: runtime.
-                  bool>>
-        {};
+                  bool>> {};
 
         // Implementation.
 
         template <class Result, class PredicateResults, class Enable = void>
-        struct equal_implementation
-        {};
+        struct equal_implementation {};
 
         template <class PredicateResults> struct equal_implementation_forwarder
         : equal_implementation<
-              typename result<PredicateResults>::type, PredicateResults>
-        {};
+              typename result<PredicateResults>::type, PredicateResults> {};
 
         // Constant result.
         template <class Result, class PredicateResults>
@@ -225,8 +222,8 @@ namespace range { namespace tuple_detail {
                 sizeof...(LeftTypes) == sizeof...(RightTypes)>::type>
         : equal_implementation_forwarder<
               meta::vector<decltype(std::declval<Predicate>()(
-                  std::declval<LeftTypes>(), std::declval<RightTypes>()))...>>
-        {};
+                  std::declval<LeftTypes>(), std::declval<RightTypes>()))...>> {
+        };
 
     }  // namespace equal_detail
 
@@ -235,7 +232,8 @@ namespace range { namespace tuple_detail {
     inline auto implement_equal(
         tuple_view_tag<Size>, tuple_view_tag<Size>, LeftView const & left,
         RightView const & right, direction::front, Predicate && predicate)
-        RETURNS(equal_detail::equal<
+        RETURNS(
+            equal_detail::equal<
                 typename types<LeftView>::type, typename types<RightView>::type,
                 Predicate>()(left, right, std::forward<Predicate>(predicate)));
 
@@ -326,8 +324,7 @@ namespace range { namespace tuple_detail {
                   LeftTypes,
                   typename meta::tail_of_longer<LeftTypes, RightTypes>::type>::
                   type,
-              RightTypes, Predicate>
-        {};
+              RightTypes, Predicate> {};
 
         template <class LeftTypes, class RightTypes, class Predicate>
         struct predicate_results_left_not_shorter
@@ -337,8 +334,7 @@ namespace range { namespace tuple_detail {
                   RightTypes,
                   typename meta::tail_of_longer<RightTypes, LeftTypes>::type>::
                   type,
-              Predicate>
-        {};
+              Predicate> {};
 
         template <class... LeftTypes, class... RightTypes, class Predicate>
         struct predicate_results<
@@ -350,8 +346,7 @@ namespace range { namespace tuple_detail {
                   Predicate>,
               predicate_results_left_not_shorter<
                   meta::vector<LeftTypes...>, meta::vector<RightTypes...>,
-                  Predicate>>::type::type
-        {};
+                  Predicate>>::type::type {};
 
         // result.
         template <
@@ -398,8 +393,7 @@ namespace range { namespace tuple_detail {
                 boost::mpl::pair<FirstLeft, FirstRight>, PredicateResults...>,
             typename rime::enable_if_constant_false<FirstLeft>::type,
             typename rime::enable_if_constant_false<FirstRight>::type>
-        : result<meta::vector<PredicateResults...>>
-        {};
+        : result<meta::vector<PredicateResults...>> {};
 
         // false_, bool: false or next.
         template <class... PredicateResults, class FirstLeft, class FirstRight>
@@ -412,8 +406,7 @@ namespace range { namespace tuple_detail {
               std::is_same<
                   typename result<meta::vector<PredicateResults...>>::type,
                   rime::false_type>::value,
-              rime::false_type, bool>
-        {};
+              rime::false_type, bool> {};
 
         // bool, false_: true or next.
         template <class... PredicateResults, class FirstLeft, class FirstRight>
@@ -426,20 +419,17 @@ namespace range { namespace tuple_detail {
               std::is_same<
                   typename result<meta::vector<PredicateResults...>>::type,
                   rime::true_type>::value,
-              rime::true_type, bool>
-        {};
+              rime::true_type, bool> {};
 
         // Implementation.
 
         template <class Result, class PredicateResults, class Enable = void>
-        struct less_lexicographical_implementation
-        {};
+        struct less_lexicographical_implementation {};
 
         template <class PredicateResults>
         struct less_lexicographical_implementation_forwarder
         : less_lexicographical_implementation<
-              typename result<PredicateResults>::type, PredicateResults>
-        {};
+              typename result<PredicateResults>::type, PredicateResults> {};
 
         // Constant result.
         template <class Result, class PredicateResults>
@@ -485,10 +475,12 @@ namespace range { namespace tuple_detail {
                 bool left_right, bool right_left,
                 utility::overload_order<2> *) const
             {
-                if (left_right)
+                if (left_right) {
                     return true;
-                if (right_left)
+                }
+                if (right_left) {
                     return false;
+                }
                 return less_lexicographical_implementation<
                     bool, meta::vector<PredicateResults...>>()(
                     range::drop(left), range::drop(right),
@@ -541,10 +533,12 @@ namespace range { namespace tuple_detail {
                 Left const & left, Right const & right,
                 Predicate && predicate) const
             {
-                if (predicate(range::first(left), range::first(right)))
+                if (predicate(range::first(left), range::first(right))) {
                     return true;
-                if (predicate(range::first(right), range::first(left)))
+                }
+                if (predicate(range::first(right), range::first(left))) {
                     return false;
+                }
                 return less_lexicographical_implementation<
                     bool, meta::vector<PredicateResults...>>()(
                     range::drop(left), range::drop(right),
@@ -563,14 +557,18 @@ namespace range { namespace tuple_detail {
                 Left const & left, Right const & right,
                 Predicate && predicate) const
             {
-                if (predicate(range::first(left), range::first(right)))
+                if (predicate(range::first(left), range::first(right))) {
                     return true;
-                if (predicate(range::first(right), range::first(left)))
+                }
+                if (predicate(range::first(right), range::first(left))) {
                     return false;
-                if (predicate(range::second(left), range::second(right)))
+                }
+                if (predicate(range::second(left), range::second(right))) {
                     return true;
-                if (predicate(range::second(right), range::second(left)))
+                }
+                if (predicate(range::second(right), range::second(left))) {
                     return false;
+                }
                 return less_lexicographical_implementation<
                     bool, meta::vector<PredicateResults...>>()(
                     range::drop(left, rime::size_t<2>()),
@@ -590,18 +588,24 @@ namespace range { namespace tuple_detail {
                 Left const & left, Right const & right,
                 Predicate && predicate) const
             {
-                if (predicate(range::first(left), range::first(right)))
+                if (predicate(range::first(left), range::first(right))) {
                     return true;
-                if (predicate(range::first(right), range::first(left)))
+                }
+                if (predicate(range::first(right), range::first(left))) {
                     return false;
-                if (predicate(range::second(left), range::second(right)))
+                }
+                if (predicate(range::second(left), range::second(right))) {
                     return true;
-                if (predicate(range::second(right), range::second(left)))
+                }
+                if (predicate(range::second(right), range::second(left))) {
                     return false;
-                if (predicate(range::third(left), range::third(right)))
+                }
+                if (predicate(range::third(left), range::third(right))) {
                     return true;
-                if (predicate(range::third(right), range::third(left)))
+                }
+                if (predicate(range::third(right), range::third(left))) {
                     return false;
+                }
                 return less_lexicographical_implementation<
                     bool, meta::vector<PredicateResults...>>()(
                     range::drop(left, rime::size_t<3>()),
@@ -622,8 +626,7 @@ namespace range { namespace tuple_detail {
         : less_lexicographical_implementation_forwarder<
               typename less_lexicographical_detail::predicate_results<
                   meta::vector<LeftTypes...>, meta::vector<RightTypes...>,
-                  Predicate>::type>
-        {};
+                  Predicate>::type> {};
 
     }  // namespace less_lexicographical_detail
 
@@ -632,7 +635,8 @@ namespace range { namespace tuple_detail {
     inline auto implement_less_lexicographical(
         tuple_view_tag<Size>, tuple_view_tag<Size>, LeftView const & left,
         RightView const & right, direction::front, Predicate && predicate)
-        RETURNS(less_lexicographical_detail::less_lexicographical<
+        RETURNS(
+            less_lexicographical_detail::less_lexicographical<
                 typename types<LeftView>::type, typename types<RightView>::type,
                 Predicate>()(left, right, std::forward<Predicate>(predicate)));
 

@@ -23,8 +23,7 @@ limitations under the License.
 namespace range {
 
 namespace callable {
-    struct any_of : find_bool_detail::find_bool<false>
-    {};
+    struct any_of : find_bool_detail::find_bool<false> {};
 }  // namespace callable
 
 /**
@@ -43,7 +42,7 @@ are not instantiated.
 If any element is found at run time to true, then the following elements are
 not evaluated.
 */
-static const auto any_of = callable::any_of();
+static auto const any_of = callable::any_of();
 
 }  // namespace range
 

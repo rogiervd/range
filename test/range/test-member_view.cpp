@@ -797,7 +797,7 @@ BOOST_AUTO_TEST_CASE(test_range_functions)
         member_s;
     typedef range::member_extractor<char (structure::*)(), &structure::get_char>
         member_c;
-    typedef range::member_extractor<int & (*) (structure &), &get_int>
+    typedef range::member_extractor<int & (*)(structure &), &get_int>
         member_i_2;
     typedef range::member_extractor<double (*)(structure const &), &get_double>
         member_d_2;
@@ -825,7 +825,7 @@ BOOST_AUTO_TEST_CASE(test_range_functions)
     {
         // Rvalue reference.
         typedef range::member_extractor<
-            double && (*) (structure &&), &move_double>
+            double && (*)(structure &&), &move_double>
             member_d_move;
         typedef range::member_view<
             structure &&, meta::vector<member_d_move, member_s>>

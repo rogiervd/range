@@ -65,8 +65,7 @@ private:
 
 namespace function_range_operation {
 
-    struct function_range_tag
-    {};
+    struct function_range_tag {};
 
     template <class Function> inline auto implement_chop(
         function_range_tag const & tag, function_range<Function> && range,

@@ -30,10 +30,8 @@ limitations under the License.
 #include "range/std/vector.hpp"
 #include "range/take.hpp"
 
-struct a
-{};
-struct b
-{};
+struct a {};
+struct b {};
 
 struct return_different_type
 {
@@ -58,8 +56,7 @@ struct return_same_type
     int operator()(int, b);
 };
 
-struct uncallable
-{};
+struct uncallable {};
 
 BOOST_AUTO_TEST_SUITE(test_range_detail_fold_result)
 

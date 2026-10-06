@@ -100,8 +100,7 @@ namespace callable {
         Callable.
         */
         template <class Range> struct call_result
-        : result_of<Callable(Range, StoredArguments const &...)>
-        {};
+        : result_of<Callable(Range, StoredArguments const &...)> {};
 
         template <
             class Range, class StoredArgumentsTuple,

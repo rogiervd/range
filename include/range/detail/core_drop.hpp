@@ -126,8 +126,9 @@ namespace callable {
             auto operator()(
                 Range && range, Increment const &, Direction const & direction,
                 overload_order<2> *) const
-                RETURNS(helper::member_access::drop_one(
-                    std::forward<Range>(range), direction));
+                RETURNS(
+                    helper::member_access::drop_one(
+                        std::forward<Range>(range), direction));
 
             // If \c increment is constant: call drop_constant().
             template <
@@ -149,8 +150,9 @@ namespace callable {
             auto operator()(
                 Range && range, Increment const & increment,
                 Direction const & direction, overload_order<4> *) const
-                RETURNS(helper::member_access::drop_constant(
-                    std::forward<Range>(range), increment, direction));
+                RETURNS(
+                    helper::member_access::drop_constant(
+                        std::forward<Range>(range), increment, direction));
 
             // Call drop().
             template <class Range, class Increment, class Direction>
@@ -166,8 +168,9 @@ namespace callable {
             auto operator()(
                 Range && range, Increment const & increment,
                 Direction const & direction, overload_order<6> *) const
-                RETURNS(helper::member_access::drop(
-                    std::forward<Range>(range), increment, direction));
+                RETURNS(
+                    helper::member_access::drop(
+                        std::forward<Range>(range), increment, direction));
         };
 
         struct drop
@@ -199,9 +202,10 @@ namespace callable {
                 auto operator()(
                     Range && range, Increment const &,
                     Direction const & direction, overload_order<8> *) const
-                    RETURNS(helper::member_access::chop(
-                                std::forward<Range>(range), direction)
-                                .forward_rest());
+                    RETURNS(
+                        helper::member_access::chop(
+                            std::forward<Range>(range), direction)
+                            .forward_rest());
             };
 
         public:
@@ -213,9 +217,10 @@ namespace callable {
             auto operator()(
                 Range && range, Increment const & increment,
                 Direction const & direction) const
-                RETURNS(dispatch()(
-                    std::forward<Range>(range), increment, direction,
-                    pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), increment, direction,
+                        pick_overload()));
 
             // With increment but without direction: use default direction.
             template <
@@ -224,9 +229,10 @@ namespace callable {
                     is_range<Range>::value
                     && !is_direction<Increment>::value>::type>
             auto operator()(Range && range, Increment const & increment) const
-                RETURNS(dispatch()(
-                    std::forward<Range>(range), increment,
-                    range::default_direction(range), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), increment,
+                        range::default_direction(range), pick_overload()));
 
             // Without increment but with direction: use one_type().
             template <
@@ -234,9 +240,10 @@ namespace callable {
                 class Enable = typename std::enable_if<
                     is_direction<Direction>::value>::type>
             auto operator()(Range && range, Direction const & direction) const
-                RETURNS(dispatch()(
-                    std::forward<Range>(range), one_type(), direction,
-                    pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), one_type(), direction,
+                        pick_overload()));
 
             // Without increment or direction: use one_type() and
             // default direction.
@@ -244,9 +251,10 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(dispatch()(
-                std::forward<Range>(range), one_type(),
-                range::default_direction(range), pick_overload()));
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    std::forward<Range>(range), one_type(),
+                    range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation
@@ -266,7 +274,7 @@ Return the range without its first elements.
 \param direction
     (optional) The direction from which the elements will be taken.
 */
-static const auto drop = callable::drop();
+static auto const drop = callable::drop();
 
 }  // namespace range
 

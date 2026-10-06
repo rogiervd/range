@@ -69,8 +69,7 @@ struct const_reference_second
     }
 };
 
-class none
-{};
+class none {};
 
 template <class Type> class accumulator
 {

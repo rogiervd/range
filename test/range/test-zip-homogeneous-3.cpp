@@ -86,10 +86,11 @@ BOOST_AUTO_TEST_CASE(with_weird_count)
         BOOST_CHECK_EQUAL(first(first(z)), 8 + count);
         BOOST_CHECK_EQUAL(second(first(z)), 17 + count);
 
-        if ((count % 2) == 0)
+        if ((count % 2) == 0) {
             z = drop(z, weird_direction(7));
-        else
+        } else {
             z = chop(z, weird_direction(7)).rest();
+        }
     }
 }
 

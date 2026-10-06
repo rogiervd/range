@@ -69,7 +69,7 @@ However, I do not think this is possible for compile-time values.
 template <typename Member, Member> struct member_extractor;
 
 // Specialisation for a member variable.
-template <typename Structure, typename Type, Type Structure::*member>
+template <typename Structure, typename Type, Type Structure::* member>
 struct member_extractor<Type Structure::*, member>
 {
     Type & operator()(Structure & structure) const { return structure.*member; }
@@ -194,12 +194,10 @@ private:
 
     // first.
     template <class Direction> struct first_extractor
-    : meta::first<Direction, Extractors>
-    {};
+    : meta::first<Direction, Extractors> {};
 
     template <class Direction> struct first_type
-    : result_of<typename first_extractor<Direction>::type(Structure)>
-    {};
+    : result_of<typename first_extractor<Direction>::type(Structure)> {};
 
     template <class Direction> typename boost::lazy_enable_if_c<
         (extractor_num != 0), first_type<Direction>>::type
@@ -227,8 +225,7 @@ private:
 };
 
 namespace member_view_operation {
-    struct member_view_tag
-    {};
+    struct member_view_tag {};
 }  // namespace member_view_operation
 
 template <class Structure, class Extractors>

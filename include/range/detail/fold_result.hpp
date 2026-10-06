@@ -56,8 +56,7 @@ namespace range { namespace fold_detail {
 
     /// Return whether the step is not known to be non-empty.
     template <class Step, class Direction> struct step_may_be_empty
-    : boost::mpl::not_<never_empty<typename Step::range_type, Direction>>
-    {};
+    : boost::mpl::not_<never_empty<typename Step::range_type, Direction>> {};
 
     /**
     Hold a direction and a function, and call it to produce the next step of
@@ -126,16 +125,15 @@ namespace range { namespace fold_detail {
     struct all_steps
     : boost::mpl::eval_if<
           meta::contains<Step, PreviousSteps>, PreviousSteps,
-          all_steps_next<Direction, Function, Step, PreviousSteps>>
-    {};
+          all_steps_next<Direction, Function, Step, PreviousSteps>> {};
 
     template <class Direction, class Function, class Step, class PreviousSteps>
     struct all_steps_next
     : boost::mpl::eval_if<
           always_empty<typename Step::range_type, Direction>,
           meta::push<meta::front, Step, PreviousSteps>,
-          all_steps_next_not_empty<Direction, Function, Step, PreviousSteps>>
-    {};
+          all_steps_next_not_empty<Direction, Function, Step, PreviousSteps>> {
+    };
 
     template <class Direction, class Function, class Step, class PreviousSteps>
     struct all_steps_next_not_empty

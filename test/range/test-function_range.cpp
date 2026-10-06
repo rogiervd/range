@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_range_function_range)
 
 BOOST_AUTO_TEST_CASE(test_range_function_range_reference)
 {
-    typedef range::function_range<int & (*) ()> f_range;
+    typedef range::function_range<int & (*)()> f_range;
     f_range r_temp(count_reference);
     f_range r(std::move(r_temp));
 

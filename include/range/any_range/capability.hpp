@@ -53,8 +53,7 @@ exactly the given capabilities.
 */
 namespace capability {
 
-    template <class Type> struct type
-    {};
+    template <class Type> struct type {};
 
     /** \brief
     Capability key for copy construction.
@@ -133,24 +132,20 @@ namespace capability {
     template <class... Types> struct all_are_capability_keys
     : meta::all_of_c<(
           std::is_same<Types, copy_construct>::value
-          || is_direction<Types>::value)...>
-    {};
+          || is_direction<Types>::value)...> {};
 
     /// Evaluate to \c true iff \a Type is a meta::set of capability keys.
-    template <class Type> struct is_capability_keys : boost::mpl::false_
-    {};
+    template <class Type> struct is_capability_keys : boost::mpl::false_ {};
 
     template <class... Keys> struct is_capability_keys<meta::set<Keys...>>
-    : all_are_capability_keys<Keys...>
-    {};
+    : all_are_capability_keys<Keys...> {};
 
     template <class Direction> struct default_construct_direction_equal
     : rime::same_constant<
           typename std::decay<
               decltype(std::declval<Direction>() == std::declval<Direction>())>::
               type,
-          rime::true_type>
-    {};
+          rime::true_type> {};
 
     /**
     Specify which directions can be default-constructed without a virtual
@@ -161,8 +156,7 @@ namespace capability {
     template <class Direction> struct default_construct_direction
     : boost::mpl::and_<
           std::is_constructible<Direction>,
-          default_construct_direction_equal<Direction>>
-    {};
+          default_construct_direction_equal<Direction>> {};
 
     // Default capabilities.
     typedef meta::map<
@@ -201,23 +195,20 @@ namespace capability {
         random_access_capabilities;
 
     template <class Range> struct detect_default_direction
-    : range::decayed_result_of<callable::default_direction(Range)>
-    {};
+    : range::decayed_result_of<callable::default_direction(Range)> {};
 
     /// Evaluate to \a Capabilities, or if it is void, to forward_capabilities.
-    template <class Capabilities> struct normalise_capabilities : Capabilities
-    {};
+    template <class Capabilities> struct normalise_capabilities : Capabilities {
+    };
 
-    template <> struct normalise_capabilities<void> : forward_capabilities
-    {};
+    template <> struct normalise_capabilities<void> : forward_capabilities {};
 
     /* Extracting capability keys. */
     template <class Capabilities> struct extract_capability_keys_implementation;
 
     template <class... Keys, class... Values>
     struct extract_capability_keys_implementation<
-        meta::map<meta::map_element<Keys, Values>...>> : meta::set<Keys...>
-    {};
+        meta::map<meta::map_element<Keys, Values>...>> : meta::set<Keys...> {};
 
     /**
     Extract the capability keys from \a Capabilities.
@@ -226,8 +217,7 @@ namespace capability {
     */
     template <class Capabilities> struct extract_capability_keys
     : extract_capability_keys_implementation<
-          typename meta::remove<default_direction, Capabilities>::type>
-    {};
+          typename meta::remove<default_direction, Capabilities>::type> {};
 
     /* Detect capabilities from a range. */
 
@@ -322,8 +312,7 @@ namespace capability {
     template <class Range, class Directions> struct detect_copy_construct_key
     : boost::mpl::eval_if<
           std::is_constructible<Range, Range const &>,
-          meta::push<copy_construct, Directions>, Directions>
-    {};
+          meta::push<copy_construct, Directions>, Directions> {};
 
     /** \brief
     Detect directions for a range.
@@ -336,8 +325,7 @@ namespace capability {
         template <
             class Direction1 = typename detect_default_direction<Range>::type,
             class Enable = void>
-        struct detect_directions : meta::vector<Direction1>
-        {};
+        struct detect_directions : meta::vector<Direction1> {};
 
         template <class Direction1> struct detect_directions<
             Direction1,
@@ -346,16 +334,14 @@ namespace capability {
         : meta::vector<
               Direction1,
               typename decayed_result_of<::direction::callable::opposite(
-                  Direction1)>::type>
-        {};
+                  Direction1)>::type> {};
 
         typedef typename detect_directions<>::type potential_directions;
 
         template <class Direction> struct uses_direction
         : boost::mpl::or_<
               always_empty<Range, Direction>,
-              has<callable::first(Range &&, Direction)>>
-        {};
+              has<callable::first(Range &&, Direction)>> {};
 
         typedef typename meta::as_set<meta::filter<
             uses_direction<boost::mpl::_1>, potential_directions>>::type
@@ -390,8 +376,7 @@ namespace capability {
           meta::map_element<
               CapabilityKeys,
               typename detect_capabilities_for_key<
-                  Range, CapabilityKeys>::type>...>
-    {};
+                  Range, CapabilityKeys>::type>...> {};
 
     /** \brief
     Evaluate to \c true iff all capabilities in \a Subset are present in
@@ -407,21 +392,18 @@ namespace capability {
     template <class Subset, class Superset> struct is_subset;
 
     template <class Value1, class LazyValue2> struct is_subset_capability
-    : std::is_same<Value1, typename LazyValue2::type>
-    {};
+    : std::is_same<Value1, typename LazyValue2::type> {};
 
     template <class... Elements1, class LazyValue2>
     struct is_subset_capability<meta::set<Elements1...>, LazyValue2>
-    : meta::is_subset<meta::set<Elements1...>, typename LazyValue2::type>
-    {};
+    : meta::is_subset<meta::set<Elements1...>, typename LazyValue2::type> {};
 
     template <class... Keys1, class... Values1, class Superset>
     struct is_subset<meta::map<meta::map_element<Keys1, Values1>...>, Superset>
     // Use all_of <vector < ...>> to ensure lazy evaluation.
     : meta::all_of<meta::vector<
           meta::has_key<Keys1, Superset>...,
-          is_subset_capability<Values1, meta::at<Keys1, Superset>>...>>
-    {};
+          is_subset_capability<Values1, meta::at<Keys1, Superset>>...>> {};
 
 }  // namespace capability
 }  // namespace range

@@ -68,8 +68,7 @@ namespace range { namespace helper {
 
     template <class Wrapper> struct underlying_type
     : utility::storage::get<
-          typename std::decay<Wrapper>::type::underlying_type, Wrapper &&>
-    {};
+          typename std::decay<Wrapper>::type::underlying_type, Wrapper &&> {};
 
 }}  // namespace range::helper
 

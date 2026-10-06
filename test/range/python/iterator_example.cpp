@@ -57,16 +57,13 @@ auto get_optional() RETURNS(range::view_optional(optional));
 namespace nanobind { namespace detail {
 
     template <> struct type_caster<decltype(get_doubles())>
-    : range::python::view_caster<decltype(get_doubles())>
-    {};
+    : range::python::view_caster<decltype(get_doubles())> {};
 
     template <> struct type_caster<decltype(get_tuple())>
-    : range::python::view_caster<decltype(get_tuple())>
-    {};
+    : range::python::view_caster<decltype(get_tuple())> {};
 
     template <> struct type_caster<decltype(get_optional())>
-    : range::python::view_caster<decltype(get_optional())>
-    {};
+    : range::python::view_caster<decltype(get_optional())> {};
 
 }}  // namespace nanobind::detail
 

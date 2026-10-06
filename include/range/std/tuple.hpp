@@ -43,10 +43,8 @@ namespace range {
 
 namespace std_tuple_operation {
 
-    struct std_pair_tag : heavyweight::heavyweight_tag
-    {};
-    struct std_tuple_tag : heavyweight::heavyweight_tag
-    {};
+    struct std_pair_tag : heavyweight::heavyweight_tag {};
+    struct std_tuple_tag : heavyweight::heavyweight_tag {};
 
 }  // namespace std_tuple_operation
 

@@ -43,8 +43,9 @@ namespace equal_detail {
                        && !range::empty(range2, direction)) {
                     if (!predicate(
                             range::first(range1, direction),
-                            range::first(range2, direction)))
+                            range::first(range2, direction))) {
                         return false;
+                    }
                     range1 = range::drop(range1);
                     range2 = range::drop(range2);
                 }
@@ -80,13 +81,15 @@ namespace equal_detail {
                         }
                     }
                 }*/
-                RETURNS(rime::call_if(
-                    rime::or_(
-                        range::empty(range1, direction),
-                        range::empty(range2, direction)),
-                    when_empty(), when_not_empty(),
-                    std::forward<Range1>(range1), std::forward<Range2>(range2),
-                    direction, std::forward<Predicate>(predicate)));
+                RETURNS(
+                    rime::call_if(
+                        rime::or_(
+                            range::empty(range1, direction),
+                            range::empty(range2, direction)),
+                        when_empty(), when_not_empty(),
+                        std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Predicate>(predicate)));
         };
 
         struct when_empty
@@ -104,14 +107,15 @@ namespace equal_detail {
             template <class Range1, class Range2> auto operator()(
                 Range1 && range1, Range2 && range2, Direction const & direction,
                 Predicate && predicate) const
-                RETURNS(rime::call_if(
-                    !predicate(
-                        range::first(range1, direction),
-                        range::first(range2, direction)),
-                    rime::callable::always_default<rime::false_type>(),
-                    next<Range1>(), std::forward<Range1>(range1),
-                    std::forward<Range2>(range2), direction,
-                    std::forward<Predicate>(predicate)));
+                RETURNS(
+                    rime::call_if(
+                        !predicate(
+                            range::first(range1, direction),
+                            range::first(range2, direction)),
+                        rime::callable::always_default<rime::false_type>(),
+                        next<Range1>(), std::forward<Range1>(range1),
+                        std::forward<Range2>(range2), direction,
+                        std::forward<Predicate>(predicate)));
         };
 
         template <class Dummy> struct next
@@ -119,23 +123,25 @@ namespace equal_detail {
             template <class Range1, class Range2> auto operator()(
                 Range1 && range1, Range2 && range2, Direction const & direction,
                 Predicate && predicate) const
-                RETURNS(equal_default()(
-                    range::drop(std::forward<Range1>(range1), direction),
-                    range::drop(std::forward<Range2>(range2), direction),
-                    direction, std::forward<Predicate>(predicate)));
+                RETURNS(
+                    equal_default()(
+                        range::drop(std::forward<Range1>(range1), direction),
+                        range::drop(std::forward<Range2>(range2), direction),
+                        direction, std::forward<Predicate>(predicate)));
         };
 
     public:
         template <class Range1, class Range2> auto operator()(
             Range1 && range1, Range2 && range2, Direction const & direction,
             Predicate && predicate) const
-            RETURNS(rime::call_if(
-                rime::and_(
-                    is_homogeneous<Range1, Direction>(),
-                    is_homogeneous<Range2, Direction>()),
-                when_homogeneous(), when_heterogeneous(),
-                std::forward<Range1>(range1), std::forward<Range2>(range2),
-                direction, std::forward<Predicate>(predicate)));
+            RETURNS(
+                rime::call_if(
+                    rime::and_(
+                        is_homogeneous<Range1, Direction>(),
+                        is_homogeneous<Range2, Direction>()),
+                    when_homogeneous(), when_heterogeneous(),
+                    std::forward<Range1>(range1), std::forward<Range2>(range2),
+                    direction, std::forward<Predicate>(predicate)));
     };
 
     struct element_equal
@@ -199,10 +205,11 @@ namespace callable {
                     Range1 && range1, Range2 && range2,
                     Direction const & direction, Predicate && predicate,
                     overload_order<2> *) const
-                    RETURNS(equal_detail::equal_default<Direction, Predicate>()(
-                        std::forward<Range1>(range1),
-                        std::forward<Range2>(range2), direction,
-                        std::forward<Predicate>(predicate)));
+                    RETURNS(
+                        equal_detail::equal_default<Direction, Predicate>()(
+                            std::forward<Range1>(range1),
+                            std::forward<Range2>(range2), direction,
+                            std::forward<Predicate>(predicate)));
             };
 
         public:
@@ -214,11 +221,12 @@ namespace callable {
             auto operator()(
                 Range1 && range1, Range2 && range2, Direction const & direction,
                 Predicate && predicate) const
-                RETURNS(dispatch()(
-                    range::view(std::forward<Range1>(range1), direction),
-                    range::view(std::forward<Range2>(range2), direction),
-                    direction, std::forward<Predicate>(predicate),
-                    pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view(std::forward<Range1>(range1), direction),
+                        range::view(std::forward<Range2>(range2), direction),
+                        direction, std::forward<Predicate>(predicate),
+                        pick_overload()));
 
             // Without direction; with predicate.
             // Use the default direction of the first range.
@@ -229,15 +237,16 @@ namespace callable {
             auto operator()(
                 Range1 && range1, Range2 && range2,
                 Predicate && predicate) const
-                RETURNS(dispatch()(
-                    range::view(
-                        std::forward<Range1>(range1),
-                        range::default_direction(range1)),
-                    range::view(
-                        std::forward<Range2>(range2),
-                        range::default_direction(range1)),
-                    range::default_direction(range1),
-                    std::forward<Predicate>(predicate), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view(
+                            std::forward<Range1>(range1),
+                            range::default_direction(range1)),
+                        range::view(
+                            std::forward<Range2>(range2),
+                            range::default_direction(range1)),
+                        range::default_direction(range1),
+                        std::forward<Predicate>(predicate), pick_overload()));
 
             // With direction; without predicate.
             // Use element_equal.
@@ -248,16 +257,18 @@ namespace callable {
             auto operator()(
                 Range1 && range1, Range2 && range2,
                 Direction const & direction) const
-                RETURNS(dispatch()(
-                    range::view(std::forward<Range1>(range1), direction),
-                    range::view(std::forward<Range2>(range2), direction),
-                    direction, equal_detail::element_equal(), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        range::view(std::forward<Range1>(range1), direction),
+                        range::view(std::forward<Range2>(range2), direction),
+                        direction, equal_detail::element_equal(),
+                        pick_overload()));
 
             // Without direction, and without predicate.
             // Use the default direction of the first range and element_equal.
             template <class Range1, class Range2>
-            auto operator()(Range1 && range1, Range2 && range2) const
-                RETURNS(dispatch()(
+            auto operator()(Range1 && range1, Range2 && range2) const RETURNS(
+                dispatch()(
                     range::view(
                         std::forward<Range1>(range1),
                         range::default_direction(range1)),
@@ -291,7 +302,7 @@ compare equal.
     (optional) Predicate to use to compare individual elements.
     If not given, then \c operator== is used.
 */
-static const auto equal = callable::equal();
+static auto const equal = callable::equal();
 
 }  // namespace range
 

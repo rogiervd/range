@@ -296,8 +296,7 @@ namespace scan_operation {
     /**
     Tag for scan_range.
     */
-    template <class Direction> struct scan_tag
-    {};
+    template <class Direction> struct scan_tag {};
 
 }  // namespace scan_operation
 
@@ -536,8 +535,7 @@ namespace callable {
         : boost::mpl::if_<
               rime::is_constant<typename result_of<range::callable::empty(
                   Underlying, Direction)>::type>,
-              rime::false_type, bool>
-        {};
+              rime::false_type, bool> {};
 
         struct apply
         {
@@ -566,10 +564,11 @@ namespace callable {
         auto operator()(
             State && state, Range && range, Direction const & direction,
             Function && function) const
-            RETURNS(apply()(
-                std::forward<State>(state),
-                range::view(std::forward<Range>(range), direction), direction,
-                std::forward<Function>(function)));
+            RETURNS(
+                apply()(
+                    std::forward<State>(state),
+                    range::view(std::forward<Range>(range), direction),
+                    direction, std::forward<Function>(function)));
 
         // Without direction: use default_direction.
         template <
@@ -577,11 +576,12 @@ namespace callable {
             // Implemented if "empty" is implemented.
             class Enable = decltype(range::empty(std::declval<Range>()))>
         auto operator()(State && state, Range && range, Function && function)
-            const RETURNS(apply()(
-                std::forward<State>(state),
-                range::view(std::forward<Range>(range)),
-                range::default_direction(range),
-                std::forward<Function>(function)));
+            const RETURNS(
+                apply()(
+                    std::forward<State>(state),
+                    range::view(std::forward<Range>(range)),
+                    range::default_direction(range),
+                    std::forward<Function>(function)));
     };
 
 }  // namespace callable
@@ -625,7 +625,7 @@ function.
     This is saved exactly as qualified.
     Its result type is stored exactly as qualified.
 */
-static const auto scan = callable::scan();
+static auto const scan = callable::scan();
 
 }  // namespace range
 

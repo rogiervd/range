@@ -83,8 +83,9 @@ namespace callable {
                 template <class Range, class Direction> auto operator()(
                     Range const & range, Direction const & direction,
                     overload_order<4> *) const
-                    RETURNS(helper::member_access::empty(
-                        range, direction::make_forward(direction)));
+                    RETURNS(
+                        helper::member_access::empty(
+                            range, direction::make_forward(direction)));
             };
 
         public:
@@ -102,8 +103,9 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range const & range) const RETURNS(dispatch()(
-                range, range::default_direction(range), pick_overload()));
+            auto operator()(Range const & range) const RETURNS(
+                dispatch()(
+                    range, range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation
@@ -120,7 +122,7 @@ Return whether the range is empty in a direction.
 \param direction
     (optional) The direction.
 */
-static const auto empty = callable::empty();
+static auto const empty = callable::empty();
 
 /**
 Evaluate to \c true iff the range is known at compile time to be empty.
@@ -133,8 +135,7 @@ run time.
 template <class Range, class Direction> struct always_empty
 : rime::equal_constant<
       decltype(empty(std::declval<Range>(), std::declval<Direction>())),
-      rime::true_type>
-{};
+      rime::true_type> {};
 
 /**
 Evaluate to \c true iff the range is known at compile time to be not empty.
@@ -147,8 +148,7 @@ non-empty at run time.
 template <class Range, class Direction> struct never_empty
 : rime::equal_constant<
       decltype(empty(std::declval<Range>(), std::declval<Direction>())),
-      rime::false_type>
-{};
+      rime::false_type> {};
 
 }  // namespace range
 

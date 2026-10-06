@@ -53,8 +53,7 @@ namespace range { namespace heavyweight {
 
     \li All relevant operations for the view.
     */
-    struct heavyweight_tag
-    {};
+    struct heavyweight_tag {};
 
     /*
     Operations on heavyweight ranges forward to the same operation applied to
@@ -75,59 +74,65 @@ namespace range { namespace heavyweight {
     template <class Container, class Direction> inline auto implement_empty(
         heavyweight_tag const &, Container && container,
         Direction const & direction)
-        RETURNS(range::empty(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::true_,
-                std::forward<Container>(container), direction),
-            direction));
+        RETURNS(
+            range::empty(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::true_,
+                    std::forward<Container>(container), direction),
+                direction));
 
     template <class Container, class Direction> inline auto implement_size(
         heavyweight_tag const &, Container && container,
         Direction const & direction)
-        RETURNS(range::size(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::true_,
-                std::forward<Container>(container), direction),
-            direction));
+        RETURNS(
+            range::size(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::true_,
+                    std::forward<Container>(container), direction),
+                direction));
 
     template <class Container, class Direction> inline auto implement_first(
         heavyweight_tag const &, Container && container,
         Direction const & direction)
-        RETURNS(range::first(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::true_,
-                std::forward<Container>(container), direction),
-            direction));
+        RETURNS(
+            range::first(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::true_,
+                    std::forward<Container>(container), direction),
+                direction));
 
     // at: once == true.
     template <class Container, class Index, class Direction>
     inline auto implement_at(
         heavyweight_tag const &, Container && container, Index const & index,
         Direction const & direction)
-        RETURNS(range::at(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::true_,
-                std::forward<Container>(container), direction),
-            index, direction));
+        RETURNS(
+            range::at(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::true_,
+                    std::forward<Container>(container), direction),
+                index, direction));
 
     template <class Container, class Increment, class Direction>
     inline auto implement_drop(
         heavyweight_tag const &, Container && container,
         Increment const & increment, Direction const & direction)
-        RETURNS(range::drop(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::false_,
-                std::forward<Container>(container), direction),
-            increment, direction));
+        RETURNS(
+            range::drop(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::false_,
+                    std::forward<Container>(container), direction),
+                increment, direction));
 
     template <class Container, class Direction> inline auto implement_chop(
         heavyweight_tag const &, Container && container,
         Direction const & direction)
-        RETURNS(range::chop(
-            implement_make_view(
-                typename tag_of<Container>::type(), rime::false_,
-                std::forward<Container>(container), direction),
-            direction));
+        RETURNS(
+            range::chop(
+                implement_make_view(
+                    typename tag_of<Container>::type(), rime::false_,
+                    std::forward<Container>(container), direction),
+                direction));
 
     // chop_in_place is not defined: by definition, the (heavyweight) container
     // type cannot be returned.

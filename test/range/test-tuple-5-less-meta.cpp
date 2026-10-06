@@ -24,9 +24,8 @@ limitations under the License.
 /// Get the predicate results with rime::less and as a vector.
 /// This saves typing in the tests.
 template <class LeftTypes, class RightTypes> struct predicate_results
-: range::tuple_detail::less_lexicographical_detail ::predicate_results<
-      LeftTypes, RightTypes, rime::callable::less>
-{};
+: range::tuple_detail::less_lexicographical_detail::predicate_results<
+      LeftTypes, RightTypes, rime::callable::less> {};
 
 BOOST_AUTO_TEST_SUITE(range_test_tuple_less_meta)
 

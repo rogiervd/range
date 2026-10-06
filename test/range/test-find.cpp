@@ -54,8 +54,7 @@ using range::view;
 
 using range::find;
 
-struct end_marker
-{};
+struct end_marker {};
 
 struct return_end_marker
 {

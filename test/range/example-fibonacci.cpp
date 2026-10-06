@@ -45,8 +45,7 @@ public:
     }
 };
 
-struct fibonacci_tag
-{};
+struct fibonacci_tag {};
 
 namespace range {
 template <> struct tag_of_qualified<fibonacci>

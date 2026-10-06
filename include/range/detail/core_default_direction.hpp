@@ -52,7 +52,7 @@ namespace callable {
 
                 template <class Range>
                 auto operator()(Range const & range, overload_order<2> *) const
-                    RETURNS(helper::member_access ::default_direction(range));
+                    RETURNS(helper::member_access::default_direction(range));
 
                 // If no function or member is defined, return range::front.
                 template <class Range> direction::front operator()(
@@ -86,7 +86,7 @@ For many ranges, this returns \c range::front.
 \param range
     The range to return the default direction of.
 */
-static const auto default_direction = callable::default_direction();
+static auto const default_direction = callable::default_direction();
 
 }  // namespace range
 

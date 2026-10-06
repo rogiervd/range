@@ -104,12 +104,10 @@ inline rime::true_type operator==(
 
 namespace direction {
 
-template <> struct is_direction_bare<weird_direction> : boost::mpl::true_
-{};
+template <> struct is_direction_bare<weird_direction> : boost::mpl::true_ {};
 
 template <> struct is_direction_bare<weird_opposite_direction>
-: boost::mpl::true_
-{};
+: boost::mpl::true_ {};
 
 }  // namespace direction
 

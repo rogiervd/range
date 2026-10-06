@@ -62,16 +62,13 @@ namespace nanobind { namespace detail {
     // The type caster for std::tuple already exists but this specialises it
     // for no good reason.
     template <> struct type_caster<std::tuple<double, std::string>>
-    : range::python::tuple_caster<std::tuple<double, std::string>>
-    {};
+    : range::python::tuple_caster<std::tuple<double, std::string>> {};
 
     template <> struct type_caster<range::tuple<int, float, std::string>>
-    : range::python::tuple_caster<range::tuple<int, float, std::string>>
-    {};
+    : range::python::tuple_caster<range::tuple<int, float, std::string>> {};
 
     template <> struct type_caster<decltype(get_twice(5, 6))>
-    : range::python::tuple_caster<decltype(get_twice(5, 6))>
-    {};
+    : range::python::tuple_caster<decltype(get_twice(5, 6))> {};
 
 }}  // namespace nanobind::detail
 

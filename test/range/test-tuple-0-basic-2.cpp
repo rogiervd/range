@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(tuple_funny_types)
         BOOST_CHECK_EQUAL(first(copy)[1], 77);
         BOOST_CHECK_EQUAL(first(copy)[2], 777);
 
-        tuple<int(&)[3]> reference(sevens);
+        tuple<int (&)[3]> reference(sevens);
         BOOST_CHECK_EQUAL(first(reference)[0], 7);
         BOOST_CHECK_EQUAL(first(reference)[1], 77);
         BOOST_CHECK_EQUAL(first(reference)[2], 777);

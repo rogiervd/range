@@ -64,8 +64,7 @@ using utility::tracked;
 using utility::tracked_counts;
 using utility::tracked_registry;
 
-struct source
-{};
+struct source {};
 
 struct convertible_target
 {
@@ -78,8 +77,7 @@ struct constructible_target
     explicit constructible_target(source const &) {}
 };
 
-struct inconvertible_target
-{};
+struct inconvertible_target {};
 
 struct base
 {

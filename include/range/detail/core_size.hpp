@@ -86,8 +86,9 @@ namespace callable {
                 template <class Range, class Direction> auto operator()(
                     Range const & range, Direction const & direction,
                     overload_order<4> *) const
-                    RETURNS(helper::member_access::size(
-                        range, direction::make_forward(direction)));
+                    RETURNS(
+                        helper::member_access::size(
+                            range, direction::make_forward(direction)));
             };
 
         public:
@@ -104,8 +105,9 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range const & range) const RETURNS(dispatch()(
-                range, range::default_direction(range), pick_overload()));
+            auto operator()(Range const & range) const RETURNS(
+                dispatch()(
+                    range, range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation
@@ -124,7 +126,7 @@ Applying \ref drop this number of times results in the range being empty.
 \param direction
     (optional) The direction from which to count.
 */
-static const auto size = callable::size();
+static auto const size = callable::size();
 
 /**
 Exception class that is thrown when it is attempted to convert one range into

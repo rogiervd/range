@@ -113,7 +113,7 @@ namespace find_detail {
                 std::declval<Range>(),
                 std::declval<Direction>()))) predicate_result;
 
-            static const bool value = boost::mpl::and_<
+            static bool const value = boost::mpl::and_<
                 rime::is_constant<predicate_result>,
                 boost::mpl::not_<predicate_result>>::value;
         };
@@ -129,8 +129,9 @@ namespace find_detail {
         {
             // "range" is used as the local variable.
             while (!range::empty(range, direction)) {
-                if (f.predicate(range::first(range, direction)))
+                if (f.predicate(range::first(range, direction))) {
                     return f.non_empty_actor(std::move(range));
+                }
                 range = range::drop(std::move(range), direction);
             }
             return f.empty_actor(std::move(range));
@@ -198,17 +199,21 @@ namespace find_detail {
         {
             template <class Range, class Direction> auto operator()(
                 finder_ & f, Range && range, Direction const & direction) const
-                RETURNS(rime::call_if(
-                    f.predicate(range::first(range, direction)), when_found(),
-                    when_not_done(), f, std::forward<Range>(range), direction));
+                RETURNS(
+                    rime::call_if(
+                        f.predicate(range::first(range, direction)),
+                        when_found(), when_not_done(), f,
+                        std::forward<Range>(range), direction));
         };
 
         // Entry point.
         template <class Range, class Direction> auto operator()(
             finder_ & f, Range && range, Direction const & direction) const
-            RETURNS(rime::call_if(
-                range::empty(range, direction), when_empty(), when_not_empty(),
-                f, std::forward<Range>(range), direction));
+            RETURNS(
+                rime::call_if(
+                    range::empty(range, direction), when_empty(),
+                    when_not_empty(), f, std::forward<Range>(range),
+                    direction));
     };
 
 }  // namespace find_detail
@@ -271,22 +276,24 @@ namespace callable {
             auto operator()(
                 Range && range, Direction const & direction,
                 Predicate && predicate, Actor && actor) const
-                RETURNS(find_detail::finder<Predicate, Actor, Actor>(
-                    std::forward<Predicate>(predicate),
-                    std::forward<Actor>(actor), std::forward<Actor>(actor))(
-                    std::forward<Range>(range), direction));
+                RETURNS(
+                    find_detail::finder<Predicate, Actor, Actor>(
+                        std::forward<Predicate>(predicate),
+                        std::forward<Actor>(actor), std::forward<Actor>(actor))(
+                        std::forward<Range>(range), direction));
 
             // No actors.
             template <class Range, class Direction, class Predicate>
             auto operator()(
                 Range && range, Direction const & direction,
                 Predicate && predicate) const
-                RETURNS(find_detail::finder<
+                RETURNS(
+                    find_detail::finder<
                         Predicate, find_detail::identity,
                         find_detail::identity>(
-                    std::forward<Predicate>(predicate), find_detail::identity(),
-                    find_detail::identity())(
-                    std::forward<Range>(range), direction));
+                        std::forward<Predicate>(predicate),
+                        find_detail::identity(), find_detail::identity())(
+                        std::forward<Range>(range), direction));
         };
 
     public:
@@ -297,9 +304,10 @@ namespace callable {
                 typename std::enable_if<is_direction<Direction>::value>::type>
         auto operator()(
             Range && range, Direction const & direction, Rest &&... rest) const
-            RETURNS(dispatch()(
-                range::view(std::forward<Range>(range), direction), direction,
-                std::forward<Rest>(rest)...));
+            RETURNS(
+                dispatch()(
+                    range::view(std::forward<Range>(range), direction),
+                    direction, std::forward<Rest>(rest)...));
 
         // No direction: use default_direction.
         template <
@@ -307,10 +315,12 @@ namespace callable {
             class Enable =
                 typename std::enable_if<!is_direction<Argument>::value>::type>
         auto operator()(Range && range, Argument && argument, Rest &&... rest)
-            const RETURNS(dispatch()(
-                range::view(std::forward<Range>(range)),
-                range::default_direction(range),
-                std::forward<Argument>(argument), std::forward<Rest>(rest)...));
+            const RETURNS(
+                dispatch()(
+                    range::view(std::forward<Range>(range)),
+                    range::default_direction(range),
+                    std::forward<Argument>(argument),
+                    std::forward<Rest>(rest)...));
     };
 
 }  // namespace callable
@@ -371,7 +381,7 @@ the last to be instantiated.
     \c true for any element.
     By default, \a actor_non_empty is used.
 */
-static const auto find = callable::find();
+static auto const find = callable::find();
 
 }  // namespace range
 

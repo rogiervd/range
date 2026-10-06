@@ -86,7 +86,7 @@ namespace callable {
     };
 }  // namespace callable
 
-static const auto nothing = callable::nothing();
+static auto const nothing = callable::nothing();
 
 /* Helpers. */
 
@@ -247,10 +247,11 @@ template <class HasSize, class HasBack, class Zero> struct check_drop_n
                 Range const & range1, Range const & range2,
                 Direction const & direction) const
         {
-            if (!range::empty(range1, direction))
+            if (!range::empty(range1, direction)) {
                 check_equal_value(
                     range::first(range1, direction),
                     range::first(range2, direction));
+            }
         }
         // Known only at compile time that the range is empty.
         template <class Range, class Direction>

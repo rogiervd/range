@@ -108,8 +108,7 @@ private:
 };
 
 namespace view_of_shared_operation {
-    struct view_of_shared_tag
-    {};
+    struct view_of_shared_tag {};
 }  // namespace view_of_shared_operation
 
 template <class Heavyweight, class View>
@@ -153,19 +152,21 @@ namespace view_of_shared_operation {
 
     template <class Range, class Direction> inline auto implement_first(
         view_of_shared_tag const &, Range && range, Direction const & direction)
-        RETURNS(range::first(
-            range::helper::get_underlying<Range>(range), direction));
+        RETURNS(
+            range::first(
+                range::helper::get_underlying<Range>(range), direction));
 
     template <class Range, class Increment, class Direction>
     inline auto implement_drop(
         view_of_shared_tag const &, Range && range, Increment const & increment,
         Direction const & direction)
-        RETURNS(view_shared_detail::make_view_of_shared()(
-            view_shared_detail::get_heavyweight_pointer()(
-                std::forward<Range>(range)),
-            range::drop(
-                range::helper::get_underlying<Range>(range), increment,
-                direction)));
+        RETURNS(
+            view_shared_detail::make_view_of_shared()(
+                view_shared_detail::get_heavyweight_pointer()(
+                    std::forward<Range>(range)),
+                range::drop(
+                    range::helper::get_underlying<Range>(range), increment,
+                    direction)));
 
     template <
         class Range, class Direction,
@@ -197,14 +198,12 @@ namespace callable {
     {
     private:
         template <class MakeView, class Heavyweight, class Enable = void>
-        struct make_view_if_range
-        {};
+        struct make_view_if_range {};
 
         template <class MakeView, class Heavyweight> struct make_view_if_range<
             MakeView, Heavyweight,
             typename boost::enable_if<is_range<Heavyweight>>::type>
-        : std::decay<typename result_of<MakeView(Heavyweight &)>::type>
-        {};
+        : std::decay<typename result_of<MakeView(Heavyweight &)>::type> {};
 
     public:
         /* With MakeView. */

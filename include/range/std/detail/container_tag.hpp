@@ -32,10 +32,8 @@ namespace range {
 
 namespace std_container_operation {
 
-    struct std_front_container_tag : heavyweight::heavyweight_tag
-    {};
-    struct std_front_back_container_tag : std_front_container_tag
-    {};
+    struct std_front_container_tag : heavyweight::heavyweight_tag {};
+    struct std_front_back_container_tag : std_front_container_tag {};
 
 }  // namespace std_container_operation
 

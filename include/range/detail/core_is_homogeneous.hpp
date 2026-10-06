@@ -36,16 +36,14 @@ namespace is_homogeneous_detail {
     \c drop or \c chop.
     */
     template <class Range, class Direction, class Enable = void>
-    struct is_homogeneous : rime::false_type
-    {};
+    struct is_homogeneous : rime::false_type {};
 
     template <class Range, class Direction> struct is_homogeneous<
         Range, Direction,
         typename utility::enable_if_compiles<
             decltype(std::declval<callable::chop_in_place>()(
                 std::declval<Range &>(), std::declval<Direction>()))>::type>
-    : rime::true_type
-    {};
+    : rime::true_type {};
 
 }  // namespace is_homogeneous_detail
 

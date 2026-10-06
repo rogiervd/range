@@ -90,8 +90,7 @@ whether the range is empty and if so returns the first element.
 template <class... Types> class python_range;
 
 namespace python_range_operation {
-    struct python_range_tag
-    {};
+    struct python_range_tag {};
 }  // namespace python_range_operation
 
 template <class... Types> struct tag_of_qualified<python_range<Types...>>
@@ -321,8 +320,7 @@ namespace nanobind { namespace detail {
 
     template <class... Types>
     struct type_caster<::range::python_range<Types...>>
-    : python_range_caster<::range::python_range<Types...>>
-    {};
+    : python_range_caster<::range::python_range<Types...>> {};
 
 }}  // namespace nanobind::detail
 

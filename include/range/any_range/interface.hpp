@@ -286,8 +286,7 @@ namespace range { namespace any_range_interface {
           implement_default_direction<
               DefaultDirection,
               base<Element, CapabilityKeys, DefaultDirection>>,
-          CapabilityKeys>::type
-    {};
+          CapabilityKeys>::type {};
 
     /**
     Function object that converts an interface.
@@ -305,8 +304,7 @@ namespace range { namespace any_range_interface {
         TargetInterfacePtr, meta::set<First, RestOne...>,
         meta::set<First, RestTwo...>>
     : convert_interface<
-          TargetInterfacePtr, meta::set<RestOne...>, meta::set<RestTwo...>>
-    {};
+          TargetInterfacePtr, meta::set<RestOne...>, meta::set<RestTwo...>> {};
 
     // Remove this direction.
     template <

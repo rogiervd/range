@@ -41,8 +41,7 @@ template <class Range> struct element_types
     typedef Range underlying_type;
 
     template <class Direction> struct view_once
-    : result_of<::range::callable::view_once(Range, Direction)>
-    {};
+    : result_of<::range::callable::view_once(Range, Direction)> {};
 
     typedef element_types type;
 };
@@ -63,8 +62,7 @@ namespace operation {
     {
         template <class TypesFrom> struct apply
         : ::range::result_of<::range::callable::default_direction(
-              typename TypesFrom::underlying_type)>
-        {};
+              typename TypesFrom::underlying_type)> {};
     };
 
     // empty.
@@ -73,8 +71,7 @@ namespace operation {
         template <class TypesFrom> struct apply
         : ::range::always_empty<
               typename TypesFrom::template view_once<Direction>::type,
-              Direction>
-        {};
+              Direction> {};
     };
 
     // size.
@@ -85,8 +82,7 @@ namespace operation {
         template <class TypesFrom> struct apply
         : ::range::result_of<::range::callable::size(
               typename TypesFrom::template view_once<Direction>::type,
-              Direction)>::type
-        {};
+              Direction)>::type {};
     };
 
     // first.
@@ -95,8 +91,7 @@ namespace operation {
         template <class TypesFrom> struct apply
         : ::range::result_of<::range::callable::first(
               typename TypesFrom::template view_once<Direction>::type,
-              Direction)>
-        {};
+              Direction)> {};
     };
 
     // drop.

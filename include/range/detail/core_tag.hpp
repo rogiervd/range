@@ -22,8 +22,7 @@ limitations under the License.
 
 namespace range {
 
-struct not_a_range_tag
-{};
+struct not_a_range_tag {};
 
 /**
 Helper for tag_of.
@@ -54,8 +53,8 @@ template <class Range> struct tag_of
 Evaluate to true if Range is a range type.
 */
 template <class Range> struct is_range
-: boost::mpl::not_<std::is_same<typename tag_of<Range>::type, not_a_range_tag>>
-{};
+: boost::mpl::not_<
+      std::is_same<typename tag_of<Range>::type, not_a_range_tag>> {};
 
 }  // namespace range
 

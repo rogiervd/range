@@ -110,18 +110,20 @@ namespace callable {
             auto operator()(
                 Range && range, FirstDirection const & first_direction,
                 OtherDirections const &... other_directions) const
-                RETURNS(dispatch()(
-                    pick_overload(), std::forward<Range>(range),
-                    first_direction, other_directions...));
+                RETURNS(
+                    dispatch()(
+                        pick_overload(), std::forward<Range>(range),
+                        first_direction, other_directions...));
 
             // Without any direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(dispatch()(
-                pick_overload(), std::forward<Range>(range),
-                range::default_direction(range)));
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    pick_overload(), std::forward<Range>(range),
+                    range::default_direction(range)));
         };
 
     }  // namespace implementation
@@ -146,7 +148,7 @@ returned.
     Directions that the view should allow traversal in.
     If no direction is given, then the default direction is used.
 */
-static const auto view = callable::view();
+static auto const view = callable::view();
 
 /** \brief
 Turn a range into a view.
@@ -164,7 +166,7 @@ Alternatively, use view(), which is safer.
     Directions that the view should allow traversal in.
     If no direction is given, then the default direction is used.
 */
-static const auto forward_view = callable::forward_view();
+static auto const forward_view = callable::forward_view();
 
 /** \brief
 Turn a range into a view that can be viewed once.
@@ -180,7 +182,7 @@ particular to the view).
     Directions that the view should allow traversal in.
     If no direction is given, then the default direction is used.
 */
-static const auto view_once = callable::view_once();
+static auto const view_once = callable::view_once();
 
 /* is_view */
 
@@ -190,8 +192,7 @@ namespace is_view_detail {
     : std::is_same<
           typename std::decay<Range>::type,
           typename std::decay<typename result_of<callable::view(
-              Range, Directions...)>::type>::type>
-    {};
+              Range, Directions...)>::type>::type> {};
 
 }  // namespace is_view_detail
 
@@ -206,8 +207,7 @@ That is, <c>view (range, directions...)</c> returns range itself.
 */
 template <class Range, class... Directions> struct is_view
 : boost::mpl::and_<
-      is_range<Range>, is_view_detail::is_view<Range, Directions...>>
-{};
+      is_range<Range>, is_view_detail::is_view<Range, Directions...>> {};
 
 }  // namespace range
 

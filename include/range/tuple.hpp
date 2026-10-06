@@ -90,8 +90,7 @@ Connected with this is the layout
 template <class... Types> class tuple;
 
 namespace tuple_operation {
-    struct tuple_tag : heavyweight::heavyweight_tag
-    {};
+    struct tuple_tag : heavyweight::heavyweight_tag {};
 }  // namespace tuple_operation
 
 template <class... Types> struct tag_of_qualified<tuple<Types...>>
@@ -100,29 +99,24 @@ template <class... Types> struct tag_of_qualified<tuple<Types...>>
 };
 
 namespace tuple_detail {
-    template <class Type> struct is_tuple_implementation : rime::false_type
-    {};
+    template <class Type> struct is_tuple_implementation : rime::false_type {};
     template <class... Types> struct is_tuple_implementation<tuple<Types...>>
-    : rime::true_type
-    {};
+    : rime::true_type {};
 }  // namespace tuple_detail
 
 /**
 Evaluate to \c true iff \a Type is a (possibly qualified) tuple.
 */
 template <class Type> struct is_tuple
-: tuple_detail::is_tuple_implementation<typename std::decay<Type>::type>
-{};
+: tuple_detail::is_tuple_implementation<typename std::decay<Type>::type> {};
 
 /**
 Evaluate to the size of the tuple.
 */
 template <class Tuple> struct tuple_size
-: tuple_size<typename std::decay<Tuple>::type>
-{};
+: tuple_size<typename std::decay<Tuple>::type> {};
 template <class... Types> struct tuple_size<tuple<Types...>>
-: rime::size_t<sizeof...(Types)>
-{};
+: rime::size_t<sizeof...(Types)> {};
 
 namespace tuple_detail {
 
@@ -138,8 +132,7 @@ namespace tuple_detail {
     Dummy structure that indicates an index into a tuple (counting from the end)
     at compile time.
     */
-    template <std::size_t Index> struct contain_index
-    {};
+    template <std::size_t Index> struct contain_index {};
 
     /**
     Dummy structure that indicates the type at an index in a tuple.
@@ -191,7 +184,7 @@ namespace tuple_detail {
         template <class... Types> friend class elements;
 
     public:
-        contain() : element_() {};
+        contain() : element_() {}
 
         template <
             class Argument,
@@ -268,8 +261,7 @@ namespace tuple_detail {
         };
 
         template <class Tuple> struct result
-        : utility::storage::get<typename element<Tuple>::type, Tuple &&>
-        {};
+        : utility::storage::get<typename element<Tuple>::type, Tuple &&> {};
 
         template <class Tuple>
         typename result<Tuple>::type operator()(Tuple && tuple) const
@@ -284,25 +276,20 @@ namespace tuple_detail {
     Extractor for member at given \a Index, counted from the start.
     */
     template <std::size_t Index, class Tuple> struct extract_at
-    : extract<tuple_size<Tuple>::value - 1 - Index>
-    {};
+    : extract<tuple_size<Tuple>::value - 1 - Index> {};
 
     /**
     Replacement for std::is_default_constructible which works for reference
     types as well.
     */
     template <class Type, class Dummy = void> struct is_default_constructible
-    : std::is_constructible<Type>
-    {};
+    : std::is_constructible<Type> {};
 
     template <class Type> struct is_default_constructible<Type &>
-    : std::integral_constant<bool, false>
-    {};
+    : std::integral_constant<bool, false> {};
 
-    struct from_elements
-    {};
-    struct from_range
-    {};
+    struct from_elements {};
+    struct from_range {};
 
     /*
     Contain all elements of a tuple.
@@ -346,21 +333,18 @@ namespace tuple_detail {
 
         // convertible if \a Range is known to be empty.
         template <class Range> struct range_is_convertible
-        : always_empty<Range, direction::front>
-        {};
+        : always_empty<Range, direction::front> {};
 
         // constructible if \a Range can be empty.
         template <class Range> struct range_is_constructible
-        : boost::mpl::not_<never_empty<Range, direction::front>>
-        {};
+        : boost::mpl::not_<never_empty<Range, direction::front>> {};
 
         static constexpr bool is_copy_assignable = true;
         static constexpr bool is_move_assignable = true;
 
         // assignable if \a Range can be empty.
         template <class Range> struct range_is_assignable
-        : boost::mpl::not_<never_empty<Range, direction::front>>
-        {};
+        : boost::mpl::not_<never_empty<Range, direction::front>> {};
 
     public:
         elements() {}
@@ -375,8 +359,9 @@ namespace tuple_detail {
         */
         template <class Range> static Range && maybe_chop(Range && range)
         {
-            if (!empty(range, front))
+            if (!empty(range, front)) {
                 throw size_mismatch();
+            }
             return static_cast<Range &&>(range);
         }
 
@@ -384,8 +369,9 @@ namespace tuple_detail {
 
         template <class Range> elements & operator=(Range && range)
         {
-            if (!empty(range, front))
+            if (!empty(range, front)) {
                 throw size_mismatch();
+            }
             return *this;
         }
 
@@ -436,8 +422,7 @@ namespace tuple_detail {
         struct range_is_convertible;
 
         template <class Range> struct range_is_convertible<Range, false>
-        : rime::false_type
-        {};
+        : rime::false_type {};
 
         // Range is never empty: it might well be convertible then!
         template <class Range> struct range_is_convertible<Range, true>
@@ -448,8 +433,7 @@ namespace tuple_detail {
                   first_stored_type>,
               typename rest_type::template range_is_convertible<
                   typename result_of<callable::drop(
-                      Range, direction::front)>::type>>
-        {};
+                      Range, direction::front)>::type>> {};
 
         /**
         Whether all elements of \a Range are constructible and the length may be
@@ -462,8 +446,7 @@ namespace tuple_detail {
 
         // Range is always empty: not constructible.
         template <class Range> struct range_is_constructible<Range, true>
-        : rime::false_type
-        {};
+        : rime::false_type {};
 
         template <class Range> struct range_is_constructible<Range, false>
         : boost::mpl::and_<
@@ -473,8 +456,7 @@ namespace tuple_detail {
                       Range, direction::front)>::type>,
               typename rest_type::template range_is_constructible<
                   typename result_of<callable::drop(
-                      Range, direction::front)>::type>>
-        {};
+                      Range, direction::front)>::type>> {};
 
         /**
         Whether all elements of \a Range are assignable and the length could be
@@ -486,8 +468,7 @@ namespace tuple_detail {
         struct range_is_assignable;
 
         template <class Range> struct range_is_assignable<Range, true>
-        : rime::false_type
-        {};
+        : rime::false_type {};
 
         template <class Range> struct range_is_assignable<Range, false>
         : boost::mpl::and_<
@@ -497,8 +478,7 @@ namespace tuple_detail {
                       Range, direction::front)>::type>,
               typename rest_type::template range_is_assignable<
                   typename result_of<callable::drop(
-                      Range, direction::front)>::type>>
-        {};
+                      Range, direction::front)>::type>> {};
 
         static constexpr bool is_copy_assignable = rest_type::is_copy_assignable
             && utility::is_assignable<First &, First const &>::value;
@@ -544,8 +524,9 @@ namespace tuple_detail {
             Range &&>::type
             maybe_chop(Range && range)
         {
-            if (empty(range, front))
+            if (empty(range, front)) {
                 throw size_mismatch();
+            }
             return static_cast<Range &&>(range);
         }
 
@@ -570,8 +551,9 @@ namespace tuple_detail {
             result_of<callable::chop(Range, direction::front)>>::type
             maybe_chop(Range && range)
         {
-            if (empty(range, front))
+            if (empty(range, front)) {
                 throw size_mismatch();
+            }
             return range::chop(std::forward<Range>(range), range::front);
         }
 
@@ -595,8 +577,9 @@ namespace tuple_detail {
 
         template <class Range> elements & operator=(Range && range)
         {
-            if (empty(range, front))
+            if (empty(range, front)) {
                 throw size_mismatch();
+            }
             auto chopped = range::chop(std::forward<Range>(range), front);
             this->first_element() = chopped.move_first();
             *static_cast<rest_type *>(this) = chopped.move_rest();
@@ -611,8 +594,7 @@ namespace tuple_detail {
         }
     };
 
-    template <class Dummy> struct dummy
-    {};
+    template <class Dummy> struct dummy {};
 
 }  // namespace tuple_detail
 
@@ -633,47 +615,38 @@ template <class... Types> class tuple
         stored_types;
 
     template <class Type> struct not_this_tuple
-    : boost::mpl::not_<std::is_same<typename std::decay<Type>::type, tuple>>
-    {};
+    : boost::mpl::not_<std::is_same<typename std::decay<Type>::type, tuple>> {};
 
     template <class Range> struct range_is_convertible_impl
     : elements_type::template range_is_convertible<typename range::result_of<
-          callable::view_once(Range, direction::front)>::type>
-    {};
+          callable::view_once(Range, direction::front)>::type> {};
     template <class Range> struct range_is_convertible
     : boost::mpl::and_<
           has<callable::view_once(Range, direction::front)>,
-          range_is_convertible_impl<Range>>
-    {};
+          range_is_convertible_impl<Range>> {};
 
     template <class Range> struct range_is_constructible_impl
     : elements_type::template range_is_constructible<typename range::result_of<
-          callable::view_once(Range, direction::front)>::type>
-    {};
+          callable::view_once(Range, direction::front)>::type> {};
     template <class Range> struct range_is_constructible
     : boost::mpl::and_<
           has<callable::view_once(Range, direction::front)>,
-          range_is_constructible_impl<Range>>
-    {};
+          range_is_constructible_impl<Range>> {};
 
     template <class Range> struct range_is_constructible_but_not_convertible
     : boost::mpl::and_<
           range_is_constructible<Range>,
-          boost::mpl::not_<range_is_convertible<Range>>>
-    {};
+          boost::mpl::not_<range_is_convertible<Range>>> {};
 
     template <class Range> struct range_is_assignable_impl
     : elements_type::template range_is_assignable<typename range::result_of<
-          callable::view_once(Range, direction::front)>::type>
-    {};
+          callable::view_once(Range, direction::front)>::type> {};
     template <class Range> struct range_is_assignable
     : boost::mpl::and_<
           has<callable::view_once(Range, direction::front)>,
-          range_is_assignable_impl<Range>>
-    {};
+          range_is_assignable_impl<Range>> {};
 
-    struct dummy_type
-    {};
+    struct dummy_type {};
 
     /**
     Type that is \c tuple if all elements are copy-assignable, and otherwise
@@ -825,8 +798,7 @@ namespace make_tuple_from_detail {
 
     template <template <class> class Transform, class Types>
     struct tuple_from_types
-    : tuple_from_types<Transform, typename meta::as_vector<Types>::type>
-    {};
+    : tuple_from_types<Transform, typename meta::as_vector<Types>::type> {};
 
     template <template <class> class Transform, class... Types>
     struct tuple_from_types<Transform, meta::vector<Types...>>
@@ -1084,8 +1056,7 @@ Evaluate to the type at position \a Position in \a Tuple, counted from the
 start of the tuple.
 */
 template <std::size_t Position, class Tuple> struct element_type
-: tuple_detail::extract_at<Position, Tuple>::template element<Tuple>
-{};
+: tuple_detail::extract_at<Position, Tuple>::template element<Tuple> {};
 
 /**
 Object that anything can be assigned to syntactically, but it has no effect.
@@ -1264,8 +1235,8 @@ namespace tuple_detail {
             Function && function, meta::size_t_vector<Indices...>) const
         {
             call_function<Function> call(std::forward<Function>(function));
-            int dummy[] = {
-                call(extract<((tuple_size - begin_position - 1) - Indices)>()(
+            int dummy[] = {call(
+                extract<((tuple_size - begin_position - 1) - Indices)>()(
                     tuple()))...};
             (void) dummy;
         }
@@ -1279,8 +1250,7 @@ namespace tuple_detail {
         }
     };
 
-    template <std::size_t Size> struct tuple_view_tag
-    {};
+    template <std::size_t Size> struct tuple_view_tag {};
 
 }  // namespace tuple_detail
 

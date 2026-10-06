@@ -124,7 +124,7 @@ assert (second (vd) == 2.0);
     (variadic)
     The underlying ranges to traverse.
 */
-static const auto zip = callable::zip();
+static auto const zip = callable::zip();
 
 namespace zip_from_detail {
 
@@ -238,14 +238,15 @@ private:
     friend class helper::member_access;
 
     // Makes decltype complain.
-    auto empty(Direction const & direction) const
-        -> decltype(range::any_of(range::transform(
+    auto empty(Direction const & direction) const -> decltype(range::any_of(
+        range::transform(
             std::declval<underlying_type>(),
             lazy::empty(std::declval<Direction>()))))
     {
-        return range::any_of(range::transform(
-            underlying_,
-            lazy::empty(this->direction_must_be_equal(direction))));
+        return range::any_of(
+            range::transform(
+                underlying_,
+                lazy::empty(this->direction_must_be_equal(direction))));
     }
 
     // size.
@@ -257,8 +258,8 @@ private:
     struct reduce
     {
         template <class Range, class Function>
-        auto operator()(Range && range, Function && function) const
-            RETURNS(range::fold(
+        auto operator()(Range && range, Function && function) const RETURNS(
+            range::fold(
                 range::first(range), range::drop(std::forward<Range>(range)),
                 front, std::forward<Function>(function)));
     };
@@ -279,13 +280,13 @@ private:
             std::is_same<Direction2, Direction>>::type,
         class Enable2 = typename boost::enable_if<meta::all_of_c<
             has<callable::size(Ranges, Direction2)>::value...>>::type>
-    auto size(Direction2 const & direction) const RETURNS(reduce()(
-        range::transform(underlying_, lazy::size(direction)), rime::min));
+    auto size(Direction2 const & direction) const RETURNS(
+        reduce()(
+            range::transform(underlying_, lazy::size(direction)), rime::min));
 };
 
 namespace zip_operation {
-    template <class Direction> struct zip_range_tag
-    {};
+    template <class Direction> struct zip_range_tag {};
 }  // namespace zip_operation
 
 template <class Direction, class... Ranges>
@@ -319,26 +320,22 @@ namespace zip_operation {
             class Callable, class ZipRange, class Direction, class... Ranges>
         struct implemented_all<
             Callable, ZipRange, Direction, meta::vector<Ranges...>>
-        : meta::all_of_c<has<Callable(Ranges const &, Direction)>::value...>
-        {};
+        : meta::all_of_c<has<Callable(Ranges const &, Direction)>::value...> {};
 
         // Rvalue.
         template <
             class Callable, class ZipRange, class Direction, class... Ranges>
         struct implemented_all<
             Callable, ZipRange &&, Direction, meta::vector<Ranges...>>
-        : meta::all_of_c<has<Callable(Ranges &&, Direction)>::value...>
-        {};
+        : meta::all_of_c<has<Callable(Ranges &&, Direction)>::value...> {};
 
         // first_implemented_all.
         template <class ZipRange, class Direction> struct first_implemented_all
-        : implemented_all<callable::first, ZipRange, Direction>
-        {};
+        : implemented_all<callable::first, ZipRange, Direction> {};
 
         // chop_implemented_all.
         template <class ZipRange, class Direction> struct chop_implemented_all
-        : implemented_all<callable::chop, ZipRange, Direction>
-        {};
+        : implemented_all<callable::chop, ZipRange, Direction> {};
 
         /* drop_implemented_all. */
         // This has an additional parameter Increment, so it must be defined
@@ -354,8 +351,7 @@ namespace zip_operation {
         struct drop_implemented_all<
             ZipRange &, Increment, Direction, meta::vector<Ranges...>>
         : meta::all_of_c<has<callable::drop(
-              Ranges const &, Increment, Direction)>::value...>
-        {};
+              Ranges const &, Increment, Direction)>::value...> {};
 
         // Rvalue.
         template <
@@ -363,8 +359,8 @@ namespace zip_operation {
         struct drop_implemented_all<
             ZipRange &&, Increment, Direction, meta::vector<Ranges...>>
         : meta::all_of_c<
-              has<callable::drop(Ranges &&, Increment, Direction)>::value...>
-        {};
+              has<callable::drop(Ranges &&, Increment, Direction)>::value...> {
+        };
 
         // Callables to use on "chopped".
         // These return rvalue references.

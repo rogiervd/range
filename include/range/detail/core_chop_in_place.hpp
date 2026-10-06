@@ -158,8 +158,9 @@ namespace callable {
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range & range) const RETURNS(dispatch()(
-                range, range::default_direction(range), pick_overload()));
+            auto operator()(Range & range) const RETURNS(
+                dispatch()(
+                    range, range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation
@@ -181,7 +182,7 @@ itself.
     type.
     This is normally required to be a reference.
 */
-static const auto chop_in_place = callable::chop_in_place();
+static auto const chop_in_place = callable::chop_in_place();
 
 namespace helper {
 

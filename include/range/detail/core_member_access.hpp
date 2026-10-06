@@ -90,16 +90,18 @@ namespace range { namespace helper {
         static auto fold(
             State && state, Range && range, Direction const & direction,
             Function && function)
-            RETURNS(std::forward<Range>(range).fold(
-                std::forward<State>(state), direction,
-                std::forward<Function>(function)));
+            RETURNS(
+                std::forward<Range>(range).fold(
+                    std::forward<State>(state), direction,
+                    std::forward<Function>(function)));
 
         // for_each.
         template <class Range, class Direction, class Function>
         static auto for_each(
             Range && range, Direction const & direction, Function && function)
-            RETURNS(std::forward<Range>(range).for_each(
-                direction, std::forward<Function>(function)));
+            RETURNS(
+                std::forward<Range>(range).for_each(
+                    direction, std::forward<Function>(function)));
     };
 
 #else
@@ -149,8 +151,9 @@ namespace range { namespace helper {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction) const
-                RETURNS(std::forward<Range>(range).at_constant(
-                    position, direction));
+                RETURNS(
+                    std::forward<Range>(range).at_constant(
+                        position, direction));
         };
 
         static callable_at_constant const at_constant;
@@ -182,8 +185,9 @@ namespace range { namespace helper {
             auto operator()(
                 Range && range, Increment const & increment,
                 Direction const & direction) const
-                RETURNS(std::forward<Range>(range).drop_constant(
-                    increment, direction));
+                RETURNS(
+                    std::forward<Range>(range).drop_constant(
+                        increment, direction));
         };
 
         static callable_drop_constant const drop_constant;
@@ -226,9 +230,10 @@ namespace range { namespace helper {
             auto operator()(
                 State && state, Range && range, Direction const & direction,
                 Function && function) const
-                RETURNS(std::forward<Range>(range).fold(
-                    std::forward<State>(state), direction,
-                    std::forward<Function>(function)));
+                RETURNS(
+                    std::forward<Range>(range).fold(
+                        std::forward<State>(state), direction,
+                        std::forward<Function>(function)));
         };
 
         static callable_fold const fold;
@@ -240,8 +245,9 @@ namespace range { namespace helper {
             auto operator()(
                 Range && range, Direction const & direction,
                 Function && function) const
-                RETURNS(std::forward<Range>(range).for_each(
-                    direction, std::forward<Function>(function)));
+                RETURNS(
+                    std::forward<Range>(range).for_each(
+                        direction, std::forward<Function>(function)));
         };
 
         static callable_for_each const for_each;

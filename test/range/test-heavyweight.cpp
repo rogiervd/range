@@ -29,11 +29,9 @@ limitations under the License.
 Fake heavyweight class that has a wrong direction as a default_direction, and
 converts to weird_count for traversal.
 */
-struct weird_heavyweight_count
-{};
+struct weird_heavyweight_count {};
 
-struct weird_heavyweight_count_tag : range::heavyweight::heavyweight_tag
-{};
+struct weird_heavyweight_count_tag : range::heavyweight::heavyweight_tag {};
 
 namespace range {
 
@@ -55,10 +53,8 @@ inline weird_count implement_make_view(
     return weird_count();
 }
 
-struct std_forward_list_tag : range::heavyweight::heavyweight_tag
-{};
-struct std_vector_tag : range::heavyweight::heavyweight_tag
-{};
+struct std_forward_list_tag : range::heavyweight::heavyweight_tag {};
+struct std_vector_tag : range::heavyweight::heavyweight_tag {};
 
 /*
 Adapt STL containers (badly) as heavyweights.
@@ -114,14 +110,18 @@ inline Result view_stl_container(
 template <class Once, class Container> inline auto implement_make_view(
     std_forward_list_tag, Once once, Container && container,
     direction::front const &)
-    RETURNS(view_stl_container<typename std::decay<Container>::type>(
-        once, std::forward<Container>(container), utility::pick_overload()));
+    RETURNS(
+        view_stl_container<typename std::decay<Container>::type>(
+            once, std::forward<Container>(container),
+            utility::pick_overload()));
 
 template <class Once, class Container> inline auto implement_make_view(
     std_vector_tag, Once once, Container && container,
     range::helper::front_or_back const &)
-    RETURNS(view_stl_container<typename std::decay<Container>::type>(
-        once, std::forward<Container>(container), utility::pick_overload()));
+    RETURNS(
+        view_stl_container<typename std::decay<Container>::type>(
+            once, std::forward<Container>(container),
+            utility::pick_overload()));
 
 BOOST_AUTO_TEST_SUITE(test_range_heavyweight)
 

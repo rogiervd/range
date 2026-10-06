@@ -102,8 +102,8 @@ namespace callable { namespace implementation {
 
 }}  // namespace callable::implementation
 
-static const direction::front front = {};
-static const direction::back back = {};
+static direction::front const front = {};
+static direction::back const back = {};
 
 }  // namespace range
 

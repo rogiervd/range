@@ -97,9 +97,8 @@ BOOST_AUTO_TEST_CASE(test_range_view_shared_2)
 
 /* shared_ptr range, transformation function. */
 
-inline auto return_4_7_10_11()
-    -> decltype(range::view_shared(
-        std::declval<std::shared_ptr<std::list<int>>>(), range::reverse))
+inline auto return_4_7_10_11() -> decltype(range::view_shared(
+    std::declval<std::shared_ptr<std::list<int>>>(), range::reverse))
 {
     std::list<int> l;
     l.push_back(11);

@@ -80,8 +80,9 @@ namespace callable {
             Range && range, Direction const & direction, bool empty,
             overload_order<2> *)
         {
-            if (empty)
+            if (empty) {
                 return empty_hash;
+            }
             // Compute the hash value for the first element.
             hash_range_detail::accumulate_hash accumulate(
                 compute_element_hash(range::first(range, direction)));

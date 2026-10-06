@@ -449,12 +449,11 @@ BOOST_AUTO_TEST_CASE(test_other_homogeneous_containers)
 // the const- and reference-qualification and calling std::begin() and
 // std::end().
 
-template <class Type> struct type
-{};
+template <class Type> struct type {};
 
-template <class Container> auto get_iterator_type(Container &&)
-    RETURNS(type<typename std::decay<
-                decltype(std::begin(std::declval<Container>()))>::type>());
+template <class Container> auto get_iterator_type(Container &&) RETURNS(
+    type<typename std::decay<
+        decltype(std::begin(std::declval<Container>()))>::type>());
 
 BOOST_AUTO_TEST_CASE(test_std_container_const)
 {

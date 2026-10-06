@@ -75,16 +75,14 @@ namespace fold_detail {
         template <class Range> struct result_of_function
         : result_of<Function(
               State,
-              typename result_of<callable::first(Range, Direction)>::type)>
-        {};
+              typename result_of<callable::first(Range, Direction)>::type)> {};
 
         /**
         Evaluate to \c true iff the result type of the first function call
         is exactly the same as the current state type.
         */
         template <class Range> struct is_stable_state
-        : std::is_same<State, typename result_of_function<Range>::type>
-        {};
+        : std::is_same<State, typename result_of_function<Range>::type> {};
 
         /**
         Evaluate to \c true iff the fold is homogeneous.
@@ -95,12 +93,10 @@ namespace fold_detail {
         */
         template <class Range> struct is_homogeneous_fold
         : boost::mpl::and_<
-              is_homogeneous<Range, Direction>, is_stable_state<Range>>
-        {};
+              is_homogeneous<Range, Direction>, is_stable_state<Range>> {};
 
         template <class Range> struct has_first
-        : has<callable::first(Range &, Direction)>
-        {};
+        : has<callable::first(Range &, Direction)> {};
 
         /*
         Four cases.
@@ -229,8 +225,9 @@ namespace fold_detail {
             State && state, Range && range, Direction const & direction,
             Function && function, overload_order<4> *) const
         {
-            if (range::empty(range, direction))
+            if (range::empty(range, direction)) {
                 return std::forward<State>(state);
+            }
             return apply_non_empty(
                 std::forward<State>(state), std::forward<Range>(range),
                 direction, std::forward<Function>(function));
@@ -313,9 +310,11 @@ namespace callable {
                 auto operator()(
                     State && state, Range && range, Direction const & direction,
                     Function && function, overload_order<2> *) const
-                    RETURNS(helper::member_access::fold(
-                        std::forward<State>(state), std::forward<Range>(range),
-                        direction, std::forward<Function>(function)));
+                    RETURNS(
+                        helper::member_access::fold(
+                            std::forward<State>(state),
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
 
                 // Use default implementation.
                 template <
@@ -323,10 +322,12 @@ namespace callable {
                 auto operator()(
                     State && state, Range && range, Direction const & direction,
                     Function && function, overload_order<3> *) const
-                    RETURNS(fold_detail::default_implementation<
+                    RETURNS(
+                        fold_detail::default_implementation<
                             State, Range, Direction, Function>()(
-                        std::forward<State>(state), std::forward<Range>(range),
-                        direction, std::forward<Function>(function)));
+                            std::forward<State>(state),
+                            std::forward<Range>(range), direction,
+                            std::forward<Function>(function)));
             };
 
         public:
@@ -338,11 +339,12 @@ namespace callable {
             auto operator()(
                 State && state, Range && range, Direction const & direction,
                 Function && function) const
-                RETURNS(dispatch()(
-                    std::forward<State>(state),
-                    range::view_once(std::forward<Range>(range), direction),
-                    direction, std::forward<Function>(function),
-                    pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<State>(state),
+                        range::view_once(std::forward<Range>(range), direction),
+                        direction, std::forward<Function>(function),
+                        pick_overload()));
 
             // Without direction: use default_direction.
             template <
@@ -351,11 +353,12 @@ namespace callable {
                 class Enable = decltype(range::empty(std::declval<Range>()))>
             auto operator()(
                 State && state, Range && range, Function && function) const
-                RETURNS(dispatch()(
-                    std::forward<State>(state),
-                    range::view_once(std::forward<Range>(range)),
-                    range::default_direction(range),
-                    std::forward<Function>(function), pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<State>(state),
+                        range::view_once(std::forward<Range>(range)),
+                        range::default_direction(range),
+                        std::forward<Function>(function), pick_overload()));
         };
 
     }  // namespace implementation
@@ -432,7 +435,7 @@ instantiations.
 \param function
     The function to be called on each element.
 */
-static const auto fold = callable::fold();
+static auto const fold = callable::fold();
 
 }  // namespace range
 

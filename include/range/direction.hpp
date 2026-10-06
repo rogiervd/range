@@ -159,18 +159,18 @@ namespace callable {
 /**
 \return The opposite of direction.
 */
-static const auto opposite = callable::opposite();
+static auto const opposite = callable::opposite();
 
 /**
 \return The forward equivalent of a backward direction.
 */
-static const auto make_forward = callable::make_forward();
+static auto const make_forward = callable::make_forward();
 
 /**
 \return The opposite of the direction if it is backward.
     Otherwise, return the argument.
 */
-static const auto ensure_forward = callable::ensure_forward();
+static auto const ensure_forward = callable::ensure_forward();
 
 }  // namespace direction
 

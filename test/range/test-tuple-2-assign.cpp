@@ -52,8 +52,7 @@ using utility::tracked;
 using utility::tracked_counts;
 using utility::tracked_registry;
 
-struct source
-{};
+struct source {};
 
 struct assignable
 {

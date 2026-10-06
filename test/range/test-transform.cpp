@@ -51,8 +51,7 @@ struct simple_count
     int chop_in_place(direction::front) { return i++; }
 };
 
-struct simple_count_tag
-{};
+struct simple_count_tag {};
 
 namespace range {
 

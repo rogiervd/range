@@ -144,8 +144,9 @@ private:
         Element const * new_first = first_ + 1;
         if (new_first == producer_->end()) {
             producer_ptr next_producer = producer_->next();
-            if (next_producer)
+            if (next_producer) {
                 return buffer(std::move(next_producer));
+            }
             // If there is no next producer, the resulting range is empty.
             // Leave things as they are.
         }
@@ -175,8 +176,7 @@ private:
 };
 
 namespace buffer_operation {
-    struct buffer_tag
-    {};
+    struct buffer_tag {};
 }  // namespace buffer_operation
 
 template <class Element> struct tag_of_qualified<buffer<Element>>
@@ -306,8 +306,9 @@ public:
     /// Return a pointer to the next producer.
     pointer next()
     {
-        if (!next_)
+        if (!next_) {
             next_ = get_next();
+        }
         return next_;
     }
 

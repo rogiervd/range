@@ -38,8 +38,7 @@ struct weird_count
     weird_count(int current) : current(current) {}
 };
 
-struct weird_count_tag
-{};
+struct weird_count_tag {};
 
 namespace range {
 template <> struct tag_of_qualified<weird_count>

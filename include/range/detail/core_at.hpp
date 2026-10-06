@@ -105,8 +105,9 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<2> *) const
-                RETURNS(helper::member_access::at_constant(
-                    std::forward<Range>(range), position, direction));
+                RETURNS(
+                    helper::member_access::at_constant(
+                        std::forward<Range>(range), position, direction));
 
             /* If position is anything. */
             // Use free function.
@@ -123,19 +124,21 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<2> *) const
-                RETURNS(helper::member_access::at(
-                    std::forward<Range>(range), position, direction));
+                RETURNS(
+                    helper::member_access::at(
+                        std::forward<Range>(range), position, direction));
 
             /* Use drop and first. */
             template <class Range, class Position, class Direction>
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction, overload_order<3> *) const
-                RETURNS(first_direct()(
-                    drop_direct()(
-                        std::forward<Range>(range), position, direction,
-                        pick_overload()),
-                    direction, pick_overload()));
+                RETURNS(
+                    first_direct()(
+                        drop_direct()(
+                            std::forward<Range>(range), position, direction,
+                            pick_overload()),
+                        direction, pick_overload()));
         };
 
         struct at
@@ -148,9 +151,10 @@ namespace callable {
             auto operator()(
                 Range && range, Position const & position,
                 Direction const & direction) const
-                RETURNS(at_dispatch()(
-                    std::forward<Range>(range), position, direction,
-                    pick_overload()));
+                RETURNS(
+                    at_dispatch()(
+                        std::forward<Range>(range), position, direction,
+                        pick_overload()));
 
             // Without direction: use default direction.
             template <
@@ -158,9 +162,10 @@ namespace callable {
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
             auto operator()(Range && range, Position const & position) const
-                RETURNS(at_dispatch()(
-                    std::forward<Range>(range), position,
-                    range::default_direction(range), pick_overload()));
+                RETURNS(
+                    at_dispatch()(
+                        std::forward<Range>(range), position,
+                        range::default_direction(range), pick_overload()));
         };
 
         template <std::size_t Position> struct at_c
@@ -171,18 +176,20 @@ namespace callable {
                 class Enable = typename std::enable_if<
                     is_direction<Direction>::value>::type>
             auto operator()(Range && range, Direction const & direction) const
-                RETURNS(at_dispatch()(
-                    std::forward<Range>(range), rime::size_t<Position>(),
-                    direction, pick_overload()));
+                RETURNS(
+                    at_dispatch()(
+                        std::forward<Range>(range), rime::size_t<Position>(),
+                        direction, pick_overload()));
 
             // Without direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(at_dispatch()(
-                std::forward<Range>(range), rime::size_t<Position>(),
-                range::default_direction(range), pick_overload()));
+            auto operator()(Range && range) const RETURNS(
+                at_dispatch()(
+                    std::forward<Range>(range), rime::size_t<Position>(),
+                    range::default_direction(range), pick_overload()));
         };
 
     }  // namespace implementation
@@ -191,24 +198,15 @@ namespace callable {
     using implementation::at_c;
 
     // Convenience definitions.
-    struct second : at_c<1>
-    {};
-    struct third : at_c<2>
-    {};
-    struct fourth : at_c<3>
-    {};
-    struct fifth : at_c<4>
-    {};
-    struct sixth : at_c<5>
-    {};
-    struct seventh : at_c<6>
-    {};
-    struct eighth : at_c<7>
-    {};
-    struct ninth : at_c<8>
-    {};
-    struct tenth : at_c<9>
-    {};
+    struct second : at_c<1> {};
+    struct third : at_c<2> {};
+    struct fourth : at_c<3> {};
+    struct fifth : at_c<4> {};
+    struct sixth : at_c<5> {};
+    struct seventh : at_c<6> {};
+    struct eighth : at_c<7> {};
+    struct ninth : at_c<8> {};
+    struct tenth : at_c<9> {};
 
 }  // namespace callable
 
@@ -223,7 +221,7 @@ and is only available if that is available.
 \param direction (optional) The direction of traversal.
 \sa at_c
 */
-static const auto at = callable::at();
+static auto const at = callable::at();
 
 /** \brief
 Return the element at a specific index in a range.
@@ -255,7 +253,7 @@ one.
 \param range
     The range from which the element is taken.
 */
-static const auto second = callable::second();
+static auto const second = callable::second();
 
 /**
 Return the element at the ... position in a range.
@@ -265,7 +263,7 @@ This is equivalent to <c>at_c<2> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto third = callable::third();
+static auto const third = callable::third();
 
 /**
 Return the element at the ... position in a range.
@@ -275,7 +273,7 @@ This is equivalent to <c>at_c<3> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto fourth = callable::fourth();
+static auto const fourth = callable::fourth();
 
 /**
 Return the element at the ... position in a range.
@@ -285,7 +283,7 @@ This is equivalent to <c>at_c<4> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto fifth = callable::fifth();
+static auto const fifth = callable::fifth();
 
 /**
 Return the element at the ... position in a range.
@@ -295,7 +293,7 @@ This is equivalent to <c>at_c<5> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto sixth = callable::sixth();
+static auto const sixth = callable::sixth();
 
 /**
 Return the element at the ... position in a range.
@@ -305,7 +303,7 @@ This is equivalent to <c>at_c<6> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto seventh = callable::seventh();
+static auto const seventh = callable::seventh();
 
 /**
 Return the element at the ... position in a range.
@@ -315,7 +313,7 @@ This is equivalent to <c>at_c<7> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto eighth = callable::eighth();
+static auto const eighth = callable::eighth();
 
 /**
 Return the element at the ... position in a range.
@@ -325,7 +323,7 @@ This is equivalent to <c>at_c<8> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto ninth = callable::ninth();
+static auto const ninth = callable::ninth();
 
 /**
 Return the element at the ... position in a range.
@@ -335,7 +333,7 @@ This is equivalent to <c>at_c<9> (...)</c>.
 \param range
     The range from which the element is taken.
 */
-static const auto tenth = callable::tenth();
+static auto const tenth = callable::tenth();
 
 }  // namespace range
 

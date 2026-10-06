@@ -80,8 +80,9 @@ namespace callable {
             template <class Range, class Direction> auto operator()(
                 Range && range, Direction const & direction,
                 overload_order<2> *) const
-                RETURNS(helper::member_access::first(
-                    std::forward<Range>(range), direction));
+                RETURNS(
+                    helper::member_access::first(
+                        std::forward<Range>(range), direction));
         };
 
         struct first
@@ -105,9 +106,10 @@ namespace callable {
                 template <class Range, class Direction> auto operator()(
                     Range && range, Direction const & direction,
                     overload_order<4> *) const
-                    RETURNS(helper::member_access::chop(
-                                std::forward<Range>(range), direction)
-                                .forward_first());
+                    RETURNS(
+                        helper::member_access::chop(
+                            std::forward<Range>(range), direction)
+                            .forward_first());
             };
 
         public:
@@ -117,17 +119,20 @@ namespace callable {
                 class Enable = typename std::enable_if<
                     is_direction<Direction>::value>::type>
             auto operator()(Range && range, Direction const & direction) const
-                RETURNS(dispatch()(
-                    std::forward<Range>(range), direction, pick_overload()));
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), direction,
+                        pick_overload()));
 
             // Without direction: use default direction.
             template <
                 class Range,
                 class Enable =
                     typename std::enable_if<is_range<Range>::value>::type>
-            auto operator()(Range && range) const RETURNS(dispatch()(
-                std::forward<Range>(range), range::default_direction(range),
-                pick_overload()));
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    std::forward<Range>(range), range::default_direction(range),
+                    pick_overload()));
         };
 
     }  // namespace implementation
@@ -145,7 +150,7 @@ Return the first element from a range.
 \param direction
     (optional) The direction from which the first element will be taken.
 */
-static const auto first = callable::first();
+static auto const first = callable::first();
 
 }  // namespace range
 

@@ -204,7 +204,7 @@ private:
         auto distance = this->end() - this->begin();
         assert(distance >= 0);
         return typename base::size_type(distance);
-    };
+    }
 
     // drop.
     iterator_range drop_one(direction::front) const
@@ -294,8 +294,7 @@ public:
 /// \endcond
 
 namespace iterator_range_operation {
-    template <class IteratorTag> struct iterator_range_tag
-    {};
+    template <class IteratorTag> struct iterator_range_tag {};
 }  // namespace iterator_range_operation
 
 template <class Iterator> struct tag_of_qualified<iterator_range<Iterator>>
@@ -396,8 +395,9 @@ namespace iterator_range_operation {
     template <class IteratorTag, class Range> inline auto implement_chop(
         iterator_range_tag<IteratorTag> const & tag, Range && range,
         direction::front const & direction)
-        RETURNS(helper::chop_by_chop_in_place(
-            std::forward<Range>(range), direction));
+        RETURNS(
+            helper::chop_by_chop_in_place(
+                std::forward<Range>(range), direction));
 
 }  // namespace iterator_range_operation
 

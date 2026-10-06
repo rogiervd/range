@@ -73,7 +73,7 @@ number of steps is counted.
 \param range The range to count the number of elements of.
 \param direction The direction to traverse the range in.
 */
-static const auto walk_size = callable::walk_size();
+static auto const walk_size = callable::walk_size();
 
 }  // namespace range
 

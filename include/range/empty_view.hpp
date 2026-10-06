@@ -33,8 +33,7 @@ intention.
 class empty_view;
 
 namespace empty_view_operation {
-    struct empty_view_tag
-    {};
+    struct empty_view_tag {};
 }  // namespace empty_view_operation
 
 template <> struct tag_of_qualified<empty_view>

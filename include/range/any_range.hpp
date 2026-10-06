@@ -94,8 +94,7 @@ something to be careful with.
 template <class Element, class Capabilities = void> class any_range;
 
 namespace any_range_operation {
-    struct any_range_tag
-    {};
+    struct any_range_tag {};
 }  // namespace any_range_operation
 
 template <class Element, class Capabilities>
@@ -149,8 +148,8 @@ private:
     template <class OtherCapabilities> struct any_range_is_convertible
     : capability::is_subset<
           capabilities,
-          typename capability::normalise_capabilities<OtherCapabilities>::type>
-    {};
+          typename capability::normalise_capabilities<
+              OtherCapabilities>::type> {};
 
     static_assert(
         any_range_is_convertible<Capabilities>::value,
@@ -179,17 +178,15 @@ private:
     };
 
     template <class Type> struct is_any_range_with_same_element_type_impl
-    : boost::mpl::false_
-    {};
+    : boost::mpl::false_ {};
 
     template <class Capabilities2>
     struct is_any_range_with_same_element_type_impl<
-        any_range<Element, Capabilities2>> : boost::mpl::true_
-    {};
+        any_range<Element, Capabilities2>> : boost::mpl::true_ {};
 
     template <class Type> struct is_any_range_with_same_element_type
-    : is_any_range_with_same_element_type_impl<typename std::decay<Type>::type>
-    {};
+    : is_any_range_with_same_element_type_impl<
+          typename std::decay<Type>::type> {};
 
     struct not_constructible;
     typedef typename boost::mpl::if_<
@@ -290,14 +287,12 @@ private:
 
     template <class Capability, class Direction> struct is_implemented_helper
     : meta::contains<
-          Capability, typename meta::at<Direction, capabilities>::type>
-    {};
+          Capability, typename meta::at<Direction, capabilities>::type> {};
 
     template <class Capability, class Direction> struct is_implemented
     : boost::mpl::and_<
           meta::has_key<Direction, capabilities>,
-          is_implemented_helper<Capability, Direction>>
-    {};
+          is_implemented_helper<Capability, Direction>> {};
 
     template <
         class Direction,
@@ -360,8 +355,9 @@ namespace any_range_operation {
 
     template <class AnyRange, class Direction> inline auto implement_chop(
         any_range_tag const & tag, AnyRange && r, Direction const & direction)
-        RETURNS(helper::chop_by_chop_in_place(
-            std::forward<AnyRange>(r), direction));
+        RETURNS(
+            helper::chop_by_chop_in_place(
+                std::forward<AnyRange>(r), direction));
 
 }  // namespace any_range_operation
 
@@ -376,8 +372,7 @@ namespace callable {
         : capability::detect_capabilities<
               View,
               typename capability::detect_copy_construct_key<
-                  View, meta::set<Directions...>>::type>
-        {};
+                  View, meta::set<Directions...>>::type> {};
 
         struct apply
         {
@@ -415,9 +410,10 @@ namespace callable {
     public:
         template <class Range, class... Directions>
         auto operator()(Range && range, Directions const &... directions) const
-            RETURNS(apply()(
-                range::view(std::forward<Range>(range), directions...),
-                directions...));
+            RETURNS(
+                apply()(
+                    range::view(std::forward<Range>(range), directions...),
+                    directions...));
     };
 
 }  // namespace callable

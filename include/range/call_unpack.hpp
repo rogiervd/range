@@ -35,8 +35,9 @@ namespace callable {
             auto operator()(
                 Function && function, Arguments && arguments,
                 meta::size_t_vector<Indices...>) const
-                RETURNS(std::forward<Function>(function)(
-                    ::range::at_c<Indices>(arguments)...));
+                RETURNS(
+                    std::forward<Function>(function)(
+                        ::range::at_c<Indices>(arguments)...));
         };
 
     }  // namespace call_unpack_detail
@@ -63,18 +64,20 @@ namespace callable {
         {}
 
         template <class Arguments> auto operator()(Arguments && arguments)
-            RETURNS(call_unpack_detail::implementation()(
-                function_,
-                ::range::view_once(std::forward<Arguments>(arguments)),
-                typename meta::count_c<
-                    result_of<size(Arguments)>::type::value>::type()));
+            RETURNS(
+                call_unpack_detail::implementation()(
+                    function_,
+                    ::range::view_once(std::forward<Arguments>(arguments)),
+                    typename meta::count_c<
+                        result_of<size(Arguments)>::type::value>::type()));
 
         template <class Arguments> auto operator()(Arguments && arguments) const
-            RETURNS(call_unpack_detail::implementation()(
-                function_,
-                ::range::view_once(std::forward<Arguments>(arguments)),
-                typename meta::count_c<
-                    result_of<size(Arguments)>::type::value>::type()));
+            RETURNS(
+                call_unpack_detail::implementation()(
+                    function_,
+                    ::range::view_once(std::forward<Arguments>(arguments)),
+                    typename meta::count_c<
+                        result_of<size(Arguments)>::type::value>::type()));
     };
 
     class call_unpack
@@ -82,11 +85,12 @@ namespace callable {
     public:
         template <class Function, class Arguments>
         auto operator()(Function && function, Arguments && arguments) const
-            RETURNS(call_unpack_detail::implementation()(
-                std::forward<Function>(function),
-                ::range::view_once(std::forward<Arguments>(arguments)),
-                typename meta::count_c<
-                    result_of<size(Arguments)>::type::value>::type()));
+            RETURNS(
+                call_unpack_detail::implementation()(
+                    std::forward<Function>(function),
+                    ::range::view_once(std::forward<Arguments>(arguments)),
+                    typename meta::count_c<
+                        result_of<size(Arguments)>::type::value>::type()));
 
         template <class Function>
         call_unpack_function<Function> operator()(Function && function) const

@@ -60,3 +60,9 @@ pip.parse(
     requirements_lock = "//:requirements.txt",
 )
 use_repo(pip, "range_pypi")
+
+# Doxygen, for generating C++ API documentation.
+bazel_dep(name = "rules_doxygen", version = "2.6.4")
+
+doxygen_extension = use_extension("@rules_doxygen//:extensions.bzl", "doxygen_extension")
+use_repo(doxygen_extension, "doxygen")

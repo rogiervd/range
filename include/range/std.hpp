@@ -25,25 +25,25 @@ For compile speed, prefer to include the headers from \c ./std/.
 #define RANGE_STD_HPP_INCLUDED
 
 // Sequence containers.
-#include "std/array.hpp"
-#include "std/deque.hpp"
-#include "std/forward_list.hpp"
-#include "std/list.hpp"
-#include "std/string.hpp"
-#include "std/vector.hpp"
+#include "std/array.hpp"         // IWYU pragma: export
+#include "std/deque.hpp"         // IWYU pragma: export
+#include "std/forward_list.hpp"  // IWYU pragma: export
+#include "std/list.hpp"          // IWYU pragma: export
+#include "std/string.hpp"        // IWYU pragma: export
+#include "std/vector.hpp"        // IWYU pragma: export
 
 // Associative containers.
-#include "std/map.hpp"
-#include "std/set.hpp"
+#include "std/map.hpp"  // IWYU pragma: export
+#include "std/set.hpp"  // IWYU pragma: export
 
 // Unordered (hashed) associative containers.
-#include "std/unordered_map.hpp"
-#include "std/unordered_set.hpp"
+#include "std/unordered_map.hpp"  // IWYU pragma: export
+#include "std/unordered_set.hpp"  // IWYU pragma: export
 
 // tuple.
-#include "std/tuple.hpp"
+#include "std/tuple.hpp"  // IWYU pragma: export
 
 // view_optional.
-#include "std/view_optional.hpp"
+#include "std/view_optional.hpp"  // IWYU pragma: export
 
 #endif  // RANGE_STD_HPP_INCLUDED

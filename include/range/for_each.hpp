@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef RANGE_FOR_EACH_HPP_INCLUDED
 #define RANGE_FOR_EACH_HPP_INCLUDED
 
-#include <boost/mpl/if.hpp>
-
 #include "rime/nothing.hpp"
+
+#include "utility/returns.hpp"
 
 #include "core.hpp"
 #include "fold.hpp"

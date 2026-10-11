@@ -28,22 +28,15 @@ to include this file.
 #ifndef RANGE_FOLD_HPP_INCLUDED
 #define RANGE_FOLD_HPP_INCLUDED
 
-#include <functional>
 #include <type_traits>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/mpl/identity.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
-
-#include <boost/utility/enable_if.hpp>
 
 #include "utility/assignable.hpp"
-#include "utility/is_assignable.hpp"
-#include "utility/storage.hpp"
+#include "utility/returns.hpp"
 
-#include "rime/assert.hpp"
-#include "rime/core.hpp"
+#include "rime/merge_types.hpp"
 #include "rime/variant.hpp"
 
 #include "core.hpp"

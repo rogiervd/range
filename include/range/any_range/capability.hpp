@@ -17,23 +17,22 @@ limitations under the License.
 #ifndef RANGE_ANY_RANGE_CAPABILITY_HPP_INCLUDED
 #define RANGE_ANY_RANGE_CAPABILITY_HPP_INCLUDED
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
 #include <boost/mpl/and.hpp>
+#include <boost/mpl/bool.hpp>  // IWYU pragma: keep
 #include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/identity.hpp>
 #include <boost/mpl/if.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/less.hpp>
 #include <boost/mpl/or.hpp>
 #include <boost/mpl/placeholders.hpp>
-#include <boost/utility/enable_if.hpp>
 
 #include "meta/all_of.hpp"
 #include "meta/all_of_c.hpp"
 #include "meta/filter.hpp"
 #include "meta/map.hpp"
+#include "meta/range.hpp"
 #include "meta/set.hpp"
 #include "meta/vector.hpp"
 

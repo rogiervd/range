@@ -18,6 +18,7 @@ limitations under the License.
 #define RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
 #include "utility/enable_if_compiles.hpp"
 
@@ -25,6 +26,7 @@ limitations under the License.
 
 #include "../direction.hpp"
 #include "core_chop_in_place.hpp"
+#include "core_tag.hpp"
 
 namespace range {
 

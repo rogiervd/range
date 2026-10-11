@@ -20,12 +20,6 @@ limitations under the License.
 #include <type_traits>
 #include <utility>
 
-#include <boost/utility/enable_if.hpp>
-
-#include <boost/mpl/and.hpp>
-
-#include "utility/overload_order.hpp"
-
 #include "rime/assert.hpp"
 #include "rime/call_if.hpp"
 #include "rime/cast.hpp"
@@ -33,6 +27,8 @@ limitations under the License.
 #include "rime/merge_types.hpp"
 #include "rime/min.hpp"
 #include "rime/sign.hpp"
+
+#include "utility/returns.hpp"
 
 #include "core.hpp"
 #include "helper/underlying.hpp"

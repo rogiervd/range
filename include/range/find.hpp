@@ -20,11 +20,15 @@ limitations under the License.
 #include <type_traits>
 #include <utility>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
-#include <boost/utility/enable_if.hpp>
+
+#include "meta/vector.hpp"
 
 #include "rime/call_if.hpp"
+#include "rime/core.hpp"
+#include "rime/variant.hpp"
 #include "utility/returns.hpp"
 
 #include "core.hpp"

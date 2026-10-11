@@ -19,21 +19,15 @@ limitations under the License.
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
-#include <boost/mpl/or.hpp>
 
 #include "utility/enable_if_compiles.hpp"
 #include "utility/returns.hpp"
 #include "utility/storage.hpp"
 
-#include "rime/always.hpp"
 #include "rime/call_if.hpp"
 #include "rime/cast.hpp"
 #include "rime/core.hpp"
-#include "rime/enable_if_constant.hpp"
 #include "rime/variant.hpp"
 
 #include "core.hpp"

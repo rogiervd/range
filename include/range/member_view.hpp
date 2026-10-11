@@ -17,16 +17,16 @@ limitations under the License.
 #ifndef RANGE_MEMBER_VIEW_HPP_INCLUDED
 #define RANGE_MEMBER_VIEW_HPP_INCLUDED
 
+#include <cstddef>
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include <boost/core/enable_if.hpp>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/or.hpp>
+#include "meta/range.hpp"
+
+#include "rime/core.hpp"
 
 #include "core.hpp"
-
-#include "meta/vector.hpp"
 
 #include "utility/returns.hpp"
 

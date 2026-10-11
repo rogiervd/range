@@ -19,7 +19,6 @@ limitations under the License.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
 
 #include "utility/assignable.hpp"
 #include "utility/returns.hpp"

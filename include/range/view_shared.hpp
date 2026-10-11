@@ -20,6 +20,8 @@ limitations under the License.
 #include <memory>
 #include <type_traits>
 
+#include <boost/core/enable_if.hpp>
+
 #include "utility/returns.hpp"
 
 #include "core.hpp"

@@ -21,24 +21,24 @@ Define a general heterogeneous container.
 #ifndef RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 #define RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include <cstddef>
+#include <type_traits>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/and.hpp>
-#include <boost/mpl/if.hpp>
 #include <boost/mpl/not.hpp>
 
 #include "meta/count_c.hpp"
+#include "meta/vector.hpp"
+#include "meta/vector_c.hpp"
 
 #include "utility/disable_if_same.hpp"
 #include "utility/is_assignable.hpp"
-#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
 #include "utility/storage.hpp"
 #include "utility/type_sequence_traits.hpp"
 
-#include "rime/always.hpp"
-#include "rime/assert.hpp"
 #include "rime/core.hpp"
-#include "rime/enable_if_constant.hpp"
 
 #include "core.hpp"
 #include "element_types.hpp"
@@ -46,7 +46,7 @@ Define a general heterogeneous container.
 #include "heavyweight.hpp"
 #include "less_lexicographical.hpp"
 
-#include "detail/tuple-compare.hpp"
+#include "detail/tuple-compare.hpp"  // IWYU pragma: keep
 #include "detail/tuple-fwd.hpp"
 
 namespace range {

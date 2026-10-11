@@ -21,9 +21,10 @@ limitations under the License.
 #include <iterator>
 #include <type_traits>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
-#include <boost/utility.hpp>
+#include <boost/mpl/not.hpp>
 
 #include "utility/returns.hpp"
 

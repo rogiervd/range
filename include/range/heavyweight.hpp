@@ -23,7 +23,9 @@ the container).
 #ifndef RANGE_HEAVYWEIGHT_HPP_INCLUDED
 #define RANGE_HEAVYWEIGHT_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include "rime/core.hpp"
+
+#include "utility/returns.hpp"
 
 #include "core.hpp"
 

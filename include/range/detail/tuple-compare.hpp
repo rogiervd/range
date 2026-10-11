@@ -22,17 +22,21 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 #ifndef RANGE_DETAIL_TUPLE_COMPARE_HPP_INCLUDED
 #define RANGE_DETAIL_TUPLE_COMPARE_HPP_INCLUDED
 
+#include <cstddef>
 #include <type_traits>
 
-#include <boost/mpl/bool.hpp>
+#include <boost/mpl/eval_if.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/pair.hpp>
 
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"
 #include "meta/count_c.hpp"
 #include "meta/vector.hpp"
+#include "meta/vector_c.hpp"
 
 #include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
 
 #include "rime/core.hpp"
 #include "rime/enable_if_constant.hpp"

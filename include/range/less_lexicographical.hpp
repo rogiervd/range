@@ -17,12 +17,13 @@ limitations under the License.
 #ifndef RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 #define RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 
-#include <boost/mpl/and.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 #include "rime/always.hpp"
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"
+
+#include "utility/returns.hpp"
 
 #include "core.hpp"
 

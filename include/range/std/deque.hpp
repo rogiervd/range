@@ -24,6 +24,7 @@ This includes \c \<deque>.
 
 #include <deque>
 
+#include "range/detail/core_tag.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

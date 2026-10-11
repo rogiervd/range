@@ -29,7 +29,7 @@ Expose views as Python iterators.
 #include <type_traits>
 
 #include <meta/count_c.hpp>
-#include <meta/vector.hpp>
+#include "meta/vector_c.hpp"
 
 #include "range/core.hpp"
 

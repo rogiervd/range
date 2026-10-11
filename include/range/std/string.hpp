@@ -24,6 +24,7 @@ This includes \c \<string>.
 
 #include <string>
 
+#include "range/detail/core_tag.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

@@ -23,12 +23,9 @@ Use utility/nested_callable.hpp to set up generic traits for callables.
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/identity.hpp>
 
 #include "utility/enable_if_compiles.hpp"
 
-#include "meta/all_of_c.hpp"
 
 namespace callable_traits {
 

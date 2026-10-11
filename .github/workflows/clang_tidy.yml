@@ -27,7 +27,12 @@ jobs:
       # Without this, clang-tidy cannot find most headers.
       - run: bazel build --config=clang //test/...
       # Generate compile_commands.json, with the compiler flags for each file.
-      - run: bazel run --config=clang @hedron_compile_commands//:refresh_all -- --config=clang
+      # Leave out entries for headers: hedron_compile_commands gives a header
+      # the command of a source file that includes it, so clang-tidy would
+      # check that source file instead of the header. Without an entry,
+      # clang-tidy infers the flags for a header from a nearby source file, and
+      # checks the header itself.
+      - run: bazel run --config=clang @hedron_compile_commands//:refresh_all -- --config=clang --bcce-exclude-headers=all
       # Run clang-tidy (configured in .clang-tidy) on every header.
       # Each header is checked separately, so that the output for each header
       # is shown together, and so that all headers are checked even if some

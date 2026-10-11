@@ -22,6 +22,10 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install clang-tidy==22.1.8
+      # Build the tests, so that the directories that Bazel creates for include
+      # paths (e.g. bazel-out/.../_virtual_includes) exist.
+      # Without this, clang-tidy cannot find most headers.
+      - run: bazel build --config=clang //test/...
       # Generate compile_commands.json, with the compiler flags for each file.
       - run: bazel run --config=clang @hedron_compile_commands//:refresh_all -- --config=clang
       # Run clang-tidy (configured in .clang-tidy) on every header.

@@ -24,6 +24,7 @@ limitations under the License.
 #include "rime/core.hpp"
 
 #include "../direction.hpp"
+#include "core_chop_in_place.hpp"
 
 namespace range {
 

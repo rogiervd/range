@@ -18,15 +18,20 @@ limitations under the License.
 #define RANGE_DETAIL_CORE_VIEW_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/placeholders.hpp>
 
 #include "meta/all_of_c.hpp"
 
+#include "utility/overload_order.hpp"
+
 #include "rime/core.hpp"
 
 #include "../direction.hpp"
+#include "core_base.hpp"
+#include "core_default_direction.hpp"
 
 namespace range {
 

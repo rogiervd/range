@@ -21,6 +21,8 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 #ifndef RANGE_DETAIL_TUPLE_FWD_HPP_INCLUDED
 #define RANGE_DETAIL_TUPLE_FWD_HPP_INCLUDED
 
+#include <cstddef>
+
 namespace range {
 
 template <class Tuple> struct tuple_size;

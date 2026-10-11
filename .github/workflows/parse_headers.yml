@@ -1,0 +1,26 @@
+name: Self-contained headers
+on:
+  push:
+    branches: [main, develop, test-github-actions]
+  pull_request:
+    branches: [main, develop, test-github-actions]
+  workflow_dispatch:
+jobs:
+  parse-headers:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      # Compile each header of //:range on its own (see "parse_headers" in
+      # BUILD.bazel).
+      - run: bazel build --keep_going --config=${{ matrix.compiler }} --process_headers_in_dependencies //:range

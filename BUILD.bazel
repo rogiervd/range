@@ -14,6 +14,13 @@ cc_library(
         "include/range/std/detail/*.hpp",
         "include/range/python/*.hpp",
     ]),
+    # Allow each header to be compiled on its own, to check that it includes
+    # everything it needs.
+    # This is enabled only for this target, so that the headers of dependencies
+    # are not checked.
+    # The check is run only when --process_headers_in_dependencies is passed:
+    #   bazel build --keep_going --process_headers_in_dependencies //:range
+    features = ["parse_headers"],
     include_prefix = "",
     # The prefix to be stripped from the include path.
     strip_include_prefix = "include/",

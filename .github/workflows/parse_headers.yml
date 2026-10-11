@@ -23,4 +23,6 @@ jobs:
           repository-cache: true
       # Compile each header of //:range on its own (see "parse_headers" in
       # BUILD.bazel).
-      - run: bazel build --keep_going --config=${{ matrix.compiler }} --process_headers_in_dependencies //:range
+      # Only the headers of //:range itself are compiled, not those of
+      # dependencies.
+      - run: bazel build --keep_going --config=${{ matrix.compiler }} --process_headers_in_dependencies --output_groups=compilation_outputs //:range

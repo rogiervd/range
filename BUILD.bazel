@@ -16,10 +16,12 @@ cc_library(
     ]),
     # Allow each header to be compiled on its own, to check that it includes
     # everything it needs.
-    # This is enabled only for this target, so that the headers of dependencies
-    # are not checked.
-    # The check is run only when --process_headers_in_dependencies is passed:
-    #   bazel build --keep_going --process_headers_in_dependencies //:range
+    # The check is run only when --process_headers_in_dependencies is passed.
+    # Requesting only the output group "compilation_outputs" restricts it to the
+    # headers of this target, and not those of dependencies (some of which, like
+    # Boost, also enable parse_headers):
+    #   bazel build --keep_going --process_headers_in_dependencies \
+    #     --output_groups=compilation_outputs //:range
     features = ["parse_headers"],
     include_prefix = "",
     # The prefix to be stripped from the include path.

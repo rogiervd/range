@@ -1,0 +1,31 @@
+name: Include cleaner
+on:
+  push:
+    branches: [main, develop, test-github-actions]
+  pull_request:
+    branches: [main, develop, test-github-actions]
+  workflow_dispatch:
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          # Avoid downloading Bazel every time.
+          bazelisk-cache: true
+          # Store build cache per workflow.
+          disk-cache: ${{ github.workflow }}
+          # Share repository cache between workflows.
+          repository-cache: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install clang-tidy==22.1.8
+      # Generate compile_commands.json, with the compiler flags for each file.
+      - run: bazel run --config=clang @hedron_compile_commands//:refresh_all -- --config=clang
+      # Run clang-tidy (configured in .clang-tidy) on every header.
+      # Each header is checked separately, so that the output for each header
+      # is shown together, and so that all headers are checked even if some
+      # fail.
+      - run: find include -name '*.hpp' | sort | xargs -n 1 clang-tidy --quiet -p .

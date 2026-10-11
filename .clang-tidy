@@ -1,0 +1,7 @@
+# Check that each file directly includes the headers that declare what it
+# uses, and does not include headers that it does not use.
+Checks: >
+  -*,
+  misc-include-cleaner,
+
+WarningsAsErrors: "*"

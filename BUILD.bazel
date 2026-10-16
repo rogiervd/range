@@ -17,18 +17,41 @@ cc_library(
         "include/range/any_range/*.hpp",
         "include/range/std/*.hpp",
         "include/range/std/detail/*.hpp",
-        "include/range/python/*.hpp",
     ]),
+    # Allow each header to be compiled on its own, to check that it includes
+    # everything it needs, by passing Bazel --process_headers_in_dependencies.
+    features = ["parse_headers"],
     include_prefix = "",
     # The prefix to be stripped from the include path.
     strip_include_prefix = "include/",
     visibility = ["//visibility:public"],
     # Dependencies of this library.
     deps = [
-        "@boost.iostreams",  # TODO can we make this more specific?
+        "@boost.exception",
+        "@boost.iostreams",
         "@meta",
         "@rime",
         "@utility",
+    ],
+)
+
+cc_library(
+    name = "python_range",
+    # Headers that a user of this library can include.
+    hdrs = glob([
+        "include/range/python/*.hpp",
+    ]),
+    # Allow each header to be compiled on its own, to check that it includes
+    # everything it needs, by passing Bazel --process_headers_in_dependencies.
+    features = ["parse_headers"],
+    include_prefix = "",
+    # The prefix to be stripped from the include path.
+    strip_include_prefix = "include/",
+    visibility = ["//visibility:public"],
+    # Dependencies of this library.
+    deps = [
+        "//:range",
+        "@nanobind_bazel//:nanobind",
     ],
 )
 

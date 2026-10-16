@@ -33,7 +33,7 @@ cc_library(
 )
 
 cc_library(
-    name = "python_range",
+    name = "range_python",
     # Headers that a user of this library can include.
     hdrs = glob([
         "include/range/python/*.hpp",

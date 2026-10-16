@@ -14,7 +14,6 @@
 
 #include <boost/mpl/assert.hpp>
 
-#include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 #include "utility/unique_ptr.hpp"
 
@@ -34,7 +33,7 @@ using range::first;
 
 using range::size_mismatch;
 
-using utility::is_assignable;
+using std::is_assignable;
 
 using utility::tracked;
 using utility::tracked_counts;
@@ -142,7 +141,7 @@ BOOST_AUTO_TEST_CASE(tuple_assign_one)
     }
     // Noncopyable
     {
-        tuple<std::unique_ptr<int>> t(utility::make_unique<int>(66));
+        tuple<std::unique_ptr<int>> t(std::make_unique<int>(66));
         tuple<std::unique_ptr<int>> t_moved(std::move(t));
         BOOST_CHECK_EQUAL(*first(t_moved), 66);
     }

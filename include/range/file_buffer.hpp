@@ -123,7 +123,7 @@ function.
 */
 inline buffer<char> read_file(std::string const & file_name)
 {
-    auto stream_buffer = utility::make_unique<
+    auto stream_buffer = std::make_unique<
         boost::iostreams::stream_buffer<file_producer_detail::file_source>>(
         file_name);
 
@@ -138,7 +138,7 @@ Open a file in Gzip format for reading and expose as a \ref buffer.
 inline buffer<char> read_gzip_file(std::string const & file_name)
 {
     auto stream_buffer =
-        utility::make_unique<file_producer_detail::gzip_file_stream>(file_name);
+        std::make_unique<file_producer_detail::gzip_file_stream>(file_name);
     return range::buffer<char>(
         internal_element_producer<char, 256>::pointer::template construct<
             file_element_producer<char>>(std::move(stream_buffer)));

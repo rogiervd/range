@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(tuple_funny_types)
 {
     // Noncopyable.
     {
-        tuple<std::unique_ptr<int>> ten(utility::make_unique<int>(10));
+        tuple<std::unique_ptr<int>> ten(std::make_unique<int>(10));
         BOOST_CHECK_EQUAL(*first(ten), 10);
     }
     // Arrays.
@@ -88,10 +88,9 @@ BOOST_AUTO_TEST_CASE(tuple_funny_types)
         BOOST_CHECK_EQUAL(first(fours)[1], 44);
         BOOST_CHECK_EQUAL(first(fours)[2], 444);
 
-        BOOST_MPL_ASSERT((utility::is_assignable<tuple<int> &, tuple<int> &>) );
-        // GCC 4.6 does not agree so never mind.
-        // BOOST_MPL_ASSERT_NOT ((utility::is_assignable <
-        //     tuple <int [3]> &, tuple <int [3]> &>));
+        BOOST_MPL_ASSERT((std::is_assignable<tuple<int> &, tuple<int> &>) );
+        BOOST_MPL_ASSERT_NOT(
+            (std::is_assignable<tuple<int[3]> &, tuple<int[3]> &>) );
     }
 
     // Function.

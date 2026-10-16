@@ -129,7 +129,7 @@ private:
                 capabilities, typename implementation::capabilities>::value,
             "Required capabilities must be subset of available ones.");
 
-        return utility::make_unique<implementation>(
+        return std::make_unique<implementation>(
             std::forward<Underlying>(underlying));
     }
 

@@ -18,7 +18,6 @@ Define a general heterogeneous container.
 #include "meta/count_c.hpp"
 
 #include "utility/disable_if_same.hpp"
-#include "utility/is_assignable.hpp"
 #include "utility/overload_order.hpp"
 #include "utility/storage.hpp"
 #include "utility/type_sequence_traits.hpp"
@@ -190,7 +189,7 @@ namespace tuple_detail {
         template <
             class Type2 = Type,
             class Enable = typename boost::enable_if<
-                utility::is_assignable<Type2 &, Type2 const &>>::type>
+                std::is_assignable<Type2 &, Type2 const &>>::type>
         contain & operator=(contain const & that)
         {
             static_cast<Type &>(this->element_) =
@@ -201,7 +200,7 @@ namespace tuple_detail {
         template <
             class Type2 = Type,
             class Enable = typename boost::enable_if<
-                utility::is_assignable<Type2 &, Type2 &&>>::type>
+                std::is_assignable<Type2 &, Type2 &&>>::type>
         contain & operator=(contain && that)
         {
             static_cast<Type &>(this->element_) =
@@ -460,7 +459,7 @@ namespace tuple_detail {
 
         template <class Range> struct range_is_assignable<Range, false>
         : boost::mpl::and_<
-              utility::is_assignable<
+              std::is_assignable<
                   First &,
                   typename result_of<callable::first(
                       Range, direction::front)>::type>,
@@ -469,9 +468,9 @@ namespace tuple_detail {
                       Range, direction::front)>::type>> {};
 
         static constexpr bool is_copy_assignable = rest_type::is_copy_assignable
-            && utility::is_assignable<First &, First const &>::value;
+            && std::is_assignable<First &, First const &>::value;
         static constexpr bool is_move_assignable = rest_type::is_move_assignable
-            && utility::is_assignable<First &, First &&>::value;
+            && std::is_assignable<First &, First &&>::value;
 
     public:
         elements() : contain_type(), rest_type() {}

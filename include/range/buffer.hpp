@@ -408,14 +408,14 @@ namespace buffer_detail {
 
         range_element_producer(Range && range)
         : internal_element_producer<Element, NumberOrZero>(),
-          range_(utility::make_unique<Range>(std::move(range)))
+          range_(std::make_unique<Range>(std::move(range)))
         {
             fill();
         }
 
         range_element_producer(Range const & range)
         : internal_element_producer<Element, NumberOrZero>(),
-          range_(utility::make_unique<Range>(range))
+          range_(std::make_unique<Range>(range))
         {
             fill();
         }

@@ -21,7 +21,6 @@
 #include "unique_range.hpp"
 
 using range::fold;
-using utility::make_unique;
 
 BOOST_AUTO_TEST_SUITE(test_range_fold_moving)
 
@@ -108,21 +107,21 @@ BOOST_AUTO_TEST_CASE(test_fold_move_state)
         v.push_back(222);
 
         std::unique_ptr<int> result =
-            fold(make_unique<int>(0), v, add_to_unique_ptr());
+            fold(std::make_unique<int>(0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL(*result, 555);
     }
     {
         std::tuple<int, short, int> v(456, -123, 222);
 
         std::unique_ptr<int> result =
-            fold(make_unique<int>(0), v, add_to_unique_ptr());
+            fold(std::make_unique<int>(0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL(*result, 555);
     }
     {
         std::tuple<int, short, int> v(456, -123, 222);
 
         std::unique_ptr<int> result =
-            fold(make_unique<int>(0), v, add_to_unique_ptr());
+            fold(std::make_unique<int>(0), v, add_to_unique_ptr());
         BOOST_CHECK_EQUAL(*result, 555);
     }
 }

@@ -27,7 +27,6 @@ to include this file.
 #include <boost/utility/enable_if.hpp>
 
 #include "utility/assignable.hpp"
-#include "utility/is_assignable.hpp"
 #include "utility/storage.hpp"
 
 #include "rime/assert.hpp"

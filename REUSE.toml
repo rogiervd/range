@@ -21,6 +21,10 @@ path = [
   "documentation/conf.py",
   "documentation/requirements.in",
   "documentation/requirements.txt",
+  "test/range/example/short.txt",
+  "test/range/example/short.txt.gz",
+  "requirements.txt",
+  "requirements.in",
 ]
 SPDX-FileCopyrightText = "NONE"
 SPDX-License-Identifier = "CC0-1.0"

@@ -42,38 +42,44 @@ The expression is executed exactly once.
 \note This macro has been inspired by Boost.Foreach.
 
 \internal
+The names of the internal variables include \c variable_name, so that
+nested loops (which must use different variable names) do not declare
+variables that hide each other's.
+
 This is not very readable.
 A more readable version with comments is in test/for_each_macro.cpp.
 */
-#define RANGE_FOR_EACH(variable_name, range_expression)                      \
-    /* Declare variable. */                                                  \
-    if (bool RANGE_FOR_EACH_internal_done = false) {                         \
-    } else                                                                   \
-        /* Declare reference to range_expression. */                         \
-        for (auto && RANGE_FOR_EACH_internal_range = range_expression;       \
-             !RANGE_FOR_EACH_internal_done;                                  \
-             RANGE_FOR_EACH_internal_done = true)                            \
-            /* Declare variable. */                                          \
-            if (bool RANGE_FOR_EACH_internal_seen = false) {                 \
-            } else                                                           \
-                /* Actual for loop. */                                       \
-                for (auto RANGE_FOR_EACH_internal_view =                     \
-                         ::range::forward_view(                              \
-                             static_cast<                                    \
-                                 decltype(RANGE_FOR_EACH_internal_range)>(   \
-                                 RANGE_FOR_EACH_internal_range));            \
-                     !::range::empty(RANGE_FOR_EACH_internal_view);          \
-                     RANGE_FOR_EACH_internal_seen =                          \
-                         !RANGE_FOR_EACH_internal_seen)                      \
-                    if (RANGE_FOR_EACH_internal_seen)                        \
-                        /* "break" statement inside */                       \
-                        break;                                               \
-                    else                                                     \
-                        /* Declare variable "variable_name". */              \
-                        for (auto && variable_name = ::range::chop_in_place( \
-                                 RANGE_FOR_EACH_internal_view);              \
-                             !RANGE_FOR_EACH_internal_seen;                  \
-                             ((void) variable_name),                         \
-                                     RANGE_FOR_EACH_internal_seen = true)
+#define RANGE_FOR_EACH(variable_name, range_expression)                          \
+    /* Declare variable. */                                                      \
+    if (bool RANGE_FOR_EACH_done_##variable_name = false) {                      \
+    } else                                                                       \
+        /* Declare reference to range_expression. */                             \
+        for (auto && RANGE_FOR_EACH_range_##variable_name = range_expression;    \
+             !RANGE_FOR_EACH_done_##variable_name;                               \
+             RANGE_FOR_EACH_done_##variable_name = true)                         \
+            /* Declare variable. */                                              \
+            if (bool RANGE_FOR_EACH_seen_##variable_name = false) {              \
+            } else                                                               \
+                /* Actual for loop. */                                           \
+                for (                                                            \
+                    auto RANGE_FOR_EACH_view_##variable_name =                   \
+                        ::range::forward_view(                                   \
+                            static_cast<                                         \
+                                decltype(RANGE_FOR_EACH_range_##variable_name)>( \
+                                RANGE_FOR_EACH_range_##variable_name));          \
+                    !::range::empty(RANGE_FOR_EACH_view_##variable_name);        \
+                    RANGE_FOR_EACH_seen_##variable_name =                        \
+                        !RANGE_FOR_EACH_seen_##variable_name)                    \
+                    if (RANGE_FOR_EACH_seen_##variable_name)                     \
+                        /* "break" statement inside */                           \
+                        break;                                                   \
+                    else                                                         \
+                        /* Declare variable "variable_name". */                  \
+                        for (auto && variable_name = ::range::chop_in_place(     \
+                                 RANGE_FOR_EACH_view_##variable_name);           \
+                             !RANGE_FOR_EACH_seen_##variable_name;               \
+                             ((void) variable_name),                             \
+                                     RANGE_FOR_EACH_seen_##variable_name =       \
+                                         true)
 
 #endif  // RANGE_FOR_EACH_MACRO_HPP_INCLUDED

@@ -42,7 +42,9 @@ build:windows --features=external_include_paths
 # Bazel applies these options if either the source file's path or its label
 # matches, so exclude both the path (external/...) and the label
 # (@@<repository>//...) of files in dependencies.
-build:windows --per_file_copt=.*,-^external/,-^@@[^/]@/W4,/WX
+# (The regular expression cannot contain "@", which separates it from the
+# options, so it matches the end of the repository name before "//".)
+build:windows --per_file_copt=.*,-^external/,-[^@/]//@/W4,/WX
 # rules_cc's Windows toolchains define _WIN32_WINNT=0x0601 by default, but
 # Boost.WinAPI (used by Boost.Filesystem) defines _WIN32_WINNT=0x0A00.
 # clang-cl warns about the redefinition, so make the toolchain agree.

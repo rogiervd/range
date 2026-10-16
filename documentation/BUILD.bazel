@@ -27,9 +27,15 @@ doxygen(
     # Explicitly depend on the relevant files, as a filegroup in ../BUILD.bazel.
     srcs = ["//:doc_sources"],
     outs = ["xml"],
+    # RETURNS(...) from utility/returns.hpp generates the trailing return type
+    # and the body. Without expanding it, Doxygen does not recognise the
+    # function declarations that use it, and drops them.
+    expand_only_predef = True,
     generate_html = False,
     # The XML output is used by Breathe to generate the Sphinx documentation.
     generate_xml = True,
+    macro_expansion = True,
+    predefined = ["RETURNS(...)=;"],
     project_name = "range",
 )
 

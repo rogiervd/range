@@ -23,7 +23,7 @@ test_names = [
         local_defines = ["NB_ABORT_ON_LEAK"],
         deps = [
             "@nanobind_bazel//:nanobind",
-            "@range",
+            "@range//:python_range",
         ],
     )
     for test_name in test_names

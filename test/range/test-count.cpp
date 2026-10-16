@@ -108,7 +108,7 @@ template <
     class True, class Zero, class One, class Two, class Three, class Four,
     class Five, class Six>
 void check_finite(
-    True true_, Zero zero, One one, Two two, Three three, Four four, Five five,
+    True true_, Zero zero, One one, Two two, Three three, Four, Five five,
     Six six)
 {
     {
@@ -229,7 +229,7 @@ void check_finite_negative(
 }
 
 template <class Zero, class One, class Two, class Three, class Four>
-void check_infinite(Zero zero, One one, Two two, Three three, Four four)
+void check_infinite(Zero, One one, Two two, Three three, Four four)
 {
     auto c = count_from(one);
 

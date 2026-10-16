@@ -17,6 +17,25 @@ cc_library(
         "include/range/any_range/*.hpp",
         "include/range/std/*.hpp",
         "include/range/std/detail/*.hpp",
+    ]),
+    include_prefix = "",
+    # The prefix to be stripped from the include path.
+    strip_include_prefix = "include/",
+    visibility = ["//visibility:public"],
+    # Dependencies of this library.
+    deps = [
+        "@boost.exception",
+        "@boost.iostreams",
+        "@meta",
+        "@rime",
+        "@utility",
+    ],
+)
+
+cc_library(
+    name = "range_python",
+    # Headers that a user of this library can include.
+    hdrs = glob([
         "include/range/python/*.hpp",
     ]),
     include_prefix = "",
@@ -25,10 +44,8 @@ cc_library(
     visibility = ["//visibility:public"],
     # Dependencies of this library.
     deps = [
-        "@boost.iostreams",  # TODO can we make this more specific?
-        "@meta",
-        "@rime",
-        "@utility",
+        "//:range",
+        "@nanobind_bazel//:nanobind",
     ],
 )
 

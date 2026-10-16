@@ -467,8 +467,10 @@ namespace tuple_detail {
                   typename result_of<callable::drop(
                       Range, direction::front)>::type>> {};
 
-        static constexpr bool is_copy_assignable = rest_type::is_copy_assignable
-            && std::is_assignable<First &, First const &>::value;
+        static constexpr bool is_copy_assignable =
+            rest_type::is_copy_assignable
+            && std::is_assignable<
+                First &, typename std::add_const<First>::type &>::value;
         static constexpr bool is_move_assignable = rest_type::is_move_assignable
             && std::is_assignable<First &, First &&>::value;
 

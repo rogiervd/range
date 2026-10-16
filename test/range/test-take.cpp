@@ -50,9 +50,9 @@ BOOST_AUTO_TEST_CASE(test_range_take_vector_runtime)
         // The obviously sensible implementation of take uses an iterator_range
         // for this:
         auto view = range::view(reference);
-        auto first = take(reference, 3);
-        BOOST_MPL_ASSERT((std::is_same<decltype(view), decltype(first)>) );
-        BOOST_CHECK(empty(first));
+        auto taken = take(reference, 3);
+        BOOST_MPL_ASSERT((std::is_same<decltype(view), decltype(taken)>) );
+        BOOST_CHECK(empty(taken));
     }
 
     // HasSize, HasBack, HasDropConstantN, HasDropRuntimeN.
@@ -190,16 +190,16 @@ BOOST_AUTO_TEST_CASE(test_range_take_list_runtime)
         // Unlike in the case of std::vector, take can't return an
         // iterator_range here:
         auto view = range::view(l);
-        auto first = take(l, 3);
-        BOOST_MPL_ASSERT_NOT((std::is_same<decltype(view), decltype(first)>) );
+        auto taken = take(l, 3);
+        BOOST_MPL_ASSERT_NOT((std::is_same<decltype(view), decltype(taken)>) );
         static_assert(
-            range::has<range::callable::first(decltype(first))>::value, "");
-        RIME_CHECK_EQUAL(empty(first), true);
+            range::has<range::callable::first(decltype(taken))>::value, "");
+        RIME_CHECK_EQUAL(empty(taken), true);
 
         // Second take: the type does not change.
-        auto first_2 = take(first, 2);
-        BOOST_MPL_ASSERT((std::is_same<decltype(first), decltype(first_2)>) );
-        RIME_CHECK_EQUAL(empty(first_2), true);
+        auto taken_2 = take(taken, 2);
+        BOOST_MPL_ASSERT((std::is_same<decltype(taken), decltype(taken_2)>) );
+        RIME_CHECK_EQUAL(empty(taken_2), true);
     }
 
     // HasSize, HasBack, HasDropConstantN, HasDropRuntimeN.

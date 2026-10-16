@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(scan_unique_range)
         RIME_CHECK_EQUAL(empty(acc), false);
         BOOST_CHECK_EQUAL(size(acc), 3u);
 
-        auto first = chop_in_place(acc);
-        RIME_CHECK_EQUAL(first, 0);
+        auto element = chop_in_place(acc);
+        RIME_CHECK_EQUAL(element, 0);
         BOOST_CHECK_EQUAL(size(acc), 2u);
 
         auto chopped = chop(std::move(acc));

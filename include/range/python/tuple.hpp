@@ -77,9 +77,10 @@ namespace range { namespace python {
             nanobind::detail::cleanup_list *)
         {
             typedef decltype(range::size(tuple)) size_type;
-            static auto constexpr size = size_type::value;
+            static auto constexpr element_count = size_type::value;
             return detail::construct_tuple(
-                       range::view(tuple), typename meta::count_c<size>::type())
+                       range::view(tuple),
+                       typename meta::count_c<element_count>::type())
                 .release();
         }
     };

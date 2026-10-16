@@ -128,7 +128,7 @@ namespace range { namespace any_range_implementation {
                 Element, new_capability_keys, typename Base::underlying_type>
                 new_implementation_type;
 
-            return utility::make_unique<new_implementation_type>(
+            return std::make_unique<new_implementation_type>(
                 this->underlying());
         }
     };
@@ -147,7 +147,7 @@ namespace range { namespace any_range_implementation {
 
         virtual typename Base::interface_ptr copy() const
         {
-            return utility::make_unique<typename Base::implementation_type>(
+            return std::make_unique<typename Base::implementation_type>(
                 this->underlying());
         }
     };
@@ -282,7 +282,7 @@ namespace range { namespace any_range_implementation {
 
             typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
-            return utility::make_unique<new_implementation_type>(
+            return std::make_unique<new_implementation_type>(
                 range::drop(this->underlying(), direction));
         }
 
@@ -325,7 +325,7 @@ namespace range { namespace any_range_implementation {
                 new_underlying_type;
             typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
-            return utility::make_unique<new_implementation_type>(
+            return std::make_unique<new_implementation_type>(
                 range::drop(this->underlying(), increment, direction));
         }
 
@@ -386,8 +386,7 @@ namespace range { namespace any_range_implementation {
             typedef typename Base::template implementation_for<
                 new_underlying_type>::type new_implementation_type;
             interface_ptr discardable = std::move(this_);
-            this_ =
-                utility::make_unique<new_implementation_type>(c.move_rest());
+            this_ = std::make_unique<new_implementation_type>(c.move_rest());
             return chop_destructive_result(
                 c.move_first(), std::move(discardable));
         }

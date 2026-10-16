@@ -38,6 +38,9 @@ cc_library(
     hdrs = glob([
         "include/range/python/*.hpp",
     ]),
+    # Allow each header to be compiled on its own, to check that it includes
+    # everything it needs, by passing Bazel --process_headers_in_dependencies.
+    features = ["parse_headers"],
     include_prefix = "",
     # The prefix to be stripped from the include path.
     strip_include_prefix = "include/",

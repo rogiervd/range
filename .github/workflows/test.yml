@@ -12,6 +12,9 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      # Let all jobs finish, so that a failure on one platform does not hide
+      # the results on others.
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-26.04, ubuntu-26.04-arm, macos-26]
         compiler: [gcc, clang]

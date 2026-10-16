@@ -38,12 +38,15 @@ test_names = [
             "test-" + test_name + ".py",
         ],
         args = ["$(rootpath test-" + test_name + ".py)"],
-        data = ["test-" + test_name + ".py"],
-        main = "pytest_main.py",
-        deps = [
+        # The extension is data rather than a dependency: on Windows, it is a
+        # .pyd file, which py_test does not accept in deps.
+        # pytest_main.py adds this directory to the Python path.
+        data = [
+            "test-" + test_name + ".py",
             test_name + "_example",
-            "@range_pypi//pytest",
         ],
+        main = "pytest_main.py",
+        deps = ["@range_pypi//pytest"],
     )
     for test_name in test_names
 ]

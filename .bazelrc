@@ -41,12 +41,15 @@ build:windows --features=external_include_paths
 # only, not for dependencies.
 # Bazel applies these options if either the source file's path or its label
 # matches, so exclude both the path (external/...) and the label
-# (@@<repository>+//...) of files in dependencies.
-build:windows --per_file_copt=.*,-^external/,-[+]//@/W4,/WX
+# (@@<repository>//...) of files in dependencies.
+build:windows --per_file_copt=.*,-^external/,-^@@[^/]@/W4,/WX
 # rules_cc's Windows toolchains define _WIN32_WINNT=0x0601 by default, but
 # Boost.WinAPI (used by Boost.Filesystem) defines _WIN32_WINNT=0x0A00.
 # clang-cl warns about the redefinition, so make the toolchain agree.
 build:windows --repo_env=BAZEL_WIN32_WINNT=/D_WIN32_WINNT=0x0A00
+# Bazel does not create runfiles trees on Windows by default, but the tests
+# expect their data files (and the Python tests their extensions) there.
+build:windows --enable_runfiles
 
 # GCC Configuration
 build:gcc --repo_env=CC=gcc

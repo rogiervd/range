@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(add)
     }
 
     {
-        tuple<int, short> v(27, 32);
+        tuple<int, short> v(27, short(32));
 
         for_each(v, c);
         BOOST_CHECK_EQUAL(c.number, 3);
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(unrolled)
     }
     // Tuple with 2 elements.
     {
-        tuple<double, short> t(87.5, 43);
+        tuple<double, short> t(87.5, short(43));
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 2u);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(unrolled)
     }
     // Tuple with 3 elements.
     {
-        tuple<double, short, bool> const t(87.5, 43, true);
+        tuple<double, short, bool> const t(87.5, short(43), true);
         collect_any c;
         for_each(t, range::back, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 3u);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(unrolled)
     }
     // Tuple with 4 elements.
     {
-        tuple<double, short, bool, int> t(87.5, 43, true, -5);
+        tuple<double, short, bool, int> t(87.5, short(43), true, -5);
         collect_any c;
         for_each(t, range::front, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 4u);
@@ -161,7 +161,8 @@ BOOST_AUTO_TEST_CASE(unrolled)
     }
     // Tuple with 5 elements.
     {
-        tuple<double, short, bool, int, unsigned> t(87.5, 43, true, -5, 900u);
+        tuple<double, short, bool, int, unsigned> t(
+            87.5, short(43), true, -5, 900u);
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 5u);
@@ -174,7 +175,7 @@ BOOST_AUTO_TEST_CASE(unrolled)
     // Tuple with 8 elements.
     {
         tuple<double, short, bool, int, unsigned, unsigned short, float, char>
-            t(87.5, 43, true, -5, 900u, 30u, 4.5, 'A');
+            t(87.5, short(43), true, -5, 900u, (unsigned short) 30u, 4.5f, 'A');
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 8u);
@@ -192,7 +193,8 @@ BOOST_AUTO_TEST_CASE(unrolled)
         tuple<
             double, short, bool, int, unsigned, unsigned short, float, char,
             unsigned char>
-            t(87.5, 43, true, -5, 900u, 30u, 4.5, 'A', 'q');
+            t(87.5, short(43), true, -5, 900u, (unsigned short) 30u, 4.5f, 'A',
+              'q');
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 9u);

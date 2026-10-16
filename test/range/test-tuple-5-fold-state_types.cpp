@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE(test_range_tuple_fold_state_types)
 
 BOOST_AUTO_TEST_CASE(test_fold_const_state)
 {
-    range::tuple<int, short, int> v(1, 2, 3);
+    range::tuple<int, short, int> v(1, short(2), 3);
     BOOST_MPL_ASSERT((std::is_same<
                       decltype(fold(int_holder(), v, add_return_const())),
                       int_holder const>) );
@@ -72,7 +72,7 @@ struct add_unassignable
 
 BOOST_AUTO_TEST_CASE(test_fold_unassignable_state)
 {
-    range::tuple<int, short, int> v(1, 2, 3);
+    range::tuple<int, short, int> v(1, short(2), 3);
     BOOST_CHECK(fold(unassignable(0), v, add_unassignable()).value == 6);
 }
 
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_fold_lvalue_state)
 {
     int i = 7;
 
-    range::tuple<int, short, int> v(1, 2, 3);
+    range::tuple<int, short, int> v(1, short(2), 3);
 
     BOOST_MPL_ASSERT(
         (std::is_same<decltype(fold(i, v, return_right())), int &>) );
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_fold_rvalue_state)
 {
     int i = 7;
 
-    range::tuple<int, short, int> v(1, 2, 3);
+    range::tuple<int, short, int> v(1, short(2), 3);
 
     BOOST_MPL_ASSERT(
         (std::is_same<

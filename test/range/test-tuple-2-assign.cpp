@@ -420,12 +420,12 @@ BOOST_AUTO_TEST_CASE(tuple_assign_from_range_more)
         float f = 5.5;
         tuple<int &, float &> tied(i, f);
 
-        std::tuple<int, float> original(101, 77.5);
+        std::tuple<int, float> original(101, 77.5f);
         tied = original;
         BOOST_CHECK_EQUAL(i, 101);
         BOOST_CHECK_EQUAL(f, 77.5);
 
-        std::pair<int, float> original2(720, -3.5);
+        std::pair<int, float> original2(720, -3.5f);
         tied = original2;
         BOOST_CHECK_EQUAL(i, 720);
         BOOST_CHECK_EQUAL(f, -3.5);
@@ -470,7 +470,7 @@ struct product_type
 
 BOOST_AUTO_TEST_CASE(contained_assign)
 {
-    product_type p1(5, 6.7);
+    product_type p1(5, 6.7f);
 
     product_type p2(12, 13.5);
     product_type p3(17, 18.5);

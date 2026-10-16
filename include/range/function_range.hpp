@@ -23,7 +23,11 @@ public:
         std::is_function<Function>, typename std::add_pointer<Function>::type,
         Function>::type function_type;
 
-    explicit function_range(Function const & function) : function_(function) {}
+    // Function may be a function type, to which "const" cannot be applied
+    // directly without a warning (std::add_const leaves it unchanged).
+    explicit function_range(typename std::add_const<Function>::type & function)
+    : function_(function)
+    {}
     explicit function_range(Function && function)
     : function_(std::forward<Function>(function))
     {}

@@ -60,6 +60,9 @@ sphinx_docs_library(
 sphinx_docs(
     name = "documentation",
     config = "conf.py",
+    # Treat Sphinx warnings (including Breathe's, such as unresolved
+    # references into the Doxygen output) as errors.
+    extra_opts = ["--fail-on-warning"],
     formats = ["html"],
     sphinx = ":sphinx-build",
     deps = [

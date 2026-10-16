@@ -82,7 +82,7 @@ namespace callable {
                 typename std::conditional<Forward, Range &&, Range>::type
                     operator()(
                         overload_order<16> *, Range && range,
-                        Directions const &... directions) const
+                        Directions const &...) const
                 {
                     return std::forward<Range>(range);
                 }

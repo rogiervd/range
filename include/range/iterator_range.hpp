@@ -381,7 +381,7 @@ static constexpr auto make_move_iterator_range =
 namespace iterator_range_operation {
 
     template <class IteratorTag, class Range> inline auto implement_chop(
-        iterator_range_tag<IteratorTag> const & tag, Range && range,
+        iterator_range_tag<IteratorTag> const &, Range && range,
         direction::front const & direction)
         RETURNS(
             helper::chop_by_chop_in_place(

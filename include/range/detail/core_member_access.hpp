@@ -5,6 +5,10 @@
 #ifndef RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
 
+#include <utility>
+
+#include "utility/returns.hpp"
+
 namespace range { namespace helper {
 
     class member_access

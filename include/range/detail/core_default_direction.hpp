@@ -7,12 +7,12 @@
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
-
+#include "../direction.hpp"
 #include "core_base.hpp"
 #include "core_member_access.hpp"
+#include "core_tag.hpp"
 
 namespace range {
 

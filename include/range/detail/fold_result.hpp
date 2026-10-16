@@ -5,22 +5,17 @@
 #ifndef RANGE_DETAIL_FOLD_RESULT_HPP_INCLUDED
 #define RANGE_DETAIL_FOLD_RESULT_HPP_INCLUDED
 
-#include <type_traits>
-#include <utility>
-
-#include "boost/mpl/bool.hpp"
+#include <boost/mpl/not.hpp>
 #include "boost/mpl/eval_if.hpp"
-#include "boost/mpl/identity.hpp"
-#include "boost/mpl/or.hpp"
 #include "boost/mpl/placeholders.hpp"
 
+#include "meta/contains.hpp"
 #include "meta/filter.hpp"
+#include "meta/fold.hpp"
 #include "meta/range.hpp"
 #include "meta/set.hpp"
 #include "meta/transform.hpp"
-
-#include "rime/core.hpp"
-#include "rime/variant.hpp"
+#include "meta/vector.hpp"
 
 #include "range/core.hpp"
 

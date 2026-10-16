@@ -12,6 +12,8 @@ iterator_range.
 
 #include "rime/enable_if_constant.hpp"
 
+#include "utility/returns.hpp"
+
 #include "range/core.hpp"
 #include "range/heavyweight.hpp"
 #include "range/iterator_range.hpp"

@@ -5,13 +5,16 @@
 #ifndef RANGE_BUFFER_HPP_INCLUDED
 #define RANGE_BUFFER_HPP_INCLUDED
 
+#include <cassert>
+#include <cstddef>
 #include <memory>
-#include <new>
+#include <new>  // IWYU pragma: keep
 #include <type_traits>
 
-#include "utility/disable_if_same.hpp"
+#include "rime/core.hpp"
+
 #include "utility/pointer_policy.hpp"
-#include "utility/returns.hpp"
+#include "utility/shared.hpp"
 #include "utility/unique_ptr.hpp"
 
 #include "core.hpp"

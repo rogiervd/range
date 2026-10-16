@@ -13,13 +13,6 @@ sequences.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
-
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/identity.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
 
 #include "utility/overload_order.hpp"
 #include "utility/returns.hpp"

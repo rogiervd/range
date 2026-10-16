@@ -11,7 +11,9 @@ This includes \c \<array>.
 #define RANGE_STD_ARRAY_HPP_INCLUDED
 
 #include <array>
+#include <cstddef>
 
+#include "range/detail/core_tag.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

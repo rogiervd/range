@@ -10,17 +10,21 @@ range.
 #ifndef RANGE_DETAIL_CORE_AT_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_AT_HPP_INCLUDED
 
+#include <cstddef>
+#include <type_traits>
 #include <utility>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/if.hpp>
+#include "rime/core.hpp"
 
-#include "meta/vector.hpp"
+#include "utility/returns.hpp"
 
+#include "../direction.hpp"
 #include "core_base.hpp"
+#include "core_default_direction.hpp"
 #include "core_drop.hpp"
 #include "core_first.hpp"
 #include "core_member_access.hpp"
+#include "core_tag.hpp"
 
 namespace range {
 

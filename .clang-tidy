@@ -1,0 +1,13 @@
+# Check that each file directly includes the headers that declare what it
+# uses, and does not include headers that it does not use.
+Checks: >
+  -*,
+  misc-include-cleaner,
+
+WarningsAsErrors: "*"
+
+CheckOptions:
+  # boost/mpl/bool_fwd.hpp declares true_ and false_, but using them (e.g. as
+  # a base class) needs boost/mpl/bool.hpp, which is included instead, with
+  # "IWYU pragma: keep".
+  misc-include-cleaner.IgnoreHeaders: "boost/mpl/bool_fwd\\.hpp"

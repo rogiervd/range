@@ -18,6 +18,7 @@ Expose views as Python iterators.
 #include "utility/disable_if_same.hpp"
 
 #include "range/any_range.hpp"
+#include "range/any_range/capability.hpp"
 #include "range/core.hpp"
 #include "range/transform.hpp"
 

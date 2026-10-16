@@ -5,6 +5,8 @@
 #ifndef RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED
 #define RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED
 
+#include <boost/mpl/bool.hpp>  // IWYU pragma: keep
+
 #include <meta/vector.hpp>
 
 namespace range { namespace detail {

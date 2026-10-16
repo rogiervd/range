@@ -13,28 +13,10 @@ too.
 #ifndef RANGE_DETAIL_CORE_BASE_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_BASE_HPP_INCLUDED
 
-#include <type_traits>
-
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/identity.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
-
-#include <boost/utility/enable_if.hpp>
-
-#include "meta/transform.hpp"
-#include "meta/vector.hpp"
-
-#include "rime/core.hpp"
-
-#include "utility/nested_callable.hpp"
-#include "utility/returns.hpp"
+#include "utility/overload_order.hpp"
 
 #include "../direction.hpp"
 #include "callable_traits.hpp"
-
-#include "core_tag.hpp"
 
 namespace range {
 

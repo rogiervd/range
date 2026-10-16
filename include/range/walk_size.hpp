@@ -5,7 +5,10 @@
 #ifndef RANGE_WALK_SIZE_HPP_INCLUDED
 #define RANGE_WALK_SIZE_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include <cstddef>
+#include <utility>
+
+#include <boost/core/enable_if.hpp>
 
 #include "core.hpp"
 

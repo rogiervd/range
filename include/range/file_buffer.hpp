@@ -5,15 +5,25 @@
 #ifndef RANGE_FILE_BUFFER_HPP_INCLUDED
 #define RANGE_FILE_BUFFER_HPP_INCLUDED
 
+#include <cerrno>
 #include <cstdio>
+#include <ios>
+#include <memory>
+#include <streambuf>
+#include <string>
+#include <utility>
 
 #include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/stream.hpp>
 
 #include <boost/exception/errinfo_errno.hpp>
 #include <boost/exception/errinfo_file_name.hpp>
+#include <boost/exception/exception.hpp>
 #include <boost/exception/info.hpp>
+#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+
+#include "utility/unique_ptr.hpp"
 
 #include "buffer.hpp"
 

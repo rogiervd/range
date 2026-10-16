@@ -12,6 +12,7 @@ This includes \<tuple>.
 #define RANGE_STD_TUPLE_HPP_INCLUDED
 
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include <boost/mpl/pair.hpp>
@@ -20,6 +21,10 @@ This includes \<tuple>.
 #include "meta/enumerate.hpp"
 #include "meta/transform.hpp"
 #include "meta/vector.hpp"
+
+#include "rime/core.hpp"
+
+#include "utility/returns.hpp"
 
 #include "range/core.hpp"
 #include "range/heavyweight.hpp"

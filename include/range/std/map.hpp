@@ -12,6 +12,7 @@ This includes \c \<map>.
 
 #include <map>
 
+#include "range/detail/core_tag.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

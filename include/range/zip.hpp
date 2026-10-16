@@ -8,9 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/or.hpp>
+#include <boost/core/enable_if.hpp>
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"

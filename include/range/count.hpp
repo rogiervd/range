@@ -5,10 +5,15 @@
 #ifndef RANGE_COUNT_HPP_INCLUDED
 #define RANGE_COUNT_HPP_INCLUDED
 
-#include "rime/always.hpp"
+#include <cstddef>
+
+#include <boost/core/enable_if.hpp>
+
 #include "rime/assert.hpp"
 #include "rime/cast.hpp"
 #include "rime/core.hpp"
+
+#include "utility/returns.hpp"
 
 #include "core.hpp"
 

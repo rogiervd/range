@@ -18,15 +18,21 @@ implementation linearly inherits from all of them.
 #ifndef RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
 #define RANGE_ANY_RANGE_IMPLEMENTATION_HPP_INCLUDED
 
+#include <cstddef>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/mpl/placeholders.hpp>
 
 #include "utility/unique_ptr.hpp"
 
 #include "meta/fold.hpp"
+#include "meta/map.hpp"
 #include "meta/range.hpp"
+
+#include "rime/core.hpp"
 
 #include "capability.hpp"
 #include "interface.hpp"

@@ -34,6 +34,10 @@ build:macos --cxxopt=-Wall
 # Windows uses MSVC (cl.exe) by default, or clang-cl with --config=clang-cl.
 # Both take MSVC-style flags.
 build:windows --cxxopt=/std:c++17
+# Follow the C++ standard more closely than MSVC does by default.
+# This includes two-phase name lookup in templates, and treating a cast to
+# the same type as producing an rvalue (/Zc:rvalueCast).
+build:windows --cxxopt=/permissive-
 # Pass include paths of dependencies with /external:I, and do not report
 # warnings in those headers.
 build:windows --features=external_include_paths

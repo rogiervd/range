@@ -655,8 +655,8 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
             BOOST_CHECK(empty(chopped.rest()));
         }
         {
-            auto first = chop_in_place(r, back);
-            BOOST_CHECK_EQUAL(first, 3);
+            auto element = chop_in_place(r, back);
+            BOOST_CHECK_EQUAL(element, 3);
             BOOST_CHECK(empty(r));
         }
 
@@ -677,8 +677,8 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
             BOOST_CHECK(empty(chopped.rest()));
         }
         {
-            auto first = chop_in_place(b);
-            BOOST_CHECK_EQUAL(first, 4.3);
+            auto element = chop_in_place(b);
+            BOOST_CHECK_EQUAL(element, 4.3);
             BOOST_CHECK(empty(b));
         }
 
@@ -699,8 +699,8 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
             BOOST_CHECK(empty(chopped.rest()));
         }
         {
-            auto first = chop_in_place(cb);
-            BOOST_CHECK_EQUAL(first, 4.3);
+            auto element = chop_in_place(cb);
+            BOOST_CHECK_EQUAL(element, 4.3);
             BOOST_CHECK(empty(cb));
         }
 
@@ -719,8 +719,8 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
             BOOST_CHECK(empty(chopped.rest()));
         }
         {
-            auto first = chop_in_place(f);
-            BOOST_CHECK_EQUAL(first, '9');
+            auto element = chop_in_place(f);
+            BOOST_CHECK_EQUAL(element, '9');
             BOOST_CHECK(empty(f));
         }
 

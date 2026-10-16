@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
 name: Pre-commit checks
 on:
   push:
@@ -7,8 +10,8 @@ on:
   workflow_dispatch:
 jobs:
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
       - uses: pre-commit/action@v3.0.1

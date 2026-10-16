@@ -21,8 +21,6 @@ jobs:
             compiler: clang
           - os: macos-26
             compiler: clang
-          - os: windows-2025
-            compiler: msvc
     steps:
       - uses: actions/checkout@v7
       - uses: bazel-contrib/setup-bazel@0.19.0

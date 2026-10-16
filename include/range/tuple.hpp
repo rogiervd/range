@@ -1221,9 +1221,13 @@ namespace tuple_detail {
             Function && function, meta::size_t_vector<Indices...>) const
         {
             call_function<Function> call(std::forward<Function>(function));
-            int dummy[] = {call(
-                extract<((tuple_size - begin_position - 1) - Indices)>()(
-                    tuple()))...};
+            // The leading 0 keeps the array from having size zero, which is
+            // an error, if there are no indices.
+            int dummy[] = {
+                0,
+                call(
+                    extract<((tuple_size - begin_position - 1) - Indices)>()(
+                        tuple()))...};
             (void) dummy;
         }
 

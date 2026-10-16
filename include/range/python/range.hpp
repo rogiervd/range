@@ -105,6 +105,13 @@ namespace python { namespace detail {
             swap(this->first_, that.first_);
         }
 
+        // Unlike the copy constructor, assignment copies the iterator and the
+        // cached first element, so that both objects refer to the same
+        // Python iterator.
+        // (This is what the implicit assignment operator does; declaring it
+        // explicitly avoids a warning about it being deprecated.)
+        python_range_base & operator=(python_range_base const &) = default;
+
     private:
         // Both the iterator and the cached first element can be null (invalid),
         // which is different from being None.
@@ -184,6 +191,8 @@ public:
     so that python_range can be copied where a copy is syntactically needed.
     */
     python_range(python_range const & that) = default;
+
+    python_range & operator=(python_range const &) = default;
 
 private:
     friend nanobind::object python::detail::next_iterator<python_range>(

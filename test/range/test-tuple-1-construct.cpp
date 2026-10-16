@@ -99,10 +99,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_test_test)
 
 BOOST_AUTO_TEST_CASE(tuple_construct_default)
 {
-    static_assert(utility::is_default_constructible<tuple<>>::value, "");
-    static_assert(utility::is_default_constructible<tuple<source>>::value, "");
+    static_assert(std::is_default_constructible<tuple<>>::value, "");
+    static_assert(std::is_default_constructible<tuple<source>>::value, "");
     static_assert(
-        utility::is_default_constructible<tuple<source, source>>::value, "");
+        std::is_default_constructible<tuple<source, source>>::value, "");
 
     {
         tuple<> t;
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
                 c.counts(), tracked_counts(1, 0, 1, 0, 0, 0, 0, 0));
         }
         {
-            auto i = utility::make_unique<int>(7);
+            auto i = std::make_unique<int>(7);
             tuple<std::unique_ptr<int>> t(std::move(i));
             BOOST_CHECK_EQUAL(*first(t), 7);
         }
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(copy_construction)
     }
     {
         // Move-construct from noncopyable.
-        tuple<std::unique_ptr<int>> t(utility::make_unique<int>(55));
+        tuple<std::unique_ptr<int>> t(std::make_unique<int>(55));
 
         // This causes a compile error:
         // tuple <std::unique_ptr <int>> t_copy (t);

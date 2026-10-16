@@ -20,7 +20,6 @@
 #include "range/std/vector.hpp"
 #include "range/take.hpp"
 
-#include "utility/is_assignable.hpp"
 #include "utility/test/tracked.hpp"
 #include "utility/unique_ptr.hpp"
 
@@ -86,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple)
     }
     // Noncopyable: must move.
     {
-        auto i = utility::make_unique<int>(11);
+        auto i = std::make_unique<int>(11);
         auto t = make_tuple(std::move(i));
         BOOST_MPL_ASSERT(
             (std::is_same<decltype(t), range::tuple<std::unique_ptr<int>>>) );

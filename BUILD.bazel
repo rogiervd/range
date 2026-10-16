@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_python//python/uv:lock.bzl", "lock")
 
 # The main target that should be used by other modules that want to depend on
 # this library.
@@ -38,4 +39,16 @@ filegroup(
     visibility = ["//documentation:__pkg__"],
 )
 
-exports_files(["requirements.txt"])
+# Python requirements, used by pip.parse in MODULE.bazel.
+# To regenerate requirements.txt from requirements.in, run
+#   bazel run //:requirements
+lock(
+    name = "requirements_lock",
+    srcs = ["requirements.in"],
+    out = "requirements.txt",
+)
+
+alias(
+    name = "requirements",
+    actual = ":requirements_lock.update",
+)

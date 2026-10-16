@@ -19,7 +19,6 @@ It is often useful to pass in Python iterators as arguments to a C++ function.
 TODO give a complete example.
 
 .. doxygenclass:: range::python_range
-.. doxygenclass:: range::python::convert_object_to_range
 
 Exposing a C++ range as a Python iterator
 =========================================
@@ -31,10 +30,9 @@ TODO give a complete example.
 
 .. doxygenclass:: range::python::python_iterator
 .. doxygenfunction:: range::python::initialise_iterator
-.. doxygenfunction:: range::python::register_view
+.. doxygenstruct:: range::python::view_caster
 
-.. doxygenstruct:: range::python::return_view
-.. doxygenstruct:: range::python::return_view_of_internal_reference
+.. doxygenfunction:: range::python::return_view(Result (*function)(Arguments...))
 
 Exposing a C++ range as a Python tuple
 ======================================
@@ -44,4 +42,4 @@ This can be used for any C++ range that has a fixed number of elements.
 
 TODO give a complete example.
 
-.. doxygenfunction:: range::python::register_tuple
+.. doxygenstruct:: range::python::tuple_caster

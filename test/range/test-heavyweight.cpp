@@ -35,7 +35,7 @@ forgotten_to_define_direction implement_default_direction(
     range::heavyweight::heavyweight_tag, weird_heavyweight_count);
 
 inline weird_count implement_make_view(
-    weird_heavyweight_count_tag, bool, weird_heavyweight_count,
+    weird_heavyweight_count_tag, bool /* once */, weird_heavyweight_count,
     weird_direction const &)
 {
     return weird_count();
@@ -68,7 +68,8 @@ template <
     class Result =
         range::iterator_range<std::move_iterator<typename Container::iterator>>>
 inline Result view_stl_container(
-    rime::true_type, Container && container, utility::overload_order<1> *)
+    rime::true_type /* once */, Container && container,
+    utility::overload_order<1> *)
 {
     return Result(
         std::move_iterator<typename Container::iterator>(container.begin()),
@@ -80,7 +81,7 @@ template <
     class Container,
     class Result = range::iterator_range<typename Container::iterator>>
 inline Result view_stl_container(
-    bool, Container & container, utility::overload_order<2> *)
+    bool /* once */, Container & container, utility::overload_order<2> *)
 {
     return Result(container.begin(), container.end());
 }
@@ -90,7 +91,7 @@ template <
     class Container,
     class Result = range::iterator_range<typename Container::const_iterator>>
 inline Result view_stl_container(
-    bool, Container const & container, utility::overload_order<3> *)
+    bool /* once */, Container const & container, utility::overload_order<3> *)
 {
     return Result(container.begin(), container.end());
 }

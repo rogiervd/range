@@ -143,12 +143,12 @@ namespace range { namespace python {
         }
 
         static nanobind::handle from_cpp(
-            View const & source, nanobind::rv_policy,
+            View const & range_view, nanobind::rv_policy,
             nanobind::detail::cleanup_list *)
         {
             // Make a typed iterator, owned by Python.
             return nanobind::cast(
-                       python_iterator(range::view(source)),
+                       python_iterator(range::view(range_view)),
                        nanobind::rv_policy::move)
                 .release();
         }

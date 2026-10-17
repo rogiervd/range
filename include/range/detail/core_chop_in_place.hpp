@@ -15,6 +15,11 @@
 #include "utility/storage.hpp"
 
 #include "core_base.hpp"
+#include "core_chop.hpp"
+#include "core_default_direction.hpp"
+#include "core_drop.hpp"
+#include "core_first.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 

@@ -358,12 +358,12 @@ public:
     /** \brief
     Destruct the array up to end_.
     */
-    virtual ~internal_element_producer()
+    ~internal_element_producer() override
     {
         destruct_elements(std::is_trivially_destructible<Element>());
     }
 
-    virtual Element const * first() const { return memory(); }
+    Element const * first() const override { return memory(); }
 };
 
 namespace buffer_detail {
@@ -379,7 +379,7 @@ namespace buffer_detail {
         std::unique_ptr<Range> range_;
 
     protected:
-        virtual pointer get_next()
+        pointer get_next() override
         {
             return pointer::template construct<range_element_producer>(
                 std::move(range_));

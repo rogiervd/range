@@ -188,18 +188,17 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
         RIME_CHECK_EQUAL(first(c).content(), 7);
         RIME_CHECK_EQUAL(first(c, back).content(), 45);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 2, 0, 0, 0, 0, 2));
-        auto once_view = view_once(std::move(c));
+        auto v = view_once(std::move(c));
+        BOOST_MPL_ASSERT((std::is_same<decltype(first(v)), tracked<int> &&>) );
         BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(once_view)), tracked<int> &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(once_view, back)), tracked<int> &&>) );
+            (std::is_same<decltype(first(v, back)), tracked<int> &&>) );
 
         // The elements should be moved out.
-        tracked<int> i = at(once_view, 0);
+        tracked<int> i = at(v, 0);
         BOOST_CHECK_EQUAL(i.content(), 7);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 3, 0, 0, 0, 0, 2));
 
-        tracked<int> d = at(once_view, 1);
+        tracked<int> d = at(v, 1);
         BOOST_CHECK_EQUAL(d.content(), 45);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 4, 0, 0, 0, 0, 2));
     }

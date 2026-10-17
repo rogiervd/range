@@ -324,9 +324,9 @@ private:
     typename std::aligned_storage<sizeof(Element), alignof(Element)>::type
         memory_[buffer_size];
 
-    void destruct_elements(rime::true_type) {}
+    void destruct_elements(rime::true_type /* trivial */) {}
 
-    void destruct_elements(rime::false_type)
+    void destruct_elements(rime::false_type /* trivial */)
     {
         Element * current = memory();
         while (current != this->end_) {

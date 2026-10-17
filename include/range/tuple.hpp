@@ -1256,8 +1256,8 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> const &>>
     inline Result implement_make_view(
-        tuple_tag, bool, tuple<Types...> const & tuple, helper::front_or_back,
-        helper::front_or_back = helper::front_or_back())
+        tuple_tag, bool /* once */, tuple<Types...> const & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
     }
@@ -1268,8 +1268,8 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &>>
     inline Result implement_make_view(
-        tuple_tag, bool, tuple<Types...> & tuple, helper::front_or_back,
-        helper::front_or_back = helper::front_or_back())
+        tuple_tag, bool /* once */, tuple<Types...> & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
     }
@@ -1280,7 +1280,7 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &&>>
     inline Result implement_make_view(
-        tuple_tag, rime::true_type, tuple<Types...> && tuple,
+        tuple_tag, rime::true_type /* once */, tuple<Types...> && tuple,
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(std::move(tuple));

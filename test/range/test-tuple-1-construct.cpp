@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
         tracked_registry c;
         {
             tuple<tracked<int>, float, tracked<std::string>> t(
-                tracked<int>(c, 45), .475, tracked<std::string>(c, "Hello"));
+                tracked<int>(c, 45), .475f, tracked<std::string>(c, "Hello"));
             BOOST_CHECK_EQUAL(
                 c.counts(), tracked_counts(2, 0, 2, 0, 0, 0, 0, 2));
             BOOST_CHECK_EQUAL(first(t).content(), 45);
@@ -1273,7 +1273,7 @@ BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_two)
         BOOST_CHECK_EQUAL(first(t2), 7.25);
         BOOST_CHECK_EQUAL(first(drop(t2)), 9.5);
 
-        v.push_back(10.1);
+        v.push_back(10.1f);
         BOOST_CHECK_THROW((tuple<float, double>(v)), size_mismatch);
     }
 }

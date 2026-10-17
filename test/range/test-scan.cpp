@@ -49,7 +49,7 @@ struct plus
 struct reference_right
 {
     template <class Left, class Right>
-    Right & operator()(Left const & left, Right & right) const
+    Right & operator()(Left const &, Right & right) const
     {
         return right;
     }
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(scan_unique_range)
         RIME_CHECK_EQUAL(empty(acc), false);
         BOOST_CHECK_EQUAL(size(acc), 3u);
 
-        auto first = chop_in_place(acc);
-        RIME_CHECK_EQUAL(first, 0);
+        auto element = chop_in_place(acc);
+        RIME_CHECK_EQUAL(element, 0);
         BOOST_CHECK_EQUAL(size(acc), 2u);
 
         auto chopped = chop(std::move(acc));

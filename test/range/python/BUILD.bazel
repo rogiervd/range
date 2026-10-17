@@ -40,6 +40,9 @@ test_names = [
         args = ["$(rootpath test-" + test_name + ".py)"],
         data = ["test-" + test_name + ".py"],
         main = "pytest_main.py",
+        # Do not run these tests with sanitizers, because symbols can't be found
+        # in the Python extension.
+        tags = ["no-sanitizers"],
         deps = [
             test_name + "_example",
             "@range_pypi//pytest",

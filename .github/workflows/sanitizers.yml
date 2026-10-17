@@ -25,4 +25,4 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
-      - run: CC=clang CXX=clang++ bazel test --keep_going //test/... --test_output=errors --config ${{ matrix.sanitizer }}
+      - run: CC=clang CXX=clang++ bazel test --keep_going //test/... --test_output=errors --config ${{ matrix.sanitizer }} --test_tag_filters=-no-sanitizers

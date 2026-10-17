@@ -28,6 +28,9 @@ Represent a Python iterable as a range.
 Python iterables are such things as lists, tuples, and generators.
 The range is lazy; the length of the iterable is not checked.
 The elements are extracted as the correct type only as they are queried.
+Only one copy of the range can exist, so this is noncopyable and non-assignable.
+It is possible to call first() many times on the range.
+drop() and chop() are only defined for rvalues.
 
 If its elements should be returned as \c nanobind::object, then give no
 template parameters.
@@ -97,13 +100,9 @@ namespace python { namespace detail {
         : iterator_(nanobind::iter(iterable))
         {}
 
-        python_range_base(python_range_base const & that)
-        {
-            // Steal the iterator from "that".
-            using std::swap;
-            swap(this->iterator_, that.iterator_);
-            swap(this->first_, that.first_);
-        }
+        python_range_base(python_range_base && that) = default;
+
+        python_range_base & operator=(python_range_base && that) = default;
 
     private:
         // Both the iterator and the cached first element can be null (invalid),
@@ -178,12 +177,11 @@ public:
     {}
 
     /**
-    Construct from another python_range, stealing its state.
-    That means that its first element becomes the first element of this.
-    This should really be the move constructor, but it is a copy constructor
-    so that python_range can be copied where a copy is syntactically needed.
+    Move-construct from another python_range, stealing its state.
     */
-    python_range(python_range const & that) = default;
+    python_range(python_range && that) = default;
+
+    python_range & operator=(python_range && that) = default;
 
 private:
     friend nanobind::object python::detail::next_iterator<python_range>(

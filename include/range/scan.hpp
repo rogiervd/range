@@ -485,9 +485,9 @@ namespace scan_operation {
     {
         range.direction_must_be_equal(direction);
         // Get the current state.
-        First first = range::first(range, direction);
+        First state = range::first(range, direction);
         return Result(
-            std::forward<First>(first),
+            std::forward<First>(state),
             range::drop(std::forward<ScanRange>(range), direction));
     }
 
@@ -501,9 +501,9 @@ namespace scan_operation {
     {
         range.direction_must_be_equal(direction);
         // Find the current state.
-        Result first = range::first(range, direction);
+        Result state = range::first(range, direction);
         range = range::drop(std::move(range), direction);
-        return std::forward<Result>(first);
+        return std::forward<Result>(state);
     }
 
 }  // namespace scan_operation

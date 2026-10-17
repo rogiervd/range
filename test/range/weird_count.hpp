@@ -56,7 +56,7 @@ inline weird_count implement_drop(
     weird_count_tag, weird_count const & c, std::size_t increment,
     weird_direction)
 {
-    return weird_count(c.current + increment);
+    return weird_count(c.current + int(increment));
 }
 
 #endif  // RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED

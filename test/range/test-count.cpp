@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(example_decrement_unsigned)
     // This is a correct implementation.
     {
         int current = 4;
-        for (int i = values.size() - 1; i >= 0; --i) {
+        for (int i = int(values.size()) - 1; i >= 0; --i) {
             current = values[i] / current;
         }
         BOOST_CHECK_EQUAL(current, 19);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(example_decrement_unsigned)
     // every time:
     {
         int current = 4;
-        for (unsigned i = values.size(); i > 0; --i) {
+        for (unsigned i = unsigned(values.size()); i > 0; --i) {
             current = values[i - 1] / current;
         }
         BOOST_CHECK_EQUAL(current, 19);

@@ -63,7 +63,7 @@ struct difference
 BOOST_AUTO_TEST_CASE(test_call_unpack_difference)
 {
     tuple<int, double> t1(1, 5.5);
-    tuple<float, double> t2(2.5, 7.5);
+    tuple<float, double> t2(2.5f, 7.5);
 
     auto differences = transform(zip(t1, t2), call_unpack(difference()));
     auto e1 = range::first(differences);

@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
     s.i = 4;
     s.d = 3.5;
 
-    structure s2(char(234));
+    structure s2('z');
     s2.i = 123;
     s2.d = 432.1;
 
@@ -719,7 +719,7 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
         BOOST_CHECK_EQUAL(s.i, 6);
         BOOST_CHECK_EQUAL(first(three_view), 123);
         BOOST_CHECK_EQUAL(first(drop(three_view)), 432.1);
-        BOOST_CHECK_EQUAL(first(three_view, back), char(234));
+        BOOST_CHECK_EQUAL(first(three_view, back), 'z');
     }
     // Rvalue reference to the structure.
     {

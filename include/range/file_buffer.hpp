@@ -157,7 +157,7 @@ template <class Char> class file_element_producer
     stream_buffer_ptr stream_buffer_;
 
 protected:
-    virtual pointer get_next()
+    pointer get_next() override
     {
         return pointer::template construct<file_element_producer>(
             std::move(stream_buffer_));

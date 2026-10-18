@@ -83,7 +83,7 @@ public:
 struct type_changer
 {
     short operator()(double d, int &) { return short(d + 1); }
-    int & operator()(short s, int & r) { return r; }
+    int & operator()(short, int & r) { return r; }
     float operator()(int & i, int &) { return float(i + 1); }
     float operator()(float f, int &) { return f + 1; }
 };

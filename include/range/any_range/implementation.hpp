@@ -368,7 +368,7 @@ namespace range { namespace any_range_implementation {
 
         // Dispatch based on: has <chop_in_place>, always_empty.
         chop_destructive_result implementation(
-            Direction const & direction, interface_ptr & this_, rime::true_type,
+            Direction const & direction, interface_ptr &, rime::true_type,
             rime::false_type)
         {
             return chop_destructive_result(

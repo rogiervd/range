@@ -48,101 +48,58 @@ namespace less_lexicographical_detail {
             }
         };
 
-        struct when_range2_not_empty;
-        struct when_neither_empty;
-        struct when_range1_not_less;
-        // The dummy type parameter allows it to call this class itself.
-        template <class Dummy> struct next;
-
         // Heterogeneous implementation: recursive.
+        // At every step, the condition can be known at compile time (in which
+        // case the other branch is not instantiated) or only at run time.
+        // The steps are generic lambdas that take the ranges as parameters, so
+        // that their bodies are only instantiated if they are actually called.
+        // E.g. range::first() must not be instantiated on an empty range.
         struct when_heterogeneous
         {
             template <class Range1, class Range2> auto operator()(
                 Range1 && range1, Range2 && range2, Direction const & direction,
                 Less && less) const
-                // This is the run-time recursive implementation:
-                /*{
-                    if (range::empty (range2, direction))
-                        // Also if both are empty.
-                        return false;
-                    else if (range::empty (range1, direction))
-                        return true;
-                    else if (range::first (range1, direction)
-                            < range::first (range2, direction))
-                        return true;
-                    else if (range::first (range2, direction)
-                            < range::first (range1, direction))
-                        return false;
-                    else {
-                        return (*this) (range::drop (range1, direction),
-                            range::drop (range2, direction), direction);
-                    }
-                }*/
-                RETURNS(
-                    rime::call_if(
-                        range::empty(range2, direction),
-                        rime::always<rime::false_type>(),
-                        when_range2_not_empty(), std::forward<Range1>(range1),
-                        std::forward<Range2>(range2), direction,
-                        std::forward<Less>(less)));
-        };
-
-        struct when_range2_not_empty
-        {
-            template <class Range1, class Range2> auto operator()(
-                Range1 && range1, Range2 && range2, Direction const & direction,
-                Less && less) const
-                RETURNS(
-                    rime::call_if(
-                        range::empty(range1, direction),
-                        rime::always<rime::true_type>(), when_neither_empty(),
-                        std::forward<Range1>(range1),
-                        std::forward<Range2>(range2), direction,
-                        std::forward<Less>(less)));
-        };
-
-        struct when_neither_empty
-        {
-            template <class Range1, class Range2> auto operator()(
-                Range1 && range1, Range2 && range2, Direction const & direction,
-                Less && less) const
-                RETURNS(
-                    rime::call_if(
-                        less(
-                            range::first(range1, direction),
-                            range::first(range2, direction)),
-                        rime::always<rime::true_type>(), when_range1_not_less(),
-                        std::forward<Range1>(range1),
-                        std::forward<Range2>(range2), direction,
-                        std::forward<Less>(less)));
-        };
-
-        struct when_range1_not_less
-        {
-            template <class Range1, class Range2> auto operator()(
-                Range1 && range1, Range2 && range2, Direction const & direction,
-                Less && less) const
-                RETURNS(
-                    rime::call_if(
+            {
+                auto next = [&](auto && range1, auto && range2) {
+                    return less_lexicographical_default()(
+                        range::drop(
+                            std::forward<decltype(range1)>(range1), direction),
+                        range::drop(
+                            std::forward<decltype(range2)>(range2), direction),
+                        direction, std::forward<Less>(less));
+                };
+                auto when_range1_not_less = [&](auto && range1,
+                                                auto && range2) {
+                    return rime::call_if(
                         less(
                             range::first(range2, direction),
                             range::first(range1, direction)),
-                        rime::always<rime::false_type>(), next<Range1>(),
-                        std::forward<Range1>(range1),
-                        std::forward<Range2>(range2), direction,
-                        std::forward<Less>(less)));
-        };
-
-        template <class Dummy> struct next
-        {
-            template <class Range1, class Range2> auto operator()(
-                Range1 && range1, Range2 && range2, Direction const & direction,
-                Less && less) const
-                RETURNS(
-                    less_lexicographical_default()(
-                        range::drop(std::forward<Range1>(range1), direction),
-                        range::drop(std::forward<Range2>(range2), direction),
-                        direction, std::forward<Less>(less)));
+                        rime::always<rime::false_type>(), next,
+                        std::forward<decltype(range1)>(range1),
+                        std::forward<decltype(range2)>(range2));
+                };
+                auto when_neither_empty = [&](auto && range1, auto && range2) {
+                    return rime::call_if(
+                        less(
+                            range::first(range1, direction),
+                            range::first(range2, direction)),
+                        rime::always<rime::true_type>(), when_range1_not_less,
+                        std::forward<decltype(range1)>(range1),
+                        std::forward<decltype(range2)>(range2));
+                };
+                auto when_range2_not_empty = [&](auto && range1,
+                                                 auto && range2) {
+                    return rime::call_if(
+                        range::empty(range1, direction),
+                        rime::always<rime::true_type>(), when_neither_empty,
+                        std::forward<decltype(range1)>(range1),
+                        std::forward<decltype(range2)>(range2));
+                };
+                return rime::call_if(
+                    range::empty(range2, direction),
+                    rime::always<rime::false_type>(), when_range2_not_empty,
+                    std::forward<Range1>(range1), std::forward<Range2>(range2));
+            }
         };
 
     public:

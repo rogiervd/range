@@ -5,8 +5,12 @@
 root_doc = "index"
 project = "Range library for C++"
 copyright = "2012-2026 Rogier van Dalen"
-version = "1.0.0"
-release = "1.0.0"
+# The following variables are defined externally so they can be specified in
+# a single location.
+# Pass them to Sphinx with the -D option, e.g.:
+#   sphinx-build -D version=1.2.3 -D release=1.2.3
+# version = ...
+# release = ...
 
 # Add any Sphinx extension module names here, as strings.
 # They also need to be added in ./BUILD.bazel to sphinx_build_binary(deps=...).

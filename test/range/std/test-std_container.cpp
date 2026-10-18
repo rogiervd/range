@@ -67,12 +67,13 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
     std::vector<int> v;
 
     {
-        auto view = range::view(v);
+        auto container_view = range::view(v);
         auto other_view = range::view_once(v);
 
-        BOOST_MPL_ASSERT((std::is_same<decltype(view), decltype(other_view)>) );
+        BOOST_MPL_ASSERT(
+            (std::is_same<decltype(container_view), decltype(other_view)>) );
 
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(view))>) );
+        BOOST_MPL_ASSERT((has<callable::empty(decltype(container_view))>) );
         BOOST_MPL_ASSERT((has<callable::empty(decltype(v))>) );
         BOOST_MPL_ASSERT_NOT((always_empty<decltype(v), direction::front>) );
         BOOST_MPL_ASSERT_NOT((never_empty<decltype(v), direction::front>) );
@@ -81,7 +82,8 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
         BOOST_CHECK_EQUAL(size(v), 0u);
 
         BOOST_MPL_ASSERT_NOT((has<callable::chop_in_place(decltype(v))>) );
-        BOOST_MPL_ASSERT_NOT((has<callable::chop_in_place(decltype(view))>) );
+        BOOST_MPL_ASSERT_NOT(
+            (has<callable::chop_in_place(decltype(container_view))>) );
     }
 
     v.push_back(5);
@@ -209,18 +211,18 @@ BOOST_AUTO_TEST_CASE(test_std_list_adaptor)
 {
     std::list<int> l;
 
-    auto view = range::view(l);
-    static_assert(has<callable::empty(decltype(view))>::value, "");
-    static_assert(!has<callable::size(decltype(view))>::value, "");
+    auto list_view = range::view(l);
+    static_assert(has<callable::empty(decltype(list_view))>::value, "");
+    static_assert(!has<callable::size(decltype(list_view))>::value, "");
 
-    static_assert(has<callable::first(decltype(view))>::value, "");
+    static_assert(has<callable::first(decltype(list_view))>::value, "");
     // second (l) is equivalent to first (drop (l)) and should therefore be
     // available.
-    static_assert(has<callable::second(decltype(view))>::value, "");
-    static_assert(!has<callable::third(decltype(view))>::value, "");
-    static_assert(!has<callable::seventh(decltype(view))>::value, "");
+    static_assert(has<callable::second(decltype(list_view))>::value, "");
+    static_assert(!has<callable::third(decltype(list_view))>::value, "");
+    static_assert(!has<callable::seventh(decltype(list_view))>::value, "");
 
-    static_assert(!has<callable::at(decltype(view))>::value, "");
+    static_assert(!has<callable::at(decltype(list_view))>::value, "");
 }
 
 template <std::size_t Number, class Type> void compare_array(

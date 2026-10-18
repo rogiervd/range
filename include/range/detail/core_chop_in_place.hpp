@@ -209,9 +209,10 @@ namespace helper {
         Range && range, Direction const & direction)
     {
         auto new_range = std::move(range);
-        auto && first = ::range::callable::chop_in_place_direct()(
+        auto && first_element = ::range::callable::chop_in_place_direct()(
             new_range, direction, pick_overload());
-        return Result(static_cast<First &&>(first), std::move(new_range));
+        return Result(
+            static_cast<First &&>(first_element), std::move(new_range));
     }
 
 }  // namespace helper

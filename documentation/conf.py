@@ -4,7 +4,7 @@
 
 root_doc = "index"
 project = "Range library for C++"
-copyright = "2021-2026 Rogier van Dalen"
+copyright = "2012-2026 Rogier van Dalen"
 version = "1.0.0"
 release = "1.0.0"
 

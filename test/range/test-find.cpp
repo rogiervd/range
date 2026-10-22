@@ -290,10 +290,10 @@ struct is_floating_point
 {
     void operator()(bool) const;  // Not defined.
 
-    auto operator()(int) const RETURNS(rime::false_);
-    auto operator()(short) const RETURNS(rime::false_);
-    auto operator()(float) const RETURNS(rime::true_);
-    auto operator()(double) const RETURNS(rime::true_);
+    auto operator()(int) const { return rime::false_; }
+    auto operator()(short) const { return rime::false_; }
+    auto operator()(float) const { return rime::true_; }
+    auto operator()(double) const { return rime::true_; }
 };
 
 /**

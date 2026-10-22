@@ -23,7 +23,7 @@ test-return_view.py.
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
-auto count(int size) RETURNS(range::count(size));
+auto count(int size) { return range::count(size); }
 
 int get_next_count()
 {

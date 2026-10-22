@@ -26,7 +26,7 @@ test-python_range.py.
 
 std::list<double> doubles;
 
-auto get_doubles() RETURNS(range::view(doubles));
+auto get_doubles() { return range::view(doubles); }
 
 void set_first_to_doubles(nanobind::object object)
 {
@@ -35,11 +35,11 @@ void set_first_to_doubles(nanobind::object object)
 
 range::tuple<int, std::string, float> tuple;
 
-auto get_tuple() RETURNS(range::view(tuple));
+auto get_tuple() { return range::view(tuple); }
 
 boost::optional<bool> optional;
 
-auto get_optional() RETURNS(range::view_optional(optional));
+auto get_optional() { return range::view_optional(optional); }
 
 // Tell Nanobind how to convert the views to Python.
 namespace nanobind { namespace detail {

@@ -46,9 +46,9 @@ private:
 private:
     friend class helper::member_access;
 
-    auto empty(direction::front) const RETURNS(rime::false_);
+    auto empty(direction::front) const { return rime::false_; }
 
-    auto chop_in_place(direction::front) RETURNS(function_());
+    decltype(auto) chop_in_place(direction::front) { return function_(); }
 };
 
 namespace function_range_operation {

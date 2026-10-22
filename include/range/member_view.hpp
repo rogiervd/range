@@ -16,8 +16,6 @@
 
 #include "meta/vector.hpp"
 
-#include "utility/returns.hpp"
-
 #include "detail/meta_is_linear_subset.hpp"
 
 namespace range {
@@ -176,9 +174,11 @@ private:
     friend class helper::member_access;
 
     auto empty(direction::front) const
-        RETURNS(rime::bool_<extractor_num == 0>());
+    {
+        return rime::bool_<extractor_num == 0>();
+    }
 
-    auto size(direction::front) const RETURNS(rime::size_t<extractor_num>());
+    auto size(direction::front) const { return rime::size_t<extractor_num>(); }
 
     // first.
     template <class Direction> struct first_extractor

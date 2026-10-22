@@ -144,7 +144,9 @@ struct add_one_to_all
 };
 
 inline auto return_8_11_56()
-    RETURNS(range::view_shared(get_7_10_55(), add_one_to_all()));
+{
+    return range::view_shared(get_7_10_55(), add_one_to_all());
+}
 
 BOOST_AUTO_TEST_CASE(test_range_view_shared_transform)
 {
@@ -173,7 +175,9 @@ struct make_one_time_view
 };
 
 auto return_5_16_18_one_time()
-    RETURNS(range::view_shared(get_5_16_18(), make_one_time_view()));
+{
+    return range::view_shared(get_5_16_18(), make_one_time_view());
+}
 
 BOOST_AUTO_TEST_CASE(test_range_view_shared_unique)
 {
@@ -192,7 +196,9 @@ BOOST_AUTO_TEST_CASE(test_range_view_shared_unique)
 }
 
 auto return_2_a_hello()
-    RETURNS(range::view_shared(std::make_tuple(2, 'a', std::string("hello"))));
+{
+    return range::view_shared(std::make_tuple(2, 'a', std::string("hello")));
+}
 
 BOOST_AUTO_TEST_CASE(test_range_view_shared_heterogeneous)
 {

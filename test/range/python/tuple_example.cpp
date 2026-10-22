@@ -41,8 +41,11 @@ struct twice
     }
 };
 
-auto get_twice(int i, float f) RETURNS(
-    range::transform(range::view_shared(get_int_float_string(i, f)), twice()));
+auto get_twice(int i, float f)
+{
+    return range::transform(
+        range::view_shared(get_int_float_string(i, f)), twice());
+}
 
 // Tell Nanobind how to convert the return types to Python.
 namespace nanobind { namespace detail {

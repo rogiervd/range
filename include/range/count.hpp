@@ -107,15 +107,19 @@ public:
 private:
     friend class helper::member_access;
 
-    auto empty(direction::front) const RETURNS(begin_ == end_);
+    auto empty(direction::front) const { return begin_ == end_; }
 
     auto size(direction::front) const
-        RETURNS(rime::cast_value<End>(rime::minus(end_, begin_)));
+    {
+        return rime::cast_value<End>(rime::minus(end_, begin_));
+    }
 
     Begin first(direction::front) const { return begin_; }
 
     auto first(direction::back) const
-        RETURNS(rime::cast_value<End>(rime::minus(end_, rime::size_t<1>())));
+    {
+        return rime::cast_value<End>(rime::minus(end_, rime::size_t<1>()));
+    }
 
     template <class Increment>
     auto drop(Increment const & increment, direction::front) const RETURNS(
@@ -180,7 +184,7 @@ Return an infinite range starting from 0.
 
 This is equivalent to <c>count_from (std::size_t (0))</c>.
 */
-inline auto count() RETURNS(count_from(std::size_t(0)));
+inline auto count() { return count_from(std::size_t(0)); }
 
 }  // namespace range
 

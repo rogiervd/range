@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2024 Rogier van Dalen
 #
 # SPDX-License-Identifier: Apache-2.0
-name: Unit tests (release build)
+name: Optimised tests and benchmarks
 on:
   push:
     branches: [main, develop, test-github-actions]
@@ -31,8 +31,13 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
-      - run: bazel test --keep_going -c opt --config=${{ matrix.compiler }} //test/...
-      - run: bazel run --color=yes //bench/... -c opt
-    # To make the benchmark slightly more reliable especially on a VM,
-    # consider getting mean/median/variance and doing random reordering:
-    # -- --benchmark_min_time=0.1s  --benchmark_repetitions=10 --benchmark_report_aggregates_only=true --benchmark_enable_random_interleaving=true
+      - run: >
+          bazel test --keep_going -c opt --config=${{ matrix.compiler }}
+          //test/...
+      - run: >
+          bazel run //bench/... -c opt --config=${{ matrix.compiler }}
+          --
+          --benchmark_min_time=0.1s
+          --benchmark_repetitions=10
+          --benchmark_report_aggregates_only=true
+          --benchmark_enable_random_interleaving=true

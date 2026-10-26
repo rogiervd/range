@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+formatter:
+  type: basic
+  # Keep the line breaks in folded block scalars (those starting with ">").
+  # Without this, yamlfmt joins all their lines into one long line.
+  scan_folded_as_literal: true

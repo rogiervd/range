@@ -1,0 +1,4 @@
+# test-buffer-file reads this file in binary mode and expects "\n" line
+# endings, so check it out unchanged on every platform (Git for Windows would
+# otherwise convert it to "\r\n").
+test/range/example/short.txt -text

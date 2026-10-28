@@ -43,7 +43,7 @@ template <class Optional> class optional_view
     typedef typename std::decay<Optional>::type::value_type decayed_value_type;
 
 public:
-    optional_view(Optional & optional) : optional_(optional) {}
+    optional_view(Optional & underlying) : optional_(underlying) {}
 
     // Constness op optional propagates to value type.
     typedef typename std::conditional<

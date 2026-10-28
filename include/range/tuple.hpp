@@ -682,7 +682,7 @@ public:
         class... Arguments,
         class Enable = typename boost::enable_if<utility::are_constructible<
             stored_types, meta::vector<Arguments...>>>::type>
-    explicit tuple(Arguments &&... arguments)
+    tuple(Arguments &&... arguments)
     : elements_(
           tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
     {}

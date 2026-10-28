@@ -36,7 +36,7 @@ double becomes int, and then we stay with ints.
 */
 struct settling_plus
 {
-    float operator()(char l, int r) const { return l + r; }
+    float operator()(char l, int r) const { return float(l + r); }
     double operator()(float l, int r) const { return l + r; }
     int operator()(double l, int r) const { return int(l + r); }
     int operator()(int l, int r) const { return l + r; }

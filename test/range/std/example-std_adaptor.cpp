@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(example_std_adaptor)
     std::tuple<int, std::string, float> various(6, "Hello", 7.5);
 #else
     std::vector<int> integers {5, 7, 9};
-    std::tuple<int, std::string, float> various {6, "Hello", 7.5};
+    std::tuple<int, std::string, float> various {6, "Hello", 7.5f};
 #endif
 
     // Print the first and second element.

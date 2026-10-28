@@ -365,7 +365,7 @@ namespace tuple_detail {
         elements & operator=(elements const &) noexcept { return *this; }
         elements & operator=(elements &&) noexcept { return *this; }
 
-        void swap(elements & that) const {}
+        void swap(elements &) const {}
     };
 
     // Recursive case.
@@ -1152,7 +1152,7 @@ namespace tuple_detail {
             class Extract =
                 extract<(tuple_size - begin_position - Index::value - 1)>>
         typename Extract::template result<TupleReference>::type at_constant(
-            Index const & index, direction::front) const
+            Index const &, direction::front) const
         {
             return Extract()(tuple());
         }
@@ -1163,7 +1163,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Index::value < view_size)>::type,
             class Extract = extract<(tuple_size - end_position + Index::value)>>
         typename Extract::template result<TupleReference>::type at_constant(
-            Index const & index, direction::back) const
+            Index const &, direction::back) const
         {
             return Extract()(tuple());
         }
@@ -1175,8 +1175,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Increment::value <= view_size)>::type,
             class Result = tuple_detail::tuple_view<
                 Begin + Increment::value, End, TupleReference>>
-        Result drop_constant(
-            Increment const & increment, direction::front) const
+        Result drop_constant(Increment const &, direction::front) const
         {
             return Result(tuple());
         }
@@ -1187,7 +1186,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Increment::value <= view_size)>::type,
             class Result = tuple_detail::tuple_view<
                 Begin, End - Increment::value, TupleReference>>
-        Result drop_constant(Increment const & increment, direction::back) const
+        Result drop_constant(Increment const &, direction::back) const
         {
             return Result(tuple());
         }
@@ -1256,7 +1255,7 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> const &>>
     inline Result implement_make_view(
-        tuple_tag, bool once, tuple<Types...> const & tuple,
+        tuple_tag, bool /* once */, tuple<Types...> const & tuple,
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
@@ -1268,8 +1267,8 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &>>
     inline Result implement_make_view(
-        tuple_tag, bool once, tuple<Types...> & tuple, helper::front_or_back,
-        helper::front_or_back = helper::front_or_back())
+        tuple_tag, bool /* once */, tuple<Types...> & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
     }
@@ -1280,7 +1279,7 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &&>>
     inline Result implement_make_view(
-        tuple_tag, rime::true_type once, tuple<Types...> && tuple,
+        tuple_tag, rime::true_type /* once */, tuple<Types...> && tuple,
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(std::move(tuple));

@@ -260,7 +260,7 @@ namespace range { namespace any_range_interface {
         destructed only after the call has finished.
         */
         virtual chopped<Element, interface_ptr> chop_destructive(
-            Direction const &, interface_ptr & this_)
+            Direction const &, interface_ptr &)
         {
             throw std::logic_error("Bug in any_range.");
         }

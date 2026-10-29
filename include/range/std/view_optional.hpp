@@ -1,18 +1,6 @@
-/*
-Copyright 2014, 2015 Rogier van Dalen.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: Copyright 2014, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /** \file
 Provide a view of boost::optional as a range.
@@ -36,67 +24,78 @@ template <class Optional> class optional_view;
 
 namespace view_optional_operation {
     struct optional_view_tag {};
-} // namespace view_optional_operation
+}  // namespace view_optional_operation
 
-template <class Optional> struct tag_of_qualified <optional_view <Optional>>
-{ typedef view_optional_operation::optional_view_tag type; };
+template <class Optional> struct tag_of_qualified<optional_view<Optional>>
+{
+    typedef view_optional_operation::optional_view_tag type;
+};
 
 /**
 A view of an optional in directions "front" and "back".
 This is empty iff the optional is empty, or a one-element range if the optional
 contains a value.
 */
-template <class Optional> class optional_view {
+template <class Optional> class optional_view
+{
     Optional & optional_;
 
-    typedef typename std::decay <Optional>::type::value_type decayed_value_type;
+    typedef typename std::decay<Optional>::type::value_type decayed_value_type;
+
 public:
-    optional_view (Optional & optional) : optional_ (optional) {}
+    optional_view(Optional & optional) : optional_(optional) {}
 
     // Constness op optional propagates to value type.
-    typedef typename std::conditional <std::is_const <Optional>::value,
-        decayed_value_type const, decayed_value_type>::type value_type;
+    typedef typename std::conditional<
+        std::is_const<Optional>::value, decayed_value_type const,
+        decayed_value_type>::type value_type;
 
 private:
     friend class helper::member_access;
 
     bool empty() const { return !this->optional_; }
-    bool empty (direction::front) const { return empty(); }
+    bool empty(direction::front) const { return empty(); }
 
-    unsigned size (direction::front) const
-    { return this->optional_ ? 1 : 0; }
+    unsigned size(direction::front) const { return this->optional_ ? 1 : 0; }
 
     // first.
-    value_type & first (direction::front) const {
-        assert (!empty());
+    value_type & first(direction::front) const
+    {
+        assert(!empty());
         return this->optional_.get();
     }
-    value_type & first (direction::back) const {
-        assert (!empty());
+    value_type & first(direction::back) const
+    {
+        assert(!empty());
         return this->optional_.get();
     }
 
     // drop_one.
-    empty_view drop_one (direction::front) const {
-        assert (!empty());
+    empty_view drop_one(direction::front) const
+    {
+        assert(!empty());
         return empty_view();
     }
-    empty_view drop_one (direction::back) const {
-        assert (!empty());
+    empty_view drop_one(direction::back) const
+    {
+        assert(!empty());
         return empty_view();
     }
 };
 
 namespace callable {
 
-    struct view_optional {
+    struct view_optional
+    {
         // Do not accept temporaries because that can only lead to tears.
         template <class Optional>
-            optional_view <Optional> operator() (Optional & o) const
-        { return optional_view <Optional> (o); }
+        optional_view<Optional> operator()(Optional & o) const
+        {
+            return optional_view<Optional>(o);
+        }
     };
 
-} // namespace callable
+}  // namespace callable
 
 /** \brief
 View an "optional" as a range containing zero or one elements.
@@ -107,6 +106,6 @@ View an "optional" as a range containing zero or one elements.
 */
 static auto const view_optional = callable::view_optional();
 
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_STD_VIEW_OPTIONAL_HPP_INCLUDED

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_subrange
-#include "utility/test/boost_unit_test.hpp"
+#include "boost/test/unit_test.hpp"
 
 #include "range/subrange.hpp"
 
@@ -14,7 +14,7 @@
 
 #include "range/count.hpp"
 #include "range/for_each_macro.hpp"
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
 using range::count;

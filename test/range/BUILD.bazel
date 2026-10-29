@@ -118,18 +118,25 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "test-take",
-    size = "small",
-    srcs = [
-        "check_equal_behaviour.hpp",
-        "test-take.cpp",
-    ],
-    deps = [
-        "//:range",
-        "@boost.test//:unit_test_main",
-    ],
-)
+# Tests that use check_equal_behaviour.
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "check_equal_behaviour.hpp",
+        ],
+        deps = [
+            "//:range",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-subrange",
+        "test-take",
+    ]
+]
 
 [
     cc_test(

@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Build Sphinx documentation.
+# This first runs Doxygen to extract the C++ API documentation.
+# Since Sphinx is a Python tool, we use the rules_python extension to set up a
+# Python toolchain and install the required Python packages.
+# Also, use ./requirements.in to specify the Python packages that are needed
+# for building the documentation.
+
+# Generating ./requirements.txt:
+#   bazel run //documentation:requirements
+# Building the documentation:
+#   bazel build //documentation:documentation
+# Building and locally serving the documentation:
+#   bazel run //documentation:documentation.serve
+
+load("@doxygen//:doxygen.bzl", "doxygen")
+load("@sphinxdocs//sphinxdocs:sphinx.bzl", "sphinx_build_binary", "sphinx_docs")
+load("@sphinxdocs//sphinxdocs:sphinx_docs_library.bzl", "sphinx_docs_library")
+load(":module_version.bzl", "module_version")
+
+# Build the API documentation from C++ source code with Doxygen, for Breathe
+# to pick up.
+doxygen(
+    name = "doxygen_xml",
+    # Explicitly depend on the relevant files, as a filegroup in ../BUILD.bazel.
+    srcs = ["//:doc_sources"],
+    outs = ["xml"],
+    # RETURNS(...) from utility/returns.hpp generates the trailing return type
+    # and the body. Without expanding it, Doxygen does not recognise the
+    # function declarations that use it, and drops them.
+    expand_only_predef = True,
+    generate_html = False,
+    # The XML output is used by Breathe to generate the Sphinx documentation.
+    generate_xml = True,
+    macro_expansion = True,
+    predefined = ["RETURNS(...)=;"],
+    project_name = "range",
+    project_number = module_version(),
+)
+
+# Install the Sphinx binary, and modules that the documentation needs.
+sphinx_build_binary(
+    name = "sphinx-build",
+    deps = [
+        "@range_pypi//breathe",
+        "@range_pypi//sphinx",
+        "@range_pypi//sphinx_rtd_theme",
+    ],
+)
+
+# The text sources for the documentation.
+sphinx_docs_library(
+    name = "sources",
+    srcs = glob([
+        "*.rst",
+    ]),
+)
+
+# The Doxygen-generated XML sources.
+sphinx_docs_library(
+    name = "doxygen_docs",
+    srcs = [":doxygen_xml"],
+)
+
+sphinx_docs(
+    name = "documentation",
+    config = "conf.py",
+    # Treat Sphinx warnings (including Breathe's, such as unresolved
+    # references into the Doxygen output) as errors.
+    # Take the version from MODULE.bazel, so it is specified in one place.
+    extra_opts = [
+        "--fail-on-warning",
+        "-D",
+        "version=" + module_version(),
+        "-D",
+        "release=" + module_version(),
+    ],
+    formats = ["html"],
+    sphinx = ":sphinx-build",
+    deps = [
+        ":doxygen_docs",
+        ":sources",
+    ],
+)

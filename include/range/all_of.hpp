@@ -1,18 +1,6 @@
-/*
-Copyright 2013, 2015 Rogier van Dalen.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: Copyright 2013, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_ALL_OF_HPP_INCLUDED
 #define RANGE_ALL_OF_HPP_INCLUDED
@@ -23,8 +11,8 @@ limitations under the License.
 namespace range {
 
 namespace callable {
-    struct all_of : find_bool_detail::find_bool <true> {};
-} // namespace callable
+    struct all_of : find_bool_detail::find_bool<true> {};
+}  // namespace callable
 
 /**
 Return whether all elements of the range evaluate to true.
@@ -42,9 +30,8 @@ are not instantiated.
 If any element is found at run time to false, then the following elements are
 not evaluated.
 */
-static const auto all_of = callable::all_of();
+static auto const all_of = callable::all_of();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_ALL_OF_HPP_INCLUDED
-
+#endif  // RANGE_ALL_OF_HPP_INCLUDED

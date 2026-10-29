@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Pre-commit checks
+on:
+  push:
+    branches: [main, develop, test-github-actions]
+  pull_request:
+    branches: [main, develop, test-github-actions]
+  workflow_dispatch:
+jobs:
+  pre-commit:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+      - uses: pre-commit/action@v3.0.1
+      # Run the hooks that only run when asked for.
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: reuse --hook-stage manual --all-files

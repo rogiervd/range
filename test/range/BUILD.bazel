@@ -62,6 +62,7 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-member_view",
         "test-reverse",
         "test-scan",
+        "test-subrange-quicksort",
         "test-transform",
         "test-tuple-1-construct",
         "test-tuple-2-assign",

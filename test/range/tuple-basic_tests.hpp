@@ -1,21 +1,6 @@
-/*
-Copyright 2013, 2014 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2013-2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED
 #define RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED
@@ -24,35 +9,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rime/check/check_equal.hpp"
 
-using range::tuple;
-using range::empty;
-using range::size;
-using range::first;
-using range::drop;
 using range::at;
 using range::at_c;
-using range::second;
-using range::third;
 using range::chop;
+using range::drop;
+using range::empty;
+using range::first;
+using range::second;
+using range::size;
+using range::third;
+using range::tuple;
 
-using range::front;
 using range::back;
+using range::front;
 
+using range::always_empty;
+using range::has;
+using range::never_empty;
+using range::result_of;
 using range::view;
 using range::view_once;
-using range::always_empty;
-using range::never_empty;
-using range::has;
-using range::result_of;
 
-using rime::true_;
 using rime::false_;
+using rime::true_;
 
-typedef rime::size_t <0> zero_type;
-typedef rime::size_t <1> one_type;
-typedef rime::size_t <2> two_type;
-typedef rime::size_t <3> three_type;
-typedef rime::size_t <4> four_type;
+typedef rime::size_t<0> zero_type;
+typedef rime::size_t<1> one_type;
+typedef rime::size_t<2> two_type;
+typedef rime::size_t<3> three_type;
+typedef rime::size_t<4> four_type;
 zero_type zero;
 one_type one;
 two_type two;
@@ -61,245 +46,243 @@ four_type four;
 
 namespace callable = range::callable;
 
-template <class Tuple> void check_tuple (Tuple const & t) {
+template <class Tuple> void check_tuple(Tuple const & t)
+{
     // empty consistent.
-    RIME_CHECK_EQUAL (range::empty (front, t), range::empty (t));
-    RIME_CHECK_EQUAL (range::empty (back, t), range::empty (t));
+    RIME_CHECK_EQUAL(range::empty(t, front), range::empty(t));
+    RIME_CHECK_EQUAL(range::empty(t, back), range::empty(t));
 
     // size consistent.
-    RIME_CHECK_EQUAL (range::size (front, t), range::size (t));
-    RIME_CHECK_EQUAL (range::size (back, t), range::size (t));
+    RIME_CHECK_EQUAL(range::size(t, front), range::size(t));
+    RIME_CHECK_EQUAL(range::size(t, back), range::size(t));
 
     // One can always drop with an increment of "size".
-    BOOST_MPL_ASSERT ((has <callable::drop (callable::size (Tuple), Tuple)>));
+    BOOST_MPL_ASSERT((has<callable::drop(Tuple, decltype(size(t)))>) );
 
     // One can never drop with an run-time increment.
-    BOOST_MPL_ASSERT_NOT ((has <callable::drop (int, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((has <callable::at (int, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((has<callable::drop(Tuple, int)>) );
+    BOOST_MPL_ASSERT_NOT((has<callable::at(Tuple, int)>) );
 }
 
 template <class Increment, class Tuple>
-    void check_has_no_drop (Increment const & increment, Tuple const & t)
+void check_has_no_drop(Increment const & increment, Tuple const & t)
 {
     // No drop.
-    BOOST_MPL_ASSERT_NOT ((range::has <callable::drop (Increment, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::drop (direction::front, Increment, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::drop (direction::back, Increment, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple, Increment)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::drop(Tuple, Increment, direction::front)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::drop(Tuple, Increment, direction::back)>) );
 
     // No at.
-    BOOST_MPL_ASSERT_NOT ((range::has <callable::at (Increment, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::at (direction::front, Increment, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::at (direction::back, Increment, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((range::has<callable::at(Tuple, Increment)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::at(Tuple, Increment, direction::front)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::at(Tuple, Increment, direction::back)>) );
 }
 
-template <class Tuple> void check_empty_implementation (Tuple const & t) {
-    BOOST_MPL_ASSERT ((always_empty <direction::front, Tuple>));
-    BOOST_MPL_ASSERT ((always_empty <direction::back, Tuple>));
+template <class Tuple> void check_empty_implementation(Tuple const & t)
+{
+    BOOST_MPL_ASSERT((always_empty<Tuple, direction::front>) );
+    BOOST_MPL_ASSERT((always_empty<Tuple, direction::back>) );
 
-    RIME_CHECK_EQUAL (range::empty (t), true_);
-    RIME_CHECK_EQUAL (range::size (t), zero);
+    RIME_CHECK_EQUAL(range::empty(t), true_);
+    RIME_CHECK_EQUAL(range::size(t), zero);
 
-    check_tuple (t);
+    check_tuple(t);
 
     // No first.
-    BOOST_MPL_ASSERT_NOT ((range::has <callable::first (Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::first (direction::front, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::first (direction::back, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((range::has<callable::first(Tuple)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::first(Tuple, direction::front)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::first(Tuple, direction::back)>) );
 
     // No drop.
-    BOOST_MPL_ASSERT_NOT ((range::has <callable::drop (Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::drop (direction::front, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::drop (direction::back, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::drop(Tuple, direction::front)>) );
+    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple, direction::back)>) );
 
     // No at.
-    BOOST_MPL_ASSERT_NOT ((range::has <callable::at (zero_type, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::at (direction::front, zero_type, Tuple)>));
-    BOOST_MPL_ASSERT_NOT ((range::has <
-        callable::at (direction::back, zero_type, Tuple)>));
+    BOOST_MPL_ASSERT_NOT((range::has<callable::at(Tuple, zero_type)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::at(Tuple, zero_type, direction::front)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (range::has<callable::at(Tuple, zero_type, direction::back)>) );
 
-    check_has_no_drop (one, t);
-    check_has_no_drop (two, t);
+    check_has_no_drop(t, one);
+    check_has_no_drop(t, two);
 }
 
-template <class Tuple> void check_empty (Tuple const & t) {
-    check_empty_implementation (t);
-    check_empty_implementation (drop (zero, t));
-    check_empty_implementation (drop (back, zero, t));
-    check_empty_implementation (drop (front, zero, t));
+template <class Tuple> void check_empty(Tuple const & t)
+{
+    check_empty_implementation(t);
+    check_empty_implementation(drop(t, zero));
+    check_empty_implementation(drop(t, zero, back));
+    check_empty_implementation(drop(t, zero, front));
 }
 
 template <class Tuple, class Element>
-    void check_one_element (Tuple const & t, Element const & element)
+void check_one_element(Tuple const & t, Element const & element)
 {
-    BOOST_MPL_ASSERT ((never_empty <direction::front, Tuple>));
-    BOOST_MPL_ASSERT ((never_empty <direction::back, Tuple>));
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
 
-    RIME_CHECK_EQUAL (range::empty (t), false_);
-    RIME_CHECK_EQUAL (range::size (t), one);
+    RIME_CHECK_EQUAL(range::empty(t), false_);
+    RIME_CHECK_EQUAL(range::size(t), one);
 
-    RIME_CHECK_EQUAL (first (t), element);
-    RIME_CHECK_EQUAL (first (front, t), element);
-    RIME_CHECK_EQUAL (first (back, t), element);
+    RIME_CHECK_EQUAL(first(t), element);
+    RIME_CHECK_EQUAL(first(t, front), element);
+    RIME_CHECK_EQUAL(first(t, back), element);
 
-    RIME_CHECK_EQUAL (at_c <0> (t), element);
-    RIME_CHECK_EQUAL (at_c <0> (front, t), element);
-    RIME_CHECK_EQUAL (at_c <0> (back, t), element);
+    RIME_CHECK_EQUAL(at_c<0>(t), element);
+    RIME_CHECK_EQUAL(at_c<0>(t, front), element);
+    RIME_CHECK_EQUAL(at_c<0>(t, back), element);
 
-    RIME_CHECK_EQUAL (at (zero, t), element);
-    RIME_CHECK_EQUAL (at (front, zero, t), element);
-    RIME_CHECK_EQUAL (at (back, zero, t), element);
+    RIME_CHECK_EQUAL(at(t, zero), element);
+    RIME_CHECK_EQUAL(at(t, zero, front), element);
+    RIME_CHECK_EQUAL(at(t, zero, back), element);
 
-    check_empty (drop (t));
-    check_empty (drop (front, t));
-    check_empty (drop (back, t));
+    check_empty(drop(t));
+    check_empty(drop(t, front));
+    check_empty(drop(t, back));
 
-    check_has_no_drop (two, t);
+    check_has_no_drop(t, two);
 
-    static_assert (has <callable::first (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <1> (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <2> (direction::back, Tuple)>::value,
-        "");
-    static_assert (!has <callable::second (direction::back, Tuple)>::value, "");
-    static_assert (!has <callable::seventh (Tuple)>::value, "");
+    static_assert(has<callable::first(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<1>(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<2>(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::second(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::seventh(Tuple)>::value, "");
 }
 
-template <class Tuple, class Element1, class Element2>
-    void check_two_elements (
-        Tuple const & t, Element1 const & element1, Element2 const & element2)
+template <class Tuple, class Element1, class Element2> void check_two_elements(
+    Tuple const & t, Element1 const & element1, Element2 const & element2)
 {
-    BOOST_MPL_ASSERT ((never_empty <direction::front, Tuple>));
-    BOOST_MPL_ASSERT ((never_empty <direction::back, Tuple>));
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
 
-    RIME_CHECK_EQUAL (range::empty (t), false_);
-    RIME_CHECK_EQUAL (range::size (t), two);
+    RIME_CHECK_EQUAL(range::empty(t), false_);
+    RIME_CHECK_EQUAL(range::size(t), two);
 
     // first.
-    RIME_CHECK_EQUAL (first (t), element1);
-    RIME_CHECK_EQUAL (first (front, t), element1);
-    RIME_CHECK_EQUAL (first (back, t), element2);
+    RIME_CHECK_EQUAL(first(t), element1);
+    RIME_CHECK_EQUAL(first(t, front), element1);
+    RIME_CHECK_EQUAL(first(t, back), element2);
 
     // at (0).
-    RIME_CHECK_EQUAL (at_c <0> (t), element1);
-    RIME_CHECK_EQUAL (at_c <0> (front, t), element1);
-    RIME_CHECK_EQUAL (at_c <0> (back, t), element2);
+    RIME_CHECK_EQUAL(at_c<0>(t), element1);
+    RIME_CHECK_EQUAL(at_c<0>(t, front), element1);
+    RIME_CHECK_EQUAL(at_c<0>(t, back), element2);
 
-    RIME_CHECK_EQUAL (at (zero, t), element1);
-    RIME_CHECK_EQUAL (at (front, zero, t), element1);
-    RIME_CHECK_EQUAL (at (back, zero, t), element2);
+    RIME_CHECK_EQUAL(at(t, zero), element1);
+    RIME_CHECK_EQUAL(at(t, zero, front), element1);
+    RIME_CHECK_EQUAL(at(t, zero, back), element2);
 
     // at (1).
-    RIME_CHECK_EQUAL (at_c <1> (t), element2);
-    RIME_CHECK_EQUAL (at_c <1> (front, t), element2);
-    RIME_CHECK_EQUAL (at_c <1> (back, t), element1);
+    RIME_CHECK_EQUAL(at_c<1>(t), element2);
+    RIME_CHECK_EQUAL(at_c<1>(t, front), element2);
+    RIME_CHECK_EQUAL(at_c<1>(t, back), element1);
 
-    RIME_CHECK_EQUAL (at (one, t), element2);
-    RIME_CHECK_EQUAL (at (front, one, t), element2);
-    RIME_CHECK_EQUAL (at (back, one, t), element1);
+    RIME_CHECK_EQUAL(at(t, one), element2);
+    RIME_CHECK_EQUAL(at(t, one, front), element2);
+    RIME_CHECK_EQUAL(at(t, one, back), element1);
 
-    RIME_CHECK_EQUAL (second (t), element2);
-    RIME_CHECK_EQUAL (second (front, t), element2);
-    RIME_CHECK_EQUAL (second (back, t), element1);
+    RIME_CHECK_EQUAL(second(t), element2);
+    RIME_CHECK_EQUAL(second(t, front), element2);
+    RIME_CHECK_EQUAL(second(t, back), element1);
 
     // Check subranges.
-    check_one_element (drop (t), element2);
-    check_one_element (drop (front, t), element2);
-    check_one_element (drop (back, t), element1);
+    check_one_element(drop(t), element2);
+    check_one_element(drop(t, front), element2);
+    check_one_element(drop(t, back), element1);
 
-    check_empty (drop (two, t));
-    check_empty (drop (front, two, t));
-    check_empty (drop (back, two, t));
+    check_empty(drop(t, two));
+    check_empty(drop(t, two, front));
+    check_empty(drop(t, two, back));
 
-    check_has_no_drop (three, t);
+    check_has_no_drop(t, three);
 
-    static_assert (has <callable::second (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <2> (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <3> (direction::back, Tuple)>::value,
-        "");
-    static_assert (!has <callable::third (direction::back, Tuple)>::value, "");
-    static_assert (!has <callable::seventh (Tuple)>::value, "");
+    static_assert(has<callable::second(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<2>(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<3>(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::third(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::seventh(Tuple)>::value, "");
 }
 
 template <class Tuple, class Element1, class Element2, class Element3>
-    void check_three_elements (
-        Tuple const & t, Element1 const & element1, Element2 const & element2,
-        Element3 const & element3)
+void check_three_elements(
+    Tuple const & t, Element1 const & element1, Element2 const & element2,
+    Element3 const & element3)
 {
-    BOOST_MPL_ASSERT ((never_empty <direction::front, Tuple>));
-    BOOST_MPL_ASSERT ((never_empty <direction::back, Tuple>));
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
+    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
 
-    RIME_CHECK_EQUAL (range::empty (t), false_);
-    RIME_CHECK_EQUAL (range::size (t), three);
+    RIME_CHECK_EQUAL(range::empty(t), false_);
+    RIME_CHECK_EQUAL(range::size(t), three);
 
-    RIME_CHECK_EQUAL (first (t), element1);
-    RIME_CHECK_EQUAL (first (front, t), element1);
+    RIME_CHECK_EQUAL(first(t), element1);
+    RIME_CHECK_EQUAL(first(t, front), element1);
 
-    RIME_CHECK_EQUAL (first (back, t), element3);
+    RIME_CHECK_EQUAL(first(t, back), element3);
 
     // at (0).
-    RIME_CHECK_EQUAL (at_c <0> (t), element1);
-    RIME_CHECK_EQUAL (at_c <0> (front, t), element1);
-    RIME_CHECK_EQUAL (at_c <0> (back, t), element3);
+    RIME_CHECK_EQUAL(at_c<0>(t), element1);
+    RIME_CHECK_EQUAL(at_c<0>(t, front), element1);
+    RIME_CHECK_EQUAL(at_c<0>(t, back), element3);
 
-    RIME_CHECK_EQUAL (at (zero, t), element1);
-    RIME_CHECK_EQUAL (at (front, zero, t), element1);
-    RIME_CHECK_EQUAL (at (back, zero, t), element3);
+    RIME_CHECK_EQUAL(at(t, zero), element1);
+    RIME_CHECK_EQUAL(at(t, zero, front), element1);
+    RIME_CHECK_EQUAL(at(t, zero, back), element3);
 
     // at (1).
-    RIME_CHECK_EQUAL (at_c <1> (t), element2);
-    RIME_CHECK_EQUAL (at_c <1> (front, t), element2);
-    RIME_CHECK_EQUAL (at_c <1> (back, t), element2);
+    RIME_CHECK_EQUAL(at_c<1>(t), element2);
+    RIME_CHECK_EQUAL(at_c<1>(t, front), element2);
+    RIME_CHECK_EQUAL(at_c<1>(t, back), element2);
 
-    RIME_CHECK_EQUAL (at (one, t), element2);
-    RIME_CHECK_EQUAL (at (front, one, t), element2);
-    RIME_CHECK_EQUAL (at (back, one, t), element2);
+    RIME_CHECK_EQUAL(at(t, one), element2);
+    RIME_CHECK_EQUAL(at(t, one, front), element2);
+    RIME_CHECK_EQUAL(at(t, one, back), element2);
 
-    RIME_CHECK_EQUAL (second (t), element2);
-    RIME_CHECK_EQUAL (second (front, t), element2);
-    RIME_CHECK_EQUAL (second (back, t), element2);
+    RIME_CHECK_EQUAL(second(t), element2);
+    RIME_CHECK_EQUAL(second(t, front), element2);
+    RIME_CHECK_EQUAL(second(t, back), element2);
 
     // at (2).
-    RIME_CHECK_EQUAL (at_c <2> (t), element3);
-    RIME_CHECK_EQUAL (at_c <2> (front, t), element3);
-    RIME_CHECK_EQUAL (at_c <2> (back, t), element1);
+    RIME_CHECK_EQUAL(at_c<2>(t), element3);
+    RIME_CHECK_EQUAL(at_c<2>(t, front), element3);
+    RIME_CHECK_EQUAL(at_c<2>(t, back), element1);
 
-    RIME_CHECK_EQUAL (at (two, t), element3);
-    RIME_CHECK_EQUAL (at (front, two, t), element3);
-    RIME_CHECK_EQUAL (at (back, two, t), element1);
+    RIME_CHECK_EQUAL(at(t, two), element3);
+    RIME_CHECK_EQUAL(at(t, two, front), element3);
+    RIME_CHECK_EQUAL(at(t, two, back), element1);
 
-    RIME_CHECK_EQUAL (third (t), element3);
-    RIME_CHECK_EQUAL (third (front, t), element3);
-    RIME_CHECK_EQUAL (third (back, t), element1);
+    RIME_CHECK_EQUAL(third(t), element3);
+    RIME_CHECK_EQUAL(third(t, front), element3);
+    RIME_CHECK_EQUAL(third(t, back), element1);
 
     // Check subranges.
-    check_two_elements (drop (t), element2, element3);
-    check_two_elements (drop (front, t), element2, element3);
-    check_two_elements (drop (back, t), element1, element2);
+    check_two_elements(drop(t), element2, element3);
+    check_two_elements(drop(t, front), element2, element3);
+    check_two_elements(drop(t, back), element1, element2);
 
-    check_one_element (drop (two, t), element3);
-    check_one_element (drop (front, two, t), element3);
-    check_one_element (drop (back, two, t), element1);
+    check_one_element(drop(t, two), element3);
+    check_one_element(drop(t, two, front), element3);
+    check_one_element(drop(t, two, back), element1);
 
-    check_empty (drop (three, t));
-    check_empty (drop (front, three, t));
-    check_empty (drop (back, three, t));
+    check_empty(drop(t, three));
+    check_empty(drop(t, three, front));
+    check_empty(drop(t, three, back));
 
-    check_has_no_drop (four, t);
+    check_has_no_drop(four, t);
 
-    static_assert (has <callable::third (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <3> (Tuple)>::value, "");
-    static_assert (!has <callable::at_c <4> (direction::back, Tuple)>::value,
-        "");
-    static_assert (!has <callable::fourth (direction::back, Tuple)>::value, "");
-    static_assert (!has <callable::seventh (Tuple)>::value, "");
+    static_assert(has<callable::third(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<3>(Tuple)>::value, "");
+    static_assert(!has<callable::at_c<4>(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::fourth(Tuple, direction::back)>::value, "");
+    static_assert(!has<callable::seventh(Tuple)>::value, "");
 }
 
-#endif // RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED
+#endif  // RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED

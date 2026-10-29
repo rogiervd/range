@@ -1,207 +1,188 @@
-/*
-Copyright 2013 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2013, 2015, 2017 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /** \file
 Turn heterogeneous containers in std:: into ranges.
 This means: std::tuple and std::pair.
+This includes \<tuple>.
 */
 
 #ifndef RANGE_STD_TUPLE_HPP_INCLUDED
 #define RANGE_STD_TUPLE_HPP_INCLUDED
 
-// It is not obvious how to forward-declare std::get from in libstdc++.
-// So just include the headers.
-// This is an implementation detail and subject to change in future versions.
-#include <utility>
 #include <tuple>
+#include <utility>
 
-#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/pair.hpp>
+#include <boost/mpl/placeholders.hpp>
 
-#include "meta/vector.hpp"
-#include "meta/transform.hpp"
 #include "meta/enumerate.hpp"
+#include "meta/transform.hpp"
+#include "meta/vector.hpp"
 
 #include "range/core.hpp"
 #include "range/heavyweight.hpp"
 #include "range/member_view.hpp"
 
-#include "range/detail/enable_if_front_back.hpp"
-
 namespace range {
 
-    // Tags.
+// Tags.
 
-    template <class First, class Second>
-        struct tag_of_qualified <std::pair <First, Second>>
-    { typedef heavyweight_tag <std::pair <First, Second>> type; };
+namespace std_tuple_operation {
 
-    template <class ... Types>
-        struct tag_of_qualified <std::tuple <Types ...>>
-    { typedef heavyweight_tag <std::tuple <Types ...>> type; };
+    struct std_pair_tag : heavyweight::heavyweight_tag {};
+    struct std_tuple_tag : heavyweight::heavyweight_tag {};
 
-    namespace operation {
+}  // namespace std_tuple_operation
 
-        namespace detail {
+template <class First, class Second>
+struct tag_of_qualified<std::pair<First, Second>>
+{
+    typedef std_tuple_operation::std_pair_tag type;
+};
 
-            /**
-            Implementation of make_view for std::pair.
-            Uses member_view with the "first" and "second" member variables.
-            */
-            template <bool Move, class First, class Second>
-                struct make_view_std_pair;
+template <class... Types> struct tag_of_qualified<std::tuple<Types...>>
+{
+    typedef std_tuple_operation::std_tuple_tag type;
+};
 
-            // Lvalue reference.
-            template <class First, class Second>
-                struct make_view_std_pair <false, First, Second>
-            {
-                typedef std::pair <First, Second> pair;
-                typedef meta::vector <
-                        member_extractor <First pair::*, &pair::first>,
-                        member_extractor <Second pair::*, &pair::second>>
-                    extractors_type;
+namespace std_tuple_operation {
 
-                member_view <pair &, extractors_type>
-                    operator() (pair & p) const
-                { return member_view <pair &, extractors_type> (p); }
+    template <class QPair> struct std_pair_member_view
+    {
+        typedef typename std::decay<QPair>::type pair;
+        typedef meta::vector<
+            member_extractor<typename pair::first_type pair::*, &pair::first>,
+            member_extractor<typename pair::second_type pair::*, &pair::second>>
+            extractors_type;
 
-                member_view <pair const &, extractors_type>
-                    operator() (pair const & p) const
-                { return member_view <pair const &, extractors_type> (p); }
-            };
+        typedef member_view<QPair, extractors_type> type;
+    };
 
-            // Rvalue reference.
-            template <class First, class Second>
-                struct make_view_std_pair <true, First, Second>
-            : make_view_std_pair <false, First, Second>
-            {
-                typedef make_view_std_pair <false, First, Second> base_type;
-                typedef typename base_type::pair pair;
-                typedef typename base_type::extractors_type extractors_type;
+    /**
+    Extractor of elements from std::tuple.
+    */
+    template <class Index> struct std_tuple_extractor
+    {
+        template <class... Types>
+        auto operator()(std::tuple<Types...> & tuple) const
+            RETURNS(std::get<Index::value>(tuple));
 
-                using make_view_std_pair <false, First, Second>::operator();
+        template <class... Types>
+        auto operator()(std::tuple<Types...> const & tuple) const
+            RETURNS(std::get<Index::value>(tuple));
 
-                member_view <pair &&, extractors_type>
-                    operator() (pair && p) const
-                {
-                    return member_view <pair &&, extractors_type> (
-                        std::move (p));
-                }
-            };
+        /**
+        C++11 does not have an overload specific for rvalue references;
+        only C++14 does.
+        For consistency, manually cast the result to an rvalue
+        reference.
+        */
+        template <
+            class... Types,
+            class Result = typename std::tuple_element<
+                Index::value, std::tuple<Types...>>::type &&>
+        Result operator()(std::tuple<Types...> && tuple) const
+        {
+            return static_cast<Result>(std::get<Index::value>(tuple));
+        }
+    };
 
-            /**
-            Extractor of elements from std::tuple.
-            */
-            template <class Index> struct std_tuple_extractor {
-                template <class ... Types>
-                    auto operator() (std::tuple <Types ...> & tuple) const
-                RETURNS (std::get <Index::value> (tuple));
+    template <class QTuple, class... Types> struct std_tuple_member_view
+    {
+        // Create meta::vector <
+        //     std_tuple_extractor <rime::size_t<0>>, ...>.
+        typedef typename meta::as_vector<meta::transform<
+            std_tuple_extractor<boost::mpl::first<boost::mpl::_>>,
+            typename meta::enumerate<meta::vector<Types...>>::type>>::type
+            extractors_type;
 
-                template <class ... Types>
-                    auto operator() (std::tuple <Types ...> const & tuple) const
-                RETURNS (std::get <Index::value> (tuple));
+        typedef member_view<QTuple, extractors_type> type;
+    };
 
-                /**
-                C++11 does not have an overload specific for rvalue references;
-                only C++14 does.
-                For consistency, manually cast the result to an rvalue
-                reference.
-                */
-                template <class ... Types> typename
-                    std::tuple_element <Index::value, std::tuple <Types ...>
-                >::type && operator() (std::tuple <Types ...> && tuple) const
-                {
-                    typedef typename std::tuple_element <Index::value,
-                        std::tuple <Types ...>>::type && result_type;
-                    return static_cast <result_type> (
-                        std::get <Index::value> (tuple));
-                }
-            };
+    // implement_make_view for std::pair.
+    // Const reference.
+    template <
+        class First, class Second,
+        class Result = typename std_tuple_operation::std_pair_member_view<
+            std::pair<First, Second> const &>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_pair_tag, bool once,
+        std::pair<First, Second> const & pair, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(pair);
+    }
 
-            /**
-            Implementation of make_view for std::tuple.
-            This is essentially a generalisation of make_view_std_pair.
-            */
-            template <bool Move, class ... Types> struct make_view_std_tuple {
-                // Create meta::vector <
-                //     std_tuple_extractors <rime::size_t<0>>, ...>.
-                typedef typename meta::as_vector <meta::transform <
-                    std_tuple_extractor <boost::mpl::first <boost::mpl::_>>,
-                    typename meta::enumerate <meta::vector <Types...>>::type
-                    >>::type extractors_type;
+    // Reference.
+    template <
+        class First, class Second,
+        class Result = typename std_tuple_operation::std_pair_member_view<
+            std::pair<First, Second> &>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_pair_tag, bool once,
+        std::pair<First, Second> & pair, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(pair);
+    }
 
-                typedef std::tuple <Types ...> tuple_type;
+    // Rvalue reference.
+    template <
+        class First, class Second,
+        class Result = typename std_tuple_operation::std_pair_member_view<
+            std::pair<First, Second> &&>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_pair_tag, rime::true_type once,
+        std::pair<First, Second> && pair, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(std::move(pair));
+    }
 
-                member_view <tuple_type &, extractors_type>
-                    operator() (tuple_type & t) const
-                {
-                    return member_view <tuple_type &, extractors_type> (t);
-                }
+    // implement_make_view for std::tuple.
+    // Const reference.
+    template <
+        class... Types,
+        class Result = typename std_tuple_operation::std_tuple_member_view<
+            std::tuple<Types...> const &, Types...>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_tuple_tag, bool once,
+        std::tuple<Types...> const & tuple, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(tuple);
+    }
 
-                member_view <tuple_type const &, extractors_type>
-                    operator() (tuple_type const & t) const
-                {
-                    return member_view <tuple_type const &, extractors_type> (
-                        t);
-                }
-            };
+    // Reference.
+    template <
+        class... Types,
+        class Result = typename std_tuple_operation::std_tuple_member_view<
+            std::tuple<Types...> &, Types...>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_tuple_tag, bool once,
+        std::tuple<Types...> & tuple, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(tuple);
+    }
 
-            template <class ... Types>
-                struct make_view_std_tuple <true, Types ...>
-            : make_view_std_tuple <false, Types ...>
-            {
-                typedef make_view_std_tuple <false, Types ...> base_type;
-                typedef typename base_type::extractors_type extractors_type;
+    // Rvalue reference.
+    template <
+        class... Types,
+        class Result = typename std_tuple_operation::std_tuple_member_view<
+            std::tuple<Types...> &&, Types...>::type>
+    inline Result implement_make_view(
+        std_tuple_operation::std_tuple_tag, rime::true_type once,
+        std::tuple<Types...> && tuple, helper::front_or_back,
+        helper::front_or_back = helper::front_or_back())
+    {
+        return Result(std::move(tuple));
+    }
 
-                using base_type::operator();
-                typedef typename base_type::tuple_type tuple_type;
+}  // namespace std_tuple_operation
 
-                member_view <tuple_type &&, extractors_type>
-                    operator() (tuple_type && t) const
-                {
-                    return member_view <tuple_type &&, extractors_type> (
-                        std::move (t));
-                }
-            };
-
-        } // namespace detail
-
-        // Enable make_view only if Directions is front, back, or a combination.
-        // Specialisation for std::pair.
-        template <bool Move, class First, class Second, class Directions>
-            struct make_view <Move, heavyweight_tag <std::pair <First, Second>>,
-                Directions,
-                typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <1, Directions,
-            detail::make_view_std_pair <Move, First, Second>> {};
-
-        // Specialisation for std::tuple.
-        template <bool Move, class ... Types, class Directions>
-            struct make_view <Move, heavyweight_tag <std::tuple <Types ...>>,
-                Directions,
-                typename detail::enable_if_front_back <Directions>::type>
-        : helper::call_with_last <1, Directions,
-            detail::make_view_std_tuple <Move, Types ...>> {};
-
-    } // namespace operation
-
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_STD_TUPLE_HPP_INCLUDED
-

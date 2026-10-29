@@ -1,21 +1,6 @@
-/*
-Copyright 2011, 2012 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2011, 2012, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /**
 Provide a simple direction class for testing the Range library.
@@ -28,87 +13,101 @@ Provide a simple direction class for testing the Range library.
 
 struct forgotten_to_define_direction;
 struct weird_direction;
-struct weird_reverse_direction;
+struct weird_opposite_direction;
 
-struct forgotten_to_define_direction {
+struct forgotten_to_define_direction
+{
     // Cause linker error if this actually gets used.
     forgotten_to_define_direction();
 };
 
-struct weird_direction {
+struct weird_direction
+{
     int n;
 
     // Can only be constructed with an int with value 7.
-    weird_direction (int n) : n (n) { assert_invariant(); }
+    weird_direction(int n) : n(n) { assert_invariant(); }
 
-    weird_direction (weird_direction const & other)
-    : n (other.n) { assert_invariant(); }
+    weird_direction(weird_direction const & other) : n(other.n)
+    {
+        assert_invariant();
+    }
 
-    weird_direction (weird_reverse_direction const & other);
+    explicit weird_direction(weird_opposite_direction const & other);
 
-    ~weird_direction() {
+    ~weird_direction()
+    {
         assert_invariant();
         n = 1234;
     }
 
-    void assert_invariant() { assert (n == 7); }
+    void assert_invariant() { assert(n == 7); }
 };
 
-struct weird_reverse_direction {
+struct weird_opposite_direction
+{
     int n;
 
     // Can only be constructed with an int with value 7.
-    weird_reverse_direction (int n) : n (n)  { assert_invariant(); }
+    weird_opposite_direction(int n) : n(n) { assert_invariant(); }
 
-    weird_reverse_direction (weird_reverse_direction const & other)
-    : n (other.n) { assert_invariant(); }
+    weird_opposite_direction(weird_opposite_direction const & other)
+    : n(other.n)
+    {
+        assert_invariant();
+    }
 
-    weird_reverse_direction (weird_direction const & other)
-    : n (other.n) { assert_invariant(); }
+    explicit weird_opposite_direction(weird_direction const & other)
+    : n(other.n)
+    {
+        assert_invariant();
+    }
 
-    ~weird_reverse_direction() {
+    ~weird_opposite_direction()
+    {
         assert_invariant();
         n = 1234;
     }
 
-    void assert_invariant() { assert (n == 7); }
+    void assert_invariant() { assert(n == 7); }
 };
 
-inline weird_direction::weird_direction (weird_reverse_direction const & other)
-: n (other.n) { assert_invariant(); }
+inline weird_direction::weird_direction(weird_opposite_direction const & other)
+: n(other.n)
+{
+    assert_invariant();
+}
 
-rime::true_type operator== (weird_direction const &, weird_direction const &)
-{ return rime::true_; }
+inline rime::true_type operator==(
+    weird_direction const &, weird_direction const &)
+{
+    return rime::true_;
+}
 
-rime::true_type operator== (
-    weird_reverse_direction const &, weird_reverse_direction const &)
-{ return rime::true_; }
+inline rime::true_type operator==(
+    weird_opposite_direction const &, weird_opposite_direction const &)
+{
+    return rime::true_;
+}
 
 namespace direction {
 
-    template <> struct is_direction_bare <weird_direction>
-    : boost::mpl::true_ {};
+template <> struct is_direction_bare<weird_direction> : boost::mpl::true_ {};
 
-    template <> struct is_direction_bare <weird_reverse_direction>
-    : boost::mpl::true_ {};
+template <> struct is_direction_bare<weird_opposite_direction>
+: boost::mpl::true_ {};
 
-    namespace operation {
+}  // namespace direction
 
-        template <> struct make_forward <weird_reverse_direction> {
-            weird_direction operator() (weird_reverse_direction const & d)
-                const
-            { return weird_direction (d); }
-        };
+inline weird_direction implement_make_forward(
+    weird_opposite_direction const & d)
+{
+    return weird_direction(d);
+}
 
-        template <> struct reverse <weird_direction> {
-            weird_reverse_direction operator() (weird_direction const & d)
-                const
-            { return weird_reverse_direction (d); }
-        };
-
-    } // namespace operation
-} // namespace direction
-
+inline weird_opposite_direction implement_opposite(weird_direction const & d)
+{
+    return weird_opposite_direction(d);
+}
 
 #endif  // RANGE_TEST_WEIRD_DIRECTION_HPP_INCLUDED
-

@@ -1,34 +1,37 @@
-/*
-Copyright 2013 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2013, 2017 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /** \file
 Turn heterogeneous and homogeneous containers in std:: into ranges.
 
-This file does not include the required system headers; it only has forward
-declarations as necessary.
+This file includes all the required system headers.
+For compile speed, prefer to include the headers from \c ./std/.
 */
 
 #ifndef RANGE_STD_HPP_INCLUDED
 #define RANGE_STD_HPP_INCLUDED
 
-#include "std/container.hpp"
+// Sequence containers.
+#include "std/array.hpp"
+#include "std/deque.hpp"
+#include "std/forward_list.hpp"
+#include "std/list.hpp"
+#include "std/string.hpp"
+#include "std/vector.hpp"
+
+// Associative containers.
+#include "std/map.hpp"
+#include "std/set.hpp"
+
+// Unordered (hashed) associative containers.
+#include "std/unordered_map.hpp"
+#include "std/unordered_set.hpp"
+
+// tuple.
 #include "std/tuple.hpp"
+
+// view_optional.
 #include "std/view_optional.hpp"
 
 #endif  // RANGE_STD_HPP_INCLUDED

@@ -1,21 +1,6 @@
-/*
-Copyright 2014 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2014, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_FUNCTION_RANGE_HPP_INCLUDED
 #define RANGE_FUNCTION_RANGE_HPP_INCLUDED
@@ -31,24 +16,25 @@ namespace range {
 /**
 The function must be move-constructible and move-assignable.
 */
-template <class Function> class function_range {
+template <class Function> class function_range
+{
 public:
-    typedef typename boost::mpl::if_ <std::is_function <Function>,
-        typename std::add_pointer <Function>::type, Function>::type
-        function_type;
+    typedef typename boost::mpl::if_<
+        std::is_function<Function>, typename std::add_pointer<Function>::type,
+        Function>::type function_type;
 
-    explicit function_range (Function const & function)
-    : function_ (function) {}
-    explicit function_range (Function && function)
-    : function_ (std::forward <Function> (function)) {}
+    explicit function_range(Function const & function) : function_(function) {}
+    explicit function_range(Function && function)
+    : function_(std::forward<Function>(function))
+    {}
 
-    function_range (function_range const &) = delete;
-    function_range (function_range && other)
-    : function_ (other.function_) {}
+    function_range(function_range const &) = delete;
+    function_range(function_range && other) : function_(other.function_) {}
 
-    function_range & operator = (function_range const &) = delete;
-    function_range & operator = (function_range && other) {
-        function_ = std::move (other.function_);
+    function_range & operator=(function_range const &) = delete;
+    function_range & operator=(function_range && other)
+    {
+        function_ = std::move(other.function_);
         return *this;
     }
 
@@ -56,53 +42,44 @@ public:
 
 private:
     function_type function_;
+
+private:
+    friend class helper::member_access;
+
+    auto empty(direction::front) const RETURNS(rime::false_);
+
+    auto chop_in_place(direction::front) RETURNS(function_());
 };
 
-template <qualification qualifier> struct function_range_tag;
+namespace function_range_operation {
 
-template <class Function> function_range <Function>
-    make_function_range (Function const & function)
-{ return function_range <Function> (function); }
+    struct function_range_tag {};
 
-template <class Function, qualification qualifier>
-    struct tag_of_qualified <function_range <Function>, qualifier>
-{ typedef function_range_tag <qualifier> type; };
+    template <class Function> inline auto implement_chop(
+        function_range_tag const & tag, function_range<Function> && range,
+        direction::front const & direction)
+        RETURNS(helper::chop_by_chop_in_place(std::move(range), direction));
 
-namespace operation {
+}  // namespace function_range_operation
 
-    /* Forward to underlying for default_direction, empty, size. */
+template <class Function> struct tag_of_qualified<function_range<Function>>
+{
+    typedef function_range_operation::function_range_tag type;
+};
 
-    template <qualification qualifier>
-        struct empty <function_range_tag <qualifier>, direction::front>
-    : rime::callable::always_default <rime::false_type> {};
+/** \brief
+Create a range whose elements are the results of consecutive function calls.
 
-    // size is unimplemented.
-    // first drop are defined automatically for rvalues.
+The resulting range implements operations on rvalues only: it is not possible
+to make a copy of it.
+The range is noncopyable, but movable.
+*/
+template <class Function>
+function_range<Function> make_function_range(Function const & function)
+{
+    return function_range<Function>(function);
+}
 
-    template <> struct chop <function_range_tag <temporary>, direction::front> {
-        template <class Function>
-            auto operator() (
-                direction::front, function_range <Function> && range) const
-        -> chopped <decltype (range.function()()), function_range <Function>>
-        {
-            return chopped <decltype (range.function()()),
-                function_range <Function>> (
-                    range.function()(), std::move (range));
-        }
-    };
+}  // namespace range
 
-    template <>
-        struct chop_in_place <function_range_tag <reference>, direction::front>
-    {
-        template <class Function>
-            auto operator() (
-                direction::front, function_range <Function> & range) const
-        -> decltype (range.function()())
-        { return range.function()(); }
-    };
-
-} // namespace operation
-
-} // namespace range
-
-#endif // RANGE_FUNCTION_RANGE_HPP_INCLUDED
+#endif  // RANGE_FUNCTION_RANGE_HPP_INCLUDED

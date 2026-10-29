@@ -1,172 +1,269 @@
-/*
-Copyright 2011-2014 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2011-2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_DETAIL_CORE_DROP_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_DROP_HPP_INCLUDED
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
-
-#include <boost/utility/enable_if.hpp>
-
-#include "meta/vector.hpp"
+#include "utility/overload_order.hpp"
 
 #include "rime/core.hpp"
 
 #include "utility/returns.hpp"
 
 #include "core_base.hpp"
+#include "core_default_direction.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 
-namespace operation {
+namespace helper {
 
-    template <class RangeTag, class Direction, class Increment, class Enable>
-        struct drop;
+    /** \brief
+    Return the range without the first \c increment elements from the direction
+    \c direction.
 
-    template <class RangeTag, class Direction, class Increment,
-        class Enable = void>
-    struct drop_constant;
-
-    template <class RangeTag, class Direction, class Enable = void>
-        struct drop_one;
-
-    typedef rime::size_t <1> one_type;
-
-    namespace drop_detail {
-
-        template <class RangeTag, class Direction> struct forward_to_chop {
-            template <class Range, class One> auto
-                operator() (Direction const & direction, One const &,
-                    Range && range) const
-            RETURNS (chop <RangeTag, Direction>() (
-                direction, std::forward <Range> (range)).forward_rest());
-        };
-
-    } // namespace drop_detail
-
-    /**
-    Convenience operation.
-    Can be specialised if "drop" is only available for an increment of one.
-
-    If operation::chop is implemented, this is automatically implemented in
-    terms of it.
-    */
-    template <class RangeTag, class Direction, class Enable>
-    struct drop_one
-    : boost::mpl::if_ <is_implemented <chop <RangeTag, Direction>>,
-        drop_detail::forward_to_chop <RangeTag, Direction>, unimplemented
-    >::type
-    {/*
-        template <class Range>
-            ... operator() (Direction const & direction,
-                Increment const & increment, Range && range) const;
-    */};
-
-    /**
-    Convenience operation.
-    Can be specialised if "drop" is only available for increments known at
-    compile time.
-    */
-    template <class RangeTag, class Direction, class Increment, class Enable>
-    struct drop_constant
-    : boost::mpl::if_ <rime::equal_constant <Increment, one_type>,
-        drop_one <RangeTag, Direction>, unimplemented
-    >::type
-    {/*
-        template <class Range>
-            ... operator() (Direction const & direction,
-                Increment const & increment, Range && range) const;
-    */};
-
-    /**
-    Return the range without the first "Increment" elements from the direction
-    "DirectionTag".
     The return type and value should be the same as the return type and value
-    of "Increment" calls to drop <DirectionTag, one_type>.
+    of \c increment calls to <c>drop (range, one_type(), direction)</c>.
+
+    To implement drop(), implement one of the member functions \c drop_one,
+    \c drop_constant, or \c drop, or one of the free functions
+    \c implement_drop_one, \c implement_drop_constant, or \c implement_drop.
+
+    If multiple of these are defined, then \c drop_one will be preferred if
+    applicable, then \c drop_constant, and finally \c drop, and free functions
+    over member functions.
+
+    If this is not implemented, but operation::chop is implemented, then drop
+    of one element is automatically implemented in terms of \c chop.
+    This only works for the qualification that \c chop is implemented for.
+
+    \param tag The range tag.
+    \param range The range itself.
+    \param increment The number of elements to remove.
+    \param direction The direction that the elements should be removed from.
     */
-    template <class RangeTag, class Direction, class Increment, class Enable>
-    struct drop
-    : boost::mpl::if_ <rime::is_constant <Increment>,
-        drop_constant <RangeTag, Direction, Increment>, unimplemented
-    >::type
-    {/*
-        template <class Range>
-            ... operator() (Direction const & direction,
-                Increment const & increment, Range && range) const;
-    */};
+    void implement_drop(unusable);
 
-} // namespace operation
+    /* \brief
+    Remove a constant number of elements from the range.
 
-namespace apply {
-    template <class ... Arguments> struct drop;
-} // namespace apply
+    \param tag The range tag.
+    \param range The range itself.
+    \param increment The number of elements to remove.
+    \param direction The direction that the elements should be removed from.
+    */
+    void implement_drop_constant(unusable);
+
+    /* \brief
+    Remove one element from the range.
+
+    This is not passed \c increment.
+
+    \param tag The range tag.
+    \param range The range itself.
+    \param direction The direction that the element should be removed from.
+    */
+    void implement_drop_one(unusable);
+
+}  // namespace helper
 
 namespace callable {
-    struct drop : generic <apply::drop> {};
-} // namespace callable
 
-static const auto drop = callable::drop();
+    namespace implementation {
 
-namespace apply {
+        using helper::implement_drop;
+        using helper::implement_drop_constant;
+        using helper::implement_drop_one;
 
-    namespace automatic_arguments {
+        typedef rime::size_t<1> one_type;
 
-        template <class Directions, class Increments, class Ranges,
-            class Enable = void>
-        struct drop : operation::unimplemented {};
+        /** \brief
+        Implement "drop" only by calling the direct implementation, not through
+        "chop"
 
-        // All arguments filled in: forward to operation::drop.
-        template <class Direction, class Increment, class Range>
-            struct drop <meta::vector <Direction>,
-                meta::vector <Increment>, meta::vector <Range>>
-        : operation::drop <typename tag_of <Range>::type,
-            Direction, typename std::decay <Increment>::type> {};
+        Compared to drop itself, this requires an additional argument
+        \c pick_overload() to be passed in, and no argument is optional.
 
-        // No Increment: insert one_type().
-        using operation::one_type;
-
-        template <class Direction, class Range>
-            struct drop <meta::vector <Direction>, meta::vector<>,
-                meta::vector <Range>, typename boost::enable_if <
-                    operation::is_implemented <drop <meta::vector <Direction>,
-                        meta::vector <one_type>, meta::vector <Range>>>
-                >::type>
+        \param range
+        \param increment
+        \param direction
+        \param overload_order
+        */
+        struct drop_direct
         {
-            drop <meta::vector <Direction>, meta::vector <one_type>,
-                meta::vector <Range>> implementation;
+            // If \c increment is one: call drop_one().
+            template <
+                class Range, class Increment, class Direction,
+                class Enable = typename std::enable_if<
+                    rime::equal_constant<Increment, one_type>::value>::type>
+            auto operator()(
+                Range && range, Increment const &, Direction const & direction,
+                overload_order<1> *) const
+                RETURNS(implement_drop_one(
+                    typename tag_of<Range>::type(), std::forward<Range>(range),
+                    direction));
 
-            auto operator() (Direction const & direction, Range && range) const
-            RETURNS (implementation (
-                direction, one_type(), std::forward <Range> (range)));
+            // Forward to member if possible.
+            template <
+                class Range, class Increment, class Direction,
+                class Enable = typename std::enable_if<
+                    rime::equal_constant<Increment, one_type>::value>::type>
+            auto operator()(
+                Range && range, Increment const &, Direction const & direction,
+                overload_order<2> *) const
+                RETURNS(
+                    helper::member_access::drop_one(
+                        std::forward<Range>(range), direction));
+
+            // If \c increment is constant: call drop_constant().
+            template <
+                class Range, class Increment, class Direction,
+                class Enable = typename std::enable_if<
+                    rime::is_constant<Increment>::value>::type>
+            auto operator()(
+                Range && range, Increment const & increment,
+                Direction const & direction, overload_order<3> *) const
+                RETURNS(implement_drop_constant(
+                    typename tag_of<Range>::type(), std::forward<Range>(range),
+                    increment, direction));
+
+            // Forward to member if possible.
+            template <
+                class Range, class Increment, class Direction,
+                class Enable = typename std::enable_if<
+                    rime::is_constant<Increment>::value>::type>
+            auto operator()(
+                Range && range, Increment const & increment,
+                Direction const & direction, overload_order<4> *) const
+                RETURNS(
+                    helper::member_access::drop_constant(
+                        std::forward<Range>(range), increment, direction));
+
+            // Call drop().
+            template <class Range, class Increment, class Direction>
+            auto operator()(
+                Range && range, Increment const & increment,
+                Direction const & direction, overload_order<5> *) const
+                RETURNS(implement_drop(
+                    typename tag_of<Range>::type(), std::forward<Range>(range),
+                    increment, direction));
+
+            // Forward to member if possible.
+            template <class Range, class Increment, class Direction>
+            auto operator()(
+                Range && range, Increment const & increment,
+                Direction const & direction, overload_order<6> *) const
+                RETURNS(
+                    helper::member_access::drop(
+                        std::forward<Range>(range), increment, direction));
         };
 
-    } // namespace automatic_arguments
+        struct drop
+        {
+        private:
+            struct dispatch : drop_direct
+            {
+                using drop_direct::operator();
 
-    template <class ... Arguments> struct drop
-    : automatic_arguments::categorise_arguments_default_direction <
-        automatic_arguments::drop, meta::vector <Arguments ...>>::type {};
+                // Additional, indirect implementation: forward to chop.
+                template <
+                    class Range, class Increment, class Direction,
+                    class Enable = typename std::enable_if<
+                        rime::is_constant<Increment>::value
+                        && Increment::value == 1>::type>
+                auto operator()(
+                    Range && range, Increment const &,
+                    Direction const & direction, overload_order<7> *) const
+                    RETURNS(implement_chop(
+                                typename tag_of<Range>::type(),
+                                std::forward<Range>(range), direction)
+                                .forward_rest());
 
-} // namespace apply
+                template <
+                    class Range, class Increment, class Direction,
+                    class Enable = typename std::enable_if<
+                        rime::is_constant<Increment>::value
+                        && Increment::value == 1>::type>
+                auto operator()(
+                    Range && range, Increment const &,
+                    Direction const & direction, overload_order<8> *) const
+                    RETURNS(
+                        helper::member_access::chop(
+                            std::forward<Range>(range), direction)
+                            .forward_rest());
+            };
 
-} // namespace range
+        public:
+            // With direction and increment.
+            template <
+                class Range, class Increment, class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(
+                Range && range, Increment const & increment,
+                Direction const & direction) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), increment, direction,
+                        pick_overload()));
+
+            // With increment but without direction: use default direction.
+            template <
+                class Range, class Increment,
+                class Enable = typename std::enable_if<
+                    is_range<Range>::value
+                    && !is_direction<Increment>::value>::type>
+            auto operator()(Range && range, Increment const & increment) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), increment,
+                        range::default_direction(range), pick_overload()));
+
+            // Without increment but with direction: use one_type().
+            template <
+                class Range, class Direction,
+                class Enable = typename std::enable_if<
+                    is_direction<Direction>::value>::type>
+            auto operator()(Range && range, Direction const & direction) const
+                RETURNS(
+                    dispatch()(
+                        std::forward<Range>(range), one_type(), direction,
+                        pick_overload()));
+
+            // Without increment or direction: use one_type() and
+            // default direction.
+            template <
+                class Range,
+                class Enable =
+                    typename std::enable_if<is_range<Range>::value>::type>
+            auto operator()(Range && range) const RETURNS(
+                dispatch()(
+                    std::forward<Range>(range), one_type(),
+                    range::default_direction(range), pick_overload()));
+        };
+
+    }  // namespace implementation
+
+    using implementation::drop;
+    using implementation::drop_direct;
+
+}  // namespace callable
+
+/** \brief
+Return the range without its first elements.
+
+\param range
+    The range to operate on.
+\param increment
+    The number of elements.
+\param direction
+    (optional) The direction from which the elements will be taken.
+*/
+static auto const drop = callable::drop();
+
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_DROP_HPP_INCLUDED
-

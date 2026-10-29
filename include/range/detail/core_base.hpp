@@ -1,21 +1,6 @@
-/*
-Copyright 2011-2014 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2011-2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 /** \file
 This file defines a skeleton and helper classes to define range operations.
@@ -30,432 +15,84 @@ too.
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
+#include <boost/mpl/and.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/identity.hpp>
+#include <boost/mpl/if.hpp>
 #include <boost/mpl/not.hpp>
-#include <boost/mpl/and.hpp>
 
 #include <boost/utility/enable_if.hpp>
 
-#include "meta/vector.hpp"
 #include "meta/transform.hpp"
+#include "meta/vector.hpp"
 
 #include "rime/core.hpp"
 
-#include "utility/returns.hpp"
 #include "utility/nested_callable.hpp"
+#include "utility/returns.hpp"
 
-#include "callable_traits.hpp"
 #include "../direction.hpp"
-
-#include "meta_split.hpp"
+#include "callable_traits.hpp"
 
 #include "core_tag.hpp"
 
 namespace range {
 
+using utility::overload_order;
+using utility::pick_overload;
+
+using ::callable_traits::decayed_result_of;
 using ::callable_traits::has;
 using ::callable_traits::result_of;
-using ::callable_traits::result_of_or;
 
-template <class Expression> struct decayed_result_of
-: std::decay <typename result_of <Expression>::type> {};
+/** \brief
+Contain names for operations on ranges, and helpers.
 
-/**
-Implementation of operations on ranges.
-Types in this namespace must be specialised to implement range operations.
-This is (hopefully) as simple as possible.
+Real implementations must be found through argument-dependent lookup.
 */
-namespace operation {
+namespace helper {
+
+    struct unusable;
 
     // Forward declarations for operations so they can refer to each other.
-    template <class RangeTag, class Enable = void> struct default_direction;
-    template <class RangeTag, class Direction, class Enable = void>
-        struct empty;
-    template <class RangeTag, class Direction, class Enable = void>
-        struct size;
-    template <class RangeTag, class Direction, class Enable = void>
-        struct first;
-    template <class RangeTag, class Direction, class Increment,
-            class Enable = void>
-        struct drop;
-    template <class RangeTag, class Direction, class Enable = void>
-        struct chop;
-    template <class RangeTag, class Direction, class Enable = void>
-        struct chop_in_place;
-    template <class RangeTag, class Direction, class Index, class Enable = void>
-        struct at;
+    void implement_default_direction(unusable);
+    void implement_empty(unusable);
+    void implement_size(unusable);
+    void implement_first(unusable);
+    void implement_drop(unusable);
+    void implement_chop(unusable);
+    void implement_chop_in_place(unusable);
+    void implement_at(unusable);
 
-    /**
-    Base class for marking an operation as not implemented.
-    Operations should be marked as unimplemented when their return type cannot
-    be computed, and in other cases where it can be decided at compile-time
-    that an operation is not be implemented.
+    /** \brief
+    Class that is convertible from direction::front and direction::back.
     */
-    struct unimplemented : ::callable_traits::unimplemented {
-        typedef unimplemented type;
+    struct front_or_back
+    {
+        front_or_back() {}
 
-        struct no_return_type {};
-
-        // Make false_type depend on Arguments so the static assertion is
-        // triggered only if operator() is actually called.
-        template <class ... Arguments> struct false_type : rime::false_type {};
-
-        template <class ... Arguments>
-            no_return_type operator() (Arguments const & ...) const
-        {
-            typedef typename
-                meta::first <meta::back, meta::vector <Arguments...>>::type
-                last_argument;
-            static_assert (is_range <last_argument>::value,
-                "Last argument must be a range. "
-                "Did you forget to include 'std_adaptor.hpp'?");
-            static_assert (false_type <Arguments ...>::value,
-                "Range operation not implemented.");
-            return no_return_type();
-        }
+        front_or_back(direction::front) {}
+        front_or_back(direction::back) {}
     };
 
-    using ::callable_traits::is_implemented;
+}  // namespace helper
 
-    namespace helper {
-        /**
-        Operation that returns a default-constructed object.
-        */
-        template <class ResultType> struct return_default_constructed {
-            template <class... Arguments>
-                ResultType operator() (Arguments &&...) const
-            { return ResultType(); }
-        };
+namespace callable { namespace implementation {
 
-        struct return_rvalue_reference {
-            template <class Argument>
-                Argument && operator() (Argument && argument) const
-            { return static_cast <Argument &&> (argument); }
-        };
+    // Forward declarations
+    struct default_direction;
+    struct empty;
+    struct first;
+    struct size;
+    struct drop;
+    struct chop;
+    struct chop_in_place;
 
-        /**
-        Operation that skips the arguments that are given and returns only the
-        result of the function applied to the last "Number" arguments.
-        */
-        template <unsigned Number, class SkipArguments, class Function>
-            struct call_with_last;
+}}  // namespace callable::implementation
 
-#if !(BOOST_CLANG && __clang_major__ == 3 && __clang_minor__ == 0)
-        template <unsigned Number, class ... SkipArguments, class Function>
-            struct call_with_last <
-                Number, meta::vector <SkipArguments ...>, Function>
-        {
-            template <class ... LastArguments> typename
-                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
-                std::result_of <Function (LastArguments ...)>>::type
-                operator() (SkipArguments const & ... skip_arguments,
-                    LastArguments && ... last_arguments) const
-            {
-                return Function() (
-                    std::forward <LastArguments> (last_arguments) ...);
-            }
-        };
-#else
-        // We would like to return the last argument.
-        // CLang 3.0 confuses types when unpacking SkipArguments ... with
-        // LastArgument && last_argument.
-        // Workaround:
-        template <unsigned Number, class Function>
-            struct call_with_last <Number, meta::vector<>, Function>
-        {
-            template <class ... LastArguments> typename
-                boost::lazy_enable_if_c <sizeof ... (LastArguments) == Number,
-                std::result_of <Function (LastArguments ...)>>::type
-                operator() (LastArguments && ... last_arguments) const
-            {
-                return Function() (
-                    std::forward <LastArguments> (last_arguments) ...);
-            }
-        };
+static direction::front const front = {};
+static direction::back const back = {};
 
-        template <unsigned Number, class SkipArguments, class Function>
-            struct call_with_last
-        {
-            typedef call_with_last <Number,
-                typename meta::drop <SkipArguments>::type, Function> recursive;
-
-            template <class FirstArgument, class ... OtherArguments>
-                auto operator() (FirstArgument const & first_argument,
-                    OtherArguments && ... other_arguments) const
-            RETURNS (recursive() (
-                std::forward <OtherArguments> (other_arguments)...));
-        };
-#endif
-
-    } // namespace helper
-
-    namespace range_detail {
-
-        /**
-        Return whether the operation is implemented for the forward direction
-        of Direction.
-        */
-        template <template <class, class, class> class Apply,
-            class RangeTag, class Direction>
-        struct is_implemented_forward
-        : is_implemented <Apply <RangeTag, typename result_of <
-            direction::callable::make_forward (Direction)>::type, void>> {};
-
-        /**
-        Perform operation Apply that takes a direction and a range with the
-        reverse direction.
-        \pre make_forward <Direction> is defined.
-        */
-        template <template <class, class, class> class Apply,
-            class RangeTag, class Direction>
-        struct forward_operation {
-            Apply <RangeTag, typename
-                result_of <direction::callable::make_forward (Direction)>::type,
-                void> implementation;
-
-            // Workaround for GCC 4.6.
-            template <class Range> struct result {
-                typedef decltype (implementation (
-                    ::direction::make_forward (std::declval <
-                        Direction const &>()), std::declval <Range>())) type;
-            };
-
-            template <class Range> typename result <Range>::type
-                operator() (Direction const & direction, Range && range) const
-            {
-                return implementation (::direction::make_forward (direction),
-                    std::forward <Range> (range));
-            }
-        };
-
-    } // namespace range_detail
-
-    /**
-    Return the default direction for a range.
-
-    If its argument is a range, this returns "front()" by default.
-    However, it can be overridden.
-    */
-    template <class RangeTag, class Enable> struct default_direction {
-        template <class Range> direction::front operator() (Range &&) const
-        { return direction::front(); }
-    };
-
-    template<> struct default_direction <not_a_range_tag> : unimplemented {};
-
-} // namespace operation
-
-/**
-Namespace with structures that normalise the parameters for the structures
-in the namespace "operation".
-They take as class template parameters the arguments that the functors (in
-callable) take, and remove cv-qualifications from directions and increments.
-
-The classes are defined for all template parameters, and are implemented
-(i.e. do not derive from operation::unimplemented, and have an operator()) only
-for the relevant ones.
-*/
-namespace apply {
-    /*
-    To allow the classes in callable:: to be implemented easily, with
-    template template parameters, the number of template parameters should be
-    variadic.
-    */
-
-    template <class ... Arguments> struct default_direction;
-
-    template <class Range> struct default_direction <Range>
-    : operation::default_direction <typename tag_of <Range>::type> {};
-
-} // namespace apply
-
-/**** Functions that can actually be called. *****/
-
-namespace callable {
-
-    using ::callable_traits::generic;
-
-    struct default_direction : generic <apply::default_direction> {};
-
-} // namespace callable
-
-/*
-Function objects.
-*/
-
-static const auto default_direction = callable::default_direction();
-
-static const direction::front front = {};
-static const direction::back back = {};
-
-namespace apply {
-    /*
-    For most operations, there is some automatic filling in of arguments
-    to be done.
-    They take zero or one (or sometimes more) directions, some variable
-    parameters, and one (or sometimes more) ranges.
-    If no direction is given, default_direction (range) is usually used.
-    The variable parameters can sometimes be filled in automatically too.
-    Below code deals with that.
-    */
-
-    namespace automatic_arguments {
-
-        /**
-        Categorise arguments into directions, other, and ranges.
-        "type" is set to Apply <meta::vector <Directions ...>,
-        meta::vector <Other...>, meta::vector <Ranges ...>, void>.
-        The types in Directions are decayed.
-        */
-        template <class Arguments> struct categorise_arguments {
-            typedef typename detail::split <
-                    meta::front, is_direction <boost::mpl::_>, Arguments>::type
-                directions_rest;
-
-            typedef typename meta::as_vector <meta::transform <
-                std::decay <boost::mpl::_>,
-                typename directions_rest::first>>::type directions;
-
-            typedef typename detail::split <
-                    meta::back, is_range <boost::mpl::_>,
-                    typename directions_rest::second
-                >::type rest_ranges;
-
-            // Here first and second are counted from the back!
-            typedef typename rest_ranges::second other;
-            typedef typename rest_ranges::first ranges;
-
-            typedef meta::vector <directions, other, ranges> type;
-        };
-
-        /**
-        Categorise Arguments into Directions, Other, and Ranges.
-        Return Apply <Directions, Other, Ranges>.
-        Except when Directions is empty.
-        Then it takes the default direction of the first range and passes
-        that as the first argument to
-        Apply <meta::vector <direction>, Other, Ranges>.
-        */
-        template <template <class, class, class, class> class Apply,
-            class Arguments, class Categorised =
-                typename categorise_arguments <Arguments>::type>
-        struct categorise_arguments_default_direction;
-
-        // At least one direction.
-        template <template <class, class, class, class> class Apply,
-            class Arguments, class ... Directions, class Other, class Ranges>
-        struct categorise_arguments_default_direction <Apply, Arguments,
-            meta::vector <meta::vector <Directions ...>, Other, Ranges>>
-        {
-            typedef Apply <meta::vector <Directions ...>, Other, Ranges, void>
-                type;
-        };
-
-        /**
-        Actually call the implementation with the default direction.
-        */
-        template <class Implementation, class Other, class Ranges>
-            struct prepend_default_direction;
-
-        // No direction.
-        template <template <class, class, class, class> class Apply,
-            class Arguments, class Other, class Ranges>
-        struct categorise_arguments_default_direction <Apply, Arguments,
-            meta::vector <meta::vector<>, Other, Ranges>>
-        {
-            typedef typename meta::first <Ranges>::type range_type;
-
-            typedef typename result_of_or <
-                callable::default_direction (range_type), void>::type direction;
-            typedef Apply <meta::vector <direction>, Other, Ranges, void>
-                implementation;
-            typedef typename boost::mpl::if_ <boost::mpl::and_ <
-                        has <callable::default_direction (range_type)>,
-                        operation::is_implemented <implementation>>,
-                    prepend_default_direction <implementation, Other, Ranges>,
-                    operation::unimplemented
-                >::type type;
-        };
-
-        // No direction but no range either: a bit silly.
-        // Needs disabling explicitly.
-        template <template <class, class, class, class> class Apply,
-            class Arguments, class Other>
-        struct categorise_arguments_default_direction <Apply, Arguments,
-            meta::vector <meta::vector<>, Other, meta::vector <>>>
-        : operation::unimplemented {};
-
-        /**
-        \return The default direction of the first range.
-        */
-        template <class Range, class ... MoreRanges> inline auto
-            first_default_direction (
-                Range const & range, MoreRanges const & ...)
-        RETURNS (::range::default_direction (range));
-
-        // Explicit specialisations for different numbers of "Other" to keep
-        // CLang 3.0 happy.
-        template <class Implementation, class ... Ranges>
-            struct prepend_default_direction <Implementation,
-                meta::vector<>, meta::vector <Ranges ...>>
-        {
-            Implementation implementation;
-
-            auto operator() (Ranges && ... ranges) const
-            RETURNS (implementation (first_default_direction (ranges ...),
-                std::forward <Ranges> (ranges) ...));
-        };
-
-        template <class Implementation, class Other, class ... Ranges>
-            struct prepend_default_direction <Implementation,
-                meta::vector <Other>, meta::vector <Ranges ...>>
-        {
-            Implementation implementation;
-
-            auto operator() (Other && other, Ranges && ... ranges) const
-            RETURNS (implementation (first_default_direction (ranges ...),
-                std::forward <Other> (other),
-                std::forward <Ranges> (ranges) ...));
-        };
-
-        template <class Implementation, class Other1, class Other2,
-                class ... Ranges>
-            struct prepend_default_direction <Implementation,
-                meta::vector <Other1, Other2>, meta::vector <Ranges ...>>
-        {
-            Implementation implementation;
-
-            auto operator() (Other1 && other_1, Other2 && other_2,
-                Ranges && ... ranges) const
-            RETURNS (implementation (first_default_direction (ranges ...),
-                std::forward <Other1> (other_1),
-                std::forward <Other2> (other_2),
-                std::forward <Ranges> (ranges) ...));
-        };
-
-        template <class Implementation, class Other1, class Other2,
-            class Other3, class ... Ranges>
-        struct prepend_default_direction <Implementation,
-            meta::vector <Other1, Other2, Other3>, meta::vector <Ranges ...>>
-        {
-            Implementation implementation;
-
-            auto operator() (Other1 && other_1, Other2 && other_2,
-                Other3 && other_3, Ranges && ... ranges) const
-            RETURNS (implementation (first_default_direction (ranges ...),
-                std::forward <Other1> (other_1),
-                std::forward <Other2> (other_2),
-                std::forward <Other3> (other_3),
-                std::forward <Ranges> (ranges) ...));
-        };
-
-    } // namespace automatic_arguments
-
-} // namespace apply
-
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_BASE_HPP_INCLUDED
-

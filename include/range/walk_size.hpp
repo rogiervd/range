@@ -1,21 +1,6 @@
-/*
-Copyright 2013 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2013, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_WALK_SIZE_HPP_INCLUDED
 #define RANGE_WALK_SIZE_HPP_INCLUDED
@@ -28,49 +13,56 @@ namespace range {
 
 namespace callable {
 
-    struct walk_size {
-        template <class Direction, class Range> typename
-            result_of_or <range::callable::size (Direction, Range)>::type
-        operator() (Direction const & direction, Range && range) const
-        { return range::size (direction, std::forward <Range> (range)); }
+    struct walk_size
+    {
+        // Use size.
+        template <class Range, class Direction>
+        typename result_of<range::callable::size(Range, Direction)>::type
+            operator()(Range && range, Direction const & direction) const
+        {
+            return range::size(std::forward<Range>(range), direction);
+        }
 
-        template <class Direction, class Range>
-            typename boost::disable_if <
-                range::has <range::callable::size (Direction, Range)>,
-                std::size_t>::type
-        operator() (Direction const & direction, Range && range) const {
+        template <class Range, class Direction> typename boost::disable_if<
+            range::has<range::callable::size(Range, Direction)>,
+            std::size_t>::type
+            operator()(Range && range, Direction const & direction) const
+        {
             std::size_t size = 0;
-            auto current = range::view (range);
-            while (!range::empty (current)) {
-                current = range::drop (direction, current);
-                ++ size;
+            auto current = range::view(range, direction);
+            while (!range::empty(current, direction)) {
+                current = range::drop(current, direction);
+                ++size;
             }
             return size;
         }
 
         // No direction: use default_direction.
-        template <class Range> auto operator() (Range && range) const
-        -> decltype (std::declval <walk_size>() (
-            range::default_direction (range), std::declval <Range>()))
+        template <class Range> auto operator()(Range && range) const
+            -> decltype(std::declval<walk_size>()(
+                std::declval<Range>(), range::default_direction(range)))
         {
-            return (*this) (
-                range::default_direction (range), std::forward <Range> (range));
+            return (*this)(
+                std::forward<Range>(range), range::default_direction(range));
         }
     };
 
-} // namespace callable
+}  // namespace callable
 
-/**
-walk_size (range) or walk_size (direction, range) computes the number of
-elements in any type of range.
-If the range has a size() operation, that is used.
-If not, then the drop() operation is used until the range is empty, and the
+/** \brief
+Computes the number of elements in a range.
+
+If the range has a \c size() operation, that is used.
+If not, then the \c drop() operation is used until the range is empty, and the
 number of steps is counted.
+
 \todo Currently only works on homogeneous ranges; use fold to remedy this.
+
+\param range The range to count the number of elements of.
+\param direction The direction to traverse the range in.
 */
-static const auto walk_size = callable::walk_size();
+static auto const walk_size = callable::walk_size();
 
-} // namespace range
+}  // namespace range
 
-#endif // RANGE_WALK_SIZE_HPP_INCLUDED
-
+#endif  // RANGE_WALK_SIZE_HPP_INCLUDED

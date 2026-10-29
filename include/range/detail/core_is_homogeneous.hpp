@@ -1,113 +1,70 @@
-/*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2011-2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
-
-#include <boost/utility/enable_if.hpp>
-
-#include "meta/vector.hpp"
-#include "meta/all.hpp"
+#include "utility/enable_if_compiles.hpp"
 
 #include "rime/core.hpp"
 
 #include "../direction.hpp"
 
+#include "core_base.hpp"
+#include "core_chop_in_place.hpp"
+
 namespace range {
 
-namespace detail {
+namespace is_homogeneous_detail {
 
-    /**
-    Return true iff Range is homogeneous in Direction.
-    This means that either:
-    \li <c>drop \<Direction, Range></c> exists and returns a range of type
-        \a Range modulo qualifications.
-    \li <c>chop \<Direction, Range></c> exists and the range that it returns
-        is of type \a Range modulo qualifications.
+    /** \brief
+    Return \c true iff Range is homogeneous in Direction.
+
+    This means that \c chop_in_place is implemented, either directly, or through
+    \c drop or \c chop.
     */
-    template <class Direction, class Range, class Enable = void>
-        struct is_homogeneous_in
-    : boost::mpl::false_ {};
+    template <class Range, class Direction, class Enable = void>
+    struct is_homogeneous : rime::false_type {};
 
-    template <class Direction, class Range>
-    struct is_homogeneous_in <Direction, Range, typename
-        boost::enable_if <range::has <callable::drop (Direction, Range)>>::type>
-    : boost::is_same <
-        typename std::decay <Range>::type,
-        typename decayed_result_of <callable::drop (Direction, Range)>::type
-    > {};
+    template <class Range, class Direction> struct is_homogeneous<
+        Range, Direction,
+        typename utility::enable_if_compiles<
+            decltype(std::declval<callable::chop_in_place>()(
+                std::declval<Range &>(), std::declval<Direction>()))>::type>
+    : rime::true_type {};
 
-    template <class Direction, class Range>
-    struct is_homogeneous_in <Direction, Range, typename
-        boost::enable_if_c <
-            !range::has <callable::drop (Direction, Range)>::value &&
-            range::has <callable::chop (Direction, Range)>::value
-        >::type>
-    : boost::is_same <
-        typename std::decay <Range>::type,
-        typename decayed_result_of <callable::chop (Direction, Range)>::type
-            ::rest_type
-    > {};
+}  // namespace is_homogeneous_detail
 
-    /**
-    Metafunction that returns true iff the range, the last argument, is
-    homogeneous in all directions.
-    */
-    template <class Directions, class Range> struct is_homogeneous;
+/** \brief
+Metafunction that returns true iff <c>drop (range, direction)</c> returns a
+Range, or if <c>chop (range, direction)</c> is implemented.
 
-    template <class ... Directions, class Range>
-        struct is_homogeneous <meta::vector <Directions ...>, Range>
-    : meta::all <meta::vector <is_homogeneous_in <Directions, Range>...>> {};
-
-} // namespace detail
-
-/**
-Metafunction that returns true iff drop (Direction, Range) returns a Range
-for all Directions.
 This means, for example, that a recursive iteration can be written as a loop.
 Since applying "drop" with an increment is equivalent to applying "drop" a
 number of times, a homogeneous range cannot become heterogeneous.
 
-The last argument is Range.
-The arguments before it form Directions.
-If only one argument is given, it is Range, and its default direction is used.
-Range can also be a callable expression.
+\param Range
+    The range to check for homogeneousness.
+    Qualifications are ignored.
+\param Direction (optional)
+    The direction.
+    If left out, the default direction is used.
 */
-template <class ... Arguments> struct is_homogeneous;
+template <
+    class Range,
+    class Direction =
+        decltype(callable::default_direction()(std::declval<Range>()))>
+struct is_homogeneous : is_homogeneous_detail::is_homogeneous<
+                            typename std::decay<Range>::type, Direction>
+{
+    static_assert(is_range<Range>::value, "Range must be a range.");
+    static_assert(
+        is_direction<Direction>::value, "Direction must be a direction.");
+};
 
-template <class ... Arguments> struct is_homogeneous
-: rime::as_rime_constant <
-    detail::is_homogeneous <
-        typename meta::drop <meta::back, meta::vector <Arguments ...>>::type,
-        typename meta::first <meta::back, meta::vector <Arguments ...>>::type>
->::type {};
-
-template <class Range> struct is_homogeneous <Range>
-: is_homogeneous <
-    typename result_of <callable::default_direction (Range)>::type, Range>
-{};
-
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED
-

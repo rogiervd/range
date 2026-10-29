@@ -1,21 +1,6 @@
-/*
-Copyright 2011, 2012, 2013 Rogier van Dalen.
-
-This file is part of Rogier van Dalen's Range library for C++.
-
-This library is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+// SPDX-FileCopyrightText: Copyright 2011-2013, 2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_MEMBER_VIEW_HPP_INCLUDED
 #define RANGE_MEMBER_VIEW_HPP_INCLUDED
@@ -24,14 +9,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/utility/enable_if.hpp>
 
-#include <boost/mpl/or.hpp>
 #include <boost/mpl/and.hpp>
+#include <boost/mpl/or.hpp>
 
 #include "core.hpp"
 
 #include "meta/vector.hpp"
 
 #include "utility/returns.hpp"
+
+#include "detail/meta_is_linear_subset.hpp"
 
 namespace range {
 
@@ -71,41 +58,55 @@ template <typename Member, Member> struct member_extractor;
 
 // Specialisation for a member variable.
 template <typename Structure, typename Type, Type Structure::* member>
-    struct member_extractor <Type Structure::*, member>
+struct member_extractor<Type Structure::*, member>
 {
-    Type & operator() (Structure & structure) const
-    { return structure.*member; }
+    Type & operator()(Structure & structure) const { return structure.*member; }
 
-    Type const & operator() (Structure const & structure) const
-    { return structure.*member; }
+    Type const & operator()(Structure const & structure) const
+    {
+        return structure.*member;
+    }
 
-    Type && operator() (Structure && structure) const
-    { return static_cast <Type &&> (structure.*member); }
+    Type && operator()(Structure && structure) const
+    {
+        return static_cast<Type &&>(structure.*member);
+    }
 };
 
 // Specialisation for a member function.
-template <typename Structure, typename ReturnType,
-    ReturnType (Structure::*member_function) ()>
-struct member_extractor <ReturnType (Structure::*)(), member_function> {
-    ReturnType operator() (Structure & structure) const
-    { return (structure.*member_function)(); }
+template <
+    typename Structure, typename ReturnType,
+    ReturnType (Structure::*member_function)()>
+struct member_extractor<ReturnType (Structure::*)(), member_function>
+{
+    ReturnType operator()(Structure & structure) const
+    {
+        return (structure.*member_function)();
+    }
 };
 
-template <typename Structure, typename ReturnType,
-    ReturnType (Structure::*member_function) () const>
-struct member_extractor <ReturnType (Structure::*)() const, member_function> {
-    ReturnType operator() (Structure const & structure) const
-    { return (structure.*member_function)(); }
+template <
+    typename Structure, typename ReturnType,
+    ReturnType (Structure::*member_function)() const>
+struct member_extractor<ReturnType (Structure::*)() const, member_function>
+{
+    ReturnType operator()(Structure const & structure) const
+    {
+        return (structure.*member_function)();
+    }
 };
 
 // Specialisation for a free function.
-template <typename Structure, typename ReturnType,
-    ReturnType (* function) (Structure)>
-struct member_extractor <ReturnType (*) (Structure), function> {
+template <
+    typename Structure, typename ReturnType, ReturnType (*function)(Structure)>
+struct member_extractor<ReturnType (*)(Structure), function>
+{
     typedef ReturnType value_type;
 
-    ReturnType operator() (Structure structure) const
-    { return (function) (std::forward <Structure> (structure)); }
+    ReturnType operator()(Structure structure) const
+    {
+        return (function) (std::forward<Structure>(structure));
+    }
 };
 
 namespace detail {
@@ -115,20 +116,24 @@ namespace detail {
     class as a base.
     This makes conversion (such as in "drop") easy.
     */
-    template <class Structure> class member_view_base {
-        static_assert (std::is_reference <Structure>::value,
+    template <class Structure> class member_view_base
+    {
+        static_assert(
+            std::is_reference<Structure>::value,
             "Structure must be an lvalue or rvalue reference.");
+
     public:
-        member_view_base (Structure structure_)
-        : structure_ (&structure_) {}
+        member_view_base(Structure structure_) : structure_(&structure_) {}
 
         Structure structure() const
-        { return static_cast <Structure> (*structure_); }
+        {
+            return static_cast<Structure>(*structure_);
+        }
 
     private:
-        typename std::add_pointer <Structure>::type structure_;
+        typename std::add_pointer<Structure>::type structure_;
     };
-} // namespace detail
+}  // namespace detail
 
 /**
 Lightweight range that traverses a struct or class.
@@ -143,91 +148,80 @@ Extractors are passed the structure qualified in exactly that way, and are
 free to do with this with they please.
 */
 template <class Structure, class Extractors> class member_view
-: public detail::member_view_base <Structure> {
-    typedef detail::member_view_base <Structure> base;
+: public detail::member_view_base<Structure>
+{
+    typedef detail::member_view_base<Structure> base;
+    static std::size_t constexpr extractor_num = meta::size<Extractors>::value;
+
 public:
-    explicit member_view (Structure structure)
-    : base (static_cast <Structure> (structure)) {}
+    explicit member_view(Structure structure)
+    : base(static_cast<Structure>(structure))
+    {}
 
     /**
     Generalised copy constructor.
-    It is not checked whether Extractors2 is a superset of Extractors.
+    Extractors2 must be a superset of Extractors.
     */
-    template <class Extractors2>
-        member_view (member_view <Structure, Extractors2> const & that)
-    : base (that) {}
+    template <class Extractors2> member_view(
+        member_view<Structure, Extractors2> const & that,
+        typename boost::enable_if<
+            detail::is_linear_subset<Extractors, Extractors2>>::type * = 0)
+    : base(that)
+    {}
 
     typedef Structure structure_type;
     typedef Extractors extractors_type;
+
+private:
+    friend class helper::member_access;
+
+    auto empty(direction::front) const
+        RETURNS(rime::bool_<extractor_num == 0>());
+
+    auto size(direction::front) const RETURNS(rime::size_t<extractor_num>());
+
+    // first.
+    template <class Direction> struct first_extractor
+    : meta::first<Direction, Extractors> {};
+
+    template <class Direction> struct first_type
+    : result_of<typename first_extractor<Direction>::type(Structure)> {};
+
+    template <class Direction> typename boost::lazy_enable_if_c<
+        (extractor_num != 0), first_type<Direction>>::type
+        first(Direction) const
+    {
+        return typename first_extractor<Direction>::type()(this->structure());
+    }
+
+    // drop.
+    template <class Increment, class Direction> struct drop_result
+    {
+        typedef typename meta::drop<Direction, Increment, Extractors>::type
+            new_extractors;
+        typedef member_view<Structure, new_extractors> type;
+    };
+
+    template <class Direction, class Increment>
+    typename boost::lazy_enable_if_c<
+        (std::size_t(Increment::value) <= extractor_num),
+        drop_result<Increment, Direction>>::type
+        drop_constant(Increment const &, Direction const &) const
+    {
+        return typename drop_result<Increment, Direction>::type(*this);
+    }
 };
 
-template <std::size_t Size> struct member_view_tag;
+namespace member_view_operation {
+    struct member_view_tag {};
+}  // namespace member_view_operation
 
 template <class Structure, class Extractors>
-    struct tag_of_qualified <member_view <Structure, Extractors> >
+struct tag_of_qualified<member_view<Structure, Extractors>>
 {
-    typedef member_view_tag <meta::size <Extractors>::type::value> type;
+    typedef member_view_operation::member_view_tag type;
 };
 
-namespace operation {
-
-    // empty
-    template <std::size_t size>
-        struct empty <member_view_tag <size>, direction::front>
-    : helper::return_default_constructed <rime::false_type> {};
-
-    template <> struct empty <member_view_tag <0u>, direction::front>
-    : helper::return_default_constructed <rime::true_type> {};
-
-    // size
-    template <std::size_t Size>
-        struct size <member_view_tag <Size>, direction::front>
-    : helper::return_default_constructed <rime::size_t <Size>> {};
-
-    // first
-    template <std::size_t Size, class Direction>
-        struct first <member_view_tag <Size>, Direction,
-            typename boost::enable_if <boost::mpl::or_ <
-                std::is_same <Direction, direction::front>,
-                std::is_same <Direction, direction::back>
-        >>::type>
-    {
-        template <class Range> struct extractor
-        : meta::first <Direction, typename Range::extractors_type> {};
-
-        template <class Range> auto operator() (Direction const &,
-            Range const & range) const
-        RETURNS (typename extractor <Range>::type() (range.structure()));
-    };
-
-    template <> struct first <member_view_tag <0u>, direction::front>
-    : unimplemented {};
-    template <> struct first <member_view_tag <0u>, direction::back>
-    : unimplemented {};
-
-    // drop_constant (instantiated only if Increment is constant).
-    template <std::size_t size, class Direction, class Increment>
-        struct drop_constant <member_view_tag <size>, Direction, Increment,
-            // Only implement if Increment <= size.
-            typename std::enable_if <(std::size_t (Increment::value) <= size)
-        >::type>
-    {
-        template <class Range> struct result {
-            typedef typename std::decay <Range>::type range;
-            typedef typename meta::drop <Direction, Increment,
-                typename range::extractors_type>::type new_extractors;
-            typedef member_view <typename range::structure_type, new_extractors>
-                type;
-        };
-
-        template <class Range> auto
-            operator() (Direction const &, Increment const &,
-                Range const & range) const
-        RETURNS (typename result <Range>::type (range));
-    };
-
-} // namespace operation
-
-} // namespace range
+}  // namespace range
 
 #endif  // RANGE_MEMBER_VIEW_HPP_INCLUDED

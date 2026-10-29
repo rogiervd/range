@@ -1,18 +1,6 @@
-/*
-Copyright 2013-2015 Rogier van Dalen.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: Copyright 2013-2015 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
 
 // Make Doxygen pick up the macro.
 /** \file */
@@ -23,15 +11,17 @@ limitations under the License.
 #include "range/core.hpp"
 
 namespace range { namespace for_each_macro_detail {
-    template <class Type> struct assert_is_range {
-        static_assert (::range::is_range <Type>::value,
+    template <class Type> struct assert_is_range
+    {
+        static_assert(
+            ::range::is_range<Type>::value,
             "Second parameter to RANGE_FOR_EACH must be a range");
-        static_assert (::range::is_homogeneous <
-            range::callable::view (Type)>::value,
+        static_assert(
+            ::range::is_homogeneous<range::callable::view(Type)>::value,
             "Range passed into RANGE_FOR_EACH must be homogeneous");
         typedef Type type;
     };
-}} // namespace range::for_each_macro_detail
+}}  // namespace range::for_each_macro_detail
 
 /** \brief
 Iterate through a homogeneous range.
@@ -52,36 +42,44 @@ The expression is executed exactly once.
 \note This macro has been inspired by Boost.Foreach.
 
 \internal
+The names of the internal variables include \c variable_name, so that
+nested loops (which must use different variable names) do not declare
+variables that hide each other's.
+
 This is not very readable.
 A more readable version with comments is in test/for_each_macro.cpp.
 */
-#define RANGE_FOR_EACH(variable_name, range_expression) \
-        /* Declare variable. */ \
-        if (bool RANGE_FOR_EACH_internal_done = false) {} else \
-        /* Declare reference to range_expression. */ \
-        for (auto && RANGE_FOR_EACH_internal_range = range_expression; \
-            !RANGE_FOR_EACH_internal_done; \
-            RANGE_FOR_EACH_internal_done = true) \
-        /* Declare variable. */ \
-        if (bool RANGE_FOR_EACH_internal_seen = false) {} else \
-            /* Actual for loop. */ \
-            for (auto RANGE_FOR_EACH_internal_view = \
-                    ::range::forward_view (static_cast < \
-                        decltype (RANGE_FOR_EACH_internal_range)> ( \
-                            RANGE_FOR_EACH_internal_range)); \
-                    ! ::range::empty (RANGE_FOR_EACH_internal_view); \
-                    RANGE_FOR_EACH_internal_seen = \
-                        !RANGE_FOR_EACH_internal_seen) \
-                if (RANGE_FOR_EACH_internal_seen) \
-                    /* "break" statement inside */ \
-                    break; \
-                else \
-                    /* Declare variable "variable_name". */ \
-                    for (auto && variable_name = \
-                        ::range::chop_in_place (RANGE_FOR_EACH_internal_view); \
-                        !RANGE_FOR_EACH_internal_seen; \
-                        ((void) variable_name), \
-                            RANGE_FOR_EACH_internal_seen = true)
+#define RANGE_FOR_EACH(variable_name, range_expression)                          \
+    /* Declare variable. */                                                      \
+    if (bool RANGE_FOR_EACH_done_##variable_name = false) {                      \
+    } else                                                                       \
+        /* Declare reference to range_expression. */                             \
+        for (auto && RANGE_FOR_EACH_range_##variable_name = range_expression;    \
+             !RANGE_FOR_EACH_done_##variable_name;                               \
+             RANGE_FOR_EACH_done_##variable_name = true)                         \
+            /* Declare variable. */                                              \
+            if (bool RANGE_FOR_EACH_seen_##variable_name = false) {              \
+            } else                                                               \
+                /* Actual for loop. */                                           \
+                for (                                                            \
+                    auto RANGE_FOR_EACH_view_##variable_name =                   \
+                        ::range::forward_view(                                   \
+                            static_cast<                                         \
+                                decltype(RANGE_FOR_EACH_range_##variable_name)>( \
+                                RANGE_FOR_EACH_range_##variable_name));          \
+                    !::range::empty(RANGE_FOR_EACH_view_##variable_name);        \
+                    RANGE_FOR_EACH_seen_##variable_name =                        \
+                        !RANGE_FOR_EACH_seen_##variable_name)                    \
+                    if (RANGE_FOR_EACH_seen_##variable_name)                     \
+                        /* "break" statement inside */                           \
+                        break;                                                   \
+                    else                                                         \
+                        /* Declare variable "variable_name". */                  \
+                        for (auto && variable_name = ::range::chop_in_place(     \
+                                 RANGE_FOR_EACH_view_##variable_name);           \
+                             !RANGE_FOR_EACH_seen_##variable_name;               \
+                             ((void) variable_name),                             \
+                                     RANGE_FOR_EACH_seen_##variable_name =       \
+                                         true)
 
 #endif  // RANGE_FOR_EACH_MACRO_HPP_INCLUDED
-

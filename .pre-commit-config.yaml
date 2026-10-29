@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+fail_fast: false
+exclude: '^\.clang-(format|tidy)$'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        types_or: [file, text]
+      - id: end-of-file-fixer
+        types_or: [python, c++, bazel, yaml]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+        types: [text]
+      - id: mixed-line-ending
+        types: [text]
+        args: [--fix=lf]
+      - id: check-added-large-files
+        args: [--maxkb=32]
+  - repo: https://github.com/keith/pre-commit-buildifier
+    rev: 8.5.1.3
+    hooks:
+      - id: buildifier
+      - id: buildifier-lint
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.21.0
+    hooks:
+      - id: yamlfmt
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v23.1.2
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+  # Check licensing and copyright information, following the REUSE
+  # specification by the FSF Europe: https://reuse.software
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      # Check only the files that pre-commit passes (tracked or staged files).
+      - id: reuse-lint-file
+      # Check the whole project, including that every licence in LICENSES/ is
+      # used and present.
+      # This also checks untracked files, so it runs only when asked for, e.g.
+      # in CI:
+      #   pre-commit run reuse --hook-stage manual --all-files
+      - id: reuse
+        stages: [manual]
+
+# Not used, on purpose:
+# actionlint has false positives e.g. when a new image is released.
+# The following require a compile_commands.json file (see README.md):
+#   clang-tidy
+#   cpplint
+#   cppcheck
+#   include-what-you-use

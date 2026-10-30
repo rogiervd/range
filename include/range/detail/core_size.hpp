@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <boost/exception/exception.hpp>
+#include "boost/exception/exception.hpp"
 
 #include "utility/overload_order.hpp"
 

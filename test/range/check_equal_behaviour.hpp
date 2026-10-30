@@ -11,7 +11,7 @@ Helper to test the behaviour of a range with respect to all operations.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"

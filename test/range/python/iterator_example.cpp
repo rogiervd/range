@@ -9,8 +9,8 @@ test-python_range.py.
 */
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/string.h"
 
 #include "range/python/iterator.hpp"
 
@@ -18,7 +18,7 @@ test-python_range.py.
 
 #include <string>
 
-#include <boost/optional.hpp>
+#include "boost/optional.hpp"
 
 #include "range/std/list.hpp"
 #include "range/std/view_optional.hpp"

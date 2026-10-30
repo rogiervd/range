@@ -21,7 +21,7 @@ implementation linearly inherits from all of them.
 #include <stdexcept>
 #include <utility>
 
-#include <boost/mpl/placeholders.hpp>
+#include "boost/mpl/placeholders.hpp"
 
 #include "utility/unique_ptr.hpp"
 

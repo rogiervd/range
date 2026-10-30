@@ -12,13 +12,13 @@ Other aspects are tested on different types of ranges by
 */
 
 #define BOOST_TEST_MODULE test_range_core
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/core.hpp"
 
 #include <type_traits>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "weird_count.hpp"
 #include "weird_direction.hpp"

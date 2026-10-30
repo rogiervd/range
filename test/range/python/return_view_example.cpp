@@ -9,8 +9,8 @@ test-return_view.py.
 */
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/string.h"
 
 #include "range/python/return_view.hpp"
 

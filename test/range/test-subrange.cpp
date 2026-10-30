@@ -50,9 +50,9 @@ template <class Count> void check_with_count(Count const & original)
         BOOST_CHECK(!empty(sub, front));
         BOOST_CHECK(!empty(sub, back));
 
-        BOOST_CHECK_EQUAL(size(sub), 10);
-        BOOST_CHECK_EQUAL(size(sub, front), 10);
-        BOOST_CHECK_EQUAL(size(sub, back), 10);
+        BOOST_CHECK_EQUAL(size(sub), 10u);
+        BOOST_CHECK_EQUAL(size(sub, front), 10u);
+        BOOST_CHECK_EQUAL(size(sub, back), 10u);
 
         BOOST_CHECK_EQUAL(first(sub), 0);
         BOOST_CHECK_EQUAL(first(sub, front), 0);

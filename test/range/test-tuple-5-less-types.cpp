@@ -9,7 +9,7 @@ These tests are very similar to the ones in test-less-lexicographical-*.cpp.
 */
 
 #define BOOST_TEST_MODULE range_test_tuple_less
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/less_lexicographical.hpp"
 #include "range/reverse.hpp"

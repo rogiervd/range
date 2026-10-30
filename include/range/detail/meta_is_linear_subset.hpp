@@ -5,7 +5,7 @@
 #ifndef RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED
 #define RANGE_DETAIL_IS_META_LINEAR_SUBSET_HPP_INCLUDED
 
-#include <meta/vector.hpp>
+#include "meta/vector.hpp"
 
 namespace range { namespace detail {
 

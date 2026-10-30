@@ -5,8 +5,8 @@
 #ifndef RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 #define RANGE_LESS_LEXICOGRAPHICAL_HPP_INCLUDED
 
-#include <boost/mpl/and.hpp>
-#include <boost/utility/enable_if.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "rime/always.hpp"
 #include "rime/call_if.hpp"

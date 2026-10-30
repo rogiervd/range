@@ -11,7 +11,7 @@ the container).
 #ifndef RANGE_HEAVYWEIGHT_HPP_INCLUDED
 #define RANGE_HEAVYWEIGHT_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
 #include "core.hpp"
 

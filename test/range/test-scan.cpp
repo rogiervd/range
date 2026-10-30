@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_scan
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/scan.hpp"
 
@@ -11,7 +11,7 @@
 #include <tuple>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include "boost/optional.hpp"
 
 #include "utility/returns.hpp"
 

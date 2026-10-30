@@ -9,8 +9,8 @@ test-python_range.py.
 */
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/string.h>
+#include "nanobind/nanobind.h"
+#include "nanobind/stl/string.h"
 
 #include <string>
 

@@ -12,8 +12,8 @@ Define optimised versions of "equal" and "less_lexicographical" for tuples.
 
 #include <type_traits>
 
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/pair.hpp>
+#include "boost/mpl/bool.hpp"
+#include "boost/mpl/pair.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"

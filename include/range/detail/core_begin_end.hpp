@@ -6,6 +6,9 @@
 #define RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 
 #include "core_base.hpp"
+#include "core_empty.hpp"
+#include "core_is_homogeneous.hpp"
+#include "core_view.hpp"
 
 namespace range {
 

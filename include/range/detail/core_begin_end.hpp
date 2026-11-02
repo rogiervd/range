@@ -245,7 +245,7 @@ the same type, or they may be different types.
     This range must be copyable, because end() needs to be called on the same
 range.
 */
-template <class Range> auto begin(Range & range)
+template <class Range> inline auto begin(Range & range)
 {
     return callable::begin()(range);
 }
@@ -264,7 +264,7 @@ the same type, or they may be different types.
     This range must be copyable, because begin() needs to be called on the same
 range.
 */
-template <class Range> auto end(Range & range)
+template <class Range> inline auto end(Range & range)
 {
     return callable::end()(range);
 }

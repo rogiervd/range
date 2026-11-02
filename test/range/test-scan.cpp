@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
     {
         std::vector<int> v {1, 2, 3, 4, 5};
 
-        auto s = range::scan(0, v, [](int a, int b) { return a + b; });
+        auto s = range::scan(0, v, plus());
 
         int sum = 0;
         for (int i : s) {

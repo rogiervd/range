@@ -170,7 +170,7 @@ namespace callable {
                 // Forward to "implement_end".
                 template <class Range>
                 auto operator()(Range & range, overload_order<0> *) const
-                    RETURNS(implement_end(range), utility::pick_overload());
+                    RETURNS(implement_end()(range, utility::pick_overload()));
 
                 // Forward to member if possible.
                 template <class Range>

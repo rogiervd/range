@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2013-2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013-2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -33,5 +33,14 @@ BOOST_AUTO_TEST_CASE(tuple_basic)
     // Checks on three element are in the other file.
     // Otherwise, compilers start using more than 1GB of memory.
 }
+
+BOOST_AUTO_TEST_CASE(test_tuple_does_not_have_begin_end)
+{
+    static_assert(
+        !range::has<range::callable::begin(range::tuple<int, double>)>::value);
+    static_assert(
+        !range::has<range::callable::end(range::tuple<int, double>)>::value);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

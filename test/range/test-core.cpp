@@ -5,10 +5,13 @@
 /** \file
 This tests some aspects of range/core.hpp.
 Other aspects are tested on different types of ranges by
-- member_view.cpp
-- std_container.cpp
-- std_tuple.cpp
-- function_range.cpp
+- test-member_view.cpp
+- test-std_container.cpp
+- test-std_tuple.cpp
+- test-function_range.cpp
+- test-tuple.cpp
+- test-transform.cpp
+- test-scan.cpp
 */
 
 #define BOOST_TEST_MODULE test_range_core

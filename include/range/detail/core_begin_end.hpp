@@ -5,7 +5,7 @@
 #ifndef RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 #define RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 
-#include <utility>
+#include <variant>  // For std::monostate.
 
 #include "core_base.hpp"
 #include "core_empty.hpp"

@@ -5,6 +5,8 @@
 #ifndef RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 #define RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 
+#include <utility>
+
 #include "core_base.hpp"
 #include "core_empty.hpp"
 #include "core_is_homogeneous.hpp"

@@ -63,6 +63,8 @@ namespace helper {
     void implement_chop(unusable);
     void implement_chop_in_place(unusable);
     void implement_at(unusable);
+    void implement_begin(unusable);
+    void implement_end(unusable);
 
     /** \brief
     Class that is convertible from direction::front and direction::back.

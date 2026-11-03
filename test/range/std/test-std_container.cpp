@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2013-2015, 2017 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013-2015, 2017, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -204,6 +204,35 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 4, 0, 0, 0, 0, 2));
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_begin_end)
+{
+    std::vector<int> is {1, 0, 2, -100, 4, 8, 16, 32};
+
+    BOOST_CHECK(range::begin(is) == is.begin());
+    BOOST_CHECK(range::end(is) == is.end());
+
+    int total = 0;
+    for (int & element : is) {
+        // Test "continue".
+        if (element < 0) {
+            continue;
+        }
+        total += element;
+        // Test mutability
+        if (element == 8) {
+            element = -8;
+        }
+        // Test "break".
+        if (element == 16) {
+            break;
+        }
+    }
+
+    BOOST_CHECK_EQUAL(total, 31);
+    BOOST_CHECK_EQUAL(is[5], -8);
+}
+
 
 BOOST_AUTO_TEST_CASE(test_std_list_adaptor)
 {

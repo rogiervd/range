@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2014, 2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2014, 2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -178,6 +178,21 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
         static_assert(
             !has<callable::size(decltype(acc))>::value,
             "Scan over forward range cannot implement size.");
+    }
+
+    // For loop, using begin() and end().
+    {
+        std::vector<int> v {1, 2, 3, 4, 5};
+
+        auto s = range::scan(0, v, plus());
+
+        int sum = 0;
+        for (int i : s) {
+            BOOST_CHECK(
+                i == 0 || i == 1 || i == 3 || i == 6 || i == 10 || i == 15);
+            sum += i;
+        }
+        BOOST_CHECK_EQUAL(sum, 0 + 1 + 3 + 6 + 10 + 15);
     }
 }
 

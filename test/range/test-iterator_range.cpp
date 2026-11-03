@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2013-2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013-2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -791,6 +791,47 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
         BOOST_CHECK_EQUAL(first(drop(r, 3, back), back), 3);
         BOOST_CHECK_EQUAL(first(drop(r, rime::int_<3>(), back), back), 3);
 
+        // begin() and end() should be the same as the original container.
+
+        BOOST_CHECK(range::begin(r) == random_access_container.begin());
+        BOOST_CHECK(range::end(r) == random_access_container.end());
+        BOOST_CHECK(range::begin(b) == bidirectional_container.begin());
+        BOOST_CHECK(range::end(b) == bidirectional_container.end());
+        BOOST_CHECK(range::begin(cb) == bidirectional_container.begin());
+        BOOST_CHECK(range::end(cb) == bidirectional_container.end());
+        BOOST_CHECK(range::begin(f) == forward_container.begin());
+        BOOST_CHECK(range::end(f) == forward_container.end());
+
+        // begin() and end() should allow C++11 range-based for loops.
+        {
+            int sum = 0;
+            for (int i : r) {
+                sum += i;
+            }
+            BOOST_CHECK_EQUAL(sum, 3 + 5 + 7 + 9);
+        }
+        {
+            double sum = 0;
+            for (double d : b) {
+                sum += d;
+            }
+            BOOST_CHECK_EQUAL(sum, 4.3 + 4.5 + 4.7 + 4.9);
+        }
+        {
+            double sum = 0;
+            for (double d : cb) {
+                sum += d;
+            }
+            BOOST_CHECK_EQUAL(sum, 4.3 + 4.5 + 4.7 + 4.9);
+        }
+        {
+            int sum = 0;
+            for (char c : f) {
+                sum += c - '0';
+            }
+            BOOST_CHECK_EQUAL(sum, 3 + 5 + 7 + 9);
+        }
+
         // Mutate original container.
         first(r) = 30;
         BOOST_CHECK_EQUAL(random_access_container.front(), 30);
@@ -930,6 +971,19 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
             first(drop(drop(drop(input_type(
                 input_iterator_type(stream), input_iterator_type()))))),
             16.f);
+    }
+
+    // begin() and end() work.
+    s = "19.5 18 17.25 16";
+    {
+        std::stringstream stream(s);
+        auto i = input_type(input_iterator_type(stream), input_iterator_type());
+
+        float sum = 0;
+        for (float f : i) {
+            sum += f;
+        }
+        BOOST_CHECK_EQUAL(sum, 19.5f + 18.f + 17.25f + 16.f);
     }
 }
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2013, 2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013, 2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
@@ -364,6 +364,23 @@ BOOST_AUTO_TEST_CASE(test_range_transform_homogeneous)
         auto chopped3 = chop(chopped2.rest());
         BOOST_CHECK(chopped3.first() == std::make_tuple(-16., -16.));
         BOOST_CHECK(empty(chopped3.rest()));
+    }
+
+    // Range-based for loop.
+    {
+        std::vector<int> v {1, 2, 3, 4, 5};
+
+        auto r = range::transform(v, [](int i) { return i + 0.5; });
+        // auto r = range::count(5);
+
+        begin(r);
+
+        double sum = 0;
+        for (double d : range::transform(v, [](int i) { return i + 0.5; })) {
+            sum += d;
+        }
+
+        BOOST_CHECK(sum == 17.5);
     }
 }
 

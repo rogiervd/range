@@ -67,6 +67,27 @@ struct constructible_target
 
 struct inconvertible_target {};
 
+/**
+Evaluate to \c true iff \a Type can be copy-list-initialised from
+\a Arguments, i.e. whether
+    Type t = {std::declval<Arguments>()...};
+compiles.
+This is false if the constructor that would be selected is explicit.
+Unlike \c std::is_convertible, this works for any number of arguments.
+*/
+template <class Type> void accept_implicitly(Type);
+
+template <class Enable, class Type, class... Arguments>
+struct is_implicitly_constructible_impl : std::false_type {};
+
+template <class Type, class... Arguments>
+struct is_implicitly_constructible_impl<
+    decltype(accept_implicitly<Type>({std::declval<Arguments>()...})), Type,
+    Arguments...> : std::true_type {};
+
+template <class Type, class... Arguments> struct is_implicitly_constructible
+: is_implicitly_constructible_impl<void, Type, Arguments...> {};
+
 struct base
 {
     int id;
@@ -93,6 +114,20 @@ BOOST_AUTO_TEST_CASE(tuple_construct_test_test)
         !std::is_convertible<source, inconvertible_target>::value, "");
     static_assert(
         !std::is_constructible<inconvertible_target, source>::value, "");
+
+    // Check whether is_implicitly_constructible works.
+    static_assert(
+        is_implicitly_constructible<convertible_target, source>::value, "");
+    static_assert(
+        !is_implicitly_constructible<constructible_target, source>::value, "");
+    static_assert(
+        !is_implicitly_constructible<inconvertible_target, source>::value, "");
+    static_assert(
+        is_implicitly_constructible<std::pair<int, int>, int, int>::value, "");
+    static_assert(
+        !is_implicitly_constructible<
+            std::pair<int, constructible_target>, int, source>::value,
+        "");
 }
 
 /* Default-construction from elements. */
@@ -124,14 +159,45 @@ BOOST_AUTO_TEST_CASE(tuple_construct_default)
 /* Construction from elements. */
 BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
 {
+    // The constructor is implicit iff the argument is implicitly convertible.
+    static_assert(
+        std::is_convertible<source, tuple<convertible_target>>::value, "");
     static_assert(
         std::is_constructible<tuple<convertible_target>, source>::value, "");
+    static_assert(
+        is_implicitly_constructible<tuple<convertible_target>, source>::value,
+        "");
 
+    static_assert(
+        !std::is_convertible<source, tuple<constructible_target>>::value, "");
     static_assert(
         std::is_constructible<tuple<constructible_target>, source>::value, "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<constructible_target>, source>::value,
+        "");
 
     static_assert(
+        !std::is_convertible<source, tuple<inconvertible_target>>::value, "");
+    static_assert(
         !std::is_constructible<tuple<inconvertible_target>, source>::value, "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<inconvertible_target>, source>::value,
+        "");
+
+    // Only explicitly convertible, e.g. to std::unique_ptr from a raw pointer.
+    static_assert(
+        !std::is_convertible<int *, tuple<std::unique_ptr<int>>>::value, "");
+    static_assert(
+        std::is_constructible<tuple<std::unique_ptr<int>>, int *>::value, "");
+
+    // Implicitly convertible.
+    static_assert(std::is_convertible<int, tuple<long>>::value, "");
+    static_assert(
+        std::is_convertible<char const *, tuple<std::string>>::value, "");
+    static_assert(
+        std::is_convertible<int &, tuple<int const &>>::value, "");
 
     // Wrong number of elements.
     static_assert(!std::is_constructible<tuple<convertible_target>>::value, "");
@@ -197,6 +263,26 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
         char c = 31;
         tuple<int> t(c);
         BOOST_CHECK_EQUAL(first(t), 31);
+    }
+
+    // Implicit construction.
+    {
+        tuple<int> t = 31;
+        BOOST_CHECK_EQUAL(first(t), 31);
+    }
+    {
+        tuple<std::string> t = "Hello";
+        BOOST_CHECK_EQUAL(first(t), "Hello");
+    }
+    {
+        auto make = []() -> tuple<convertible_target> { return source(); };
+        tuple<convertible_target> t = make();
+        (void) t;
+    }
+    // Explicit construction.
+    {
+        tuple<std::unique_ptr<int>> t(new int(7));
+        BOOST_CHECK_EQUAL(*first(t), 7);
     }
 
     // const, const &, &, &&.
@@ -267,9 +353,19 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
             tuple<convertible_target, convertible_target>, source,
             source>::value,
         "");
+    static_assert(
+        is_implicitly_constructible<
+            tuple<convertible_target, convertible_target>, source,
+            source>::value,
+        "");
 
     static_assert(
         std::is_constructible<
+            tuple<convertible_target, constructible_target>, source,
+            source>::value,
+        "");
+    static_assert(
+        !is_implicitly_constructible<
             tuple<convertible_target, constructible_target>, source,
             source>::value,
         "");
@@ -286,11 +382,44 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
             tuple<constructible_target, convertible_target>, source,
             source>::value,
         "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<constructible_target, convertible_target>, source,
+            source>::value,
+        "");
 
     static_assert(
         std::is_constructible<
             tuple<constructible_target, constructible_target>, source,
             source>::value,
+        "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<constructible_target, constructible_target>, source,
+            source>::value,
+        "");
+
+    // Three elements: one only explicitly convertible element suffices to
+    // make the constructor explicit.
+    static_assert(
+        is_implicitly_constructible<
+            tuple<convertible_target, convertible_target, convertible_target>,
+            source, source, source>::value,
+        "");
+    static_assert(
+        std::is_constructible<
+            tuple<convertible_target, convertible_target, constructible_target>,
+            source, source, source>::value,
+        "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<convertible_target, convertible_target, constructible_target>,
+            source, source, source>::value,
+        "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<convertible_target, constructible_target, convertible_target>,
+            source, source, source>::value,
         "");
 
     static_assert(
@@ -317,6 +446,11 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
             tuple<inconvertible_target, inconvertible_target>, source,
             source>::value,
         "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<inconvertible_target, inconvertible_target>, source,
+            source>::value,
+        "");
 
     // Wrong number of elements.
     static_assert(
@@ -332,6 +466,37 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
             tuple<convertible_target, convertible_target>, source, source,
             source>::value,
         "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<convertible_target, convertible_target>, source>::value,
+        "");
+    static_assert(
+        !is_implicitly_constructible<
+            tuple<convertible_target, convertible_target>, source, source,
+            source>::value,
+        "");
+
+    // Implicit construction.
+    {
+        tuple<int, std::string> t = {17, "Hello"};
+        BOOST_CHECK_EQUAL(first(t), 17);
+        BOOST_CHECK_EQUAL(first(t, back), "Hello");
+    }
+    {
+        auto make = []() -> tuple<long, double, std::string> {
+            return {4, 2.5f, "Hi"};
+        };
+        auto t = make();
+        BOOST_CHECK_EQUAL(first(t), 4);
+        BOOST_CHECK_EQUAL(at_c<1>(t), 2.5);
+        BOOST_CHECK_EQUAL(first(t, back), "Hi");
+    }
+    // Explicit construction.
+    {
+        tuple<int, std::unique_ptr<int>> t(5, new int(6));
+        BOOST_CHECK_EQUAL(first(t), 5);
+        BOOST_CHECK_EQUAL(*first(t, back), 6);
+    }
 
     // More elements: copy, move, convertible, and combinations.
     {

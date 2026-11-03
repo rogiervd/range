@@ -35,6 +35,7 @@ Define a general heterogeneous container.
 
 #include "detail/tuple-compare.hpp"
 #include "detail/tuple-fwd.hpp"
+#include "detail/tuple_is_convertible.hpp"
 
 namespace range {
 
@@ -46,6 +47,10 @@ given explicitly as template parameters.
 The container can be constructed in three ways.
 One is default construction.
 The next is construction from a value for each contained type.
+If each value can be implicitly converted to the corresponding type, this
+constructor is implicit.
+If at least one value can only be explicitly converted (though all types must be
+constructible from the values), then the constructor is explicit.
 The third is construction from another range.
 If the length of this range is known at compile time to be of the same length
 and all elements can be implicitly converted, this constructor is implicit.
@@ -675,13 +680,35 @@ public:
     /**
     Construct element-wise.
     Each type must be constructible from the corresponding argument passed in.
+    If each argument is implicitly convertible to the corresponding type, then
+    this implicit constructor is provided.
 
     The order in which the elements are constructed is not defined.
     */
     template <
         class... Arguments,
-        class Enable = typename boost::enable_if<utility::are_constructible<
-            stored_types, meta::vector<Arguments...>>>::type>
+        class Enable = typename boost::enable_if<
+            tuple_detail::are_implicitly_constructible<
+                stored_types, meta::vector<Arguments...>>>::type>
+    tuple(Arguments &&... arguments)
+    : elements_(
+          tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
+    {}
+
+    /**
+    Construct element-wise.
+    Each type must be constructible from the corresponding argument passed in.
+    If at least one of the arguments is only explicitly convertible to the
+    corresponding type, then this explicit constructor is provided.
+
+    The order in which the elements are constructed is not defined.
+    */
+    template <
+        class... Arguments,
+        typename boost::enable_if<
+            tuple_detail::are_only_explicitly_constructible<
+                stored_types, meta::vector<Arguments...>>,
+            int>::type = 0>
     explicit tuple(Arguments &&... arguments)
     : elements_(
           tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)

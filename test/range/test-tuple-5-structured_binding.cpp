@@ -15,47 +15,6 @@ Test structured binding for range::tuple.
 #include <vector>
 #include "range/std/vector.hpp"
 
-namespace std {
-
-// template <class ... Types>
-// struct tuple_size<::range::tuple<Types...>>
-// // This assumes that the size is a compile-time constant.
-// : ::range::result_of<::range::callable::size(::range::tuple<Types...>,
-// ::direction::front)>::type {};
-
-// template <std::size_t Position, class ... Types>
-// struct tuple_element<Position, ::range::tuple<Types...>>
-// : ::range::result_of<::range::callable::at(::range::tuple<Types...>,
-// rime::size_t<Position>)> {};
-
-template <class... Types> struct tuple_size<::range::tuple<Types...>>
-: rime::size_t<sizeof...(Types)> {};
-
-template <std::size_t Position, class... Types>
-struct tuple_element<Position, ::range::tuple<Types...>>
-: meta::first<typename meta::drop<
-      rime::size_t<Position>, meta::vector<Types...>>::type> {};
-}  // namespace std
-
-namespace range {
-template <std::size_t Position, class... Types> auto get(tuple<Types...> & t)
-{
-    return ::range::at(t, rime::size_t<Position>());
-}
-
-template <std::size_t Position, class... Types> auto get(tuple<Types...> && t)
-{
-    return ::range::at(std::move(t), rime::size_t<Position>());
-}
-
-template <std::size_t Position, class... Types>
-auto get(tuple<Types...> const & t)
-{
-    return ::range::at(t, rime::size_t<Position>());
-}
-}  // namespace range
-
-
 BOOST_AUTO_TEST_SUITE(range_test_tuple_structured_binding)
 
 using range::tuple;
@@ -74,12 +33,11 @@ BOOST_AUTO_TEST_CASE(compile_time)
     static_assert(
         std::is_same_v<std::tuple_element<1, tuple<char, int>>::type, int>);
 
-    static_assert(std::is_same_v<
-                  std::tuple_element<0, tuple<char, long, bool>>::type, char>);
-    static_assert(std::is_same_v<
-                  std::tuple_element<1, tuple<char, long, bool>>::type, long>);
-    static_assert(std::is_same_v<
-                  std::tuple_element<2, tuple<char, long, bool>>::type, bool>);
+    using tuple_3 = tuple<char, long &, bool const &>;
+    static_assert(std::is_same_v<std::tuple_element<0, tuple_3>::type, char>);
+    static_assert(std::is_same_v<std::tuple_element<1, tuple_3>::type, long &>);
+    static_assert(
+        std::is_same_v<std::tuple_element<2, tuple_3>::type, bool const &>);
 }
 
 
@@ -90,16 +48,16 @@ BOOST_AUTO_TEST_CASE(run_time)
     tuple<char, int, bool> t3('c', 29, true);
 
     auto [i1] = t1;
-    BOOST_CHECK(i1 == 27);
+    BOOST_CHECK_EQUAL(i1, 27);
 
     auto [c2, i2] = t2;
-    BOOST_CHECK(c2 == 'c');
-    BOOST_CHECK(i2 == 28);
+    BOOST_CHECK_EQUAL(c2, 'c');
+    BOOST_CHECK_EQUAL(i2, 28);
 
     auto [c3, i3, b3] = t3;
-    BOOST_CHECK(c3 == 'c');
-    BOOST_CHECK(i3 == 29);
-    BOOST_CHECK(b3 == true);
+    BOOST_CHECK_EQUAL(c3, 'c');
+    BOOST_CHECK_EQUAL(i3, 29);
+    BOOST_CHECK_EQUAL(b3, true);
 
     // TODO check return types.
 }
@@ -111,12 +69,12 @@ BOOST_AUTO_TEST_CASE(example)
 
     for (auto [number, name] : v) {
         if (number == 0) {
-            BOOST_CHECK(name == "zero");
+            BOOST_CHECK_EQUAL(name, "zero");
         } else if (number == 1) {
-            BOOST_CHECK(name == "one");
+            BOOST_CHECK_EQUAL(name, "one");
         } else {
-            BOOST_CHECK(number == 2);
-            BOOST_CHECK(name == "two");
+            BOOST_CHECK_EQUAL(number, 2);
+            BOOST_CHECK_EQUAL(name, "two");
         }
     }
 }

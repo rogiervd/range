@@ -1290,4 +1290,41 @@ namespace tuple_operation {
 
 }  // namespace range
 
+
+/* C++ structured binding support. */
+
+namespace std {
+
+template <class... Types> struct tuple_size<::range::tuple<Types...>>
+: rime::size_t<sizeof...(Types)> {};
+
+// Give the precise element type, as required.
+template <std::size_t Position, class... Types>
+struct tuple_element<Position, ::range::tuple<Types...>>
+: meta::first<typename meta::drop<
+      rime::size_t<Position>, meta::vector<Types...>>::type> {};
+
+}  // namespace std
+
+namespace range {
+
+template <std::size_t Position, class... Types> auto get(tuple<Types...> & t)
+{
+    return ::range::at(t, rime::size_t<Position>());
+}
+
+template <std::size_t Position, class... Types> auto get(tuple<Types...> && t)
+{
+    return ::range::at(std::move(t), rime::size_t<Position>());
+}
+
+template <std::size_t Position, class... Types>
+auto get(tuple<Types...> const & t)
+{
+    return ::range::at(t, rime::size_t<Position>());
+}
+
+}  // namespace range
+
+
 #endif  // RANGE_CONTAINER_TUPLE_HPP_INCLUDED

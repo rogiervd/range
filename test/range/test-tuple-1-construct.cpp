@@ -78,16 +78,16 @@ Unlike \c std::is_convertible, this works for any number of arguments.
 template <class Type> void accept_implicitly(Type);
 
 template <class Enable, class Type, class... Arguments>
-struct is_implicitly_constructible_impl : std::false_type {};
+struct is_copy_list_initializable_impl : std::false_type {};
 
 template <class Type, class... Arguments>
-struct is_implicitly_constructible_impl<
+struct is_copy_list_initializable_impl<
     decltype(accept_implicitly<Type>({std::declval<Arguments>()...})), Type,
     Arguments...> : std::true_type {};
 
 template <class Type, class... Arguments>
-constexpr bool is_implicitly_constructible_v =
-    is_implicitly_constructible_impl<void, Type, Arguments...>::value;
+constexpr bool is_copy_list_initializable_v =
+    is_copy_list_initializable_impl<void, Type, Arguments...>::value;
 
 struct base
 {
@@ -112,12 +112,12 @@ BOOST_AUTO_TEST_CASE(tuple_construct_test_test)
     static_assert(!std::is_convertible<source, inconvertible_target>::value);
     static_assert(!std::is_constructible<inconvertible_target, source>::value);
 
-    // Check whether is_implicitly_constructible_v works.
-    static_assert(is_implicitly_constructible_v<convertible_target, source>);
-    static_assert(!is_implicitly_constructible_v<constructible_target, source>);
-    static_assert(!is_implicitly_constructible_v<inconvertible_target, source>);
-    static_assert(is_implicitly_constructible_v<std::pair<int, int>, int, int>);
-    static_assert(!is_implicitly_constructible_v<
+    // Check whether is_copy_list_initializable_v works.
+    static_assert(is_copy_list_initializable_v<convertible_target, source>);
+    static_assert(!is_copy_list_initializable_v<constructible_target, source>);
+    static_assert(!is_copy_list_initializable_v<inconvertible_target, source>);
+    static_assert(is_copy_list_initializable_v<std::pair<int, int>, int, int>);
+    static_assert(!is_copy_list_initializable_v<
                   std::pair<int, constructible_target>, int, source>);
 }
 
@@ -155,14 +155,14 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
     static_assert(
         std::is_constructible<tuple<convertible_target>, source>::value);
     static_assert(
-        is_implicitly_constructible_v<tuple<convertible_target>, source>);
+        is_copy_list_initializable_v<tuple<convertible_target>, source>);
 
     static_assert(
         !std::is_convertible<source, tuple<constructible_target>>::value);
     static_assert(
         std::is_constructible<tuple<constructible_target>, source>::value);
     static_assert(
-        !is_implicitly_constructible_v<tuple<constructible_target>, source>);
+        !is_copy_list_initializable_v<tuple<constructible_target>, source>);
 
     static_assert(
         !std::is_convertible<source, tuple<inconvertible_target>>::value);
@@ -331,14 +331,14 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
                   tuple<convertible_target, convertible_target>, source,
                   source>::value);
     static_assert(
-        is_implicitly_constructible_v<
+        is_copy_list_initializable_v<
             tuple<convertible_target, convertible_target>, source, source>);
 
     static_assert(std::is_constructible<
                   tuple<convertible_target, constructible_target>, source,
                   source>::value);
     static_assert(
-        !is_implicitly_constructible_v<
+        !is_copy_list_initializable_v<
             tuple<convertible_target, constructible_target>, source, source>);
 
     static_assert(!std::is_constructible<
@@ -350,20 +350,20 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
                   tuple<constructible_target, convertible_target>, source,
                   source>::value);
     static_assert(
-        !is_implicitly_constructible_v<
+        !is_copy_list_initializable_v<
             tuple<constructible_target, convertible_target>, source, source>);
 
     static_assert(std::is_constructible<
                   tuple<constructible_target, constructible_target>, source,
                   source>::value);
     static_assert(
-        !is_implicitly_constructible_v<
+        !is_copy_list_initializable_v<
             tuple<constructible_target, constructible_target>, source, source>);
 
     // Three elements: one only explicitly convertible element suffices to
     // make the constructor explicit.
     static_assert(
-        is_implicitly_constructible_v<
+        is_copy_list_initializable_v<
             tuple<convertible_target, convertible_target, convertible_target>,
             source, source, source>);
     static_assert(
@@ -371,11 +371,11 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
             tuple<convertible_target, convertible_target, constructible_target>,
             source, source, source>::value);
     static_assert(
-        !is_implicitly_constructible_v<
+        !is_copy_list_initializable_v<
             tuple<convertible_target, convertible_target, constructible_target>,
             source, source, source>);
     static_assert(
-        !is_implicitly_constructible_v<
+        !is_copy_list_initializable_v<
             tuple<convertible_target, constructible_target, convertible_target>,
             source, source, source>);
 

@@ -196,8 +196,7 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
     static_assert(std::is_convertible<int, tuple<long>>::value, "");
     static_assert(
         std::is_convertible<char const *, tuple<std::string>>::value, "");
-    static_assert(
-        std::is_convertible<int &, tuple<int const &>>::value, "");
+    static_assert(std::is_convertible<int &, tuple<int const &>>::value, "");
 
     // Wrong number of elements.
     static_assert(!std::is_constructible<tuple<convertible_target>>::value, "");

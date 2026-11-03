@@ -16,8 +16,7 @@ explicit.
 
 #include "utility/type_sequence_traits.hpp"
 
-namespace range {
-namespace tuple_detail {
+namespace range { namespace tuple_detail {
 
     /**
     Evaluate to \c true iff \a Type can be constructed from \a Argument, and
@@ -57,7 +56,6 @@ namespace tuple_detail {
           utility::are_constructible<Types, Arguments>::value
               && !are_implicitly_constructible<Types, Arguments>::value> {};
 
-}  // namespace tuple_detail
-}  // namespace range
+}}  // namespace range::tuple_detail
 
 #endif  // RANGE_DETAIL_TUPLE_IS_CONVERTIBLE_HPP_INCLUDED

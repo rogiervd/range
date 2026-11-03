@@ -42,7 +42,6 @@ BOOST_AUTO_TEST_CASE(compile_time)
         std::is_same_v<std::tuple_element<2, tuple_3>::type, bool const &>);
 }
 
-
 BOOST_AUTO_TEST_CASE(run_time)
 {
     using range::tuple;

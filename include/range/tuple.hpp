@@ -1322,6 +1322,8 @@ namespace tuple_operation {
 
 namespace std {
 
+// tuple_size and tuple_element must be defined in the std namespace.
+
 template <class... Types> struct tuple_size<::range::tuple<Types...>>
 : rime::size_t<sizeof...(Types)> {};
 
@@ -1334,6 +1336,9 @@ struct tuple_element<Position, ::range::tuple<Types...>>
 }  // namespace std
 
 namespace range {
+
+// get can be defined in the std namespace.
+// decltype(auto) passes on the correct return types.
 
 template <std::size_t Position, class... Types>
 decltype(auto) get(tuple<Types...> & t)

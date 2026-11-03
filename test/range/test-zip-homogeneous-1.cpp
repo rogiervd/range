@@ -103,7 +103,6 @@ BOOST_AUTO_TEST_CASE(begin_end)
 
     std::vector<std::string> vs {"Hello", "there!", "Never change"};
 
-
     std::size_t count = 0;
 
     for (auto pair : zip(vi, vs)) {

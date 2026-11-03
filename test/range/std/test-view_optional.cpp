@@ -13,22 +13,22 @@ BOOST_AUTO_TEST_SUITE(test_range_view_optional)
 
 BOOST_AUTO_TEST_CASE(test_range_view_optional_properties)
 {
-    BOOST_MPL_ASSERT_NOT((range::is_range<boost::optional<int>>) );
+    static_assert(!range::is_range<boost::optional<int>>::value);
 
     // Only works on lvalues (const or non-const).
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::view_optional(boost::optional<int>)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::view_optional(boost::optional<int> &&)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::view_optional(boost::optional<int> &)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::view_optional(
-                          boost::optional<int> const &)>) );
+    static_assert(!range::has<range::callable::view_optional(
+                      boost::optional<int>)>::value);
+    static_assert(!range::has<range::callable::view_optional(
+                      boost::optional<int> &&)>::value);
+    static_assert(range::has<range::callable::view_optional(
+                      boost::optional<int> &)>::value);
+    static_assert(range::has<range::callable::view_optional(
+                      boost::optional<int> const &)>::value);
 
     typedef typename range::result_of<range::callable::view_optional(
         boost::optional<int> &)>::type view_type;
 
-    BOOST_MPL_ASSERT((range::is_range<view_type>) );
+    static_assert(range::is_range<view_type>::value);
 }
 
 BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)

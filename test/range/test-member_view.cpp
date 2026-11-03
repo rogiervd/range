@@ -79,89 +79,62 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
             "member_view should be only explicitly is_convertible.");
 
         static_assert(
-            std::is_same<
+            std::is_same_v<
                 typename range::result_of<range::callable::default_direction(
                     empty_view_type)>::type,
-                direction::front>::value,
-            "");
+                direction::front>);
         auto d = range::default_direction(empty_view);
-        static_assert(std::is_same<decltype(d), direction::front>::value, "");
+        static_assert(std::is_same_v<decltype(d), direction::front>);
 
-        static_assert(!range::is_homogeneous<empty_view_type>::value, "");
+        static_assert(!range::is_homogeneous<empty_view_type>::value);
         static_assert(
-            !range::is_homogeneous<empty_view_type, direction::back>::value,
-            "");
+            !range::is_homogeneous<empty_view_type, direction::back>::value);
 
         // view.
         static_assert(
-            range::has<range::callable::view(empty_view_type const)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::view(
-                int, empty_view_type const)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::view(
-                empty_view_type &, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::view(
-                empty_view_type const &, direction::back)>::value,
-            "");
+            range::has<range::callable::view(empty_view_type const)>::value);
+        static_assert(!range::has<range::callable::view(
+                          int, empty_view_type const)>::value);
+        static_assert(range::has<range::callable::view(
+                          empty_view_type &, direction::front)>::value);
+        static_assert(range::has<range::callable::view(
+                          empty_view_type const &, direction::back)>::value);
 
         // view_once.
-        static_assert(
-            range::has<range::callable::view_once(
-                empty_view_type const)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::view_once(
-                int, empty_view_type const)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::view_once(
-                empty_view_type &, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::view_once(
-                empty_view_type const &, direction::back)>::value,
-            "");
+        static_assert(range::has<range::callable::view_once(
+                          empty_view_type const)>::value);
+        static_assert(!range::has<range::callable::view_once(
+                          int, empty_view_type const)>::value);
+        static_assert(range::has<range::callable::view_once(
+                          empty_view_type &, direction::front)>::value);
+        static_assert(range::has<range::callable::view_once(
+                          empty_view_type const &, direction::back)>::value);
 
         // empty.
         static_assert(
-            range::has<range::callable::empty(empty_view_type const)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::empty(
-                empty_view_type &, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::empty(
-                empty_view_type const &, direction::back)>::value,
-            "");
+            range::has<range::callable::empty(empty_view_type const)>::value);
+        static_assert(range::has<range::callable::empty(
+                          empty_view_type &, direction::front)>::value);
+        static_assert(range::has<range::callable::empty(
+                          empty_view_type const &, direction::back)>::value);
 
         // size.
         static_assert(
-            range::has<range::callable::size(empty_view_type const)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::size(
-                empty_view_type const &, direction::front &)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::size(
-                empty_view_type, direction::back const &)>::value,
-            "");
+            range::has<range::callable::size(empty_view_type const)>::value);
+        static_assert(range::has<range::callable::size(
+                          empty_view_type const &, direction::front &)>::value);
+        static_assert(range::has<range::callable::size(
+                          empty_view_type, direction::back const &)>::value);
 
         // empty.
         RIME_CHECK_EQUAL(empty(empty_view_type(s)), rime::true_);
         RIME_CHECK_EQUAL(empty(view(empty_view_type(s), front)), rime::true_);
         RIME_CHECK_EQUAL(empty(empty_view, front), rime::true_);
         RIME_CHECK_EQUAL(empty(empty_view, direction::back()), rime::true_);
-        BOOST_MPL_ASSERT(
-            (range::always_empty<empty_view_type, direction::front>) );
-        BOOST_MPL_ASSERT(
-            (range::always_empty<empty_view_type, direction::back>) );
+        static_assert(
+            range::always_empty<empty_view_type, direction::front>::value);
+        static_assert(
+            range::always_empty<empty_view_type, direction::back>::value);
 
         // size.
         RIME_CHECK_EQUAL(size(empty_view), rime::size_t<0>());
@@ -170,106 +143,72 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
 
         // first.
         static_assert(
-            !range::has<range::callable::first(empty_view_type)>::value, "");
-        static_assert(
-            !range::has<range::callable::first(
-                direction::front, empty_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::first(
-                direction::back, empty_view_type)>::value,
-            "");
+            !range::has<range::callable::first(empty_view_type)>::value);
+        static_assert(!range::has<range::callable::first(
+                          direction::front, empty_view_type)>::value);
+        static_assert(!range::has<range::callable::first(
+                          direction::back, empty_view_type)>::value);
 
         // drop.
         static_assert(
-            !range::has<range::callable::drop(empty_view_type)>::value, "");
-        static_assert(
-            !range::has<range::callable::drop(
-                direction::front, empty_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::drop(
-                direction::back, empty_view_type)>::value,
-            "");
+            !range::has<range::callable::drop(empty_view_type)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          direction::front, empty_view_type)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          direction::back, empty_view_type)>::value);
 
         // at.
-        static_assert(
-            !range::has<range::callable::at(empty_view_type)>::value, "");
-        static_assert(
-            !range::has<range::callable::at(
-                direction::front, empty_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::at(
-                direction::back, empty_view_type)>::value,
-            "");
+        static_assert(!range::has<range::callable::at(empty_view_type)>::value);
+        static_assert(!range::has<range::callable::at(
+                          direction::front, empty_view_type)>::value);
+        static_assert(!range::has<range::callable::at(
+                          direction::back, empty_view_type)>::value);
 
         // drop of size 0 is available.
-        static_assert(
-            range::has<range::callable::drop(
-                empty_view_type, rime::size_t<0>)>::value,
-            "");
+        static_assert(range::has<range::callable::drop(
+                          empty_view_type, rime::size_t<0>)>::value);
         static_assert(
             range::has<range::callable::drop(
                 empty_view_type, std::integral_constant<std::size_t, 0>,
-                direction::front)>::value,
-            "");
+                direction::front)>::value);
         static_assert(
             range::has<range::callable::drop(
-                empty_view_type, rime::size_t<0>, direction::back)>::value,
-            "");
+                empty_view_type, rime::size_t<0>, direction::back)>::value);
 
+        static_assert(!range::has<range::callable::drop(
+                          empty_view_type, rime::size_t<1>)>::value);
         static_assert(
             !range::has<range::callable::drop(
-                empty_view_type, rime::size_t<1>)>::value,
-            "");
+                empty_view_type, rime::size_t<1>, direction::front)>::value);
         static_assert(
             !range::has<range::callable::drop(
-                empty_view_type, rime::size_t<1>, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::drop(
-                empty_view_type, rime::size_t<1>, direction::back)>::value,
-            "");
+                empty_view_type, rime::size_t<1>, direction::back)>::value);
 
-        static_assert(
-            !range::has<range::callable::drop(
-                empty_view_type, rime::size_t<2>)>::value,
-            "");
+        static_assert(!range::has<range::callable::drop(
+                          empty_view_type, rime::size_t<2>)>::value);
         static_assert(
             !range::has<range::callable::drop(
                 empty_view_type, std::integral_constant<std::size_t, 3>,
-                direction::front)>::value,
-            "");
+                direction::front)>::value);
         static_assert(
             !range::has<range::callable::drop(
-                empty_view_type, rime::size_t<3>, direction::back)>::value,
-            "");
+                empty_view_type, rime::size_t<3>, direction::back)>::value);
 
         // chop.
         static_assert(
-            !range::has<range::callable::chop(empty_view_type)>::value, "");
-        static_assert(
-            !range::has<range::callable::chop(
-                empty_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop(
-                empty_view_type, direction::back)>::value,
-            "");
+            !range::has<range::callable::chop(empty_view_type)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          empty_view_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          empty_view_type, direction::back)>::value);
 
         // chop_in_place: not a homogeneous range.
-        static_assert(
-            !range::has<range::callable::chop_in_place(empty_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                empty_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                empty_view_type, direction::back)>::value,
-            "");
+        static_assert(!range::has<range::callable::chop_in_place(
+                          empty_view_type)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          empty_view_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          empty_view_type, direction::back)>::value);
 
         // View must be assignable.
         empty_view = empty_view_type(s2);
@@ -286,160 +225,125 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
         int_view_type int_view(s);
 
         // empty.
-        static_assert(
-            range::has<range::callable::empty(int_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::empty(
-                int_view_type, direction::front)>::value,
-            "");
+        static_assert(range::has<range::callable::empty(int_view_type)>::value);
+        static_assert(range::has<range::callable::empty(
+                          int_view_type, direction::front)>::value);
         RIME_CHECK_EQUAL(range::empty(int_view), rime::false_);
         RIME_CHECK_EQUAL(range::empty(int_view, front), rime::false_);
-        BOOST_MPL_ASSERT(
-            (range::never_empty<int_view_type, direction::front>) );
-        BOOST_MPL_ASSERT((range::never_empty<int_view_type, direction::back>) );
+        static_assert(
+            range::never_empty<int_view_type, direction::front>::value);
+        static_assert(
+            range::never_empty<int_view_type, direction::back>::value);
 
         // size.
+        static_assert(range::has<range::callable::size(int_view_type)>::value);
+        static_assert(range::has<range::callable::size(
+                          int_view_type, direction::back)>::value);
         static_assert(
-            range::has<range::callable::size(int_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::size(
-                int_view_type, direction::back)>::value,
-            "");
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+            std::is_same_v<
                 range::result_of<range::callable::size(int_view_type)>::type,
-                rime::size_t<1>>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::size(
-                              int_view_type, direction::back)>::type,
-                          rime::size_t<1>>) );
+                rime::size_t<1>>);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::size(
+                          int_view_type, direction::back)>::type,
+                      rime::size_t<1>>);
 
         // first.
-        static_assert(
-            range::has<range::callable::first(int_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::first(
-                int_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::first(
-                int_view_type, direction::back)>::value,
-            "");
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::first(
-                              int_view_type const)>::type,
-                          int const &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::first(
-                              int_view_type, direction::back)>::type,
-                          int const &>) );
+        static_assert(range::has<range::callable::first(int_view_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          int_view_type, direction::front)>::value);
+        static_assert(range::has<range::callable::first(
+                          int_view_type, direction::back)>::value);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::first(
+                          int_view_type const)>::type,
+                      int const &>);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::first(
+                          int_view_type, direction::back)>::type,
+                      int const &>);
 
-        static_assert(!range::is_homogeneous<int_view_type>::value, "");
+        static_assert(!range::is_homogeneous<int_view_type>::value);
         static_assert(
-            !range::is_homogeneous<int_view_type, direction::back>::value, "");
+            !range::is_homogeneous<int_view_type, direction::back>::value);
 
         // drop.
-        static_assert(
-            range::has<range::callable::drop(int_view_type)>::value, "");
+        static_assert(range::has<range::callable::drop(int_view_type)>::value);
         static_assert(
             range::has<range::callable::drop(
-                int_view_type, rime::int_<1>, direction::front)>::value,
-            "");
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+                int_view_type, rime::int_<1>, direction::front)>::value);
+        static_assert(
+            std::is_same_v<
                 range::result_of<range::callable::drop(int_view_type)>::type,
-                empty_view_type>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::drop(
-                              int_view_type, direction::back)>::type,
-                          empty_view_type>) );
+                empty_view_type>);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::drop(
+                          int_view_type, direction::back)>::type,
+                      empty_view_type>);
 
         static_assert(
             !range::has<range::callable::drop(
-                int_view_type, rime::int_<2>, direction::back)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::drop(
-                int_view_type, int, direction::back)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::drop(
-                int_view_type, std::size_t, direction::back)>::value,
-            "");
+                int_view_type, rime::int_<2>, direction::back)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          int_view_type, int, direction::back)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          int_view_type, std::size_t, direction::back)>::value);
 
         // chop.
+        static_assert(range::has<range::callable::chop(int_view_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          int_view_type, direction::front)>::value);
+        static_assert(range::has<range::callable::chop(
+                          int_view_type, direction::back)>::value);
         static_assert(
-            range::has<range::callable::chop(int_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::chop(
-                int_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::chop(
-                int_view_type, direction::back)>::value,
-            "");
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+            std::is_same_v<
                 range::result_of<range::callable::chop(int_view_type)>::type,
-                range::chopped<int const &, empty_view_type>>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::chop(
-                              int_view_type, direction::front)>::type,
-                          range::chopped<int const &, empty_view_type>>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::chop(
-                              int_view_type, direction::back)>::type,
-                          range::chopped<int const &, empty_view_type>>) );
+                range::chopped<int const &, empty_view_type>>);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::chop(
+                          int_view_type, direction::front)>::type,
+                      range::chopped<int const &, empty_view_type>>);
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::chop(
+                          int_view_type, direction::back)>::type,
+                      range::chopped<int const &, empty_view_type>>);
 
         // chop_in_place: not a homogeneous range.
         static_assert(
-            !range::has<range::callable::chop_in_place(int_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                int_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                int_view_type, direction::back)>::value,
-            "");
+            !range::has<range::callable::chop_in_place(int_view_type)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          int_view_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          int_view_type, direction::back)>::value);
 
         // at: the implementation is based on drop and first.
+        static_assert(range::has<range::callable::at(
+                          int_view_type, rime::size_t<0>)>::value);
         static_assert(
             range::has<range::callable::at(
-                int_view_type, rime::size_t<0>)>::value,
-            "");
+                int_view_type, rime::size_t<0>, direction::front)>::value);
         static_assert(
             range::has<range::callable::at(
-                int_view_type, rime::size_t<0>, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::at(
-                int_view_type, rime::size_t<0>, direction::back)>::value,
-            "");
+                int_view_type, rime::size_t<0>, direction::back)>::value);
 
+        static_assert(!range::has<range::callable::at(
+                          int_view_type, rime::size_t<1>)>::value);
         static_assert(
             !range::has<range::callable::at(
-                int_view_type, rime::size_t<1>)>::value,
-            "");
+                int_view_type, rime::size_t<1>, direction::front)>::value);
         static_assert(
             !range::has<range::callable::at(
-                int_view_type, rime::size_t<1>, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::at(
-                int_view_type, rime::size_t<1>, direction::back)>::value,
-            "");
+                int_view_type, rime::size_t<1>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::at(
-                              int_view_type const, rime::size_t<0>)>::type,
-                          int const &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::at(
+                          int_view_type const, rime::size_t<0>)>::type,
+                      int const &>);
+        static_assert(
+            std::is_same_v<
                 range::result_of<range::callable::at(
                     int_view_type, rime::size_t<0>, direction::back)>::type,
-                int const &>) );
+                int const &>);
 
         BOOST_CHECK_EQUAL(at(int_view, rime::size_t<0>()), 4);
         BOOST_CHECK_EQUAL(at(int_view, rime::size_t<0>(), back), 4);
@@ -502,98 +406,71 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
             three_view_type;
         three_view_type three_view(s);
 
-        static_assert(!range::is_homogeneous<three_view_type>::value, "");
+        static_assert(!range::is_homogeneous<three_view_type>::value);
         static_assert(
-            !range::is_homogeneous<three_view_type &, direction::back>::value,
-            "");
-        static_assert(
-            !range::is_homogeneous<
-                three_view_type const, direction::front>::value,
-            "");
+            !range::is_homogeneous<three_view_type &, direction::back>::value);
+        static_assert(!range::is_homogeneous<
+                      three_view_type const, direction::front>::value);
 
         static_assert(
-            range::has<range::callable::empty(three_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::empty(
-                three_view_type, direction::front)>::value,
-            "");
+            range::has<range::callable::empty(three_view_type)>::value);
+        static_assert(range::has<range::callable::empty(
+                          three_view_type, direction::front)>::value);
 
         static_assert(
-            range::has<range::callable::size(three_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::size(
-                three_view_type, direction::back)>::value,
-            "");
+            range::has<range::callable::size(three_view_type)>::value);
+        static_assert(range::has<range::callable::size(
+                          three_view_type, direction::back)>::value);
 
         static_assert(
-            range::has<range::callable::first(three_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::first(
-                three_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::first(
-                three_view_type, direction::back)>::value,
-            "");
+            range::has<range::callable::first(three_view_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          three_view_type, direction::front)>::value);
+        static_assert(range::has<range::callable::first(
+                          three_view_type, direction::back)>::value);
 
         static_assert(
-            range::has<range::callable::drop(three_view_type)>::value, "");
+            range::has<range::callable::drop(three_view_type)>::value);
         static_assert(
             range::has<range::callable::drop(
-                three_view_type, rime::int_<1>, direction::front)>::value,
-            "");
+                three_view_type, rime::int_<1>, direction::front)>::value);
         static_assert(
             range::has<range::callable::drop(
-                three_view_type, boost::mpl::int_<2>, direction::back)>::value,
-            "");
+                three_view_type, boost::mpl::int_<2>, direction::back)>::value);
         static_assert(
             range::has<range::callable::drop(
                 three_view_type, std::integral_constant<std::size_t, 3>,
-                direction::back)>::value,
-            "");
+                direction::back)>::value);
         static_assert(
             !range::has<range::callable::drop(
-                three_view_type, rime::int_<4>, direction::back)>::value,
-            "");
+                three_view_type, rime::int_<4>, direction::back)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          three_view_type, int, direction::back)>::value);
         static_assert(
             !range::has<range::callable::drop(
-                three_view_type, int, direction::back)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::drop(
-                three_view_type, std::size_t, direction::back)>::value,
-            "");
+                three_view_type, std::size_t, direction::back)>::value);
 
         static_assert(
-            range::has<range::callable::chop(three_view_type)>::value, "");
-        static_assert(
-            range::has<range::callable::chop(
-                three_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::chop(
-                three_view_type, direction::back)>::value,
-            "");
+            range::has<range::callable::chop(three_view_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          three_view_type, direction::front)>::value);
+        static_assert(range::has<range::callable::chop(
+                          three_view_type, direction::back)>::value);
 
-        static_assert(
-            !range::has<range::callable::chop_in_place(three_view_type)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                three_view_type, direction::front)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::chop_in_place(
-                three_view_type, direction::back)>::value,
-            "");
+        static_assert(!range::has<range::callable::chop_in_place(
+                          three_view_type)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          three_view_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          three_view_type, direction::back)>::value);
 
         RIME_CHECK_EQUAL(empty(three_view), rime::false_);
         RIME_CHECK_EQUAL(empty(three_view, front), rime::false_);
         RIME_CHECK_EQUAL(empty(three_view, back), rime::false_);
-        BOOST_MPL_ASSERT(
-            (range::never_empty<three_view_type, direction::front>) );
-        BOOST_MPL_ASSERT(
-            (range::never_empty<three_view_type, direction::back>) );
+        static_assert(
+            range::never_empty<three_view_type, direction::front>::value);
+        static_assert(
+            range::never_empty<three_view_type, direction::back>::value);
 
         RIME_CHECK_EQUAL(size(three_view), rime::size_t<3>());
         RIME_CHECK_EQUAL(size(three_view, front), rime::size_t<3>());
@@ -652,22 +529,14 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
         BOOST_CHECK_EQUAL(first(drop(three_view, rime::int_<2>(), front)), 'a');
 
         // at (d,n,r) is a shorthand for first (d, drop (d, n, r)).
-        static_assert(
-            range::has<range::callable::at(
-                three_view_type, rime::size_t<0>)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::at(
-                three_view_type, rime::size_t<1>)>::value,
-            "");
-        static_assert(
-            range::has<range::callable::at(
-                three_view_type, rime::size_t<2>)>::value,
-            "");
-        static_assert(
-            !range::has<range::callable::at(
-                three_view_type, rime::size_t<3>)>::value,
-            "");
+        static_assert(range::has<range::callable::at(
+                          three_view_type, rime::size_t<0>)>::value);
+        static_assert(range::has<range::callable::at(
+                          three_view_type, rime::size_t<1>)>::value);
+        static_assert(range::has<range::callable::at(
+                          three_view_type, rime::size_t<2>)>::value);
+        static_assert(!range::has<range::callable::at(
+                          three_view_type, rime::size_t<3>)>::value);
 
         BOOST_CHECK_EQUAL(at(three_view, rime::size_t<0>()), 4);
         BOOST_CHECK_EQUAL(at(three_view, rime::size_t<1>()), 3.5);
@@ -728,15 +597,13 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
             three_view_type;
         three_view_type three_view(std::move(s));
 
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(three_view)), int &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(at_c<1>(three_view)), double &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(second(three_view)), double &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(at_c<2>(three_view)), char const &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(third(three_view)), char const &&>) );
+        static_assert(std::is_same_v<decltype(first(three_view)), int &&>);
+        static_assert(std::is_same_v<decltype(at_c<1>(three_view)), double &&>);
+        static_assert(std::is_same_v<decltype(second(three_view)), double &&>);
+        static_assert(
+            std::is_same_v<decltype(at_c<2>(three_view)), char const &&>);
+        static_assert(
+            std::is_same_v<decltype(third(three_view)), char const &&>);
 
         BOOST_CHECK_EQUAL(first(three_view), 6);
         BOOST_CHECK_EQUAL(at_c<1>(three_view), 98.7);
@@ -752,19 +619,19 @@ BOOST_AUTO_TEST_CASE(test_range_member_view)
             structure &, meta::vector<member_i, member_d, member_c>>
             three_view_type;
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<int_view_type, empty_view_type>) );
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<three_view_type, empty_view_type>) );
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<three_view_type, int_view_type>) );
+        static_assert(
+            std::is_convertible<int_view_type, empty_view_type>::value);
+        static_assert(
+            std::is_convertible<three_view_type, empty_view_type>::value);
+        static_assert(
+            std::is_convertible<three_view_type, int_view_type>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<empty_view_type, int_view_type>) );
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<empty_view_type, three_view_type>) );
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<int_view_type, three_view_type>) );
+        static_assert(
+            !std::is_convertible<empty_view_type, int_view_type>::value);
+        static_assert(
+            !std::is_convertible<empty_view_type, three_view_type>::value);
+        static_assert(
+            !std::is_convertible<int_view_type, three_view_type>::value);
     }
 }
 
@@ -819,8 +686,8 @@ BOOST_AUTO_TEST_CASE(test_range_functions)
             structure &&, meta::vector<member_d_move, member_s>>
             view_type;
         view_type structure_view(std::move(s));
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(structure_view)), double &&>) );
+        static_assert(
+            std::is_same_v<decltype(first(structure_view)), double &&>);
         BOOST_CHECK_EQUAL(first(structure_view), 890.1);
         // Use nonconst function.
         BOOST_CHECK_EQUAL(at_c<1>(structure_view), "hello");

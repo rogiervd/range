@@ -31,33 +31,23 @@ BOOST_AUTO_TEST_CASE(types)
     auto v3 = drop(drop(t));
     auto v4 = drop(v3, range::back);
 
-    static_assert(
-        std::is_same<
-            range::tuple_detail::types<decltype(v0)>::type,
-            meta::vector<int &, double &, bool &>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  range::tuple_detail::types<decltype(v0)>::type,
+                  meta::vector<int &, double &, bool &>>);
 
-    static_assert(
-        std::is_same<
-            range::tuple_detail::types<decltype(v1)>::type,
-            meta::vector<double &, bool &>>::value,
-        "");
-    static_assert(
-        std::is_same<
-            range::tuple_detail::types<decltype(v2)>::type,
-            meta::vector<int &, double &>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  range::tuple_detail::types<decltype(v1)>::type,
+                  meta::vector<double &, bool &>>);
+    static_assert(std::is_same_v<
+                  range::tuple_detail::types<decltype(v2)>::type,
+                  meta::vector<int &, double &>>);
 
+    static_assert(std::is_same_v<
+                  range::tuple_detail::types<decltype(v3)>::type,
+                  meta::vector<bool &>>);
     static_assert(
-        std::is_same<
-            range::tuple_detail::types<decltype(v3)>::type,
-            meta::vector<bool &>>::value,
-        "");
-    static_assert(
-        std::is_same<
-            range::tuple_detail::types<decltype(v4)>::type,
-            meta::vector<>>::value,
-        "");
+        std::is_same_v<
+            range::tuple_detail::types<decltype(v4)>::type, meta::vector<>>);
 }
 
 bool approximately_equal(double i, double j)

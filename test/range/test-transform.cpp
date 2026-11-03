@@ -128,43 +128,39 @@ BOOST_AUTO_TEST_CASE(test_range_transform)
         std::tuple<> t;
         auto v = transform(t, duplicate);
         auto direction = default_direction(v);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(direction), direction::front>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(v)>) );
+        static_assert(std::is_same_v<decltype(direction), direction::front>);
+        static_assert(!is_homogeneous<decltype(v)>::value);
 
         RIME_CHECK_EQUAL(empty(v), rime::true_);
         RIME_CHECK_EQUAL(size(v), rime::size_t<0u>());
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::first(decltype(v))>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(decltype(v))>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(decltype(v))>) );
+        static_assert(!range::has<range::callable::first(decltype(v))>::value);
+        static_assert(!range::has<range::callable::drop(decltype(v))>::value);
+        static_assert(!range::has<range::callable::chop(decltype(v))>::value);
     }
     {
         std::tuple<int> t(7);
         auto v = transform(t, duplicate);
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(v)>) );
+        static_assert(!is_homogeneous<decltype(v)>::value);
         // v should have elements:
         // std::tuple <int, int> (7, 7)
 
         RIME_CHECK_EQUAL(empty(v), rime::false_);
         RIME_CHECK_EQUAL(size(v), rime::size_t<1u>());
 
-        BOOST_MPL_ASSERT((range::has<range::callable::first(decltype(v))>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(decltype(v))>) );
+        static_assert(range::has<range::callable::first(decltype(v))>::value);
+        static_assert(range::has<range::callable::drop(decltype(v))>::value);
 
         auto f = range::first(v);
-        BOOST_MPL_ASSERT((std::is_same<decltype(f), std::tuple<int, int>>) );
+        static_assert(std::is_same_v<decltype(f), std::tuple<int, int>>);
         BOOST_CHECK_EQUAL(first(f), 7);
         BOOST_CHECK_EQUAL(second(f), 7);
 
         RIME_CHECK_EQUAL(empty(drop(v)), rime::true_);
 
         auto chopped = chop(v);
-        static_assert(
-            std::is_same<
-                decltype(chopped.first()), std::tuple<int, int> const &>::value,
-            "");
+        static_assert(std::is_same_v<
+                      decltype(chopped.first()), std::tuple<int, int> const &>);
         BOOST_CHECK_EQUAL(first(chopped.first()), 7);
         BOOST_CHECK_EQUAL(second(chopped.first()), 7);
         RIME_CHECK_EQUAL(empty(chopped.rest()), rime::true_);
@@ -173,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_range_transform)
         std::tuple<int, char, double> t(7, 'a', 9.25);
         {
             auto v = transform(t, duplicate);
-            BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(v)>) );
+            static_assert(!is_homogeneous<decltype(v)>::value);
             // v should have elements:
             // std::tuple <int, int> (7, 7)
             // std::tuple <char, char> ('a', 'a')
@@ -182,25 +178,24 @@ BOOST_AUTO_TEST_CASE(test_range_transform)
             RIME_CHECK_EQUAL(empty(v), rime::false_);
             RIME_CHECK_EQUAL(size(v), rime::size_t<3u>());
 
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::first(decltype(v))>) );
-            BOOST_MPL_ASSERT((range::has<range::callable::drop(decltype(v))>) );
+            static_assert(
+                range::has<range::callable::first(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::drop(decltype(v))>::value);
 
             auto e1 = range::first(v);
-            BOOST_MPL_ASSERT(
-                (std::is_same<decltype(e1), std::tuple<int, int>>) );
+            static_assert(std::is_same_v<decltype(e1), std::tuple<int, int>>);
             BOOST_CHECK_EQUAL(first(e1), 7);
             BOOST_CHECK_EQUAL(second(e1), 7);
 
             auto e2 = range::first(drop(v));
-            BOOST_MPL_ASSERT(
-                (std::is_same<decltype(e2), std::tuple<char, char>>) );
+            static_assert(std::is_same_v<decltype(e2), std::tuple<char, char>>);
             BOOST_CHECK_EQUAL(first(e2), 'a');
             BOOST_CHECK_EQUAL(second(e2), 'a');
 
             auto e3 = range::first(drop(v, rime::size_t<2>()));
-            BOOST_MPL_ASSERT(
-                (std::is_same<decltype(e3), std::tuple<double, double>>) );
+            static_assert(
+                std::is_same_v<decltype(e3), std::tuple<double, double>>);
             BOOST_CHECK_EQUAL(first(e3), 9.25);
             BOOST_CHECK_EQUAL(second(e3), 9.25);
 
@@ -209,30 +204,24 @@ BOOST_AUTO_TEST_CASE(test_range_transform)
             // Test chop.
             auto chopped1 = chop(v);
             static_assert(
-                std::is_same<
-                    decltype(chopped1.first()),
-                    std::tuple<int, int> const &>::value,
-                "");
+                std::is_same_v<
+                    decltype(chopped1.first()), std::tuple<int, int> const &>);
             BOOST_CHECK_EQUAL(first(chopped1.first()), 7);
             BOOST_CHECK_EQUAL(second(chopped1.first()), 7);
             RIME_CHECK_EQUAL(empty(chopped1.rest()), rime::false_);
 
             auto chopped2 = chop(chopped1.rest());
-            static_assert(
-                std::is_same<
-                    decltype(chopped2.first()),
-                    std::tuple<char, char> const &>::value,
-                "");
+            static_assert(std::is_same_v<
+                          decltype(chopped2.first()),
+                          std::tuple<char, char> const &>);
             BOOST_CHECK_EQUAL(first(chopped2.first()), 'a');
             BOOST_CHECK_EQUAL(second(chopped2.first()), 'a');
             RIME_CHECK_EQUAL(empty(chopped2.rest()), rime::false_);
 
             auto chopped3 = chop(chopped2.rest());
-            static_assert(
-                std::is_same<
-                    decltype(chopped3.first()),
-                    std::tuple<double, double> const &>::value,
-                "");
+            static_assert(std::is_same_v<
+                          decltype(chopped3.first()),
+                          std::tuple<double, double> const &>);
             BOOST_CHECK_EQUAL(first(chopped3.first()), 9.25);
             BOOST_CHECK_EQUAL(second(chopped3.first()), 9.25);
             RIME_CHECK_EQUAL(empty(chopped3.rest()), rime::true_);
@@ -268,17 +257,19 @@ BOOST_AUTO_TEST_CASE(test_range_transform_homogeneous)
         c.push_back(-8);
         {
             auto v = transform(c, twice);
-            BOOST_MPL_ASSERT((is_homogeneous<decltype(v)>) );
+            static_assert(is_homogeneous<decltype(v)>::value);
             // v should have elements 12, 21, -16.
 
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::empty(decltype(v))>) );
-            BOOST_MPL_ASSERT((range::has<range::callable::size(decltype(v))>) );
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::first(decltype(v))>) );
-            BOOST_MPL_ASSERT((range::has<range::callable::drop(decltype(v))>) );
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::drop(decltype(v), int)>) );
+            static_assert(
+                range::has<range::callable::empty(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::size(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::first(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::drop(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::drop(decltype(v), int)>::value);
 
             BOOST_CHECK(!empty(v));
             BOOST_CHECK_EQUAL(size(v), 3u);
@@ -326,18 +317,19 @@ BOOST_AUTO_TEST_CASE(test_range_transform_homogeneous)
         c.push_back(-8);
         {
             auto v = transform(c, twice);
-            BOOST_MPL_ASSERT((is_homogeneous<decltype(v)>) );
+            static_assert(is_homogeneous<decltype(v)>::value);
             // v should have elements 12, 21, -16.
 
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::empty(decltype(v))>) );
-            BOOST_MPL_ASSERT_NOT(
-                (range::has<range::callable::size(decltype(v))>) );
-            BOOST_MPL_ASSERT(
-                (range::has<range::callable::first(decltype(v))>) );
-            BOOST_MPL_ASSERT((range::has<range::callable::drop(decltype(v))>) );
-            BOOST_MPL_ASSERT_NOT(
-                (range::has<range::callable::drop(decltype(v), int)>) );
+            static_assert(
+                range::has<range::callable::empty(decltype(v))>::value);
+            static_assert(
+                !range::has<range::callable::size(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::first(decltype(v))>::value);
+            static_assert(
+                range::has<range::callable::drop(decltype(v))>::value);
+            static_assert(
+                !range::has<range::callable::drop(decltype(v), int)>::value);
 
             BOOST_CHECK(!empty(v));
 
@@ -383,14 +375,14 @@ BOOST_AUTO_TEST_CASE(test_range_transform_weird_count)
 
         auto v = transform(w, twice, weird_direction(7));
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          range::result_of<range::callable::default_direction(
-                              decltype(v))>::type,
-                          forgotten_to_define_direction>) );
+        static_assert(std::is_same_v<
+                      range::result_of<range::callable::default_direction(
+                          decltype(v))>::type,
+                      forgotten_to_define_direction>);
 
         BOOST_CHECK(!empty(v, direction));
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(weird_direction, decltype(v))>) );
+        static_assert(!range::has<range::callable::size(
+                          weird_direction, decltype(v))>::value);
 
         BOOST_CHECK_EQUAL(first(v, direction), 0);
         BOOST_CHECK_EQUAL(first(drop(v, direction), direction), 2);
@@ -437,10 +429,9 @@ BOOST_AUTO_TEST_CASE(unique_underlying)
         auto t = transform(one_time_view(v), twice);
 
         // Chop only available for rvalue references.
+        static_assert(range::has<range::callable::chop(decltype(t))>::value);
         static_assert(
-            range::has<range::callable::chop(decltype(t))>::value, "");
-        static_assert(
-            !range::has<range::callable::chop(decltype(t) const &)>::value, "");
+            !range::has<range::callable::chop(decltype(t) const &)>::value);
 
         auto chopped1 = chop(std::move(t));
         BOOST_CHECK_EQUAL(chopped1.first(), 12);

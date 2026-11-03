@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(test_range_detail_underlying)
         typedef with_underlying<int> type;
         type u(5);
         BOOST_CHECK_EQUAL(get_underlying<type &>(u), 5);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(get_underlying<type &>(u)), int &>) );
+        static_assert(
+            std::is_same_v<decltype(get_underlying<type &>(u)), int &>);
         BOOST_CHECK_EQUAL(&get_underlying<type &>(u), &u.underlying_);
     }
     // Const reference.
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(test_range_detail_underlying)
         typedef with_underlying<int> const type;
         type u(6);
         BOOST_CHECK_EQUAL(get_underlying<type &>(u), 6);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(get_underlying<type &>(u)), int const &>) );
+        static_assert(
+            std::is_same_v<decltype(get_underlying<type &>(u)), int const &>);
         BOOST_CHECK_EQUAL(&get_underlying<type &>(u), &u.underlying_);
     }
     // Rvalue.
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(test_range_detail_underlying)
         typedef with_underlying<int> type;
         type u(7);
         BOOST_CHECK_EQUAL(get_underlying<type>(u), 7);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(get_underlying<type>(u)), int &&>) );
+        static_assert(
+            std::is_same_v<decltype(get_underlying<type>(u)), int &&>);
         // BOOST_CHECK_EQUAL (&get_underlying <type> (u), &u.underlying_);
         u.underlying_ = 8;
         BOOST_CHECK_EQUAL(get_underlying<type>(u), 8);
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE(test_range_detail_underlying)
         typedef with_underlying<int const> type;
         type u(6);
         BOOST_CHECK_EQUAL(get_underlying<type &>(u), 6);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(get_underlying<type &>(u)), int const &>) );
+        static_assert(
+            std::is_same_v<decltype(get_underlying<type &>(u)), int const &>);
         BOOST_CHECK_EQUAL(&get_underlying<type &>(u), &u.underlying_);
     }
     // Const reference to const.
@@ -93,8 +93,8 @@ BOOST_AUTO_TEST_CASE(test_range_detail_underlying)
         typedef with_underlying<int const> const type;
         type u(6);
         BOOST_CHECK_EQUAL(get_underlying<type &>(u), 6);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(get_underlying<type &>(u)), int const &>) );
+        static_assert(
+            std::is_same_v<decltype(get_underlying<type &>(u)), int const &>);
         BOOST_CHECK_EQUAL(&get_underlying<type &>(u), &u.underlying_);
     }
 }

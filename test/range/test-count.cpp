@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(example_decrement_unsigned)
         RANGE_FOR_EACH(i, reverse(count(values.size())))
         {
             static_assert(
-                std::is_same<decltype(i), std::size_t &&>::value,
+                std::is_same_v<decltype(i), std::size_t &&>,
                 "Should be the same type as values.size(), with &&.");
             current = values[i] / current;
         }
@@ -259,15 +259,11 @@ void check_infinite_negative(
     RIME_CHECK_EQUAL(empty(c), rime::false_);
     RIME_CHECK_EQUAL(empty(c, front), rime::false_);
 
-    static_assert(!range::has<range::callable::size(decltype(c))>::value, "");
-    static_assert(
-        !range::has<range::callable::size(
-            direction::front, decltype(c))>::value,
-        "");
-    static_assert(
-        !range::has<range::callable::first(
-            direction::back, decltype(c))>::value,
-        "");
+    static_assert(!range::has<range::callable::size(decltype(c))>::value);
+    static_assert(!range::has<range::callable::size(
+                      direction::front, decltype(c))>::value);
+    static_assert(!range::has<range::callable::first(
+                      direction::back, decltype(c))>::value);
 
     RIME_CHECK_EQUAL(first(c), minus_two);
     auto c2 = drop(c);
@@ -356,7 +352,7 @@ BOOST_AUTO_TEST_CASE(homogeneous)
     // Check that chop works properly.
     {
         auto c = count(3);
-        BOOST_MPL_ASSERT((is_homogeneous<decltype(c)>) );
+        static_assert(is_homogeneous<decltype(c)>::value);
 
         auto chopped = chop(c, back);
         BOOST_CHECK_EQUAL(chopped.first(), 2);
@@ -387,13 +383,13 @@ BOOST_AUTO_TEST_CASE(homogeneous)
 
     {
         auto c = count(3);
-        BOOST_MPL_ASSERT((is_homogeneous<decltype(c)>) );
+        static_assert(is_homogeneous<decltype(c)>::value);
     }
     {
         // Without arguments: start at std::size_t (0).
         auto c = count();
 
-        BOOST_MPL_ASSERT((is_homogeneous<decltype(c)>) );
+        static_assert(is_homogeneous<decltype(c)>::value);
 
         BOOST_CHECK(default_direction(c) == front);
 

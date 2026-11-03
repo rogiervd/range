@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_range_find_homogeneous)
 
     {
         auto result = find(v, less_than_4);
-        BOOST_MPL_ASSERT((std::is_same<decltype(view(v)), decltype(result)>) );
+        static_assert(std::is_same_v<decltype(view(v)), decltype(result)>);
         BOOST_CHECK(empty(result));
     }
     // With actors.
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_range_find_homogeneous)
     {
         auto result = find(
             v, return_false(), range::callable::size(), return_end_marker());
-        BOOST_MPL_ASSERT((std::is_same<decltype(result), end_marker>) );
+        static_assert(std::is_same_v<decltype(result), end_marker>);
     }
 
     // Known at compile-time that the predicate is false.
@@ -184,22 +184,22 @@ BOOST_AUTO_TEST_CASE(test_range_find_heterogeneous)
 
     {
         auto result = find(empty_tuple, less_than_4);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(view(empty_tuple)), decltype(result)>) );
+        static_assert(
+            std::is_same_v<decltype(view(empty_tuple)), decltype(result)>);
         RIME_CHECK_EQUAL(empty(result), rime::true_);
     }
     {
         // Return the size if non-empty, or end_marker() if empty.
         auto result =
             find(empty_tuple, less_than_four, size, return_end_marker());
-        BOOST_MPL_ASSERT((std::is_same<decltype(result), end_marker>) );
+        static_assert(std::is_same_v<decltype(result), end_marker>);
     }
 
     std::tuple<rime::int_<3>> tuple_three;
     {
         auto result = find(tuple_three, less_than_four);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(view(tuple_three)), decltype(result)>) );
+        static_assert(
+            std::is_same_v<decltype(view(tuple_three)), decltype(result)>);
         RIME_CHECK_EQUAL(empty(result), rime::false_);
         RIME_CHECK_EQUAL(first(result), rime::int_<3>());
     }
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_range_find_heterogeneous)
         // Return the size if non-empty, or end_marker() if empty.
         auto result =
             find(tuple_four, less_than_four, size, return_end_marker());
-        BOOST_MPL_ASSERT((std::is_same<decltype(result), end_marker>) );
+        static_assert(std::is_same_v<decltype(result), end_marker>);
     }
 
     std::tuple<rime::int_<3>, rime::int_<5>> tuple_three_five;

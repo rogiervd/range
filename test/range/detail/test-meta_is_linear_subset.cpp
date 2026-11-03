@@ -15,75 +15,75 @@ BOOST_AUTO_TEST_CASE(test_range_detail_linear_subset)
 {
     using range::detail::is_linear_subset;
 
-    BOOST_MPL_ASSERT((is_linear_subset<meta::vector<>, meta::vector<>>) );
-    BOOST_MPL_ASSERT((is_linear_subset<meta::vector<>, meta::vector<int>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<>, meta::vector<int, bool>>) );
+    static_assert(is_linear_subset<meta::vector<>, meta::vector<>>::value);
+    static_assert(is_linear_subset<meta::vector<>, meta::vector<int>>::value);
+    static_assert(
+        is_linear_subset<meta::vector<>, meta::vector<int, bool>>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<int>, meta::vector<>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<int, bool>, meta::vector<>>) );
+    static_assert(!is_linear_subset<meta::vector<int>, meta::vector<>>::value);
+    static_assert(
+        !is_linear_subset<meta::vector<int, bool>, meta::vector<>>::value);
 
     // Subset of one.
-    BOOST_MPL_ASSERT((is_linear_subset<meta::vector<int>, meta::vector<int>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int>, meta::vector<int, bool>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int>, meta::vector<bool, int>>) );
+    static_assert(
+        is_linear_subset<meta::vector<int>, meta::vector<int>>::value);
+    static_assert(
+        is_linear_subset<meta::vector<int>, meta::vector<int, bool>>::value);
+    static_assert(
+        is_linear_subset<meta::vector<int>, meta::vector<bool, int>>::value);
 
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int>, meta::vector<int, bool, long>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int>, meta::vector<long, int, bool>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int>, meta::vector<long, bool, int>>) );
+    static_assert(is_linear_subset<
+                  meta::vector<int>, meta::vector<int, bool, long>>::value);
+    static_assert(is_linear_subset<
+                  meta::vector<int>, meta::vector<long, int, bool>>::value);
+    static_assert(is_linear_subset<
+                  meta::vector<int>, meta::vector<long, bool, int>>::value);
 
     // Subset of multiple.
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<meta::vector<int, long>, meta::vector<int, long>>) );
+    static_assert(is_linear_subset<
+                  meta::vector<int, long>, meta::vector<int, long>>::value);
 
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<
-            meta::vector<int, long>, meta::vector<int, bool, long>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<
-            meta::vector<long, int>, meta::vector<long, int, bool>>) );
-    BOOST_MPL_ASSERT(
-        (is_linear_subset<
-            meta::vector<long, int>, meta::vector<long, bool, int>>) );
+    static_assert(
+        is_linear_subset<
+            meta::vector<int, long>, meta::vector<int, bool, long>>::value);
+    static_assert(
+        is_linear_subset<
+            meta::vector<long, int>, meta::vector<long, int, bool>>::value);
+    static_assert(
+        is_linear_subset<
+            meta::vector<long, int>, meta::vector<long, bool, int>>::value);
 
     // Not a subset.
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<char>, meta::vector<int>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<char>, meta::vector<int, bool>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<char>, meta::vector<int, bool, long>>) );
+    static_assert(
+        !is_linear_subset<meta::vector<char>, meta::vector<int>>::value);
+    static_assert(
+        !is_linear_subset<meta::vector<char>, meta::vector<int, bool>>::value);
+    static_assert(!is_linear_subset<
+                  meta::vector<char>, meta::vector<int, bool, long>>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<meta::vector<int, char>, meta::vector<int, long>>) );
+    static_assert(!is_linear_subset<
+                  meta::vector<int, char>, meta::vector<int, long>>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<char, long>, meta::vector<int, bool, long>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<char, int>, meta::vector<long, int, bool>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<long, char>, meta::vector<long, bool, int>>) );
+    static_assert(
+        !is_linear_subset<
+            meta::vector<char, long>, meta::vector<int, bool, long>>::value);
+    static_assert(
+        !is_linear_subset<
+            meta::vector<char, int>, meta::vector<long, int, bool>>::value);
+    static_assert(
+        !is_linear_subset<
+            meta::vector<long, char>, meta::vector<long, bool, int>>::value);
 
     // Not a linear subset because of the order.
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<long, int>, meta::vector<int, bool, long>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<int, long>, meta::vector<long, int, bool>>) );
-    BOOST_MPL_ASSERT_NOT(
-        (is_linear_subset<
-            meta::vector<int, long>, meta::vector<long, bool, int>>) );
+    static_assert(
+        !is_linear_subset<
+            meta::vector<long, int>, meta::vector<int, bool, long>>::value);
+    static_assert(
+        !is_linear_subset<
+            meta::vector<int, long>, meta::vector<long, int, bool>>::value);
+    static_assert(
+        !is_linear_subset<
+            meta::vector<int, long>, meta::vector<long, bool, int>>::value);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

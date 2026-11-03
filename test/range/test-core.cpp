@@ -39,274 +39,268 @@ BOOST_AUTO_TEST_SUITE(test_range_core)
 
 BOOST_AUTO_TEST_CASE(test_range_tag)
 {
-    BOOST_MPL_ASSERT(
-        (std::is_same<range::tag_of<fake_range_1>::type, fake_range_1_tag>) );
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            range::tag_of<fake_range_1 const>::type, fake_range_1_tag>) );
-    BOOST_MPL_ASSERT(
-        (std::is_same<range::tag_of<fake_range_1 &>::type, fake_range_1_tag>) );
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            range::tag_of<fake_range_1 const &>::type, fake_range_1_tag>) );
-    BOOST_MPL_ASSERT((
-        std::is_same<range::tag_of<fake_range_1 &&>::type, fake_range_1_tag>) );
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            range::tag_of<fake_range_1 const &&>::type, fake_range_1_tag>) );
+    static_assert(
+        std::is_same_v<range::tag_of<fake_range_1>::type, fake_range_1_tag>);
+    static_assert(std::is_same_v<
+                  range::tag_of<fake_range_1 const>::type, fake_range_1_tag>);
+    static_assert(
+        std::is_same_v<range::tag_of<fake_range_1 &>::type, fake_range_1_tag>);
+    static_assert(std::is_same_v<
+                  range::tag_of<fake_range_1 const &>::type, fake_range_1_tag>);
+    static_assert(
+        std::is_same_v<range::tag_of<fake_range_1 &&>::type, fake_range_1_tag>);
+    static_assert(
+        std::is_same_v<
+            range::tag_of<fake_range_1 const &&>::type, fake_range_1_tag>);
 }
 
 BOOST_AUTO_TEST_CASE(test_range_core)
 {
     {
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::default_direction(int)>) );
+        static_assert(
+            !range::has<range::callable::default_direction(int)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::view(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::view(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::view(double, int, char)>) );
+        static_assert(!range::has<range::callable::view(int)>::value);
+        static_assert(!range::has<range::callable::view(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::view(double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::view_once(int)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::view_once(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::view_once(double, int, char)>) );
+        static_assert(!range::has<range::callable::view_once(int)>::value);
+        static_assert(
+            !range::has<range::callable::view_once(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::view_once(double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::empty(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::empty(int, char)>) );
+        static_assert(!range::has<range::callable::empty(int)>::value);
+        static_assert(!range::has<range::callable::empty(int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(int, char)>) );
+        static_assert(!range::has<range::callable::size(int)>::value);
+        static_assert(!range::has<range::callable::size(int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(int, char)>) );
+        static_assert(!range::has<range::callable::first(int)>::value);
+        static_assert(!range::has<range::callable::first(int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(double, int, char)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop(double, int, char)>) );
+        static_assert(!range::has<range::callable::drop(int)>::value);
+        static_assert(!range::has<range::callable::drop(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::drop(double, int, char)>::value);
+        static_assert(!range::has<range::callable::chop(int)>::value);
+        static_assert(!range::has<range::callable::chop(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::chop(double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(int)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(double, int, char)>) );
+        static_assert(!range::has<range::callable::chop_in_place(int)>::value);
+        static_assert(
+            !range::has<range::callable::chop_in_place(int, char)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::at(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::at(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::at(double, int, char)>) );
+        static_assert(!range::has<range::callable::at(int)>::value);
+        static_assert(!range::has<range::callable::at(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::at(double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::at_c<2>(int)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::at_c<0>(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::at_c<1>(double, int, char)>) );
+        static_assert(!range::has<range::callable::at_c<2>(int)>::value);
+        static_assert(!range::has<range::callable::at_c<0>(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::at_c<1>(double, int, char)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::second(int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::third(int, char)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::seventh(double, int, char)>) );
+        static_assert(!range::has<range::callable::second(int)>::value);
+        static_assert(!range::has<range::callable::third(int, char)>::value);
+        static_assert(
+            !range::has<range::callable::seventh(double, int, char)>::value);
     }
 
     weird_count c;
 
     // default_direction.
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::default_direction(
-                          weird_count)>::type,
-                      forgotten_to_define_direction>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(range::default_direction(c)),
-                      forgotten_to_define_direction>) );
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::default_direction(
+                      weird_count)>::type,
+                  forgotten_to_define_direction>);
+    static_assert(std::is_same_v<
+                  decltype(range::default_direction(c)),
+                  forgotten_to_define_direction>);
 
     // is_homogeneous.
-    BOOST_MPL_ASSERT((range::is_homogeneous<weird_count, weird_direction>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::is_homogeneous<weird_count, weird_opposite_direction>) );
+    static_assert(range::is_homogeneous<weird_count, weird_direction>::value);
+    static_assert(
+        !range::is_homogeneous<weird_count, weird_opposite_direction>::value);
 
     // is_view.
-    BOOST_MPL_ASSERT((range::is_view<weird_count, weird_direction>) );
-    BOOST_MPL_ASSERT((range::is_view<weird_count, weird_opposite_direction>) );
-    BOOST_MPL_ASSERT(
-        (range::is_view<
-            weird_count, weird_direction, weird_opposite_direction>) );
+    static_assert(range::is_view<weird_count, weird_direction>::value);
+    static_assert(range::is_view<weird_count, weird_opposite_direction>::value);
+    static_assert(
+        range::is_view<
+            weird_count, weird_direction, weird_opposite_direction>::value);
 
-    BOOST_MPL_ASSERT((range::is_view<weird_count &, weird_direction>) );
-    BOOST_MPL_ASSERT(
-        (range::is_view<weird_count const, weird_opposite_direction>) );
-    BOOST_MPL_ASSERT(
-        (range::is_view<
-            weird_count const &, weird_direction, weird_opposite_direction>) );
+    static_assert(range::is_view<weird_count &, weird_direction>::value);
+    static_assert(
+        range::is_view<weird_count const, weird_opposite_direction>::value);
+    static_assert(range::is_view<
+                  weird_count const &, weird_direction,
+                  weird_opposite_direction>::value);
 
     // view.
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::view(weird_count)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::view(weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::view(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::view(
-                          weird_count, weird_direction)>::type,
-                      weird_count>) );
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            weird_count &, decltype(range::view(c, weird_direction(7)))>) );
+    static_assert(!range::has<range::callable::view(weird_count)>::value);
+    static_assert(!range::has<range::callable::view(
+                      weird_count, direction::front)>::value);
+    static_assert(
+        range::has<range::callable::view(weird_count, weird_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::view(
+                      weird_count, weird_direction)>::type,
+                  weird_count>);
+    static_assert(std::is_same_v<
+                  weird_count &, decltype(range::view(c, weird_direction(7)))>);
 
     // forward_view.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::forward_view(weird_count)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::forward_view(
-                              weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::forward_view(
-                          weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::forward_view(
-                          weird_count, weird_direction)>::type,
-                      weird_count &&>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(range::forward_view(c, weird_direction(7))),
-                      weird_count &>) );
+    static_assert(
+        !range::has<range::callable::forward_view(weird_count)>::value);
+    static_assert(!range::has<range::callable::forward_view(
+                      weird_count, direction::front)>::value);
+    static_assert(range::has<range::callable::forward_view(
+                      weird_count, weird_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::forward_view(
+                      weird_count, weird_direction)>::type,
+                  weird_count &&>);
+    static_assert(std::is_same_v<
+                  decltype(range::forward_view(c, weird_direction(7))),
+                  weird_count &>);
 
     // view_once.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::view_once(weird_count)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::view_once(
-                              weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT((
-        range::has<range::callable::view_once(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::view_once(
-                          weird_count, weird_direction)>::type,
-                      weird_count>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(range::view_once(c, weird_direction(7))),
-                      weird_count &>) );
+    static_assert(!range::has<range::callable::view_once(weird_count)>::value);
+    static_assert(!range::has<range::callable::view_once(
+                      weird_count, direction::front)>::value);
+    static_assert(range::has<range::callable::view_once(
+                      weird_count, weird_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::view_once(
+                      weird_count, weird_direction)>::type,
+                  weird_count>);
+    static_assert(
+        std::is_same_v<
+            decltype(range::view_once(c, weird_direction(7))), weird_count &>);
 
     // empty.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::empty(weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::empty(weird_count)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::empty(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                          weird_count, weird_opposite_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::empty(
-                          weird_count, weird_direction)>::type,
-                      rime::false_type>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::empty(
-                          weird_count, weird_opposite_direction)>::type,
-                      rime::false_type>) );
-    BOOST_MPL_ASSERT_NOT((range::always_empty<weird_count, weird_direction>) );
-    BOOST_MPL_ASSERT((range::never_empty<weird_count, weird_direction>) );
+    static_assert(!range::has<range::callable::empty(
+                      weird_count, direction::front)>::value);
+    static_assert(!range::has<range::callable::empty(weird_count)>::value);
+    static_assert(range::has<range::callable::empty(
+                      weird_count, weird_direction)>::value);
+    static_assert(range::has<range::callable::empty(
+                      weird_count, weird_opposite_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::empty(
+                      weird_count, weird_direction)>::type,
+                  rime::false_type>);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::empty(
+                      weird_count, weird_opposite_direction)>::type,
+                  rime::false_type>);
+    static_assert(!range::always_empty<weird_count, weird_direction>::value);
+    static_assert(range::never_empty<weird_count, weird_direction>::value);
 
     // size.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::size(weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(weird_count)>) );
+    static_assert(!range::has<range::callable::size(
+                      weird_count, direction::front)>::value);
+    static_assert(!range::has<range::callable::size(weird_count)>::value);
     // Has no size.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::size(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(
-                              weird_count, weird_opposite_direction)>) );
+    static_assert(!range::has<range::callable::size(
+                      weird_count, weird_direction)>::value);
+    static_assert(!range::has<range::callable::size(
+                      weird_count, weird_opposite_direction)>::value);
 
     // first.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::first(weird_count, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(weird_count)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::first(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(
-                              weird_count, weird_opposite_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::first(
-                          weird_count, weird_direction)>::type,
-                      int>) );
+    static_assert(!range::has<range::callable::first(
+                      weird_count, direction::front)>::value);
+    static_assert(!range::has<range::callable::first(weird_count)>::value);
+    static_assert(range::has<range::callable::first(
+                      weird_count, weird_direction)>::value);
+    static_assert(!range::has<range::callable::first(
+                      weird_count, weird_opposite_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::first(
+                      weird_count, weird_direction)>::type,
+                  int>);
 
     // drop.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::drop(weird_count, direction::front &)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(weird_count)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::drop(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                              weird_count, weird_opposite_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::drop(
-                          weird_count, weird_direction)>::type,
-                      weird_count>) );
+    static_assert(!range::has<range::callable::drop(
+                      weird_count, direction::front &)>::value);
+    static_assert(!range::has<range::callable::drop(weird_count)>::value);
+    static_assert(
+        range::has<range::callable::drop(weird_count, weird_direction)>::value);
+    static_assert(!range::has<range::callable::drop(
+                      weird_count, weird_opposite_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::drop(
+                      weird_count, weird_direction)>::type,
+                  weird_count>);
 
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::drop(
-             weird_count const, rime::int_<1>, weird_direction)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::drop(
-             weird_count const &, rime::int_<5>, weird_direction)>) );
-    BOOST_MPL_ASSERT((
-        range::has<range::callable::drop(weird_count, int, weird_direction)>) );
+    static_assert(
+        range::has<range::callable::drop(
+            weird_count const, rime::int_<1>, weird_direction)>::value);
+    static_assert(
+        range::has<range::callable::drop(
+            weird_count const &, rime::int_<5>, weird_direction)>::value);
+    static_assert(range::has<range::callable::drop(
+                      weird_count, int, weird_direction)>::value);
 
     // chop.
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::chop(weird_count, direction::front &)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(weird_count)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::chop(weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(
-                              weird_count, weird_opposite_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::chop(
-                          weird_count, weird_direction)>::type,
-                      range::chopped<int, weird_count>>) );
+    static_assert(!range::has<range::callable::chop(
+                      weird_count, direction::front &)>::value);
+    static_assert(!range::has<range::callable::chop(weird_count)>::value);
+    static_assert(
+        range::has<range::callable::chop(weird_count, weird_direction)>::value);
+    static_assert(!range::has<range::callable::chop(
+                      weird_count, weird_opposite_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::chop(
+                      weird_count, weird_direction)>::type,
+                  range::chopped<int, weird_count>>);
 
     // chop_in_place.
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                              weird_count, direction::front &)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::chop_in_place(weird_count)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                              weird_count, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                              weird_count const &, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                              weird_count &&, weird_direction)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                          weird_count &, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                              weird_opposite_direction, weird_count)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::chop_in_place(
-                          weird_count &, weird_direction)>::type,
-                      int>) );
+    static_assert(!range::has<range::callable::chop_in_place(
+                      weird_count, direction::front &)>::value);
+    static_assert(
+        !range::has<range::callable::chop_in_place(weird_count)>::value);
+    static_assert(!range::has<range::callable::chop_in_place(
+                      weird_count, weird_direction)>::value);
+    static_assert(!range::has<range::callable::chop_in_place(
+                      weird_count const &, weird_direction)>::value);
+    static_assert(!range::has<range::callable::chop_in_place(
+                      weird_count &&, weird_direction)>::value);
+    static_assert(range::has<range::callable::chop_in_place(
+                      weird_count &, weird_direction)>::value);
+    static_assert(!range::has<range::callable::chop_in_place(
+                      weird_opposite_direction, weird_count)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::chop_in_place(
+                      weird_count &, weird_direction)>::type,
+                  int>);
 
     // at.
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::at(
-                              weird_count, int, direction::front &)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::at(weird_count, int)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::at(weird_count, int, weird_direction)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::at(
-                              weird_count, int, weird_opposite_direction)>) );
-    BOOST_MPL_ASSERT((std::is_same<
-                      range::result_of<range::callable::at(
-                          weird_count, int, weird_direction)>::type,
-                      int>) );
+    static_assert(!range::has<range::callable::at(
+                      weird_count, int, direction::front &)>::value);
+    static_assert(!range::has<range::callable::at(weird_count, int)>::value);
+    static_assert(range::has<range::callable::at(
+                      weird_count, int, weird_direction)>::value);
+    static_assert(!range::has<range::callable::at(
+                      weird_count, int, weird_opposite_direction)>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::at(
+                      weird_count, int, weird_direction)>::type,
+                  int>);
 
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::at(
-             weird_count const, rime::int_<1>, weird_direction)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::at(
-             weird_count const &, rime::int_<5>, weird_direction)>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::at(weird_count, int, weird_direction)>) );
+    static_assert(
+        range::has<range::callable::at(
+            weird_count const, rime::int_<1>, weird_direction)>::value);
+    static_assert(
+        range::has<range::callable::at(
+            weird_count const &, rime::int_<5>, weird_direction)>::value);
+    static_assert(range::has<range::callable::at(
+                      weird_count, int, weird_direction)>::value);
 
     // Run-time behaviour.
     weird_direction direction(7);

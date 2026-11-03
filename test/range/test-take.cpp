@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_range_take_vector_runtime)
         // for this:
         auto view = range::view(reference);
         auto first = take(reference, 3);
-        BOOST_MPL_ASSERT((std::is_same<decltype(view), decltype(first)>) );
+        static_assert(std::is_same_v<decltype(view), decltype(first)>);
         BOOST_CHECK(empty(first));
     }
 
@@ -134,8 +134,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_vector_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 27);
 
         auto take_back_next = drop(take_back, back);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next)>);
         RIME_CHECK_EQUAL(empty(take_back_next), false);
         BOOST_CHECK_EQUAL(first(take_back_next, back), 7);
 
@@ -159,8 +159,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_vector_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 37);
 
         auto take_back_next_2 = drop(take_back, 2);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next_2)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next_2)>);
         RIME_CHECK_EQUAL(empty(take_back_next_2), true);
     }
     {
@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_vector_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 37);
 
         auto take_back_next_2 = drop(take_back, 2, back);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next_2)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next_2)>);
         RIME_CHECK_EQUAL(empty(take_back_next_2), false);
         BOOST_CHECK_EQUAL(first(take_back_next_2, back), 7);
 
@@ -191,14 +191,14 @@ BOOST_AUTO_TEST_CASE(test_range_take_list_runtime)
         // iterator_range here:
         auto view = range::view(l);
         auto first = take(l, 3);
-        BOOST_MPL_ASSERT_NOT((std::is_same<decltype(view), decltype(first)>) );
+        static_assert(!std::is_same_v<decltype(view), decltype(first)>);
         static_assert(
-            range::has<range::callable::first(decltype(first))>::value, "");
+            range::has<range::callable::first(decltype(first))>::value);
         RIME_CHECK_EQUAL(empty(first), true);
 
         // Second take: the type does not change.
         auto first_2 = take(first, 2);
-        BOOST_MPL_ASSERT((std::is_same<decltype(first), decltype(first_2)>) );
+        static_assert(std::is_same_v<decltype(first), decltype(first_2)>);
         RIME_CHECK_EQUAL(empty(first_2), true);
     }
 
@@ -282,8 +282,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_list_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 27);
 
         auto take_back_next = drop(take_back, back);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next)>);
         RIME_CHECK_EQUAL(empty(take_back_next, back), false);
         BOOST_CHECK_EQUAL(first(take_back_next, back), 7);
 
@@ -307,8 +307,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_list_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 37);
 
         auto take_back_next_2 = drop(drop(take_back, back), back);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next_2)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next_2)>);
         RIME_CHECK_EQUAL(empty(take_back_next_2, back), true);
     }
     {
@@ -318,8 +318,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_list_runtime)
         BOOST_CHECK_EQUAL(first(take_back, back), 37);
 
         auto take_back_next_2 = drop(drop(take_back, back), back);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(take_back), decltype(take_back_next_2)>) );
+        static_assert(
+            std::is_same_v<decltype(take_back), decltype(take_back_next_2)>);
         RIME_CHECK_EQUAL(empty(take_back_next_2, back), false);
         BOOST_CHECK_EQUAL(first(take_back_next_2, back), 7);
 
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE(test_range_take_infinite_homogeneous_runtime)
 
     {
         auto t = take(c, 7);
-        BOOST_MPL_ASSERT((is_homogeneous<decltype(t)>) );
+        static_assert(is_homogeneous<decltype(t)>::value);
         // Not currently true, but maybe it should be?
         // static_assert (range::has::size <decltype (t)>::value, "");
 
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE(test_range_take_infinite_homogeneous_runtime)
     }
     {
         auto t = take(c, 7);
-        BOOST_MPL_ASSERT((is_homogeneous<decltype(t)>) );
+        static_assert(is_homogeneous<decltype(t)>::value);
         // Not currently true, but maybe it should be?
         // static_assert (range::has::size <decltype (t)>::value, "");
 
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(test_range_take_infinite_heterogeneous_constant)
     auto c = count_from(rime::size_t<5>());
 
     auto t = take(c, rime::int_<7>());
-    BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(t)>) );
+    static_assert(!is_homogeneous<decltype(t)>::value);
 
     RIME_CHECK_EQUAL(first(t), rime::size_t<5>());
     auto t2 = drop(t, rime::int_<4>());
@@ -516,8 +516,8 @@ BOOST_AUTO_TEST_CASE(test_range_take_input_range)
     {
         auto t = take(
             range::make_function_range(produce_consecutive), rime::int_<2>());
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(decltype(t) &)>) );
+        static_assert(
+            !range::has<range::callable::chop_in_place(decltype(t) &)>::value);
     }
 }
 

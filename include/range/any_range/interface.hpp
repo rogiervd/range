@@ -95,8 +95,7 @@ namespace range { namespace any_range_interface {
     template <class Element, class CapabilityKeys, class DefaultDirection>
     struct base
     {
-        static_assert(
-            capability::is_capability_keys<CapabilityKeys>::value, "");
+        static_assert(capability::is_capability_keys<CapabilityKeys>::value);
 
         void lose_capability();
 

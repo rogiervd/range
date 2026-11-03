@@ -119,7 +119,7 @@ namespace capability {
 
     template <class... Types> struct all_are_capability_keys
     : meta::all_of_c<(
-          std::is_same<Types, copy_construct>::value
+          std::is_same_v<Types, copy_construct>
           || is_direction<Types>::value)...> {};
 
     /// Evaluate to \c true iff \a Type is a meta::set of capability keys.
@@ -257,7 +257,7 @@ namespace capability {
     template <class Range, class Direction> class detect_capabilities_for_key
     {
         static_assert(
-            std::is_same<Range, typename std::decay<Range>::type>::value,
+            std::is_same_v<Range, typename std::decay<Range>::type>,
             "Internal: Range must be unqualified.");
 
         typedef typename boost::mpl::eval_if<

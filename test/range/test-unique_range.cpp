@@ -41,87 +41,86 @@ BOOST_AUTO_TEST_CASE(vector)
     {
         auto view = unique_view(v);
 
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view)>::type, unique_range_tag<false>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view)>::type, unique_range_tag<false>>);
         // &.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view) &>::type, unique_range_tag<false>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view) &>::type, unique_range_tag<false>>);
         // const &.
-        BOOST_MPL_ASSERT((std::is_same<
-                          tag_of<decltype(view) const &>::type,
-                          unique_range_tag<false>>) );
+        static_assert(
+            std::is_same_v<
+                tag_of<decltype(view) const &>::type, unique_range_tag<false>>);
 
         // empty.
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(view))>) );
-        BOOST_MPL_ASSERT((has<callable::size(decltype(view))>) );
+        static_assert(has<callable::empty(decltype(view))>::value);
+        static_assert(has<callable::size(decltype(view))>::value);
 
         // first.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::back)>) );
+        static_assert(has<callable::first(decltype(view))>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::back)>::value);
 
         // Also for lvalues.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view) &)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view) &, direction::back)>) );
+        static_assert(has<callable::first(decltype(view) &)>::value);
+        static_assert(
+            has<callable::first(decltype(view) &, direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view) &, direction::back)>::value);
 
         // drop.
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::back)>) );
+        static_assert(has<callable::drop(decltype(view))>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::drop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::drop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::is_homogeneous<decltype(view)>) );
+        static_assert(range::is_homogeneous<decltype(view)>::value);
 
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view), std::size_t)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT((has<callable::drop(
-                              decltype(view), std::size_t, direction::back)>) );
+        static_assert(has<callable::drop(decltype(view), std::size_t)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), std::size_t, direction::front)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), std::size_t, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, std::size_t)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::back)>) );
+        static_assert(
+            !has<callable::drop(decltype(view) &, std::size_t)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::back)>::value);
 
         // chop.
-        BOOST_MPL_ASSERT((has<callable::chop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::back)>) );
+        static_assert(has<callable::chop(decltype(view))>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::back)>::value);
 
         // Not for lvalues (whether const or not).
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) const &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) const &)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::front)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::back)>::value);
 
         // Run-time.
         BOOST_CHECK(!empty(view));
@@ -161,87 +160,86 @@ BOOST_AUTO_TEST_CASE(vector)
     {
         auto view = one_time_view(v);
 
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view)>::type, unique_range_tag<true>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view)>::type, unique_range_tag<true>>);
         // &.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view) &>::type, unique_range_tag<true>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view) &>::type, unique_range_tag<true>>);
         // const &.
-        BOOST_MPL_ASSERT((std::is_same<
-                          tag_of<decltype(view) const &>::type,
-                          unique_range_tag<true>>) );
+        static_assert(
+            std::is_same_v<
+                tag_of<decltype(view) const &>::type, unique_range_tag<true>>);
 
         // empty.
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(view))>) );
-        BOOST_MPL_ASSERT((has<callable::size(decltype(view))>) );
+        static_assert(has<callable::empty(decltype(view))>::value);
+        static_assert(has<callable::size(decltype(view))>::value);
 
         // first.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::back)>) );
+        static_assert(has<callable::first(decltype(view))>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::first(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::first(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::first(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::first(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::first(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::first(decltype(view) &, direction::back)>::value);
 
         // drop.
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::back)>) );
+        static_assert(has<callable::drop(decltype(view))>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::drop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::drop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::is_homogeneous<decltype(view)>) );
+        static_assert(range::is_homogeneous<decltype(view)>::value);
 
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view), std::size_t)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT((has<callable::drop(
-                              decltype(view), std::size_t, direction::back)>) );
+        static_assert(has<callable::drop(decltype(view), std::size_t)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), std::size_t, direction::front)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), std::size_t, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, std::size_t)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::back)>) );
+        static_assert(
+            !has<callable::drop(decltype(view) &, std::size_t)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::back)>::value);
 
         // chop.
-        BOOST_MPL_ASSERT((has<callable::chop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::back)>) );
+        static_assert(has<callable::chop(decltype(view))>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::back)>::value);
 
         // Not for lvalues (whether const or not).
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) const &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) const &)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::front)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::back)>::value);
 
         // Run-time.
         BOOST_CHECK(!empty(view));
@@ -274,106 +272,104 @@ BOOST_AUTO_TEST_CASE(tuple)
     {
         auto view = unique_view(v);
 
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view)>::type, unique_range_tag<false>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view)>::type, unique_range_tag<false>>);
         // &.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view) &>::type, unique_range_tag<false>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view) &>::type, unique_range_tag<false>>);
         // const &.
-        BOOST_MPL_ASSERT((std::is_same<
-                          tag_of<decltype(view) const &>::type,
-                          unique_range_tag<false>>) );
+        static_assert(
+            std::is_same_v<
+                tag_of<decltype(view) const &>::type, unique_range_tag<false>>);
 
         // empty.
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(view))>) );
-        BOOST_MPL_ASSERT((has<callable::size(decltype(view))>) );
+        static_assert(has<callable::empty(decltype(view))>::value);
+        static_assert(has<callable::size(decltype(view))>::value);
 
         // first.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::back)>) );
+        static_assert(has<callable::first(decltype(view))>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::back)>::value);
 
         // Also for lvalues.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view) &)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view) &, direction::back)>) );
+        static_assert(has<callable::first(decltype(view) &)>::value);
+        static_assert(
+            has<callable::first(decltype(view) &, direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view) &, direction::back)>::value);
 
         // drop.
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::back)>) );
+        static_assert(has<callable::drop(decltype(view))>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::drop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::drop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::is_homogeneous<decltype(view)>) );
+        static_assert(!range::is_homogeneous<decltype(view)>::value);
 
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), rime::size_t<2>)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), rime::size_t<2>, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), rime::size_t<2>, direction::back)>) );
+        static_assert(
+            has<callable::drop(decltype(view), rime::size_t<2>)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), rime::size_t<2>, direction::front)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), rime::size_t<2>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, std::size_t)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::back)>) );
+        static_assert(
+            !has<callable::drop(decltype(view) &, std::size_t)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::back)>::value);
 
         // chop.
-        BOOST_MPL_ASSERT((has<callable::chop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::back)>) );
+        static_assert(has<callable::chop(decltype(view))>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::back)>::value);
 
         // Not for lvalues (whether const or not).
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) const &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) const &)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::front)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::back)>::value);
 
         // Run-time.
-        BOOST_MPL_ASSERT((never_empty<decltype(view), direction::front>) );
+        static_assert(never_empty<decltype(view), direction::front>::value);
         BOOST_CHECK_EQUAL(size(view), 2u);
         BOOST_CHECK_EQUAL(first(view), 5);
 
         auto view2 = drop(std::move(view));
 
-        BOOST_MPL_ASSERT((never_empty<decltype(view2), direction::front>) );
+        static_assert(never_empty<decltype(view2), direction::front>::value);
         BOOST_CHECK_EQUAL(size(view2), 1u);
         BOOST_CHECK_EQUAL(first(view2), 6);
 
         auto chopped = chop(std::move(view2));
 
         BOOST_CHECK_EQUAL(chopped.first(), 6);
-        BOOST_MPL_ASSERT(
-            (always_empty<decltype(chopped.rest()), direction::front>) );
+        static_assert(
+            always_empty<decltype(chopped.rest()), direction::front>::value);
         BOOST_CHECK_EQUAL(size(chopped.rest()), 0u);
     }
 
@@ -382,106 +378,104 @@ BOOST_AUTO_TEST_CASE(tuple)
     {
         auto view = one_time_view(v);
 
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view)>::type, unique_range_tag<true>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view)>::type, unique_range_tag<true>>);
         // &.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                tag_of<decltype(view) &>::type, unique_range_tag<true>>) );
+        static_assert(std::is_same_v<
+                      tag_of<decltype(view) &>::type, unique_range_tag<true>>);
         // const &.
-        BOOST_MPL_ASSERT((std::is_same<
-                          tag_of<decltype(view) const &>::type,
-                          unique_range_tag<true>>) );
+        static_assert(
+            std::is_same_v<
+                tag_of<decltype(view) const &>::type, unique_range_tag<true>>);
 
         // empty.
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(view))>) );
-        BOOST_MPL_ASSERT((has<callable::size(decltype(view))>) );
+        static_assert(has<callable::empty(decltype(view))>::value);
+        static_assert(has<callable::size(decltype(view))>::value);
 
         // first.
-        BOOST_MPL_ASSERT((has<callable::first(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::first(decltype(view), direction::back)>) );
+        static_assert(has<callable::first(decltype(view))>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::first(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::first(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::first(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::first(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::first(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::first(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::first(decltype(view) &, direction::back)>::value);
 
         // drop.
-        BOOST_MPL_ASSERT((has<callable::drop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), direction::back)>) );
+        static_assert(has<callable::drop(decltype(view))>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::drop(decltype(view), direction::back)>::value);
 
         // Not for lvalues.
-        BOOST_MPL_ASSERT_NOT((has<callable::drop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::drop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::is_homogeneous<decltype(view)>) );
+        static_assert(!range::is_homogeneous<decltype(view)>::value);
 
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(decltype(view), rime::size_t<2>)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), rime::size_t<2>, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::drop(
-                 decltype(view), rime::size_t<2>, direction::back)>) );
+        static_assert(
+            has<callable::drop(decltype(view), rime::size_t<2>)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), rime::size_t<2>, direction::front)>::value);
+        static_assert(
+            has<callable::drop(
+                decltype(view), rime::size_t<2>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(decltype(view) &, std::size_t)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::drop(
-                 decltype(view) &, std::size_t, direction::back)>) );
+        static_assert(
+            !has<callable::drop(decltype(view) &, std::size_t)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::front)>::value);
+        static_assert(
+            !has<callable::drop(
+                decltype(view) &, std::size_t, direction::back)>::value);
 
         // chop.
-        BOOST_MPL_ASSERT((has<callable::chop(decltype(view))>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (has<callable::chop(decltype(view), direction::back)>) );
+        static_assert(has<callable::chop(decltype(view))>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::front)>::value);
+        static_assert(
+            has<callable::chop(decltype(view), direction::back)>::value);
 
         // Not for lvalues (whether const or not).
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) &)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::front)>::value);
+        static_assert(
+            !has<callable::chop(decltype(view) &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((has<callable::chop(decltype(view) const &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop(decltype(view) const &, direction::back)>) );
+        static_assert(!has<callable::chop(decltype(view) const &)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::front)>::value);
+        static_assert(!has<callable::chop(
+                          decltype(view) const &, direction::back)>::value);
 
         // Run-time.
-        BOOST_MPL_ASSERT((never_empty<decltype(view), direction::front>) );
+        static_assert(never_empty<decltype(view), direction::front>::value);
         BOOST_CHECK_EQUAL(size(view), 2u);
 
         auto chopped1 = chop(std::move(view));
 
         BOOST_CHECK_EQUAL(chopped1.first(), 5);
-        BOOST_MPL_ASSERT(
-            (never_empty<decltype(chopped1.rest()), direction::front>) );
+        static_assert(
+            never_empty<decltype(chopped1.rest()), direction::front>::value);
         BOOST_CHECK_EQUAL(size(chopped1.rest()), 1u);
 
         auto chopped2 = chop(chopped1.move_rest());
 
         BOOST_CHECK_EQUAL(chopped2.first(), 6);
-        BOOST_MPL_ASSERT(
-            (always_empty<decltype(chopped2.rest()), direction::front>) );
+        static_assert(
+            always_empty<decltype(chopped2.rest()), direction::front>::value);
         BOOST_CHECK_EQUAL(size(chopped2.rest()), 0u);
     }
 }

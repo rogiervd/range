@@ -49,20 +49,20 @@ BOOST_AUTO_TEST_CASE(test_range_callable_lazy)
         auto f4 = f3(true);
         auto result = f4(tuple<>());
 
-        static_assert(std::is_same<decltype(result), int>::value, "");
+        static_assert(std::is_same_v<decltype(result), int>);
         BOOST_CHECK_EQUAL(result, 71);
     }
     {
         auto f2 = f(4, true);
         auto result = f2(tuple<int>(27));
 
-        static_assert(std::is_same<decltype(result), int>::value, "");
+        static_assert(std::is_same_v<decltype(result), int>);
         BOOST_CHECK_EQUAL(result, 27);
     }
     {
         auto result = f(tuple<double>(8.25));
 
-        static_assert(std::is_same<decltype(result), double>::value, "");
+        static_assert(std::is_same_v<decltype(result), double>);
         BOOST_CHECK_EQUAL(result, 8.25);
     }
     {

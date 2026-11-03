@@ -54,32 +54,31 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple)
     tracked_registry r;
     {
         auto t = make_tuple();
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<>>);
     }
     // One element.
     {
         auto t = make_tuple(6);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int>>);
         BOOST_CHECK_EQUAL(first(t), 6);
     }
     {
         int i = 7;
         auto t = make_tuple(i);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int>>);
         BOOST_CHECK_EQUAL(first(t), 7);
     }
     {
         int const i = 7;
         auto t = make_tuple(i);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int>>);
         BOOST_CHECK_EQUAL(first(t), 7);
     }
     {
         tracked<int> i(r, 9);
         auto before = r.counts();
         auto t = make_tuple(std::move(i));
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<tracked<int>>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<tracked<int>>>);
         BOOST_CHECK_EQUAL(first(t).content(), 9);
         BOOST_CHECK_EQUAL(r.since(before), utility::move_count(1));
     }
@@ -87,14 +86,14 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple)
     {
         auto i = std::make_unique<int>(11);
         auto t = make_tuple(std::move(i));
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<std::unique_ptr<int>>>) );
+        static_assert(
+            std::is_same_v<decltype(t), range::tuple<std::unique_ptr<int>>>);
         BOOST_CHECK_EQUAL(*first(t), 11);
     }
     // More elements.
     {
         auto t = make_tuple(6, 'a');
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int, char>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int, char>>);
         BOOST_CHECK_EQUAL(first(t), 6);
         BOOST_CHECK_EQUAL(first(t, back), 'a');
     }
@@ -103,8 +102,8 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple)
         float f = 8.5f;
         double d = 12.75;
         auto t = make_tuple(i, f, d);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<int, float, double>>) );
+        static_assert(
+            std::is_same_v<decltype(t), range::tuple<int, float, double>>);
         BOOST_CHECK_EQUAL(first(t), 7);
         BOOST_CHECK_EQUAL(at_c<1>(t), 8.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 12.75f);
@@ -114,8 +113,8 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple)
         float f = 9.5f;
         double d = 13.75;
         auto t = make_tuple(std::move(i), std::move(f), std::move(d));
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<int, float, double>>) );
+        static_assert(
+            std::is_same_v<decltype(t), range::tuple<int, float, double>>);
         BOOST_CHECK_EQUAL(first(t), 8);
         BOOST_CHECK_EQUAL(at_c<1>(t), 9.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 13.75f);
@@ -131,8 +130,7 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple_from)
         std::tuple<int, float> st(i, f);
 
         auto copy = make_tuple_from(st);
-        static_assert(
-            std::is_same<decltype(copy), tuple<int, float>>::value, "");
+        static_assert(std::is_same_v<decltype(copy), tuple<int, float>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -141,8 +139,7 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple_from)
         std::tuple<int &, float &&, bool const &> st(i, std::move(f), b);
 
         auto copy = make_tuple_from(st);
-        static_assert(
-            std::is_same<decltype(copy), tuple<int, float, bool>>::value, "");
+        static_assert(std::is_same_v<decltype(copy), tuple<int, float, bool>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -168,8 +165,7 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple_from)
         {
             auto copy = make_tuple_from(take(l, rime::size_t<3>()));
 
-            static_assert(
-                std::is_same<decltype(copy), tuple<int, int, int>>::value, "");
+            static_assert(std::is_same_v<decltype(copy), tuple<int, int, int>>);
 
             BOOST_CHECK_EQUAL(first(copy), 3);
             BOOST_CHECK_EQUAL(second(copy), 4);
@@ -180,8 +176,7 @@ BOOST_AUTO_TEST_CASE(test_range_make_tuple_from)
         {
             auto copy = make_tuple_from(take(l, rime::size_t<3>()));
 
-            static_assert(
-                std::is_same<decltype(copy), tuple<int, int, int>>::value, "");
+            static_assert(std::is_same_v<decltype(copy), tuple<int, int, int>>);
 
             BOOST_CHECK_EQUAL(first(copy), 3);
             BOOST_CHECK_EQUAL(second(copy), 4);
@@ -200,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie)
 {
     {
         auto t = range::tie();
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<>>);
     }
     // One element.
     // Does not work:
@@ -210,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie)
     {
         int i = 7;
         auto t = range::tie(i);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int &>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int &>>);
         BOOST_CHECK_EQUAL(first(t), 7);
 
         // The tuple's elements must reference the original memory location.
@@ -220,8 +215,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie)
     {
         int const i = 8;
         auto t = range::tie(i);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<int const &>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int const &>>);
         BOOST_CHECK_EQUAL(first(t), 8);
         const_cast<int &>(i) = 18;
         BOOST_CHECK_EQUAL(first(t), 18);
@@ -237,9 +231,8 @@ BOOST_AUTO_TEST_CASE(test_range_tie)
         float f = 8.5f;
         double d = 12.75;
         auto t = range::tie(i, f, d);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(t), range::tuple<int &, float &, double &>>) );
+        static_assert(std::is_same_v<
+                      decltype(t), range::tuple<int &, float &, double &>>);
         BOOST_CHECK_EQUAL(first(t), 7);
         BOOST_CHECK_EQUAL(at_c<1>(t), 8.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 12.75);
@@ -257,10 +250,10 @@ BOOST_AUTO_TEST_CASE(test_range_tie)
         float const f = 9.5f;
         double const d = 13.75;
         auto t = range::tie(i, f, d);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+        static_assert(
+            std::is_same_v<
                 decltype(t),
-                range::tuple<int const &, float const &, double const &>>) );
+                range::tuple<int const &, float const &, double const &>>);
         BOOST_CHECK_EQUAL(first(t), 8);
         BOOST_CHECK_EQUAL(at_c<1>(t), 9.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 13.75f);
@@ -310,8 +303,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie_from)
         std::tuple<int, float> st(i, f);
 
         auto copy = tie_from(st);
-        static_assert(
-            std::is_same<decltype(copy), tuple<int &, float &>>::value, "");
+        static_assert(std::is_same_v<decltype(copy), tuple<int &, float &>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -325,10 +317,8 @@ BOOST_AUTO_TEST_CASE(test_range_tie_from)
         std::tuple<int &, float &&, bool const &> st(i, std::move(f), b);
 
         auto copy = tie_from(st);
-        static_assert(
-            std::is_same<
-                decltype(copy), tuple<int &, float &, bool const &>>::value,
-            "");
+        static_assert(std::is_same_v<
+                      decltype(copy), tuple<int &, float &, bool const &>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -360,8 +350,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie_from)
             auto copy = tie_from(take(l, rime::size_t<3>()));
 
             static_assert(
-                std::is_same<decltype(copy), tuple<int &, int &, int &>>::value,
-                "");
+                std::is_same_v<decltype(copy), tuple<int &, int &, int &>>);
 
             BOOST_CHECK_EQUAL(first(copy), 3);
             BOOST_CHECK_EQUAL(second(copy), 4);
@@ -380,8 +369,7 @@ BOOST_AUTO_TEST_CASE(test_range_tie_from)
             auto copy = tie_from(take(l, rime::size_t<3>()));
 
             static_assert(
-                std::is_same<decltype(copy), tuple<int &, int &, int &>>::value,
-                "");
+                std::is_same_v<decltype(copy), tuple<int &, int &, int &>>);
 
             BOOST_CHECK_EQUAL(first(copy), 13);
             BOOST_CHECK_EQUAL(second(copy), 24);
@@ -407,19 +395,19 @@ BOOST_AUTO_TEST_CASE(test_range_forward_as_tuple)
 {
     {
         auto t = range::forward_as_tuple();
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<>>);
     }
     // One element.
     {
         auto t = range::forward_as_tuple(6);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int &&>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int &&>>);
         // We can't check first (t) because the temporary has been moved.
         BOOST_CHECK_EQUAL(first(range::forward_as_tuple(66)), 66);
     }
     {
         int i = 7;
         auto t = range::forward_as_tuple(i);
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int &>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int &>>);
         BOOST_CHECK_EQUAL(first(t), 7);
         first(t) = 17;
         BOOST_CHECK_EQUAL(i, 17);
@@ -427,15 +415,14 @@ BOOST_AUTO_TEST_CASE(test_range_forward_as_tuple)
     {
         int const i = 8;
         auto t = range::forward_as_tuple(i);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<int const &>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int const &>>);
         BOOST_CHECK_EQUAL(first(t), 8);
         BOOST_CHECK_EQUAL(&first(t), &i);
     }
     {
         int i = 9;
         auto t = range::forward_as_tuple(std::move(i));
-        BOOST_MPL_ASSERT((std::is_same<decltype(t), range::tuple<int &&>>) );
+        static_assert(std::is_same_v<decltype(t), range::tuple<int &&>>);
         BOOST_CHECK_EQUAL(first(t), 9);
         i = 19;
         BOOST_CHECK_EQUAL(first(t), 19);
@@ -443,17 +430,17 @@ BOOST_AUTO_TEST_CASE(test_range_forward_as_tuple)
     // More elements.
     {
         auto t = range::forward_as_tuple(6, 'a');
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(t), range::tuple<int &&, char &&>>) );
+        static_assert(
+            std::is_same_v<decltype(t), range::tuple<int &&, char &&>>);
     }
     {
         int i = 7;
         float const f = 8.5f;
         double d = 12.75;
         auto t = range::forward_as_tuple(i, f, d);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(t), range::tuple<int &, float const &, double &>>) );
+        static_assert(
+            std::is_same_v<
+                decltype(t), range::tuple<int &, float const &, double &>>);
         BOOST_CHECK_EQUAL(first(t), 7);
         BOOST_CHECK_EQUAL(at_c<1>(t), 8.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 12.75);
@@ -469,10 +456,9 @@ BOOST_AUTO_TEST_CASE(test_range_forward_as_tuple)
         double d = 13.75;
         auto t =
             range::forward_as_tuple(std::move(i), std::move(f), std::move(d));
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(t), range::tuple<int &&, float &&, double &&>>) );
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(t)), int &&>) );
+        static_assert(std::is_same_v<
+                      decltype(t), range::tuple<int &&, float &&, double &&>>);
+        static_assert(std::is_same_v<decltype(first(t)), int &&>);
         BOOST_CHECK_EQUAL(first(t), 8);
         BOOST_CHECK_EQUAL(at_c<1>(t), 9.5f);
         BOOST_CHECK_EQUAL(at_c<2>(t), 13.75);
@@ -495,8 +481,7 @@ BOOST_AUTO_TEST_CASE(test_range_copy_tuple_from)
         std::tuple<int, float> st(i, f);
 
         auto copy = copy_tuple_from(st);
-        static_assert(
-            std::is_same<decltype(copy), tuple<int &, float &>>::value, "");
+        static_assert(std::is_same_v<decltype(copy), tuple<int &, float &>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -510,10 +495,8 @@ BOOST_AUTO_TEST_CASE(test_range_copy_tuple_from)
         std::tuple<int &, float, bool &&> const st(i, f, std::move(b));
 
         auto copy = copy_tuple_from(st);
-        static_assert(
-            std::is_same<
-                decltype(copy), tuple<int &, float const &, bool &>>::value,
-            "");
+        static_assert(std::is_same_v<
+                      decltype(copy), tuple<int &, float const &, bool &>>);
 
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7.75);
@@ -546,8 +529,7 @@ BOOST_AUTO_TEST_CASE(test_range_copy_tuple_from)
                 copy_tuple_from(unique_view(take(l, rime::size_t<3>())));
 
             static_assert(
-                std::is_same<decltype(copy), tuple<int &, int &, int &>>::value,
-                "");
+                std::is_same_v<decltype(copy), tuple<int &, int &, int &>>);
 
             BOOST_CHECK_EQUAL(first(copy), 3);
             BOOST_CHECK_EQUAL(second(copy), 4);
@@ -566,8 +548,7 @@ BOOST_AUTO_TEST_CASE(test_range_copy_tuple_from)
             auto copy = copy_tuple_from(take(l, rime::size_t<3>()));
 
             static_assert(
-                std::is_same<decltype(copy), tuple<int &, int &, int &>>::value,
-                "");
+                std::is_same_v<decltype(copy), tuple<int &, int &, int &>>);
 
             BOOST_CHECK_EQUAL(first(copy), 13);
             BOOST_CHECK_EQUAL(second(copy), 24);

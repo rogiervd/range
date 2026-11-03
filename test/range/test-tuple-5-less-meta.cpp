@@ -22,32 +22,24 @@ BOOST_AUTO_TEST_CASE(test_meta)
     using boost::mpl::pair;
     using meta::vector;
 
-    static_assert(
-        std::is_same<
-            predicate_results<vector<>, vector<>>::type,
-            vector<pair<rime::false_type, rime::true_type>>>::value,
-        "");
-    static_assert(
-        std::is_same<
-            predicate_results<vector<int>, vector<>>::type,
-            vector<
-                pair<rime::false_type, rime::true_type>,
-                pair<rime::false_type, rime::true_type>>>::value,
-        "");
-    static_assert(
-        std::is_same<
-            predicate_results<vector<>, vector<int>>::type,
-            vector<
-                pair<rime::true_type, rime::false_type>,
-                pair<rime::false_type, rime::true_type>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  predicate_results<vector<>, vector<>>::type,
+                  vector<pair<rime::false_type, rime::true_type>>>);
+    static_assert(std::is_same_v<
+                  predicate_results<vector<int>, vector<>>::type,
+                  vector<
+                      pair<rime::false_type, rime::true_type>,
+                      pair<rime::false_type, rime::true_type>>>);
+    static_assert(std::is_same_v<
+                  predicate_results<vector<>, vector<int>>::type,
+                  vector<
+                      pair<rime::true_type, rime::false_type>,
+                      pair<rime::false_type, rime::true_type>>>);
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             predicate_results<vector<int>, vector<int>>::type,
-            vector<pair<bool, bool>, pair<rime::false_type, rime::true_type>>>::
-            value,
-        "");
+            vector<pair<bool, bool>, pair<rime::false_type, rime::true_type>>>);
 
     static_assert(
         std::is_same<

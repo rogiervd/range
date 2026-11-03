@@ -45,24 +45,24 @@ struct add_one
 
 BOOST_AUTO_TEST_CASE(has)
 {
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::for_each(std::vector<int>, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::for_each(
-                          std::vector<int>, direction::front, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::for_each(
-                          std::vector<int>, direction::back, plus)>) );
+    static_assert(
+        range::has<range::callable::for_each(std::vector<int>, plus)>::value);
+    static_assert(range::has<range::callable::for_each(
+                      std::vector<int>, direction::front, plus)>::value);
+    static_assert(range::has<range::callable::for_each(
+                      std::vector<int>, direction::back, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::for_each(
-                              std::vector<int>, weird_direction, plus)>) );
+    static_assert(!range::has<range::callable::for_each(
+                      std::vector<int>, weird_direction, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::for_each(float)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::for_each(std::vector<int>)>) );
+    static_assert(!range::has<range::callable::for_each(float)>::value);
+    static_assert(
+        !range::has<range::callable::for_each(std::vector<int>)>::value);
 
-    BOOST_MPL_ASSERT_NOT((
-        range::has<range::callable::for_each(std::vector<int>, float, plus)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::for_each(std::vector<int>, int, plus)>) );
+    static_assert(!range::has<range::callable::for_each(
+                      std::vector<int>, float, plus)>::value);
+    static_assert(!range::has<range::callable::for_each(
+                      std::vector<int>, int, plus)>::value);
 }
 
 BOOST_AUTO_TEST_CASE(homogeneous)

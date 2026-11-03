@@ -32,10 +32,10 @@ using range::size;
 
 BOOST_AUTO_TEST_CASE(test_range_reverse_static)
 {
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::reverse(int)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::reverse()>) );
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::reverse(std::vector<int> &)>) );
+    static_assert(!range::has<range::callable::reverse(int)>::value);
+    static_assert(!range::has<range::callable::reverse()>::value);
+    static_assert(
+        range::has<range::callable::reverse(std::vector<int> &)>::value);
 }
 
 BOOST_AUTO_TEST_CASE(test_range_reverse_homogeneous)
@@ -156,10 +156,9 @@ BOOST_AUTO_TEST_CASE(test_range_reverse_homogeneous)
         std::list<char> l;
 
         auto r = reverse(l);
+        static_assert(!range::has<range::callable::size(decltype(r))>::value);
         static_assert(
-            !range::has<range::callable::size(decltype(r))>::value, "");
-        static_assert(
-            !range::has<range::callable::drop(int, decltype(r))>::value, "");
+            !range::has<range::callable::drop(int, decltype(r))>::value);
 
         BOOST_CHECK(empty(r));
 

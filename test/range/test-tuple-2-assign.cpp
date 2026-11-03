@@ -54,19 +54,19 @@ struct unassignable
 BOOST_AUTO_TEST_CASE(tuple_assign_test_test)
 {
     // Check whether the tests make sense.
-    static_assert(is_assignable<assignable, source>::value, "");
-    static_assert(!is_assignable<unassignable, source>::value, "");
+    static_assert(is_assignable<assignable, source>::value);
+    static_assert(!is_assignable<unassignable, source>::value);
 }
 
 /* Default-assignion from elements. */
 
 BOOST_AUTO_TEST_CASE(tuple_assign_zero)
 {
-    static_assert(is_assignable<tuple<>, tuple<>>::value, "");
+    static_assert(is_assignable<tuple<>, tuple<>>::value);
 
     // Wrong size.
-    static_assert(!is_assignable<tuple<>, tuple<source>>::value, "");
-    static_assert(!is_assignable<tuple<>, tuple<source, source>>::value, "");
+    static_assert(!is_assignable<tuple<>, tuple<source>>::value);
+    static_assert(!is_assignable<tuple<>, tuple<source, source>>::value);
 
     {
         tuple<> t1;
@@ -78,15 +78,14 @@ BOOST_AUTO_TEST_CASE(tuple_assign_zero)
 BOOST_AUTO_TEST_CASE(tuple_assign_from_range_zero)
 {
     // std::tuple.
-    static_assert(is_assignable<tuple<>, std::tuple<>>::value, "");
+    static_assert(is_assignable<tuple<>, std::tuple<>>::value);
 
     // Wrong size.
-    static_assert(!is_assignable<tuple<>, std::tuple<source>>::value, "");
-    static_assert(
-        !is_assignable<tuple<>, std::tuple<source, source>>::value, "");
+    static_assert(!is_assignable<tuple<>, std::tuple<source>>::value);
+    static_assert(!is_assignable<tuple<>, std::tuple<source, source>>::value);
 
     // std::vector
-    static_assert(is_assignable<tuple<>, std::vector<int>>::value, "");
+    static_assert(is_assignable<tuple<>, std::vector<int>>::value);
 
     {
         std::tuple<> t1;
@@ -105,14 +104,13 @@ BOOST_AUTO_TEST_CASE(tuple_assign_from_range_zero)
 
 BOOST_AUTO_TEST_CASE(tuple_assign_one)
 {
-    static_assert(is_assignable<tuple<assignable>, tuple<source>>::value, "");
-    static_assert(
-        !is_assignable<tuple<unassignable>, tuple<source>>::value, "");
+    static_assert(is_assignable<tuple<assignable>, tuple<source>>::value);
+    static_assert(!is_assignable<tuple<unassignable>, tuple<source>>::value);
 
     // Wrong size.
-    static_assert(!is_assignable<tuple<assignable>, tuple<>>::value, "");
+    static_assert(!is_assignable<tuple<assignable>, tuple<>>::value);
     static_assert(
-        !is_assignable<tuple<assignable>, tuple<source, source>>::value, "");
+        !is_assignable<tuple<assignable>, tuple<source, source>>::value);
 
     {
         tuple<int> t(7);
@@ -171,22 +169,19 @@ BOOST_AUTO_TEST_CASE(tuple_assign_one)
 
 BOOST_AUTO_TEST_CASE(tuple_assign_from_range_one)
 {
+    static_assert(is_assignable<tuple<assignable>, std::tuple<source>>::value);
     static_assert(
-        is_assignable<tuple<assignable>, std::tuple<source>>::value, "");
-    static_assert(
-        !is_assignable<tuple<unassignable>, std::tuple<source>>::value, "");
+        !is_assignable<tuple<unassignable>, std::tuple<source>>::value);
 
     // Wrong size.
-    static_assert(!is_assignable<tuple<assignable>, std::tuple<>>::value, "");
+    static_assert(!is_assignable<tuple<assignable>, std::tuple<>>::value);
     static_assert(
-        !is_assignable<tuple<assignable>, std::tuple<source, source>>::value,
-        "");
+        !is_assignable<tuple<assignable>, std::tuple<source, source>>::value);
 
     // std::vector
+    static_assert(is_assignable<tuple<assignable>, std::vector<source>>::value);
     static_assert(
-        is_assignable<tuple<assignable>, std::vector<source>>::value, "");
-    static_assert(
-        !is_assignable<tuple<unassignable>, std::vector<source>>::value, "");
+        !is_assignable<tuple<unassignable>, std::vector<source>>::value);
 
     {
         std::tuple<int> t(7);
@@ -240,34 +235,26 @@ BOOST_AUTO_TEST_CASE(tuple_assign_from_range_one)
 
 BOOST_AUTO_TEST_CASE(tuple_assign_more)
 {
-    static_assert(
-        is_assignable<
-            tuple<assignable, assignable>, tuple<source, source>>::value,
-        "");
+    static_assert(is_assignable<
+                  tuple<assignable, assignable>, tuple<source, source>>::value);
     static_assert(
         !is_assignable<
-            tuple<assignable, unassignable>, tuple<source, source>>::value,
-        "");
+            tuple<assignable, unassignable>, tuple<source, source>>::value);
     static_assert(
         !is_assignable<
-            tuple<unassignable, assignable>, tuple<source, source>>::value,
-        "");
+            tuple<unassignable, assignable>, tuple<source, source>>::value);
     static_assert(
         !is_assignable<
-            tuple<unassignable, unassignable>, tuple<source, source>>::value,
-        "");
+            tuple<unassignable, unassignable>, tuple<source, source>>::value);
 
     // Wrong size.
     static_assert(
-        !is_assignable<tuple<assignable, assignable>, tuple<>>::value, "");
+        !is_assignable<tuple<assignable, assignable>, tuple<>>::value);
     static_assert(
-        !is_assignable<tuple<assignable, assignable>, tuple<source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<assignable, assignable>,
-            tuple<source, source, source>>::value,
-        "");
+        !is_assignable<tuple<assignable, assignable>, tuple<source>>::value);
+    static_assert(!is_assignable<
+                  tuple<assignable, assignable>,
+                  tuple<source, source, source>>::value);
 
     {
         tracked_registry c;
@@ -350,70 +337,49 @@ BOOST_AUTO_TEST_CASE(tuple_assign_from_range_more)
     // std::tuple.
     static_assert(
         is_assignable<
-            tuple<assignable, assignable>, std::tuple<source, source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<assignable, unassignable>, std::tuple<source, source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<unassignable, assignable>, std::tuple<source, source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<unassignable, unassignable>,
-            std::tuple<source, source>>::value,
-        "");
+            tuple<assignable, assignable>, std::tuple<source, source>>::value);
+    static_assert(!is_assignable<
+                  tuple<assignable, unassignable>,
+                  std::tuple<source, source>>::value);
+    static_assert(!is_assignable<
+                  tuple<unassignable, assignable>,
+                  std::tuple<source, source>>::value);
+    static_assert(!is_assignable<
+                  tuple<unassignable, unassignable>,
+                  std::tuple<source, source>>::value);
 
     // std::pair.
     static_assert(
         is_assignable<
-            tuple<assignable, assignable>, std::pair<source, source>>::value,
-        "");
+            tuple<assignable, assignable>, std::pair<source, source>>::value);
     static_assert(
         !is_assignable<
-            tuple<assignable, unassignable>, std::pair<source, source>>::value,
-        "");
+            tuple<assignable, unassignable>, std::pair<source, source>>::value);
     static_assert(
         !is_assignable<
-            tuple<unassignable, assignable>, std::pair<source, source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<unassignable, unassignable>,
-            std::pair<source, source>>::value,
-        "");
+            tuple<unassignable, assignable>, std::pair<source, source>>::value);
+    static_assert(!is_assignable<
+                  tuple<unassignable, unassignable>,
+                  std::pair<source, source>>::value);
 
     // Wrong size.
     static_assert(
-        !is_assignable<tuple<assignable, assignable>, std::tuple<>>::value, "");
-    static_assert(
-        !is_assignable<
-            tuple<assignable, assignable>, std::tuple<source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<assignable, assignable>,
-            std::tuple<source, source, source>>::value,
-        "");
+        !is_assignable<tuple<assignable, assignable>, std::tuple<>>::value);
+    static_assert(!is_assignable<
+                  tuple<assignable, assignable>, std::tuple<source>>::value);
+    static_assert(!is_assignable<
+                  tuple<assignable, assignable>,
+                  std::tuple<source, source, source>>::value);
 
-    static_assert(
-        is_assignable<
-            tuple<assignable, assignable>, std::vector<source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<assignable, unassignable>, std::vector<source>>::value,
-        "");
+    static_assert(is_assignable<
+                  tuple<assignable, assignable>, std::vector<source>>::value);
+    static_assert(!is_assignable<
+                  tuple<assignable, unassignable>, std::vector<source>>::value);
+    static_assert(!is_assignable<
+                  tuple<unassignable, assignable>, std::vector<source>>::value);
     static_assert(
         !is_assignable<
-            tuple<unassignable, assignable>, std::vector<source>>::value,
-        "");
-    static_assert(
-        !is_assignable<
-            tuple<unassignable, unassignable>, std::vector<source>>::value,
-        "");
+            tuple<unassignable, unassignable>, std::vector<source>>::value);
 
     {
         int i = 89;

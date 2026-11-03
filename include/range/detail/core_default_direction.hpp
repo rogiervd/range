@@ -44,7 +44,7 @@ namespace callable {
 
                 // If no function or member is defined, return range::front.
                 template <class Range> direction::front operator()(
-                    Range const & range, overload_order<16> *) const
+                    Range const &, overload_order<16> *) const
                 {
                     return range::front;
                 }

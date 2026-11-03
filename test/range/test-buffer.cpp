@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_buffer
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/buffer.hpp"
 
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(count)
 {
     auto count = make_buffer(one_time_view(range::count()));
 
-    static_assert(std::is_same<decltype(first(count)), std::size_t>::value, "");
+    static_assert(std::is_same_v<decltype(first(count)), std::size_t>);
 
     BOOST_CHECK_EQUAL(first(count), 0u);
     BOOST_CHECK_EQUAL(first(drop(count)), 1u);

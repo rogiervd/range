@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_tuple_fold_state_types
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/fold.hpp"
 
@@ -34,9 +34,9 @@ BOOST_AUTO_TEST_SUITE(test_range_tuple_fold_state_types)
 BOOST_AUTO_TEST_CASE(test_fold_const_state)
 {
     range::tuple<int, short, int> v(1, 2, 3);
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(fold(int_holder(), v, add_return_const())),
-                      int_holder const>) );
+    static_assert(std::is_same_v<
+                  decltype(fold(int_holder(), v, add_return_const())),
+                  int_holder const>);
     BOOST_CHECK_EQUAL(fold(int_holder(), v, add_return_const()).i, 6);
 }
 
@@ -91,8 +91,7 @@ BOOST_AUTO_TEST_CASE(test_fold_lvalue_state)
 
     range::tuple<int, short, int> v(1, 2, 3);
 
-    BOOST_MPL_ASSERT(
-        (std::is_same<decltype(fold(i, v, return_right())), int &>) );
+    static_assert(std::is_same_v<decltype(fold(i, v, return_right())), int &>);
     BOOST_CHECK_EQUAL(&fold(i, v, return_right()), &at_c<2>(v));
 
     // Check that nothing has changed.
@@ -108,9 +107,8 @@ BOOST_AUTO_TEST_CASE(test_fold_rvalue_state)
 
     range::tuple<int, short, int> v(1, 2, 3);
 
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            decltype(fold(i, std::move(v), return_right())), int &&>) );
+    static_assert(std::is_same_v<
+                  decltype(fold(i, std::move(v), return_right())), int &&>);
     auto && result = fold(i, std::move(v), return_right());
     BOOST_CHECK_EQUAL(&result, &at_c<2>(v));
 

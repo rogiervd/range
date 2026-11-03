@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_make_any_range
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/any_range.hpp"
 
@@ -49,65 +49,57 @@ BOOST_AUTO_TEST_CASE(test_make_any_range)
     using meta::map_element;
     using meta::set;
 
-    static_assert(
-        std::is_same<
-            std::invoke_result<
-                callable::make_any_range, std::vector<int> &>::type,
-            any_range<
-                int &,
-                map<map_element<default_direction, direction::front>,
-                    map_element<copy_construct, void>,
-                    map_element<
-                        direction::front,
-                        set<empty, size, first, drop_one, drop_n,
-                            chop_destructive>>,
-                    map_element<
-                        direction::back,
-                        set<empty, size, first, drop_one, drop_n,
-                            chop_destructive>>>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::front,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>,
+                          map_element<
+                              direction::back,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
 
     // Passing in front and back explicitly.
-    static_assert(
-        std::is_same<
-            std::invoke_result<
-                callable::make_any_range, std::vector<int> &, direction::front,
-                direction::back>::type,
-            std::invoke_result<
-                callable::make_any_range, std::vector<int> &>::type>::value,
-        "");
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::front, direction::back>::type,
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &>::type>);
 
     // Only front.
-    static_assert(
-        std::is_same<
-            std::invoke_result<
-                callable::make_any_range, std::vector<int> &,
-                direction::front>::type,
-            any_range<
-                int &,
-                map<map_element<default_direction, direction::front>,
-                    map_element<copy_construct, void>,
-                    map_element<
-                        direction::front,
-                        set<empty, size, first, drop_one, drop_n,
-                            chop_destructive>>>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::front>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::front,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
 
     // Only back: default_direction is still front.
-    static_assert(
-        std::is_same<
-            std::invoke_result<
-                callable::make_any_range, std::vector<int> &,
-                direction::back>::type,
-            any_range<
-                int &,
-                map<map_element<default_direction, direction::front>,
-                    map_element<copy_construct, void>,
-                    map_element<
-                        direction::back,
-                        set<empty, size, first, drop_one, drop_n,
-                            chop_destructive>>>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::back>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::back,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
 
     {
         std::vector<int> v;
@@ -120,13 +112,13 @@ BOOST_AUTO_TEST_CASE(test_make_any_range)
 
         auto a2 = make_any_range(v, range::back);
         // The default direction does not match the available directions.
-        static_assert(!has<callable::first(decltype(a2))>::value, "");
+        static_assert(!has<callable::first(decltype(a2))>::value);
         BOOST_CHECK_EQUAL(range::first(a1, range::back), 65);
         BOOST_CHECK(range::empty(range::drop(a1, 2, range::back)));
     }
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             std::invoke_result<
                 callable::make_any_range, std::list<double> const &>::type,
             any_range<
@@ -138,23 +130,19 @@ BOOST_AUTO_TEST_CASE(test_make_any_range)
                         set<empty, first, drop_one, chop_destructive>>,
                     map_element<
                         direction::back,
-                        set<empty, first, drop_one, chop_destructive>>>>>::
-            value,
-        "");
+                        set<empty, first, drop_one, chop_destructive>>>>>);
 
     typedef range::function_range<int (*)()> function_range;
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             std::invoke_result<
                 callable::make_any_range, function_range &&>::type,
             any_range<
                 int,
                 map<map_element<default_direction, direction::front>,
                     map_element<
-                        direction::front, set<empty, chop_destructive>>>>>::
-            value,
-        "");
+                        direction::front, set<empty, chop_destructive>>>>>);
 
     {
         struct count
@@ -173,7 +161,7 @@ BOOST_AUTO_TEST_CASE(test_make_any_range)
 
     // Heterogeneous: only if there is at least one element.
     static_assert(
-        std::is_same<
+        std::is_same_v<
             std::invoke_result<
                 callable::make_any_range, range::tuple<int> &>::type,
             any_range<
@@ -186,8 +174,7 @@ BOOST_AUTO_TEST_CASE(test_make_any_range)
                     map_element<
                         direction::back,
                         set<empty, size, first, drop_one,
-                            chop_destructive>>>>>::value,
-        "");
+                            chop_destructive>>>>>);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

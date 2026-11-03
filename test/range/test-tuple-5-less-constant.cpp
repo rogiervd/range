@@ -11,7 +11,7 @@ all that is tested.
 */
 
 #define BOOST_TEST_MODULE range_test_tuple_less_constant
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"

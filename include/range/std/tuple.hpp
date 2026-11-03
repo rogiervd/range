@@ -14,8 +14,8 @@ This includes \<tuple>.
 #include <tuple>
 #include <utility>
 
-#include <boost/mpl/pair.hpp>
-#include <boost/mpl/placeholders.hpp>
+#include "boost/mpl/pair.hpp"
+#include "boost/mpl/placeholders.hpp"
 
 #include "meta/enumerate.hpp"
 #include "meta/transform.hpp"

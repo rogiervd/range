@@ -8,7 +8,7 @@ by splitting it up, the compiler requires less memory.
 */
 
 #define BOOST_TEST_MODULE range_test_less_lexicographical_heterogeneous_2
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/less_lexicographical.hpp"
 

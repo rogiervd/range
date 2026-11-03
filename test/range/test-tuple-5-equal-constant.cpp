@@ -9,7 +9,7 @@ These tests are very similar to the ones in test-equal-*.cpp.
 */
 
 #define BOOST_TEST_MODULE range_tuple_equal
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/equal.hpp"
 #include "range/tuple.hpp"

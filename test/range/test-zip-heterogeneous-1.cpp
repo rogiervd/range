@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_zip_heterogeneous
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/zip.hpp"
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(heterogeneous)
         auto tuple_tuple = std::make_tuple(ti, td);
 
         auto z2 = zip_from(tuple_tuple);
-        static_assert(std::is_same<decltype(z), decltype(z2)>::value, "");
+        static_assert(std::is_same_v<decltype(z), decltype(z2)>);
         RIME_CHECK_EQUAL(first(first(z2)), 4);
         RIME_CHECK_EQUAL(second(first(z2)), 7.5);
 

@@ -7,6 +7,7 @@
 
 #include "detail/core_at.hpp"
 #include "detail/core_base.hpp"
+#include "detail/core_begin_end.hpp"
 #include "detail/core_chop.hpp"
 #include "detail/core_chop_in_place.hpp"
 #include "detail/core_default_direction.hpp"

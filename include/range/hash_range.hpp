@@ -5,9 +5,9 @@
 #ifndef RANGE_HASH_RANGE_HPP_INCLUDED
 #define RANGE_HASH_RANGE_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
-#include <boost/functional/hash_fwd.hpp>
+#include "boost/functional/hash_fwd.hpp"
 
 #include "rime/core.hpp"
 #include "utility/overload_order.hpp"

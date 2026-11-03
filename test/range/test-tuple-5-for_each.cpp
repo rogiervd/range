@@ -44,23 +44,23 @@ struct add_one
 
 BOOST_AUTO_TEST_CASE(has)
 {
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::for_each(tuple<int>, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::for_each(
-                          tuple<int>, direction::front, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::for_each(
-                          tuple<int>, direction::back, plus)>) );
+    static_assert(
+        range::has<range::callable::for_each(tuple<int>, plus)>::value);
+    static_assert(range::has<range::callable::for_each(
+                      tuple<int>, direction::front, plus)>::value);
+    static_assert(range::has<range::callable::for_each(
+                      tuple<int>, direction::back, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::for_each(
-                              tuple<int>, weird_direction, plus)>) );
+    static_assert(!range::has<range::callable::for_each(
+                      tuple<int>, weird_direction, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::for_each(float)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::for_each(tuple<int>)>) );
+    static_assert(!range::has<range::callable::for_each(float)>::value);
+    static_assert(!range::has<range::callable::for_each(tuple<int>)>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::for_each(tuple<int>, float, plus)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::for_each(tuple<int>, int, plus)>) );
+    static_assert(
+        !range::has<range::callable::for_each(tuple<int>, float, plus)>::value);
+    static_assert(
+        !range::has<range::callable::for_each(tuple<int>, int, plus)>::value);
 }
 
 BOOST_AUTO_TEST_CASE(add)

@@ -81,28 +81,23 @@ struct derived : base
 BOOST_AUTO_TEST_CASE(tuple_construct_test_test)
 {
     // Check whether the tests make sense.
-    static_assert(std::is_convertible<source, convertible_target>::value, "");
-    static_assert(std::is_constructible<convertible_target, source>::value, "");
+    static_assert(std::is_convertible<source, convertible_target>::value);
+    static_assert(std::is_constructible<convertible_target, source>::value);
 
-    static_assert(
-        !std::is_convertible<source, constructible_target>::value, "");
-    static_assert(
-        std::is_constructible<constructible_target, source>::value, "");
+    static_assert(!std::is_convertible<source, constructible_target>::value);
+    static_assert(std::is_constructible<constructible_target, source>::value);
 
-    static_assert(
-        !std::is_convertible<source, inconvertible_target>::value, "");
-    static_assert(
-        !std::is_constructible<inconvertible_target, source>::value, "");
+    static_assert(!std::is_convertible<source, inconvertible_target>::value);
+    static_assert(!std::is_constructible<inconvertible_target, source>::value);
 }
 
 /* Default-construction from elements. */
 
 BOOST_AUTO_TEST_CASE(tuple_construct_default)
 {
-    static_assert(std::is_default_constructible<tuple<>>::value, "");
-    static_assert(std::is_default_constructible<tuple<source>>::value, "");
-    static_assert(
-        std::is_default_constructible<tuple<source, source>>::value, "");
+    static_assert(std::is_default_constructible<tuple<>>::value);
+    static_assert(std::is_default_constructible<tuple<source>>::value);
+    static_assert(std::is_default_constructible<tuple<source, source>>::value);
 
     {
         tuple<> t;
@@ -110,12 +105,12 @@ BOOST_AUTO_TEST_CASE(tuple_construct_default)
     }
     {
         tuple<int> t;
-        static_assert(never_empty<tuple<int>, direction::front>::value, "");
+        static_assert(never_empty<tuple<int>, direction::front>::value);
         BOOST_CHECK_EQUAL(at_c<0>(t), 0);
     }
     {
         tuple<std::string, int> t;
-        static_assert(never_empty<tuple<int>, direction::front>::value, "");
+        static_assert(never_empty<tuple<int>, direction::front>::value);
         BOOST_CHECK_EQUAL(at_c<0>(t), "");
         BOOST_CHECK_EQUAL(at_c<1>(t), 0);
     }
@@ -125,20 +120,18 @@ BOOST_AUTO_TEST_CASE(tuple_construct_default)
 BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
 {
     static_assert(
-        std::is_constructible<tuple<convertible_target>, source>::value, "");
+        std::is_constructible<tuple<convertible_target>, source>::value);
 
     static_assert(
-        std::is_constructible<tuple<constructible_target>, source>::value, "");
+        std::is_constructible<tuple<constructible_target>, source>::value);
 
     static_assert(
-        !std::is_constructible<tuple<inconvertible_target>, source>::value, "");
+        !std::is_constructible<tuple<inconvertible_target>, source>::value);
 
     // Wrong number of elements.
-    static_assert(!std::is_constructible<tuple<convertible_target>>::value, "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target>, source, source>::value,
-        "");
+    static_assert(!std::is_constructible<tuple<convertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target>, source, source>::value);
 
     // One element.
     {
@@ -146,10 +139,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
         BOOST_CHECK(default_direction(t) == range::front);
         RIME_CHECK_EQUAL(range::empty(t), rime::false_);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t) &)>::type,
-                          int &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t) &)>::type,
+                      int &>);
 
         BOOST_CHECK_EQUAL(first(t), 2);
         BOOST_CHECK_EQUAL(first(t, front), 2);
@@ -205,10 +198,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
     {
         tuple<int const> t1(56);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t1) &)>::type,
-                          int const &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t1) &)>::type,
+                      int const &>);
 
         BOOST_CHECK_EQUAL(first(t1), 56);
     }
@@ -217,10 +210,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
         int i1 = 56;
         tuple<int const &> t1(i1);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t1) &)>::type,
-                          int const &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t1) &)>::type,
+                      int const &>);
 
         BOOST_CHECK_EQUAL(first(t1), 56);
         i1 = 34;
@@ -231,10 +224,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
         int i1 = 56;
         tuple<int &> t1(i1);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t1) &)>::type,
-                          int &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t1) &)>::type,
+                      int &>);
 
         BOOST_CHECK_EQUAL(first(t1), 56);
         i1 = 34;
@@ -246,10 +239,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_one_element)
         int i1 = 56;
         tuple<int &&> t1(std::move(i1));
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t1) &)>::type,
-                          int &&>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t1) &)>::type,
+                      int &&>);
 
         BOOST_CHECK_EQUAL(first(t1), 56);
         i1 = 34;
@@ -262,76 +255,53 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
 {
     // Convertibility: the most restrictive element counts.
     // convertible_target, ...
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, convertible_target>, source,
-            source>::value,
-        "");
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, convertible_target>, source,
+                  source>::value);
 
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, constructible_target>, source,
-            source>::value,
-        "");
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, constructible_target>, source,
+                  source>::value);
 
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, inconvertible_target>, source,
-            source>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, inconvertible_target>, source,
+                  source>::value);
 
     // constructible_target, ...
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, convertible_target>, source,
-            source>::value,
-        "");
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, convertible_target>, source,
+                  source>::value);
 
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, constructible_target>, source,
-            source>::value,
-        "");
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, constructible_target>, source,
+                  source>::value);
 
-    static_assert(
-        !std::is_constructible<
-            tuple<constructible_target, inconvertible_target>, source,
-            source>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<constructible_target, inconvertible_target>, source,
+                  source>::value);
 
     // inconvertible_target, ...
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, convertible_target>, source,
-            source>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, convertible_target>, source,
+                  source>::value);
 
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, constructible_target>, source,
-            source>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, constructible_target>, source,
+                  source>::value);
 
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, inconvertible_target>, source,
-            source>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, inconvertible_target>, source,
+                  source>::value);
 
     // Wrong number of elements.
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>>::value);
     static_assert(
         !std::is_constructible<
-            tuple<convertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>, source>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>, source, source,
-            source>::value,
-        "");
+            tuple<convertible_target, convertible_target>, source>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>, source, source,
+                  source>::value);
 
     // More elements: copy, move, convertible, and combinations.
     {
@@ -391,10 +361,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
     {
         tuple<bool, int const> const t2(true, 67);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t2) &, direction::back)>::type,
-                          int const &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t2) &, direction::back)>::type,
+                      int const &>);
 
         BOOST_CHECK_EQUAL(first(t2, back), 67);
     }
@@ -403,10 +373,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
         int const i2 = 67;
         tuple<bool, int const &> const t2(true, i2);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t2) &, direction::back)>::type,
-                          int const &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t2) &, direction::back)>::type,
+                      int const &>);
 
         BOOST_CHECK_EQUAL(first(t2, back), 67);
     }
@@ -415,10 +385,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
         int i2 = 67;
         tuple<bool, int &> const t2(true, i2);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t2) &, direction::back)>::type,
-                          int &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t2) &, direction::back)>::type,
+                      int &>);
 
         BOOST_CHECK_EQUAL(first(t2, back), 67);
         i2 = 23;
@@ -430,10 +400,10 @@ BOOST_AUTO_TEST_CASE(tuple_construct_more_elements)
         int i2 = 67;
         tuple<bool, int &&> const t2(true, std::move(i2));
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              decltype(t2) &, direction::back)>::type,
-                          int &&>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          decltype(t2) &, direction::back)>::type,
+                      int &&>);
 
         BOOST_CHECK_EQUAL(first(t2, back), 67);
         i2 = 23;
@@ -507,11 +477,11 @@ template <class IntRange> void test_view_from_int(IntRange & range)
 // Empty tuple.
 BOOST_AUTO_TEST_CASE(tuple_to_tuple_conversion_empty)
 {
-    static_assert(std::is_convertible<tuple<>, tuple<>>::value, "");
-    static_assert(std::is_constructible<tuple<>, tuple<>>::value, "");
+    static_assert(std::is_convertible<tuple<>, tuple<>>::value);
+    static_assert(std::is_constructible<tuple<>, tuple<>>::value);
 
     // Wrong size.
-    static_assert(!std::is_constructible<tuple<>, tuple<int>>::value, "");
+    static_assert(!std::is_constructible<tuple<>, tuple<int>>::value);
 
     {
         tuple<> t1;
@@ -522,18 +492,17 @@ BOOST_AUTO_TEST_CASE(tuple_to_tuple_conversion_empty)
 BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_empty)
 {
     // From std::tuple.
-    static_assert(std::is_convertible<std::tuple<>, tuple<>>::value, "");
-    static_assert(std::is_constructible<tuple<>, std::tuple<>>::value, "");
+    static_assert(std::is_convertible<std::tuple<>, tuple<>>::value);
+    static_assert(std::is_constructible<tuple<>, std::tuple<>>::value);
 
     // Wrong size.
+    static_assert(!std::is_constructible<tuple<>, std::tuple<source>>::value);
     static_assert(
-        !std::is_constructible<tuple<>, std::tuple<source>>::value, "");
-    static_assert(
-        !std::is_constructible<tuple<>, std::tuple<source, source>>::value, "");
+        !std::is_constructible<tuple<>, std::tuple<source, source>>::value);
 
     // From std::vector.
-    static_assert(!std::is_convertible<std::vector<int>, tuple<>>::value, "");
-    static_assert(std::is_constructible<tuple<>, std::vector<int>>::value, "");
+    static_assert(!std::is_convertible<std::vector<int>, tuple<>>::value);
+    static_assert(std::is_constructible<tuple<>, std::vector<int>>::value);
 
     {
         std::tuple<> t1;
@@ -553,35 +522,25 @@ BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_empty)
 BOOST_AUTO_TEST_CASE(tuple_to_tuple_conversion_one)
 {
     static_assert(
-        std::is_convertible<tuple<source>, tuple<convertible_target>>::value,
-        "");
+        std::is_convertible<tuple<source>, tuple<convertible_target>>::value);
     static_assert(
-        std::is_constructible<tuple<convertible_target>, tuple<source>>::value,
-        "");
+        std::is_constructible<tuple<convertible_target>, tuple<source>>::value);
 
-    static_assert(
-        !std::is_convertible<tuple<source>, tuple<constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target>, tuple<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source>, tuple<constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target>, tuple<source>>::value);
 
-    static_assert(
-        !std::is_convertible<tuple<source>, tuple<inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target>, tuple<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source>, tuple<inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target>, tuple<source>>::value);
 
     // Wrong size.
     static_assert(
-        !std::is_constructible<tuple<convertible_target>, tuple<>>::value, "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target>, tuple<source, source>>::value,
-        "");
+        !std::is_constructible<tuple<convertible_target>, tuple<>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target>, tuple<source, source>>::value);
 
     {
         tuple<int> t1(5);
@@ -599,69 +558,43 @@ BOOST_AUTO_TEST_CASE(tuple_to_tuple_conversion_one)
 BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_one)
 {
     // std::tuple.
-    static_assert(
-        std::is_convertible<
-            std::tuple<source>, tuple<convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target>, std::tuple<source>>::value,
-        "");
+    static_assert(std::is_convertible<
+                  std::tuple<source>, tuple<convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target>, std::tuple<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source>, tuple<constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target>, std::tuple<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source>, tuple<constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target>, std::tuple<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source>, tuple<inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target>, std::tuple<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source>, tuple<inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target>, std::tuple<source>>::value);
 
     // Wrong size.
     static_assert(
-        !std::is_constructible<tuple<convertible_target>, std::tuple<>>::value,
-        "");
+        !std::is_constructible<tuple<convertible_target>, std::tuple<>>::value);
     static_assert(
         !std::is_constructible<
-            tuple<convertible_target>, std::tuple<source, source>>::value,
-        "");
+            tuple<convertible_target>, std::tuple<source, source>>::value);
 
     // std::vector: only explicitly convertible.
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>, tuple<convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target>, std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>, tuple<convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target>, std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>, tuple<constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target>, std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>, tuple<constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target>, std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>, tuple<inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target>, std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>, tuple<inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target>, std::vector<source>>::value);
 
     {
         std::tuple<int> t1(5);
@@ -706,122 +639,81 @@ BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_one)
 BOOST_AUTO_TEST_CASE(tuple_to_tuple_conversion_two)
 {
     // convertible_target, ...
-    static_assert(
-        std::is_convertible<
-            tuple<source, source>,
-            tuple<convertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(std::is_convertible<
+                  tuple<source, source>,
+                  tuple<convertible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<convertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, constructible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<convertible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, constructible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<convertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, inconvertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<convertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, inconvertible_target>,
+                  tuple<source, source>>::value);
 
     // constructible_target, ...
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<constructible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, convertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<constructible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, convertible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<constructible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, constructible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<constructible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, constructible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<constructible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<constructible_target, inconvertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<constructible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<constructible_target, inconvertible_target>,
+                  tuple<source, source>>::value);
 
     // inconvertible_target, ...
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<inconvertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, convertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<inconvertible_target, convertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, convertible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<inconvertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, constructible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<inconvertible_target, constructible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, constructible_target>,
+                  tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            tuple<source, source>,
-            tuple<inconvertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, inconvertible_target>,
-            tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  tuple<source, source>,
+                  tuple<inconvertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, inconvertible_target>,
+                  tuple<source, source>>::value);
 
     // Wrong size.
     static_assert(
         !std::is_constructible<
-            tuple<convertible_target, convertible_target>, tuple<>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            tuple<source>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            tuple<source, source, source>>::value,
-        "");
+            tuple<convertible_target, convertible_target>, tuple<>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  tuple<source>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  tuple<source, source, source>>::value);
 
     // Two types.
     {
@@ -922,328 +814,215 @@ BOOST_AUTO_TEST_CASE(range_to_tuple_conversion_two)
 {
     // std::tuple.
     // convertible_target, ...
-    static_assert(
-        std::is_convertible<
-            std::tuple<source, source>,
-            tuple<convertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<convertible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<convertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, constructible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<convertible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, constructible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<convertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, inconvertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<convertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, inconvertible_target>,
+                  std::tuple<source, source>>::value);
 
     // constructible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<constructible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, convertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<constructible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, convertible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<constructible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, constructible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<constructible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, constructible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<constructible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<constructible_target, inconvertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<constructible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<constructible_target, inconvertible_target>,
+                  std::tuple<source, source>>::value);
 
     // inconvertible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<inconvertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, convertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<inconvertible_target, convertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, convertible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<inconvertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, constructible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<inconvertible_target, constructible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, constructible_target>,
+                  std::tuple<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::tuple<source, source>,
-            tuple<inconvertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, inconvertible_target>,
-            std::tuple<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::tuple<source, source>,
+                  tuple<inconvertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, inconvertible_target>,
+                  std::tuple<source, source>>::value);
 
     // Wrong size.
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>, std::tuple<>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            std::tuple<source>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            std::tuple<source, source, source>>::value,
-        "");
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::tuple<>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::tuple<source>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::tuple<source, source, source>>::value);
 
     // std::pair.
     // convertible_target, ...
-    static_assert(
-        std::is_convertible<
-            std::pair<source, source>,
-            tuple<convertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<convertible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<convertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, constructible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<convertible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, constructible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<convertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, inconvertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<convertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, inconvertible_target>,
+                  std::pair<source, source>>::value);
 
     // constructible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<constructible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, convertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<constructible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, convertible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<constructible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, constructible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<constructible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, constructible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<constructible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<constructible_target, inconvertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<constructible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<constructible_target, inconvertible_target>,
+                  std::pair<source, source>>::value);
 
     // inconvertible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<inconvertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, convertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<inconvertible_target, convertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, convertible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<inconvertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, constructible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<inconvertible_target, constructible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, constructible_target>,
+                  std::pair<source, source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::pair<source, source>,
-            tuple<inconvertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, inconvertible_target>,
-            std::pair<source, source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::pair<source, source>,
+                  tuple<inconvertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, inconvertible_target>,
+                  std::pair<source, source>>::value);
 
     // std::vector: only explicitly convertible.
     // convertible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<convertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, convertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<convertible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, convertible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<convertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<convertible_target, constructible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<convertible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<convertible_target, constructible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<convertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<convertible_target, inconvertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<convertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<convertible_target, inconvertible_target>,
+                  std::vector<source>>::value);
 
     // constructible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<constructible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, convertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<constructible_target, convertible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, convertible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<constructible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        std::is_constructible<
-            tuple<constructible_target, constructible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<constructible_target, constructible_target>>::value);
+    static_assert(std::is_constructible<
+                  tuple<constructible_target, constructible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<constructible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<constructible_target, inconvertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<constructible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<constructible_target, inconvertible_target>,
+                  std::vector<source>>::value);
 
     // inconvertible_target, ...
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<inconvertible_target, convertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, convertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<inconvertible_target, convertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, convertible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<inconvertible_target, constructible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, constructible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<inconvertible_target, constructible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, constructible_target>,
+                  std::vector<source>>::value);
 
-    static_assert(
-        !std::is_convertible<
-            std::vector<source>,
-            tuple<inconvertible_target, inconvertible_target>>::value,
-        "");
-    static_assert(
-        !std::is_constructible<
-            tuple<inconvertible_target, inconvertible_target>,
-            std::vector<source>>::value,
-        "");
+    static_assert(!std::is_convertible<
+                  std::vector<source>,
+                  tuple<inconvertible_target, inconvertible_target>>::value);
+    static_assert(!std::is_constructible<
+                  tuple<inconvertible_target, inconvertible_target>,
+                  std::vector<source>>::value);
 
     // std::tuple.
     {

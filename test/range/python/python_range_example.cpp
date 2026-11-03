@@ -20,21 +20,21 @@ using range::python_range;
 
 void test_static()
 {
-    static_assert(std::is_same<
+    static_assert(std::is_same_v<
                   range::tag_of<python_range<>>::type,
-                  range::python_range_operation::python_range_tag>::value);
-    static_assert(std::is_same<
+                  range::python_range_operation::python_range_tag>);
+    static_assert(std::is_same_v<
                   range::tag_of<python_range<double> &>::type,
-                  range::python_range_operation::python_range_tag>::value);
-    static_assert(std::is_same<
+                  range::python_range_operation::python_range_tag>);
+    static_assert(std::is_same_v<
                   range::tag_of<python_range<double> const &>::type,
-                  range::python_range_operation::python_range_tag>::value);
-    static_assert(std::is_same<
+                  range::python_range_operation::python_range_tag>);
+    static_assert(std::is_same_v<
                   range::tag_of<python_range<double, int> const &&>::type,
-                  range::python_range_operation::python_range_tag>::value);
-    static_assert(std::is_same<
+                  range::python_range_operation::python_range_tag>);
+    static_assert(std::is_same_v<
                   range::tag_of<python_range<double, int, float> &&>::type,
-                  range::python_range_operation::python_range_tag>::value);
+                  range::python_range_operation::python_range_tag>);
 
     static_assert(
         range::has<range::callable::empty(range::python_range<int>)>::value);
@@ -92,32 +92,32 @@ void test_static()
 
     // Return types.
     // first.
-    static_assert(std::is_same<
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::first(
                       range::python_range<>)>::type,
-                  nanobind::object>::value);
-    static_assert(std::is_same<
+                  nanobind::object>);
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::first(
                       range::python_range<int>)>::type,
-                  int>::value);
-    static_assert(std::is_same<
+                  int>);
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::first(
                       range::python_range<double, char>)>::type,
-                  double>::value);
+                  double>);
 
     // drop.
-    static_assert(std::is_same<
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::drop(
                       range::python_range<>)>::type,
-                  range::python_range<>>::value);
-    static_assert(std::is_same<
+                  range::python_range<>>);
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::drop(
                       range::python_range<int>)>::type,
-                  range::python_range<int>>::value);
-    static_assert(std::is_same<
+                  range::python_range<int>>);
+    static_assert(std::is_same_v<
                   range::result_of<range::callable::drop(
                       range::python_range<double, char>)>::type,
-                  range::python_range<char>>::value);
+                  range::python_range<char>>);
 }
 
 template <class Range> void check_empty(Range range)

@@ -45,91 +45,72 @@ typedef range::function_range<int (*)()> function_range;
 BOOST_AUTO_TEST_CASE(test_capabilities_for_direction)
 {
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities_for_key<vector, direction::front>::type,
-            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>::
-            value,
-        "");
+            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>);
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities_for_key<function_range, direction::front>::type,
-            meta::set<empty, chop_destructive>>::value,
-        "");
+            meta::set<empty, chop_destructive>>);
 
     // An known-empty range has all capabilities!
     // (But they're all not allowed at run time.)
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities_for_key<range::tuple<>, direction::back>::type,
-            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>::
-            value,
-        "");
-    static_assert(
-        std::is_same<
-            detect_capabilities_for_key<
-                range::tuple<int>, direction::back>::type,
-            meta::set<empty, size, first, drop_one, chop_destructive>>::value,
-        "");
+            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>);
+    static_assert(std::is_same_v<
+                  detect_capabilities_for_key<
+                      range::tuple<int>, direction::back>::type,
+                  meta::set<empty, size, first, drop_one, chop_destructive>>);
 }
 
 BOOST_AUTO_TEST_CASE(test_detect_capability_keys)
 {
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capability_keys<vector>::type,
-            meta::set<copy_construct, direction::front, direction::back>>::
-            value,
-        "");
+            meta::set<copy_construct, direction::front, direction::back>>);
+
+    static_assert(std::is_same_v<
+                  detect_capability_keys<forward_list>::type,
+                  meta::set<copy_construct, direction::front>>);
 
     static_assert(
-        std::is_same<
-            detect_capability_keys<forward_list>::type,
-            meta::set<copy_construct, direction::front>>::value,
-        "");
-
-    static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capability_keys<tuple>::type,
-            meta::set<copy_construct, direction::front, direction::back>>::
-            value,
-        "");
+            meta::set<copy_construct, direction::front, direction::back>>);
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capability_keys<empty_tuple>::type,
-            meta::set<copy_construct, direction::front, direction::back>>::
-            value,
-        "");
+            meta::set<copy_construct, direction::front, direction::back>>);
 
-    static_assert(
-        std::is_same<
-            detect_capability_keys<function_range>::type,
-            meta::set<direction::front>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  detect_capability_keys<function_range>::type,
+                  meta::set<direction::front>>);
 }
 
 BOOST_AUTO_TEST_CASE(test_detect_capabilities)
 {
-    static_assert(
-        std::is_same<
-            detect_capabilities<vector>::type,
-            meta::map<
-                meta::map_element<default_direction, direction::front>,
-                meta::map_element<copy_construct, void>,
-                meta::map_element<
-                    direction::front,
-                    meta::set<
-                        empty, size, first, drop_one, drop_n,
-                        chop_destructive>>,
-                meta::map_element<
-                    direction::back,
-                    meta::set<
-                        empty, size, first, drop_one, drop_n,
-                        chop_destructive>>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  detect_capabilities<vector>::type,
+                  meta::map<
+                      meta::map_element<default_direction, direction::front>,
+                      meta::map_element<copy_construct, void>,
+                      meta::map_element<
+                          direction::front,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>,
+                      meta::map_element<
+                          direction::back,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>>>);
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities<list>::type,
             meta::map<
                 meta::map_element<default_direction, direction::front>,
@@ -139,12 +120,10 @@ BOOST_AUTO_TEST_CASE(test_detect_capabilities)
                     meta::set<empty, first, drop_one, chop_destructive>>,
                 meta::map_element<
                     direction::back,
-                    meta::set<empty, first, drop_one, chop_destructive>>>>::
-            value,
-        "");
+                    meta::set<empty, first, drop_one, chop_destructive>>>>);
 
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities<tuple>::type,
             meta::map<
                 meta::map_element<default_direction, direction::front>,
@@ -155,113 +134,81 @@ BOOST_AUTO_TEST_CASE(test_detect_capabilities)
                 meta::map_element<
                     direction::back,
                     meta::set<
-                        empty, size, first, drop_one, chop_destructive>>>>::
-            value,
-        "");
+                        empty, size, first, drop_one, chop_destructive>>>>);
 
-    static_assert(
-        std::is_same<
-            detect_capabilities<empty_tuple>::type,
-            meta::map<
-                meta::map_element<default_direction, direction::front>,
-                meta::map_element<copy_construct, void>,
-                meta::map_element<
-                    direction::front,
-                    meta::set<
-                        empty, size, first, drop_one, drop_n,
-                        chop_destructive>>,
-                meta::map_element<
-                    direction::back,
-                    meta::set<
-                        empty, size, first, drop_one, drop_n,
-                        chop_destructive>>>>::value,
-        "");
+    static_assert(std::is_same_v<
+                  detect_capabilities<empty_tuple>::type,
+                  meta::map<
+                      meta::map_element<default_direction, direction::front>,
+                      meta::map_element<copy_construct, void>,
+                      meta::map_element<
+                          direction::front,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>,
+                      meta::map_element<
+                          direction::back,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>>>);
 
     // function_range: no copy constrution.
     static_assert(
-        std::is_same<
+        std::is_same_v<
             detect_capabilities<function_range>::type,
             meta::map<
                 meta::map_element<default_direction, direction::front>,
                 meta::map_element<
-                    direction::front, meta::set<empty, chop_destructive>>>>::
-            value,
-        "");
+                    direction::front, meta::set<empty, chop_destructive>>>>);
 }
 
 BOOST_AUTO_TEST_CASE(test_is_subset)
 {
-    static_assert(
-        is_subset<
-            detect_capabilities<function_range>::type,
-            detect_capabilities<function_range>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<function_range>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<function_range>::type,
-            detect_capabilities<vector>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<vector>::type,
-            detect_capabilities<function_range>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<function_range>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<list>::type,
-            detect_capabilities<vector>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<vector>::type,
-            detect_capabilities<list>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<list>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<list>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<forward_list>::type,
-            detect_capabilities<vector>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<vector>::type,
-            detect_capabilities<forward_list>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<forward_list>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<forward_list>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<forward_list>::type,
-            detect_capabilities<list>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<list>::type,
-            detect_capabilities<forward_list>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<forward_list>::type,
+                  detect_capabilities<list>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<list>::type,
+                  detect_capabilities<forward_list>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<function_range>::type,
-            detect_capabilities<tuple>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<tuple>::type,
-            detect_capabilities<function_range>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<tuple>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<tuple>::type,
+                  detect_capabilities<function_range>::type>::value);
 
-    static_assert(
-        is_subset<
-            detect_capabilities<tuple>::type,
-            detect_capabilities<empty_tuple>::type>::value,
-        "");
-    static_assert(
-        !is_subset<
-            detect_capabilities<empty_tuple>::type,
-            detect_capabilities<tuple>::type>::value,
-        "");
+    static_assert(is_subset<
+                  detect_capabilities<tuple>::type,
+                  detect_capabilities<empty_tuple>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<empty_tuple>::type,
+                  detect_capabilities<tuple>::type>::value);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

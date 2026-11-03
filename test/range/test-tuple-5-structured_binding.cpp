@@ -12,15 +12,17 @@ Test structured binding for range::tuple.
 #include "range/tuple.hpp"
 
 #include <string>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 #include "range/std/vector.hpp"
 
 BOOST_AUTO_TEST_SUITE(range_test_tuple_structured_binding)
 
-using range::tuple;
 
 BOOST_AUTO_TEST_CASE(compile_time)
 {
+    using range::tuple;
     static_assert(std::tuple_size<tuple<char>>::value == 1);
     static_assert(std::tuple_size<tuple<char, int>>::value == 2);
     static_assert(std::tuple_size<tuple<char, long, bool>>::value == 3);
@@ -43,6 +45,7 @@ BOOST_AUTO_TEST_CASE(compile_time)
 
 BOOST_AUTO_TEST_CASE(run_time)
 {
+    using range::tuple;
     tuple<int> t1(27);
     tuple<char, int> t2('c', 28);
     tuple<char, int, bool> t3('c', 29, true);
@@ -58,8 +61,57 @@ BOOST_AUTO_TEST_CASE(run_time)
     BOOST_CHECK_EQUAL(c3, 'c');
     BOOST_CHECK_EQUAL(i3, 29);
     BOOST_CHECK_EQUAL(b3, true);
+}
 
-    // TODO check return types.
+BOOST_AUTO_TEST_CASE(return_types)
+{
+    long l = 34;
+    std::string s = "Hello";
+    int i = 27;
+    bool b = true;
+
+    using type = range::tuple<long, std::string const, int &, bool const &>;
+    using range::get;
+
+    // The following checks pass with std::tuple and std::get, so presumably
+    // this is the correct behaviour.
+    {
+        type t(l, s, i, b);
+
+        BOOST_CHECK_EQUAL(get<0>(t), 34);
+        BOOST_CHECK_EQUAL(get<1>(t), "Hello");
+        BOOST_CHECK_EQUAL(get<2>(t), 27);
+        BOOST_CHECK_EQUAL(get<3>(t), true);
+
+        // tuple passed in as const reference.
+        static_assert(std::is_same_v<decltype(get<0>(t)), long &>);
+        static_assert(std::is_same_v<decltype(get<1>(t)), std::string const &>);
+        static_assert(std::is_same_v<decltype(get<2>(t)), int &>);
+        static_assert(std::is_same_v<decltype(get<3>(t)), bool const &>);
+
+        // tuple passed in as rvalue reference.
+        static_assert(std::is_same_v<decltype(get<0>(std::move(t))), long &&>);
+        static_assert(std::is_same_v<
+                      decltype(get<1>(std::move(t))), std::string const &&>);
+        static_assert(std::is_same_v<decltype(get<2>(std::move(t))), int &>);
+        static_assert(
+            std::is_same_v<decltype(get<3>(std::move(t))), bool const &>);
+    }
+
+    {
+        type const t(l, s, i, b);
+
+        BOOST_CHECK_EQUAL(get<0>(t), 34);
+        BOOST_CHECK_EQUAL(get<1>(t), "Hello");
+        BOOST_CHECK_EQUAL(get<2>(t), 27);
+        BOOST_CHECK_EQUAL(get<3>(t), true);
+
+        // tuple passed in as const reference.
+        static_assert(std::is_same_v<decltype(get<0>(t)), long const &>);
+        static_assert(std::is_same_v<decltype(get<1>(t)), std::string const &>);
+        static_assert(std::is_same_v<decltype(get<2>(t)), int &>);
+        static_assert(std::is_same_v<decltype(get<3>(t)), bool const &>);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(example)

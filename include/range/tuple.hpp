@@ -1308,18 +1308,20 @@ struct tuple_element<Position, ::range::tuple<Types...>>
 
 namespace range {
 
-template <std::size_t Position, class... Types> auto get(tuple<Types...> & t)
+template <std::size_t Position, class... Types>
+decltype(auto) get(tuple<Types...> & t)
 {
     return ::range::at(t, rime::size_t<Position>());
 }
 
-template <std::size_t Position, class... Types> auto get(tuple<Types...> && t)
+template <std::size_t Position, class... Types>
+decltype(auto) get(tuple<Types...> && t)
 {
     return ::range::at(std::move(t), rime::size_t<Position>());
 }
 
 template <std::size_t Position, class... Types>
-auto get(tuple<Types...> const & t)
+decltype(auto) get(tuple<Types...> const & t)
 {
     return ::range::at(t, rime::size_t<Position>());
 }

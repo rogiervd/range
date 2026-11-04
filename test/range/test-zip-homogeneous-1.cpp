@@ -125,4 +125,34 @@ BOOST_AUTO_TEST_CASE(begin_end)
     BOOST_CHECK_EQUAL(second(vi), 6);
 }
 
+
+// The same as above, but using structured binding.
+BOOST_AUTO_TEST_CASE(structured_binding)
+{
+    std::vector<int> vi {2, 7};
+
+    std::vector<std::string> vs {"Hello", "there!", "Never change"};
+
+    std::size_t count = 0;
+
+    for (auto [number, name] : zip(vi, vs)) {
+        if (number == 2) {
+            BOOST_CHECK_EQUAL(name, "Hello");
+        } else {
+            BOOST_CHECK_EQUAL(number, 7);
+            BOOST_CHECK_EQUAL(name, "there!");
+        }
+
+        // Set the first element to the length of the second element.
+        number = size(name);
+
+        ++count;
+    }
+
+    BOOST_CHECK_EQUAL(count, 2u);
+
+    BOOST_CHECK_EQUAL(first(vi), 5);
+    BOOST_CHECK_EQUAL(second(vi), 6);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

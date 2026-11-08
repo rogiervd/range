@@ -317,14 +317,28 @@ namespace callable {
                 return iterator_range<Iterator>(begin, end);
             }
 
+            // Only accept lvalue containers.
+            // The iterator_range refers to the container's elements, so
+            // passing in a temporary container would leave the range with
+            // dangling iterators.
             template <
                 class Container,
-                class Iterator = decltype(begin(std::declval<Container &&>()))>
+                class Enable = typename std::enable_if<
+                    std::is_lvalue_reference<Container>::value>::type,
+                class Iterator = decltype(begin(std::declval<Container &>()))>
             iterator_range<Iterator> operator()(Container && container) const
             {
                 return iterator_range<Iterator>(
                     begin(container), end(container));
             }
+
+            // Explicitly reject temporary containers, for a clearer error
+            // message.
+            template <
+                class Container,
+                typename std::enable_if<
+                    !std::is_lvalue_reference<Container>::value, int>::type = 0>
+            void operator()(Container && container) const = delete;
         };
 
         struct make_move_iterator_range
@@ -362,6 +376,9 @@ Give either \a begin and \a end, or \a container.
     The container to iterate.
     Begin and end iterators are found with unqualified calls to \c begin
     and \c end, after <c>using std::begin</c> and <c>using std::end</c>.
+    This must be an lvalue.
+    Passing in a temporary is a compile error, since the resulting range would
+    contain dangling iterators.
 */
 static constexpr auto make_iterator_range = callable::make_iterator_range();
 

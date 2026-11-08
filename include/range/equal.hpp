@@ -211,8 +211,10 @@ namespace callable {
                 Predicate && predicate) const
                 RETURNS(
                     dispatch()(
-                        range::view(std::forward<Range1>(range1), direction),
-                        range::view(std::forward<Range2>(range2), direction),
+                        range::helper::view_within_call(
+                            std::forward<Range1>(range1), direction),
+                        range::helper::view_within_call(
+                            std::forward<Range2>(range2), direction),
                         direction, std::forward<Predicate>(predicate),
                         pick_overload()));
 
@@ -227,10 +229,10 @@ namespace callable {
                 Predicate && predicate) const
                 RETURNS(
                     dispatch()(
-                        range::view(
+                        range::helper::view_within_call(
                             std::forward<Range1>(range1),
                             range::default_direction(range1)),
-                        range::view(
+                        range::helper::view_within_call(
                             std::forward<Range2>(range2),
                             range::default_direction(range1)),
                         range::default_direction(range1),
@@ -247,8 +249,10 @@ namespace callable {
                 Direction const & direction) const
                 RETURNS(
                     dispatch()(
-                        range::view(std::forward<Range1>(range1), direction),
-                        range::view(std::forward<Range2>(range2), direction),
+                        range::helper::view_within_call(
+                            std::forward<Range1>(range1), direction),
+                        range::helper::view_within_call(
+                            std::forward<Range2>(range2), direction),
                         direction, equal_detail::element_equal(),
                         pick_overload()));
 
@@ -257,10 +261,10 @@ namespace callable {
             template <class Range1, class Range2>
             auto operator()(Range1 && range1, Range2 && range2) const RETURNS(
                 dispatch()(
-                    range::view(
+                    range::helper::view_within_call(
                         std::forward<Range1>(range1),
                         range::default_direction(range1)),
-                    range::view(
+                    range::helper::view_within_call(
                         std::forward<Range2>(range2),
                         range::default_direction(range1)),
                     range::default_direction(range1),

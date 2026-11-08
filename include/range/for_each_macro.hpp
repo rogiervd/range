@@ -17,7 +17,7 @@ namespace range { namespace for_each_macro_detail {
             ::range::is_range<Type>::value,
             "Second parameter to RANGE_FOR_EACH must be a range");
         static_assert(
-            ::range::is_homogeneous<range::callable::view(Type)>::value,
+            ::range::is_homogeneous<range::callable::forward_view(Type)>::value,
             "Range passed into RANGE_FOR_EACH must be homogeneous");
         typedef Type type;
     };

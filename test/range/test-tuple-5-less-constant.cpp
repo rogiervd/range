@@ -47,24 +47,30 @@ using range::front;
 
 using range::transform;
 
-#define CHECK_tuple_view_less(r1, r2, value)                              \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2), value);                \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front), value);         \
-                                                                          \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2, less()), value);        \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front, less()), value); \
-                                                                          \
-    RIME_CHECK_EQUAL(                                                     \
-        less_lexicographical(                                             \
-            make_tuple_from(range::transform(r1, negate())),              \
-            make_tuple_from(range::transform(r2, negate())), greater()),  \
-        value);                                                           \
-    RIME_CHECK_EQUAL(                                                     \
-        less_lexicographical(                                             \
-            make_tuple_from(range::transform(r1, negate())),              \
-            make_tuple_from(range::transform(r2, negate())), front,       \
-            greater()),                                                   \
-        value)
+#define CHECK_tuple_view_less(r1, r2, value)                                   \
+    /* reverse() and transform() do not accept temporaries. */                 \
+    do {                                                                       \
+        auto && lvalue_r1 = r1;                                                \
+        auto && lvalue_r2 = r2;                                                \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2), value);                 \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front), value);          \
+                                                                               \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2, less()), value);         \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front, less()), value);  \
+                                                                               \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(range::transform(lvalue_r1, negate())),        \
+                make_tuple_from(range::transform(lvalue_r2, negate())),        \
+                greater()),                                                    \
+            value);                                                            \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(range::transform(lvalue_r1, negate())),        \
+                make_tuple_from(range::transform(lvalue_r2, negate())), front, \
+                greater()),                                                    \
+            value);                                                            \
+    } while (false)
 
 #define CHECK_tuple_less(r1, r2, value)   \
     CHECK_tuple_view_less(r1, r2, value); \

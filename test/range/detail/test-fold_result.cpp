@@ -137,7 +137,8 @@ BOOST_AUTO_TEST_CASE(test_fold_result)
 
     {
         // It is unknown at compile time when this tuple ends.
-        auto r = range::take(std::make_tuple(b(), b()), 2);
+        auto t = std::make_tuple(b(), b());
+        auto r = range::take(t, 2);
         static_assert(
             std::is_same_v<
                 range::fold_detail::all_result_types<

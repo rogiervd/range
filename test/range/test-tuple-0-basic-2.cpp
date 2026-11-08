@@ -20,9 +20,9 @@ BOOST_AUTO_TEST_SUITE(test_range_tuple_basic_2)
 
 BOOST_AUTO_TEST_CASE(tuple_basic)
 {
+    tuple<int, char, double> t(5, 'A', 7.25);
     check_three_elements(tuple<int, char, double>(5, 'A', 7.25), 5, 'A', 7.25);
-    check_three_elements(
-        view(tuple<int, char, double>(5, 'A', 7.25)), 5, 'A', 7.25);
+    check_three_elements(view(t), 5, 'A', 7.25);
     check_three_elements(
         view_once(tuple<int, char, double>(5, 'A', 7.25)), 5, 'A', 7.25);
 }

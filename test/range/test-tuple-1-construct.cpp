@@ -1188,14 +1188,14 @@ BOOST_AUTO_TEST_CASE(unique)
     {
         range::tuple<int, double> t(6, 6.25);
 
-        range::tuple<int, double> copy(unique_view(std::move(t)));
+        range::tuple<int, double> copy(unique_view(t));
         BOOST_CHECK_EQUAL(first(copy), 6);
         BOOST_CHECK_EQUAL(second(copy), 6.25);
     }
     {
         range::tuple<int, double> t(6, 6.25);
 
-        range::tuple<int, double> copy(one_time_view(std::move(t)));
+        range::tuple<int, double> copy(one_time_view(t));
         BOOST_CHECK_EQUAL(first(copy), 6);
         BOOST_CHECK_EQUAL(second(copy), 6.25);
     }
@@ -1206,7 +1206,7 @@ BOOST_AUTO_TEST_CASE(unique)
         v.push_back(4);
         v.push_back(7);
 
-        range::tuple<int, double> copy(unique_view(std::move(v)));
+        range::tuple<int, double> copy(unique_view(v));
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7);
     }
@@ -1215,7 +1215,7 @@ BOOST_AUTO_TEST_CASE(unique)
         v.push_back(4);
         v.push_back(7);
 
-        range::tuple<int, double> copy(one_time_view(std::move(v)));
+        range::tuple<int, double> copy(one_time_view(v));
         BOOST_CHECK_EQUAL(first(copy), 4);
         BOOST_CHECK_EQUAL(second(copy), 7);
     }

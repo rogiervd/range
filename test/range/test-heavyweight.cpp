@@ -232,6 +232,11 @@ BOOST_AUTO_TEST_CASE(test_range_heavyweight)
     {
         // weird_direction.
         static_assert(range::has<range::callable::view(
+                          weird_heavyweight_count &, weird_direction)>::value);
+        // A temporary heavyweight range cannot be viewed.
+        static_assert(!range::has<range::callable::view(
+                          weird_heavyweight_count, weird_direction)>::value);
+        static_assert(range::has<range::callable::view_once(
                           weird_heavyweight_count, weird_direction)>::value);
         static_assert(range::has<range::callable::empty(
                           weird_heavyweight_count, weird_direction)>::value);

@@ -63,17 +63,52 @@ namespace callable {
 
         using helper::implement_make_view;
 
-        template <bool Once, bool Forward> struct view
+        /*
+        \tparam AllowTemporary
+            Whether a view may be made of a temporary that is not a view
+            itself.
+            view does not allow this, since the resulting view would refer to a
+            container that is destructed at the end of the full expression.
+            view_once and forward_view do allow it, and so does
+            helper::view_within_call.
+        */
+        template <
+            bool Once, bool Forward, bool AllowTemporary = Once || Forward>
+        struct view
         {
         private:
+            template <class Range> struct allow_make_view
+            : std::integral_constant<
+                  bool,
+                  AllowTemporary || std::is_lvalue_reference<Range>::value> {};
+
             struct dispatch
             {
-                template <class Range, class... Directions> auto operator()(
+                template <
+                    class Range, class... Directions,
+                    class Enable = typename std::enable_if<
+                        allow_make_view<Range>::value>::type>
+                auto operator()(
                     overload_order<1> *, Range && range,
                     Directions const &... directions) const
                     RETURNS(implement_make_view(
                         typename tag_of<Range>::type(), rime::bool_<Once>(),
                         std::forward<Range>(range), directions...));
+
+                // Temporary that is not a view itself: disallow.
+                // This overload is deleted, rather than left out, so that the
+                // overload below, which returns the range itself, is not
+                // chosen.
+                template <
+                    class Range, class... Directions,
+                    class Enable = typename std::enable_if<
+                        !allow_make_view<Range>::value>::type,
+                    class Result = decltype(implement_make_view(
+                        typename tag_of<Range>::type(), rime::bool_<Once>(),
+                        std::declval<Range>(), std::declval<Directions>()...))>
+                void operator()(
+                    overload_order<1> *, Range && range,
+                    Directions const &... directions) const = delete;
 
                 // If implement_make_view is not implemented, and empty() is
                 // implemented for each of the directions, then return the
@@ -122,6 +157,7 @@ namespace callable {
     typedef implementation::view<false, false> view;
     typedef implementation::view<false, true> forward_view;
     typedef implementation::view<true, false> view_once;
+    typedef implementation::view<false, false, true> view_within_call;
 
 }  // namespace callable
 
@@ -132,6 +168,10 @@ A view is lightweight.
 If the range is already a view, then the range itself is returned.
 If an rvalue reference to a view is passed in, then the unqualified view is
 returned.
+
+A temporary range that is not a view (for example, a temporary container) is
+not accepted, since the view would refer to it after it has been destructed.
+Use view_once() to view a temporary.
 
 \param range
     Range that the view should be over.
@@ -175,14 +215,40 @@ particular to the view).
 */
 static auto const view_once = callable::view_once();
 
+namespace helper {
+
+    /** \brief
+    Turn a range into a view, also if it is a temporary.
+
+    This is the same as view(), except that it also accepts a temporary range
+    that is not a view.
+    This is unsafe in general, since the view refers to the temporary, which is
+    destructed at the end of the full expression.
+    It is safe only if the view is used within the current call, and not
+    returned.
+    This is useful to implement algorithms like equal(), which use their
+    arguments and then return a value that does not refer to them.
+
+    \param range
+        Range that the view should be over.
+    \param directions
+        Directions that the view should allow traversal in.
+        If no direction is given, then the default direction is used.
+    */
+    static auto const view_within_call = callable::view_within_call();
+
+}  // namespace helper
+
 /* is_view */
 
 namespace is_view_detail {
 
+    // Use view_within_call, so that this also works if Range is not a
+    // reference.
     template <class Range, class... Directions> struct is_view
     : std::is_same<
           typename std::decay<Range>::type,
-          typename std::decay<typename result_of<callable::view(
+          typename std::decay<typename result_of<callable::view_within_call(
               Range, Directions...)>::type>::type> {};
 
 }  // namespace is_view_detail

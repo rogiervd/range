@@ -475,9 +475,25 @@ template <class Container> auto get_iterator_type(Container &&) RETURNS(
 
 BOOST_AUTO_TEST_CASE(test_std_container_const)
 {
-    static_assert(std::is_same_v<
-                  decltype(get_iterator_type(std::vector<int>())),
-                  decltype(get_iterator_type(view(std::vector<int>())))>);
+    // view() does not accept a temporary container, since the view would
+    // refer to the destructed container.
+    static_assert(!range::has<range::callable::view(std::vector<int>)>::value);
+    static_assert(
+        !range::has<range::callable::view(std::vector<int> const)>::value);
+    // That is, this should not compile:
+    //     auto r = range::view(std::vector{1, 2, 3});
+    static_assert(!range::has<range::callable::view(
+                      decltype(std::vector {1, 2, 3}))>::value);
+
+    // A temporary that is a view already is accepted, and returned by value.
+    {
+        std::vector<int> v;
+        typedef decltype(view(v)) view_type;
+        static_assert(!std::is_reference_v<view_type>);
+        static_assert(std::is_same_v<decltype(view(view(v))), view_type>);
+    }
+
+    // view_once() does accept it.
 
     static_assert(std::is_same_v<
                   decltype(get_iterator_type(view_once(std::vector<int>()))),
@@ -493,9 +509,8 @@ BOOST_AUTO_TEST_CASE(test_std_container_const)
                       decltype(get_iterator_type(v)),
                       decltype(get_iterator_type(view_once(v)))>);
 
-        static_assert(std::is_same_v<
-                      decltype(get_iterator_type(std::move(v))),
-                      decltype(get_iterator_type(view(std::move(v))))>);
+        static_assert(
+            !range::has<range::callable::view(decltype(std::move(v)))>::value);
     }
 
     {
@@ -508,9 +523,8 @@ BOOST_AUTO_TEST_CASE(test_std_container_const)
                       decltype(get_iterator_type(v)),
                       decltype(get_iterator_type(view_once(v)))>);
 
-        static_assert(std::is_same_v<
-                      decltype(get_iterator_type(std::move(v))),
-                      decltype(get_iterator_type(view(std::move(v))))>);
+        static_assert(
+            !range::has<range::callable::view(decltype(std::move(v)))>::value);
     }
 }
 

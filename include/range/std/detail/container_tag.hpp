@@ -10,6 +10,8 @@ iterator_range.
 #ifndef RANGE_STD_CONTAINER_DETAIL_CONTAINER_TAG_HPP_INCLUDED
 #define RANGE_STD_CONTAINER_DETAIL_CONTAINER_TAG_HPP_INCLUDED
 
+#include <type_traits>
+
 #include "rime/enable_if_constant.hpp"
 
 #include "range/core.hpp"
@@ -29,12 +31,30 @@ namespace std_container_operation {
 
     /* make_iterator_range_with_once. */
 
+    /*
+    make_iterator_range only accepts lvalue containers, since an iterator_range
+    over a temporary would contain dangling iterators.
+    Here, however, the container is guaranteed to be alive during the operation
+    (e.g. "first" or "empty") that is applied to the view.
+    Therefore, pass the container as an lvalue.
+    An rvalue container is passed as a const lvalue, so that the resulting
+    iterator_range does not allow its elements to be modified.
+    */
+    template <class Container> struct container_as_lvalue
+    {
+        typedef typename std::conditional<
+            std::is_lvalue_reference<Container>::value, Container,
+            typename std::remove_reference<Container>::type const &>::type type;
+    };
+
     // If Once is not compile-time true.
     template <
         class Once, class Container,
         class Enable = typename rime::disable_if_constant_true<Once>::type>
     inline auto make_iterator_range_with_once(Once once, Container && container)
-        RETURNS(make_iterator_range(std::forward<Container>(container)));
+        RETURNS(make_iterator_range(
+            static_cast<typename container_as_lvalue<Container>::type>(
+                container)));
 
     // If Once is compile-time true.
     template <

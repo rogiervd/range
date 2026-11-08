@@ -18,16 +18,26 @@ BOOST_AUTO_TEST_SUITE(test_range_tuple_basic)
 
 BOOST_AUTO_TEST_CASE(tuple_basic)
 {
+    // view() does not accept a temporary tuple, since the view would refer to
+    // the destructed tuple.
+    // view_once() does.
+    static_assert(!range::has<range::callable::view(tuple<>)>::value);
+    static_assert(!range::has<range::callable::view(tuple<int>)>::value);
+    static_assert(range::has<range::callable::view_once(tuple<int>)>::value);
+
+    tuple<> t0;
     check_empty(tuple<>());
-    check_empty(view(tuple<>()));
+    check_empty(view(t0));
     check_empty(view_once(tuple<>()));
 
+    tuple<int> t1(5);
     check_one_element(tuple<int>(5), 5);
-    check_one_element(view(tuple<int>(5)), 5);
+    check_one_element(view(t1), 5);
     check_one_element(view_once(tuple<int>(5)), 5);
 
+    tuple<int, char> t2(5, 'A');
     check_two_elements(tuple<int, char>(5, 'A'), 5, 'A');
-    check_two_elements(view(tuple<int, char>(5, 'A')), 5, 'A');
+    check_two_elements(view(t2), 5, 'A');
     check_two_elements(view_once(tuple<int, char>(5, 'A')), 5, 'A');
 
     // Checks on three element are in the other file.

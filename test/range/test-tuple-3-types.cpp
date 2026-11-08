@@ -113,20 +113,19 @@ BOOST_AUTO_TEST_CASE(tuple_types)
         static_assert(std::is_same_v<decltype(at(t, one)), int const &>);
     }
     {
+        // view() does not accept temporaries, so use const lvalues.
+        static_assert(!range::has<range::callable::view(tuple<int>)>::value);
+        tuple<int> const t1 {};
+        tuple<int, int> const t2 {};
+        static_assert(std::is_same_v<decltype(first(view(t1))), int const &>);
+        static_assert(std::is_same_v<decltype(at_c<0>(view(t1))), int const &>);
         static_assert(
-            std::is_same_v<decltype(first(view(tuple<int>()))), int const &>);
-        static_assert(
-            std::is_same_v<decltype(at_c<0>(view(tuple<int>()))), int const &>);
-        static_assert(std::is_same_v<
-                      decltype(at(view(tuple<int>()), zero)), int const &>);
+            std::is_same_v<decltype(at(view(t1), zero)), int const &>);
 
         static_assert(
-            std::is_same_v<
-                decltype(first(drop(view(tuple<int, int>())))), int const &>);
-        static_assert(std::is_same_v<
-                      decltype(second(view(tuple<int, int>()))), int const &>);
-        static_assert(std::is_same_v<
-                      decltype(at(view(tuple<int, int>()), one)), int const &>);
+            std::is_same_v<decltype(first(drop(view(t2)))), int const &>);
+        static_assert(std::is_same_v<decltype(second(view(t2))), int const &>);
+        static_assert(std::is_same_v<decltype(at(view(t2), one)), int const &>);
     }
     {
         static_assert(
@@ -174,14 +173,13 @@ BOOST_AUTO_TEST_CASE(tuple_types)
         static_assert(std::is_same_v<decltype(at(t, zero)), int const &>);
     }
     {
-        static_assert(std::is_same_v<
-                      decltype(first(view(tuple<int const>()))), int const &>);
+        // view() does not accept temporaries.
         static_assert(
-            std::is_same_v<
-                decltype(at_c<0>(view(tuple<int const>()))), int const &>);
-        static_assert(
-            std::is_same_v<
-                decltype(at(view(tuple<int const>()), zero)), int const &>);
+            !range::has<range::callable::view(tuple<int const>)>::value);
+        tuple<int const> const t {};
+        static_assert(std::is_same_v<decltype(first(view(t))), int const &>);
+        static_assert(std::is_same_v<decltype(at_c<0>(view(t))), int const &>);
+        static_assert(std::is_same_v<decltype(at(view(t), zero)), int const &>);
     }
     {
         static_assert(
@@ -218,12 +216,12 @@ BOOST_AUTO_TEST_CASE(tuple_types)
         static_assert(std::is_same_v<decltype(at(t, zero)), int &>);
     }
     {
-        static_assert(
-            std::is_same_v<decltype(first(view(tuple<int &>(i)))), int &>);
-        static_assert(
-            std::is_same_v<decltype(at_c<0>(view(tuple<int &>(i)))), int &>);
-        static_assert(
-            std::is_same_v<decltype(at(view(tuple<int &>(i)), zero)), int &>);
+        // view() does not accept temporaries.
+        static_assert(!range::has<range::callable::view(tuple<int &>)>::value);
+        tuple<int &> const t(i);
+        static_assert(std::is_same_v<decltype(first(view(t))), int &>);
+        static_assert(std::is_same_v<decltype(at_c<0>(view(t))), int &>);
+        static_assert(std::is_same_v<decltype(at(view(t), zero)), int &>);
     }
     {
         static_assert(
@@ -255,15 +253,13 @@ BOOST_AUTO_TEST_CASE(tuple_types)
         static_assert(std::is_same_v<decltype(at(t, zero)), int const &>);
     }
     {
+        // view() does not accept temporaries.
         static_assert(
-            std::is_same_v<
-                decltype(first(view(tuple<int const &>(i)))), int const &>);
-        static_assert(
-            std::is_same_v<
-                decltype(at_c<0>(view(tuple<int const &>(i)))), int const &>);
-        static_assert(
-            std::is_same_v<
-                decltype(at(view(tuple<int const &>(i)), zero)), int const &>);
+            !range::has<range::callable::view(tuple<int const &>)>::value);
+        tuple<int const &> const t(i);
+        static_assert(std::is_same_v<decltype(first(view(t))), int const &>);
+        static_assert(std::is_same_v<decltype(at_c<0>(view(t))), int const &>);
+        static_assert(std::is_same_v<decltype(at(view(t), zero)), int const &>);
     }
     {
         static_assert(std::is_same_v<

@@ -159,11 +159,15 @@ template <
         typename zip_from_detail::zip_range_from<RangeTuple, Direction>::type>
 inline Result zip_from(RangeTuple && range_tuple, Direction const & direction)
 {
+    // range_tuple may be a temporary, so it cannot be passed to transform
+    // directly: transform makes a view of it, which view() does not allow for
+    // temporaries.
+    // Each element is extracted only once, so use view_once.
     return Result(
         direction,
         transform(
-            std::forward<RangeTuple>(range_tuple), lazy::view(direction),
-            front));
+            view_once(std::forward<RangeTuple>(range_tuple), front),
+            lazy::view(direction), front));
 }
 
 /// \cond DONT_DOCUMENT
@@ -228,7 +232,7 @@ private:
     // Makes decltype complain.
     auto empty(Direction const & direction) const -> decltype(range::any_of(
         range::transform(
-            std::declval<underlying_type>(),
+            std::declval<underlying_type const &>(),
             lazy::empty(std::declval<Direction>()))))
     {
         return range::any_of(

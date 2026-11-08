@@ -1008,7 +1008,22 @@ BOOST_AUTO_TEST_CASE(test_make_iterator_range)
 
     // Pass in a container.
     static_assert(
-        range::has<range::callable::make_iterator_range(decltype(v))>::value);
+        range::has<range::callable::make_iterator_range(decltype((v)))>::value);
+    static_assert(range::has<range::callable::make_iterator_range(
+                      std::vector<int> const &)>::value);
+
+    // Passing in a temporary container should not compile, since the
+    // iterator_range would contain dangling iterators.
+    // That is, this should not compile:
+    //     auto r = range::make_iterator_range(std::vector{1, 2, 3});
+    static_assert(!range::has<range::callable::make_iterator_range(
+                      decltype(std::vector {1, 2, 3}))>::value);
+    static_assert(!range::has<range::callable::make_iterator_range(
+                      std::vector<int> &&)>::value);
+    static_assert(!range::has<range::callable::make_iterator_range(
+                      std::vector<int> const &&)>::value);
+    static_assert(!range::has<range::callable::make_iterator_range(
+                      decltype(std::move(v)))>::value);
     static_assert(std::is_same_v<
                   range::result_of<range::callable::make_iterator_range(
                       decltype((v)))>::type,

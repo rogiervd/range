@@ -27,41 +27,49 @@ struct negate
 BOOST_AUTO_TEST_SUITE(range_test_less_lexicographical_heterogeneous)
 
 #define CHECK_range_less_lexicographical(r1, r2, value)                      \
-    RIME_CHECK_EQUAL(range::less_lexicographical(r1, r2), value);            \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(r1, r2, range::front), value);           \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(                                         \
-            range::reverse(r1), range::reverse(r2), range::back),            \
-        value);                                                              \
+    /* reverse() and transform() do not accept temporaries. */               \
+    do {                                                                     \
+        auto && lvalue_r1 = r1;                                              \
+        auto && lvalue_r2 = r2;                                              \
+        RIME_CHECK_EQUAL(range::less_lexicographical(r1, r2), value);        \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(r1, r2, range::front), value);       \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                range::reverse(lvalue_r1), range::reverse(lvalue_r2),        \
+                range::back),                                                \
+            value);                                                          \
                                                                              \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(r1, r2, std::less<int>()), value);       \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(r1, r2, range::front, std::less<int>()), \
-        value);                                                              \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(                                         \
-            range::reverse(r1), range::reverse(r2), range::back,             \
-            std::less<int>()),                                               \
-        value);                                                              \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(r1, r2, std::less<int>()), value);   \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                r1, r2, range::front, std::less<int>()),                     \
+            value);                                                          \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                range::reverse(lvalue_r1), range::reverse(lvalue_r2),        \
+                range::back, std::less<int>()),                              \
+            value);                                                          \
                                                                              \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(                                         \
-            range::transform(r1, negate()), range::transform(r2, negate()),  \
-            std::greater<int>()),                                            \
-        value);                                                              \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(                                         \
-            range::transform(r1, negate()), range::transform(r2, negate()),  \
-            range::front, std::greater<int>()),                              \
-        value);                                                              \
-    RIME_CHECK_EQUAL(                                                        \
-        range::less_lexicographical(                                         \
-            range::transform(range::reverse(r1), negate()),                  \
-            range::transform(range::reverse(r2), negate()), range::back,     \
-            std::greater<int>()),                                            \
-        value)
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                range::transform(lvalue_r1, negate()),                       \
+                range::transform(lvalue_r2, negate()), std::greater<int>()), \
+            value);                                                          \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                range::transform(lvalue_r1, negate()),                       \
+                range::transform(lvalue_r2, negate()), range::front,         \
+                std::greater<int>()),                                        \
+            value);                                                          \
+        RIME_CHECK_EQUAL(                                                    \
+            range::less_lexicographical(                                     \
+                range::transform(range::reverse(lvalue_r1), negate()),       \
+                range::transform(range::reverse(lvalue_r2), negate()),       \
+                range::back, std::greater<int>()),                           \
+            value);                                                          \
+    } while (false)
 
 BOOST_AUTO_TEST_CASE(test_range_less_lexicographical_heterogeneous)
 {

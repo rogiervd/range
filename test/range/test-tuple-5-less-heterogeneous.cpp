@@ -37,41 +37,50 @@ using range::reverse;
 using range::transform;
 
 #define CHECK_tuple_view_less(r1, r2, value)                                   \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2), value);                     \
-    RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front), value);              \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(                                                  \
-            make_tuple_from(reverse(r1)), make_tuple_from(reverse(r2)), back), \
-        value);                                                                \
+    /* reverse() and transform() do not accept temporaries. */                 \
+    do {                                                                       \
+        auto && lvalue_r1 = r1;                                                \
+        auto && lvalue_r2 = r2;                                                \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2), value);                 \
+        RIME_CHECK_EQUAL(less_lexicographical(r1, r2, front), value);          \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(reverse(lvalue_r1)),                           \
+                make_tuple_from(reverse(lvalue_r2)), back),                    \
+            value);                                                            \
                                                                                \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(r1, r2, std::less<double>()), value);             \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(r1, r2, front, std::less<double>()), value);      \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(                                                  \
-            make_tuple_from(reverse(r1)), make_tuple_from(reverse(r2)), back,  \
-            std::less<double>()),                                              \
-        value);                                                                \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(r1, r2, std::less<double>()), value);         \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(r1, r2, front, std::less<double>()), value);  \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(reverse(lvalue_r1)),                           \
+                make_tuple_from(reverse(lvalue_r2)), back,                     \
+                std::less<double>()),                                          \
+            value);                                                            \
                                                                                \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(                                                  \
-            make_tuple_from(range::transform(r1, negate())),                   \
-            make_tuple_from(range::transform(r2, negate())),                   \
-            std::greater<double>()),                                           \
-        value);                                                                \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(                                                  \
-            make_tuple_from(range::transform(r1, negate())),                   \
-            make_tuple_from(range::transform(r2, negate())), front,            \
-            std::greater<double>()),                                           \
-        value);                                                                \
-    RIME_CHECK_EQUAL(                                                          \
-        less_lexicographical(                                                  \
-            make_tuple_from(range::transform(reverse(r1), negate())),          \
-            make_tuple_from(range::transform(reverse(r2), negate())), back,    \
-            std::greater<double>()),                                           \
-        value)
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(range::transform(lvalue_r1, negate())),        \
+                make_tuple_from(range::transform(lvalue_r2, negate())),        \
+                std::greater<double>()),                                       \
+            value);                                                            \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(range::transform(lvalue_r1, negate())),        \
+                make_tuple_from(range::transform(lvalue_r2, negate())), front, \
+                std::greater<double>()),                                       \
+            value);                                                            \
+        RIME_CHECK_EQUAL(                                                      \
+            less_lexicographical(                                              \
+                make_tuple_from(                                               \
+                    range::transform(reverse(lvalue_r1), negate())),           \
+                make_tuple_from(                                               \
+                    range::transform(reverse(lvalue_r2), negate())),           \
+                back, std::greater<double>()),                                 \
+            value);                                                            \
+    } while (false)
 
 #define CHECK_tuple_less(r1, r2, value)   \
     CHECK_tuple_view_less(r1, r2, value); \
@@ -106,13 +115,15 @@ BOOST_AUTO_TEST_CASE(heterogeneous)
     CHECK_tuple_less(make_tuple(5, 2), make_tuple(1, 2), false);
     CHECK_tuple_less(make_tuple(1, 2), make_tuple(5, 2), true);
 
-    CHECK_tuple_view_less(make_tuple(1, 2), drop(make_tuple(7., 1, 2)), false);
-    CHECK_tuple_view_less(drop(make_tuple(7., 1, 2)), make_tuple(1, 3), true);
-    CHECK_tuple_view_less(
-        drop(make_tuple(7., 1, 3)), drop(make_tuple(7., 1, 2)), false);
-    CHECK_tuple_view_less(make_tuple(5, 2), drop(make_tuple(7., 1, 2)), false);
-    CHECK_tuple_view_less(
-        drop(make_tuple(7., 1, 2)), drop(make_tuple(7., 5, 2)), true);
+    // drop() returns a view of the tuple, so the tuple must outlive it.
+    auto t_7_1_2 = make_tuple(7., 1, 2);
+    auto t_7_1_3 = make_tuple(7., 1, 3);
+    auto t_7_5_2 = make_tuple(7., 5, 2);
+    CHECK_tuple_view_less(make_tuple(1, 2), drop(t_7_1_2), false);
+    CHECK_tuple_view_less(drop(t_7_1_2), make_tuple(1, 3), true);
+    CHECK_tuple_view_less(drop(t_7_1_3), drop(t_7_1_2), false);
+    CHECK_tuple_view_less(make_tuple(5, 2), drop(t_7_1_2), false);
+    CHECK_tuple_view_less(drop(t_7_1_2), drop(t_7_5_2), true);
 
     CHECK_tuple_less(make_tuple(1, 2, 3), make_tuple(1, 2, 3), false);
 

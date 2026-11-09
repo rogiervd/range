@@ -16,7 +16,11 @@ jobs:
       - uses: actions/setup-python@v7
       # Standard pre-commit checks:
       - uses: pre-commit/action@v3.0.1
-      # Complicated pre-commit checks.
+      # Run the full "reuse" hook.
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: reuse --hook-stage manual --all-files
+      # "clang-tidy" hook: requires set-up.
       - uses: bazel-contrib/setup-bazel@0.19.0
         with:
           # Avoid downloading Bazel every time.
@@ -33,7 +37,7 @@ jobs:
       - run: bazel build --keep_going --config=clang --output_groups=compilation_prerequisites_INTERNAL_ //test/...
       # Generate compile_commands.json, which clang-tidy needs.
       - run: bazel run --config=clang @hedron_compile_commands//:refresh_all
-      # Run the "clang-tidy" hook, and the full "reuse" hook.
+      # Actually run the "clang-tidy" hook.
       - uses: pre-commit/action@v3.0.1
         with:
-          extra_args: reuse --hook-stage manual --all-files
+          extra_args: clang-tidy --hook-stage manual --all-files

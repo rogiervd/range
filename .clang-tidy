@@ -1,0 +1,28 @@
+UseColor: true
+
+Checks: >
+    -*,
+    misc-include-cleaner,
+
+
+# abseil-*,
+# boost-*,
+# bugprone-*,
+# cert-*,
+# clang-analyzer-*,
+# concurrency-*,
+# cppcoreguidelines-*,
+# google-*,
+# hicpp-*,
+# linuxkernel-*,
+# llvm-*,
+# misc-*,
+# modernize-*,
+# mpi-*,
+# performance-*,
+# portability-*,
+# readability-*,
+# -modernize-use-trailing-return-type,
+# -llvm-header-guard,
+
+WarningsAsErrors: "*"

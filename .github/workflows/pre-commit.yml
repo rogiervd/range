@@ -29,6 +29,9 @@ jobs:
           disk-cache: ${{ github.workflow }}
           # Share repository cache between workflows.
           repository-cache: true
+          # Cache unpacked external repositories, so that Bazel need not set
+          # them up again on every run.
+          external-cache: true
       # Produce the inputs to compilation (external dependencies, generated
       # files, and the symlinks that compile_commands.json refers to) without
       # actually compiling anything.

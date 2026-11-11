@@ -21,7 +21,7 @@ implementation linearly inherits from all of them.
 #include <stdexcept>
 #include <utility>
 
-#include <boost/mpl/placeholders.hpp>
+#include "boost/mpl/placeholders.hpp"
 
 #include "utility/unique_ptr.hpp"
 
@@ -49,8 +49,7 @@ namespace range { namespace any_range_implementation {
           Element, CapabilityKeys,
           typename capability::detect_default_direction<Underlying>::type>
     {
-        static_assert(
-            capability::is_capability_keys<CapabilityKeys>::value, "");
+        static_assert(capability::is_capability_keys<CapabilityKeys>::value);
 
         Underlying underlying_;
 
@@ -91,8 +90,7 @@ namespace range { namespace any_range_implementation {
             meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
     : Base
     {
-        static_assert(
-            capability::is_capability_keys<CapabilityKeys>::value, "");
+        static_assert(capability::is_capability_keys<CapabilityKeys>::value);
 
         template <class Argument>
         implement_lose_capability(Argument && argument)
@@ -109,8 +107,7 @@ namespace range { namespace any_range_implementation {
             meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
     : Base
     {
-        static_assert(
-            capability::is_capability_keys<CapabilityKeys>::value, "");
+        static_assert(capability::is_capability_keys<CapabilityKeys>::value);
 
         template <class Argument>
         implement_lose_capability(Argument && argument)
@@ -368,7 +365,7 @@ namespace range { namespace any_range_implementation {
 
         // Dispatch based on: has <chop_in_place>, always_empty.
         chop_destructive_result implementation(
-            Direction const & direction, interface_ptr & this_, rime::true_type,
+            Direction const & direction, interface_ptr &, rime::true_type,
             rime::false_type)
         {
             return chop_destructive_result(

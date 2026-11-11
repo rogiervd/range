@@ -13,6 +13,9 @@
 
 #include "../direction.hpp"
 
+#include "core_base.hpp"
+#include "core_chop_in_place.hpp"
+
 namespace range {
 
 namespace is_homogeneous_detail {

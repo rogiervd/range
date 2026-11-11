@@ -75,6 +75,7 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-tuple-5-less-heterogeneous",
         "test-tuple-5-less-meta",
         "test-tuple-5-less-types",
+        "test-tuple-5-structured_binding",
         "test-unique_range",
         "test-view_shared",
         "test-walk_size",

@@ -5,9 +5,9 @@
 #ifndef RANGE_HASH_RANGE_HPP_INCLUDED
 #define RANGE_HASH_RANGE_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
-#include <boost/functional/hash_fwd.hpp>
+#include "boost/functional/hash_fwd.hpp"
 
 #include "rime/core.hpp"
 #include "utility/overload_order.hpp"
@@ -58,8 +58,7 @@ namespace callable {
         }
 
         template <class Range, class Direction> static std::size_t compute_hash(
-            Range && range, Direction const & direction, rime::true_type empty,
-            overload_order<1> *)
+            Range &&, Direction const &, rime::true_type, overload_order<1> *)
         {
             return empty_hash;
         }

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_lazy
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/lazy.hpp"
 
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_SUITE(test_range_lazy)
 
 struct take_4_true_tuple
 {
-    int operator()(tuple<> t, int i, bool b) const
+    int operator()(tuple<>, int i, bool b) const
     {
         BOOST_CHECK_EQUAL(i, 4);
         BOOST_CHECK_EQUAL(b, true);
@@ -49,20 +49,20 @@ BOOST_AUTO_TEST_CASE(test_range_callable_lazy)
         auto f4 = f3(true);
         auto result = f4(tuple<>());
 
-        static_assert(std::is_same<decltype(result), int>::value, "");
+        static_assert(std::is_same_v<decltype(result), int>);
         BOOST_CHECK_EQUAL(result, 71);
     }
     {
         auto f2 = f(4, true);
         auto result = f2(tuple<int>(27));
 
-        static_assert(std::is_same<decltype(result), int>::value, "");
+        static_assert(std::is_same_v<decltype(result), int>);
         BOOST_CHECK_EQUAL(result, 27);
     }
     {
         auto result = f(tuple<double>(8.25));
 
-        static_assert(std::is_same<decltype(result), double>::value, "");
+        static_assert(std::is_same_v<decltype(result), double>);
         BOOST_CHECK_EQUAL(result, 8.25);
     }
     {

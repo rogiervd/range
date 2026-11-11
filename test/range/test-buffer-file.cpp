@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_buffer_file
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/file_buffer.hpp"
 
 #include <fstream>
 
-#include <boost/filesystem/operations.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "range/count.hpp"
 #include "range/for_each_macro.hpp"
@@ -88,14 +88,14 @@ BOOST_AUTO_TEST_CASE(long_file)
 
     // Make 100k file with cycling chars.
     {
-        std::ofstream f(temporary_file_name.native(), std::ios_base::binary);
+        std::ofstream f(temporary_file_name.string(), std::ios_base::binary);
         RANGE_FOR_EACH(i, range::count(100000)) { f << char(i); }
         f.flush();
     }
 
     // Read the file.
     {
-        auto b = range::read_file(temporary_file_name.native());
+        auto b = range::read_file(temporary_file_name.string());
         RANGE_FOR_EACH(i, range::count(100000))
         {
             char c = chop_in_place(b);

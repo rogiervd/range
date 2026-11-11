@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_fold
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/fold.hpp"
 
@@ -83,31 +83,31 @@ public:
 struct type_changer
 {
     short operator()(double d, int &) { return short(d + 1); }
-    int & operator()(short s, int & r) { return r; }
+    int & operator()(short, int & r) { return r; }
     float operator()(int & i, int &) { return float(i + 1); }
     float operator()(float f, int &) { return f + 1; }
 };
 
 BOOST_AUTO_TEST_CASE(has)
 {
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::fold(int, std::vector<int>, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::fold(
-                          int, std::vector<int>, direction::front, plus)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::fold(
-                          int, std::vector<int>, direction::back, plus)>) );
+    static_assert(
+        range::has<range::callable::fold(int, std::vector<int>, plus)>::value);
+    static_assert(range::has<range::callable::fold(
+                      int, std::vector<int>, direction::front, plus)>::value);
+    static_assert(range::has<range::callable::fold(
+                      int, std::vector<int>, direction::back, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::fold(
-                              int, std::vector<int>, weird_direction, plus)>) );
+    static_assert(!range::has<range::callable::fold(
+                      int, std::vector<int>, weird_direction, plus)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::fold(float)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::fold(float, std::vector<int>)>) );
+    static_assert(!range::has<range::callable::fold(float)>::value);
+    static_assert(
+        !range::has<range::callable::fold(float, std::vector<int>)>::value);
 
-    BOOST_MPL_ASSERT_NOT((range::has<range::callable::fold(
-                              int, std::vector<int>, float, plus)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::fold(int, std::vector<int>, int, plus)>) );
+    static_assert(!range::has<range::callable::fold(
+                      int, std::vector<int>, float, plus)>::value);
+    static_assert(!range::has<range::callable::fold(
+                      int, std::vector<int>, int, plus)>::value);
 }
 
 BOOST_AUTO_TEST_CASE(test_fold_heterogeneous)
@@ -273,15 +273,15 @@ BOOST_AUTO_TEST_CASE(test_fold_heterogeneous_function)
     {
         std::vector<double> v;
         auto result = fold(1, v, plus());
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(result), rime::variant<int, double>>) );
+        static_assert(
+            std::is_same_v<decltype(result), rime::variant<int, double>>);
         BOOST_CHECK(result.contains<int>());
         BOOST_CHECK_EQUAL(rime::get<int>(result), 1);
 
         v.push_back(1.5);
         auto result2 = fold(1, unique_view(v), plus());
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(result2), rime::variant<int, double>>) );
+        static_assert(
+            std::is_same_v<decltype(result2), rime::variant<int, double>>);
         BOOST_CHECK(result2.contains<double>());
         BOOST_CHECK_EQUAL(rime::get<double>(result2), 2.5);
     }
@@ -292,9 +292,9 @@ BOOST_AUTO_TEST_CASE(test_fold_heterogeneous_function)
         std::vector<int> v;
         {
             auto result = fold(1., v, type_changer());
-            BOOST_MPL_ASSERT((std::is_same<
-                              decltype(result),
-                              rime::variant<double, short, int &, float>>) );
+            static_assert(std::is_same_v<
+                          decltype(result),
+                          rime::variant<double, short, int &, float>>);
             BOOST_CHECK(result.contains<double>());
             BOOST_CHECK_EQUAL(rime::get<double>(result), 1);
         }
@@ -357,7 +357,7 @@ BOOST_AUTO_TEST_CASE(test_fold_heterogeneous_function)
         std::tuple<int, int> t(4, 7);
         {
             auto result = fold(1., unique_view(t), type_changer());
-            BOOST_MPL_ASSERT((std::is_same<decltype(result), int>) );
+            static_assert(std::is_same_v<decltype(result), int>);
             BOOST_CHECK_EQUAL(result, 7);
         }
     }
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(test_fold_heterogeneous_function)
         std::tuple<int, int, int> t(4, 7, 9);
         {
             auto result = fold(1., t, type_changer());
-            BOOST_MPL_ASSERT((std::is_same<decltype(result), float>) );
+            static_assert(std::is_same_v<decltype(result), float>);
             BOOST_CHECK_EQUAL(result, 8);
         }
     }

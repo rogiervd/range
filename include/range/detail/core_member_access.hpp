@@ -1,9 +1,13 @@
-// SPDX-FileCopyrightText: Copyright 2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_MEMBER_ACCESS_HPP_INCLUDED
+
+#include <utility>
+
+#include "utility/returns.hpp"
 
 namespace range { namespace helper {
 
@@ -72,6 +76,14 @@ namespace range { namespace helper {
         template <class Range, class Direction>
         static auto chop_in_place(Range && range, Direction const & direction)
             RETURNS(std::forward<Range>(range).chop_in_place(direction));
+
+        // begin.
+        template <class Range> static auto begin(Range && range)
+            RETURNS(std::forward<Range>(range).begin());
+
+        // end.
+        template <class Range> static auto end(Range && range)
+            RETURNS(std::forward<Range>(range).end());
 
         // fold.
         template <class State, class Range, class Direction, class Function>

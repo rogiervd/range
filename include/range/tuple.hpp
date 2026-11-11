@@ -9,11 +9,11 @@ Define a general heterogeneous container.
 #ifndef RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 #define RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/if.hpp"
+#include "boost/mpl/not.hpp"
 
 #include "meta/count_c.hpp"
 
@@ -35,6 +35,7 @@ Define a general heterogeneous container.
 
 #include "detail/tuple-compare.hpp"
 #include "detail/tuple-fwd.hpp"
+#include "detail/tuple_is_convertible.hpp"
 
 namespace range {
 
@@ -46,6 +47,10 @@ given explicitly as template parameters.
 The container can be constructed in three ways.
 One is default construction.
 The next is construction from a value for each contained type.
+If each value can be implicitly converted to the corresponding type, this
+constructor is implicit.
+If at least one value can only be explicitly converted (though all types must be
+constructible from the values), then the constructor is explicit.
 The third is construction from another range.
 If the length of this range is known at compile time to be of the same length
 and all elements can be implicitly converted, this constructor is implicit.
@@ -365,7 +370,7 @@ namespace tuple_detail {
         elements & operator=(elements const &) noexcept { return *this; }
         elements & operator=(elements &&) noexcept { return *this; }
 
-        void swap(elements & that) const {}
+        void swap(elements &) const {}
     };
 
     // Recursive case.
@@ -675,13 +680,35 @@ public:
     /**
     Construct element-wise.
     Each type must be constructible from the corresponding argument passed in.
+    If each argument is implicitly convertible to the corresponding type, then
+    this implicit constructor is provided.
 
     The order in which the elements are constructed is not defined.
     */
     template <
         class... Arguments,
-        class Enable = typename boost::enable_if<utility::are_constructible<
-            stored_types, meta::vector<Arguments...>>>::type>
+        class Enable = typename boost::enable_if<
+            tuple_detail::are_implicitly_constructible<
+                stored_types, meta::vector<Arguments...>>>::type>
+    tuple(Arguments &&... arguments)
+    : elements_(
+          tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
+    {}
+
+    /**
+    Construct element-wise.
+    Each type must be constructible from the corresponding argument passed in.
+    If at least one of the arguments is only explicitly convertible to the
+    corresponding type, then this explicit constructor is provided.
+
+    The order in which the elements are constructed is not defined.
+    */
+    template <
+        class... Arguments,
+        typename boost::enable_if<
+            tuple_detail::are_only_explicitly_constructible<
+                stored_types, meta::vector<Arguments...>>,
+            int>::type = 0>
     explicit tuple(Arguments &&... arguments)
     : elements_(
           tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
@@ -1072,7 +1099,7 @@ namespace tuple_detail {
     template <std::size_t Begin, std::size_t End, class TupleReference>
     class tuple_view
     {
-        static_assert(std::is_reference<TupleReference>::value, "");
+        static_assert(std::is_reference<TupleReference>::value);
         typedef typename std::add_pointer<TupleReference>::type pointer_type;
         pointer_type tuple_;
 
@@ -1152,7 +1179,7 @@ namespace tuple_detail {
             class Extract =
                 extract<(tuple_size - begin_position - Index::value - 1)>>
         typename Extract::template result<TupleReference>::type at_constant(
-            Index const & index, direction::front) const
+            Index const &, direction::front) const
         {
             return Extract()(tuple());
         }
@@ -1163,7 +1190,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Index::value < view_size)>::type,
             class Extract = extract<(tuple_size - end_position + Index::value)>>
         typename Extract::template result<TupleReference>::type at_constant(
-            Index const & index, direction::back) const
+            Index const &, direction::back) const
         {
             return Extract()(tuple());
         }
@@ -1175,8 +1202,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Increment::value <= view_size)>::type,
             class Result = tuple_detail::tuple_view<
                 Begin + Increment::value, End, TupleReference>>
-        Result drop_constant(
-            Increment const & increment, direction::front) const
+        Result drop_constant(Increment const &, direction::front) const
         {
             return Result(tuple());
         }
@@ -1187,7 +1213,7 @@ namespace tuple_detail {
                 typename std::enable_if<(Increment::value <= view_size)>::type,
             class Result = tuple_detail::tuple_view<
                 Begin, End - Increment::value, TupleReference>>
-        Result drop_constant(Increment const & increment, direction::back) const
+        Result drop_constant(Increment const &, direction::back) const
         {
             return Result(tuple());
         }
@@ -1256,7 +1282,7 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> const &>>
     inline Result implement_make_view(
-        tuple_tag, bool once, tuple<Types...> const & tuple,
+        tuple_tag, bool /* once */, tuple<Types...> const & tuple,
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
@@ -1268,8 +1294,8 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &>>
     inline Result implement_make_view(
-        tuple_tag, bool once, tuple<Types...> & tuple, helper::front_or_back,
-        helper::front_or_back = helper::front_or_back())
+        tuple_tag, bool /* once */, tuple<Types...> & tuple,
+        helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(tuple);
     }
@@ -1280,7 +1306,7 @@ namespace tuple_operation {
         class Result = typename tuple_detail::tuple_view<
             0, sizeof...(Types), tuple<Types...> &&>>
     inline Result implement_make_view(
-        tuple_tag, rime::true_type once, tuple<Types...> && tuple,
+        tuple_tag, rime::true_type /* once */, tuple<Types...> && tuple,
         helper::front_or_back, helper::front_or_back = helper::front_or_back())
     {
         return Result(std::move(tuple));
@@ -1289,5 +1315,49 @@ namespace tuple_operation {
 }  // namespace tuple_operation
 
 }  // namespace range
+
+
+/* C++ structured binding support. */
+
+namespace std {
+
+// tuple_size and tuple_element must be defined in the std namespace.
+
+template <class... Types> struct tuple_size<::range::tuple<Types...>>
+: rime::size_t<sizeof...(Types)> {};
+
+// Give the precise element type, as required.
+template <std::size_t Position, class... Types>
+struct tuple_element<Position, ::range::tuple<Types...>>
+: meta::first<typename meta::drop<
+      rime::size_t<Position>, meta::vector<Types...>>::type> {};
+
+}  // namespace std
+
+namespace range {
+
+// get can be defined in the std namespace.
+// decltype(auto) passes on the correct return types.
+
+template <std::size_t Position, class... Types>
+decltype(auto) get(tuple<Types...> & t)
+{
+    return ::range::at(t, rime::size_t<Position>());
+}
+
+template <std::size_t Position, class... Types>
+decltype(auto) get(tuple<Types...> && t)
+{
+    return ::range::at(std::move(t), rime::size_t<Position>());
+}
+
+template <std::size_t Position, class... Types>
+decltype(auto) get(tuple<Types...> const & t)
+{
+    return ::range::at(t, rime::size_t<Position>());
+}
+
+}  // namespace range
+
 
 #endif  // RANGE_CONTAINER_TUPLE_HPP_INCLUDED

@@ -7,7 +7,7 @@ Example to be used in the documentation.
 */
 
 #define BOOST_TEST_MODULE example_std_adaptor
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/std/string.hpp"
 #include "range/std/tuple.hpp"
@@ -20,7 +20,7 @@ Example to be used in the documentation.
 #include <tuple>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include "boost/optional.hpp"
 
 #include "range/fold.hpp"
 

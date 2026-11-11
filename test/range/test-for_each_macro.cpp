@@ -7,7 +7,7 @@ Test the RANGE_FOR_EACH macro.
 */
 
 #define BOOST_TEST_MODULE test_range_for_each_macro
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include <iostream>
 #include "range/for_each_macro.hpp"
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_example)
         BOOST_CHECK_EQUAL(i2, 5);
 
         // The declared type of i2 is int &&.
-        BOOST_MPL_ASSERT((std::is_same<decltype(i2), int &&>) );
+        static_assert(std::is_same_v<decltype(i2), int &&>);
 
         BOOST_CHECK(!is_rvalue_reference(i));
         // Since i2 has a name, it is not an rvalue reference here.
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(test_macro)
             // Even though the sequence is held internally with an rvalue
             // reference, since it is named, it should be an lvalue.
             // So its elements should be lvalues.
-            static_assert(std::is_reference<decltype(i)>::value, "");
+            static_assert(std::is_reference<decltype(i)>::value);
         }
         BOOST_CHECK_EQUAL(sum, 12u);
 
@@ -340,9 +340,9 @@ BOOST_AUTO_TEST_CASE(test_input_range)
     BOOST_CHECK_EQUAL(second, 1);
 
     int total = 0;
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(range::forward_view(std::move(range))),
-                      decltype(std::move(range))>) );
+    static_assert(std::is_same_v<
+                  decltype(range::forward_view(std::move(range))),
+                  decltype(std::move(range))>);
     RANGE_FOR_EACH(n, std::move(range))
     {
         total += n;

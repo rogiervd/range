@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_zip
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/zip.hpp"
 
@@ -50,8 +50,7 @@ BOOST_AUTO_TEST_CASE(single)
 {
     std::vector<int> v;
     auto z = zip(v);
-    static_assert(
-        range::is_homogeneous<decltype(z), direction::front>::value, "");
+    static_assert(range::is_homogeneous<decltype(z), direction::front>::value);
 
     RIME_CHECK_EQUAL(empty(z), true);
 }
@@ -63,12 +62,12 @@ BOOST_AUTO_TEST_CASE(with_weird_count)
     auto z = zip_from(make_tuple(w1, w2), weird_direction(7));
 
     auto d = range::default_direction(z);
-    static_assert(std::is_same<decltype(d), weird_direction>::value, "");
+    static_assert(std::is_same_v<decltype(d), weird_direction>);
 
     BOOST_CHECK_EQUAL(first(first(z)), 8);
     BOOST_CHECK_EQUAL(second(first(z)), 17);
 
-    static_assert(!has<callable::size(decltype(z))>::value, "");
+    static_assert(!has<callable::size(decltype(z))>::value);
 
     for (int count = 0; count != 10; ++count) {
         BOOST_CHECK_EQUAL(first(first(z)), 8 + count);

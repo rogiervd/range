@@ -10,14 +10,14 @@ Expose views as Python iterators.
 #define RANGE_PYTHON_TUPLE_HPP_INCLUDED
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
+#include "nanobind/nanobind.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 
-#include <meta/count_c.hpp>
-#include <meta/vector.hpp>
+#include "meta/count_c.hpp"
+#include "meta/vector.hpp"
 
 #include "range/core.hpp"
 
@@ -56,7 +56,7 @@ namespace range { namespace python {
     {
         static_assert(is_range<Tuple>::value, "Tuple must be a range.");
         static_assert(
-            std::is_same<Tuple, typename std::decay<Tuple>::type>::value,
+            std::is_same_v<Tuple, typename std::decay<Tuple>::type>,
             "tuple_caster requires an unqualified type.");
 
         using Value = Tuple;

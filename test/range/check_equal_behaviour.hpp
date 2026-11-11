@@ -11,7 +11,7 @@ Helper to test the behaviour of a range with respect to all operations.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"
@@ -27,7 +27,7 @@ and compare equal.
 */
 template <class Value, class Reference>
 typename boost::enable_if<rime::is_constant<Reference>>::type check_equal_value(
-    Value const & value, Reference const & reference)
+    Value const &, Reference const &)
 {
     static_assert(
         rime::is_rime_constant<Value>::value, "Value must be a Rime constant");
@@ -41,7 +41,7 @@ typename boost::disable_if<rime::is_constant<Reference>>::type
     check_equal_value(Value const & value, Reference const & reference)
 {
     static_assert(
-        std::is_same<Value, Reference>::value,
+        std::is_same_v<Value, Reference>,
         "value and reference must be of the same type");
     BOOST_CHECK_EQUAL(value, reference);
 }
@@ -53,10 +53,10 @@ void check_equal_value(
     std::pair<Reference1, Reference2> const & reference)
 {
     static_assert(
-        std::is_same<Value1, Reference1>::value,
+        std::is_same_v<Value1, Reference1>,
         "value and reference must be of the same type");
     static_assert(
-        std::is_same<Value2, Reference2>::value,
+        std::is_same_v<Value2, Reference2>,
         "value and reference must be of the same type");
     BOOST_CHECK_EQUAL(value.first, reference.first);
     BOOST_CHECK_EQUAL(value.second, reference.second);
@@ -84,11 +84,11 @@ static auto const nothing = callable::nothing();
 template <class Range, class Reference>
 void check_empty(Range const & range, Reference const & reference)
 {
-    static_assert(range::has<range::callable::empty(Range)>::value, "");
+    static_assert(range::has<range::callable::empty(Range)>::value);
     static_assert(
-        range::has<range::callable::empty(Range, direction::front)>::value, "");
+        range::has<range::callable::empty(Range, direction::front)>::value);
     static_assert(
-        range::has<range::callable::empty(Range, direction::back)>::value, "");
+        range::has<range::callable::empty(Range, direction::back)>::value);
     check_equal_value(range::empty(range), range::empty(reference));
     check_equal_value(
         range::empty(range, range::front),
@@ -103,9 +103,9 @@ typename boost::enable_if<HasSize>::type check_size(
     Range const & range, Reference const & reference)
 {
     static_assert(
-        range::has<range::callable::size(Range, direction::front)>::value, "");
+        range::has<range::callable::size(Range, direction::front)>::value);
     static_assert(
-        range::has<range::callable::size(Range, direction::back)>::value, "");
+        range::has<range::callable::size(Range, direction::back)>::value);
     check_equal_value(
         range::size(range, range::front), range::size(reference, range::front));
     check_equal_value(
@@ -113,10 +113,10 @@ typename boost::enable_if<HasSize>::type check_size(
 }
 template <class HasSize, class Range, class Reference>
 typename boost::disable_if<HasSize>::type check_size(
-    Range const & range, Reference const & reference, void * = 0)
+    Range const &, Reference const &, void * = 0)
 {
     static_assert(
-        !range::has<range::callable::size(Range, direction::front)>::value, "");
+        !range::has<range::callable::size(Range, direction::front)>::value);
 }
 
 /* Main loop. */
@@ -245,8 +245,7 @@ template <class HasSize, class HasBack, class Zero> struct check_drop_n
         template <class Range, class Direction>
         typename boost::enable_if<range::always_empty<Range, Direction>>::type
             check_first_equal(
-                Range const & range1, Range const & range2,
-                Direction const & direction) const
+                Range const &, Range const &, Direction const &) const
         {}
 
         template <class Range1, class Direction, class Range2> void check_equal(
@@ -344,8 +343,8 @@ template <
     class Range, class Reference>
 void check_equal_behaviour(Range const & range, Reference const & reference)
 {
-    BOOST_MPL_ASSERT((range::is_range<Reference>) );
-    BOOST_MPL_ASSERT((range::is_range<Range>) );
+    static_assert(range::is_range<Reference>::value);
+    static_assert(range::is_range<Range>::value);
 
     // Start off with first and drop.
     detail::check_equal_behaviour_recursive<HasSize, HasBack>(

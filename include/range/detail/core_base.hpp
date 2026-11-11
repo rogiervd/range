@@ -15,13 +15,13 @@ too.
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/eval_if.hpp>
-#include <boost/mpl/identity.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/mpl/not.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/eval_if.hpp"
+#include "boost/mpl/identity.hpp"
+#include "boost/mpl/if.hpp"
+#include "boost/mpl/not.hpp"
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
 #include "meta/transform.hpp"
 #include "meta/vector.hpp"
@@ -63,6 +63,8 @@ namespace helper {
     void implement_chop(unusable);
     void implement_chop_in_place(unusable);
     void implement_at(unusable);
+    void implement_begin(unusable);
+    void implement_end(unusable);
 
     /** \brief
     Class that is convertible from direction::front and direction::back.

@@ -46,6 +46,9 @@ test_names = [
             test_name + "_example",
         ],
         main = "pytest_main.py",
+        # Do not run these tests with sanitizers, because symbols can't be found
+        # in the Python extension.
+        tags = ["no-sanitizers"],
         deps = ["@range_pypi//pytest"],
     )
     for test_name in test_names

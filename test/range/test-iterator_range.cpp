@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: Copyright 2013-2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013-2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_iterator_range
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/iterator_range.hpp"
 
@@ -15,7 +15,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_iterator_range)
 
@@ -51,503 +51,488 @@ BOOST_AUTO_TEST_CASE (test_range_iterator_debug_mode) {
 BOOST_AUTO_TEST_CASE(test_range_iterator_range_static)
 {
     // is_homogeneous
-    BOOST_MPL_ASSERT((range::is_homogeneous<random_access_type>) );
-    BOOST_MPL_ASSERT(
-        (range::is_homogeneous<random_access_type, direction::front>) );
-    BOOST_MPL_ASSERT(
-        (range::is_homogeneous<random_access_type const, direction::back>) );
+    static_assert(range::is_homogeneous<random_access_type>::value);
+    static_assert(
+        range::is_homogeneous<random_access_type, direction::front>::value);
+    static_assert(range::is_homogeneous<
+                  random_access_type const, direction::back>::value);
 
-    BOOST_MPL_ASSERT((range::is_homogeneous<bidirectional_type &>) );
-    BOOST_MPL_ASSERT((range::is_homogeneous<forward_type, direction::front>) );
-    BOOST_MPL_ASSERT((range::is_homogeneous<input_type, direction::front>) );
-    BOOST_MPL_ASSERT(
-        (range::is_homogeneous<const_bidirectional_type, direction::back>) );
+    static_assert(range::is_homogeneous<bidirectional_type &>::value);
+    static_assert(range::is_homogeneous<forward_type, direction::front>::value);
+    static_assert(range::is_homogeneous<input_type, direction::front>::value);
+    static_assert(range::is_homogeneous<
+                  const_bidirectional_type, direction::back>::value);
 
     // has::
     {
         // view
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::view(random_access_type)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::view(random_access_type, int)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::view(
-                              random_access_type const &, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::view(
-                              random_access_type, direction::back &)>) );
+        static_assert(
+            range::has<range::callable::view(random_access_type)>::value);
+        static_assert(
+            !range::has<range::callable::view(random_access_type, int)>::value);
+        static_assert(
+            range::has<range::callable::view(
+                random_access_type const &, direction::front)>::value);
+        static_assert(range::has<range::callable::view(
+                          random_access_type, direction::back &)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::view(forward_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::view(input_type)>) );
+        static_assert(range::has<range::callable::view(forward_type)>::value);
+        static_assert(range::has<range::callable::view(input_type)>::value);
 
         // empty
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::empty(random_access_type)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::empty(random_access_type, int)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              random_access_type const &, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              random_access_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::empty(random_access_type)>::value);
+        static_assert(!range::has<range::callable::empty(
+                          random_access_type, int)>::value);
+        static_assert(
+            range::has<range::callable::empty(
+                random_access_type const &, direction::front)>::value);
+        static_assert(range::has<range::callable::empty(
+                          random_access_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::empty(bidirectional_type)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::empty(const_bidirectional_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              bidirectional_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              bidirectional_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::empty(bidirectional_type)>::value);
+        static_assert(range::has<range::callable::empty(
+                          const_bidirectional_type)>::value);
+        static_assert(range::has<range::callable::empty(
+                          bidirectional_type, direction::front)>::value);
+        static_assert(range::has<range::callable::empty(
+                          bidirectional_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(forward_type &)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              forward_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              forward_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::empty(forward_type &)>::value);
+        static_assert(range::has<range::callable::empty(
+                          forward_type, direction::front)>::value);
+        static_assert(range::has<range::callable::empty(
+                          forward_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(input_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              input_type const &, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              input_type &&, direction::back)>) );
+        static_assert(range::has<range::callable::empty(input_type)>::value);
+        static_assert(range::has<range::callable::empty(
+                          input_type const &, direction::front)>::value);
+        static_assert(range::has<range::callable::empty(
+                          input_type &&, direction::back)>::value);
 
         // size
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::size(random_access_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::size(
-                              random_access_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::size(
-                              random_access_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::size(random_access_type)>::value);
+        static_assert(range::has<range::callable::size(
+                          random_access_type, direction::front)>::value);
+        static_assert(range::has<range::callable::size(
+                          random_access_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(bidirectional_type)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(const_bidirectional_type)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(
-                                  bidirectional_type, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(
-                 bidirectional_type const &, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::size(bidirectional_type)>::value);
+        static_assert(!range::has<range::callable::size(
+                          const_bidirectional_type)>::value);
+        static_assert(!range::has<range::callable::size(
+                          bidirectional_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::size(
+                          bidirectional_type const &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(forward_type const)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(
-                                  forward_type, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((
-            range::has<range::callable::size(forward_type, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::size(forward_type const)>::value);
+        static_assert(!range::has<range::callable::size(
+                          forward_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::size(
+                          forward_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(input_type const)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(
-                                  input_type &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(input_type, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::size(input_type const)>::value);
+        static_assert(!range::has<range::callable::size(
+                          input_type &, direction::front)>::value);
+        static_assert(!range::has<range::callable::size(
+                          input_type, direction::back)>::value);
 
         // first
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::first(random_access_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              random_access_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              random_access_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::first(random_access_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          random_access_type, direction::front)>::value);
+        static_assert(range::has<range::callable::first(
+                          random_access_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::first(bidirectional_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              bidirectional_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              bidirectional_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::first(bidirectional_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          bidirectional_type, direction::front)>::value);
+        static_assert(range::has<range::callable::first(
+                          bidirectional_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::first(forward_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              forward_type, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(
-                                  forward_type, direction::back)>) );
+        static_assert(range::has<range::callable::first(forward_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          forward_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::first(
+                          forward_type, direction::back)>::value);
 
         // Only for rvalue ranges.
-        static_assert(
-            std::is_constructible<input_type, input_type &&>::value, "");
-        BOOST_MPL_ASSERT((range::has<range::callable::first(input_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::first(
-                              input_type &&, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::first(input_type, direction::back)>) );
+        static_assert(std::is_constructible<input_type, input_type &&>::value);
+        static_assert(range::has<range::callable::first(input_type)>::value);
+        static_assert(range::has<range::callable::first(
+                          input_type &&, direction::front)>::value);
+        static_assert(!range::has<range::callable::first(
+                          input_type, direction::back)>::value);
 
         // Not for lvalue ranges.
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::first(input_type &)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(
-                                  input_type const &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(
-                                  input_type &, direction::back)>) );
+        static_assert(!range::has<range::callable::first(input_type &)>::value);
+        static_assert(!range::has<range::callable::first(
+                          input_type const &, direction::front)>::value);
+        static_assert(!range::has<range::callable::first(
+                          input_type &, direction::back)>::value);
 
         // drop without increment
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(random_access_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::drop(random_access_type)>::value);
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, direction::front)>::value);
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(bidirectional_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              bidirectional_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              bidirectional_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::drop(bidirectional_type)>::value);
+        static_assert(range::has<range::callable::drop(
+                          bidirectional_type, direction::front)>::value);
+        static_assert(range::has<range::callable::drop(
+                          bidirectional_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(forward_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              forward_type, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((
-            range::has<range::callable::drop(forward_type, direction::back)>) );
+        static_assert(range::has<range::callable::drop(forward_type)>::value);
+        static_assert(range::has<range::callable::drop(
+                          forward_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          forward_type, direction::back)>::value);
 
         // Only for rvalue input.
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(input_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              input_type &&, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(input_type, direction::back)>) );
+        static_assert(range::has<range::callable::drop(input_type)>::value);
+        static_assert(range::has<range::callable::drop(
+                          input_type &&, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(input_type &)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  input_type &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((
-            range::has<range::callable::drop(input_type &, direction::back)>) );
+        static_assert(!range::has<range::callable::drop(input_type &)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type &, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type &, direction::back)>::value);
 
         // drop with increment of 1
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, rime::int_<1>)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 random_access_type, rime::int_<1>, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 random_access_type, rime::int_<1>, direction::back)>) );
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, rime::int_<1>)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                random_access_type, rime::int_<1>, direction::front)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                random_access_type, rime::int_<1>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              bidirectional_type, rime::int_<1>)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 bidirectional_type, rime::int_<1>, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 bidirectional_type, rime::int_<1>, direction::back)>) );
+        static_assert(range::has<range::callable::drop(
+                          bidirectional_type, rime::int_<1>)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                bidirectional_type, rime::int_<1>, direction::front)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                bidirectional_type, rime::int_<1>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(forward_type, rime::int_<1>)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 forward_type, rime::int_<1>, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 forward_type, rime::int_<1>, direction::back)>) );
+        static_assert(range::has<range::callable::drop(
+                          forward_type, rime::int_<1>)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                forward_type, rime::int_<1>, direction::front)>::value);
+        static_assert(
+            !range::has<range::callable::drop(
+                forward_type, rime::int_<1>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(input_type, rime::int_<1>)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              input_type, rime::int_<1>, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 input_type, rime::int_<1>, direction::back)>) );
+        static_assert(range::has<range::callable::drop(
+                          input_type, rime::int_<1>)>::value);
+        static_assert(range::has<range::callable::drop(
+                          input_type, rime::int_<1>, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, rime::int_<1>, direction::back)>::value);
 
         // drop with increment of 2
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, rime::int_<2>)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 random_access_type, rime::int_<2>, direction::front)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 random_access_type, rime::int_<2>, direction::back)>) );
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, rime::int_<2>)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                random_access_type, rime::int_<2>, direction::front)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                random_access_type, rime::int_<2>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  bidirectional_type, rime::int_<2>)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 bidirectional_type, rime::int_<2>, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 bidirectional_type, rime::int_<2>, direction::back)>) );
+        static_assert(!range::has<range::callable::drop(
+                          bidirectional_type, rime::int_<2>)>::value);
+        static_assert(
+            !range::has<range::callable::drop(
+                bidirectional_type, rime::int_<2>, direction::front)>::value);
+        static_assert(
+            !range::has<range::callable::drop(
+                bidirectional_type, rime::int_<2>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(forward_type, rime::int_<2>)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 forward_type, rime::int_<2>, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 forward_type, rime::int_<2>, direction::back)>) );
+        static_assert(!range::has<range::callable::drop(
+                          forward_type, rime::int_<2>)>::value);
+        static_assert(
+            !range::has<range::callable::drop(
+                forward_type, rime::int_<2>, direction::front)>::value);
+        static_assert(
+            !range::has<range::callable::drop(
+                forward_type, rime::int_<2>, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(input_type, rime::int_<2>)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 input_type, rime::int_<2>, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 input_type, rime::int_<2>, direction::back)>) );
+        static_assert(!range::has<range::callable::drop(
+                          input_type, rime::int_<2>)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, rime::int_<2>, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, rime::int_<2>, direction::back)>::value);
 
         // drop with increment of int
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(random_access_type, int)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, int, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              random_access_type, int, direction::back)>) );
+        static_assert(
+            range::has<range::callable::drop(random_access_type, int)>::value);
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, int, direction::front)>::value);
+        static_assert(range::has<range::callable::drop(
+                          random_access_type, int, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(bidirectional_type, int)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(
-                 bidirectional_type, int, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  bidirectional_type, int, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::drop(bidirectional_type, int)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          bidirectional_type, int, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          bidirectional_type, int, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(forward_type, int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  forward_type, int, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  forward_type, int, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::drop(forward_type, int)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          forward_type, int, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          forward_type, int, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(input_type, int)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  input_type, int, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  input_type, int, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::drop(input_type, int)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, int, direction::front)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          input_type, int, direction::back)>::value);
 
         // chop.
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::chop(random_access_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              random_access_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              random_access_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::chop(random_access_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          random_access_type, direction::front)>::value);
+        static_assert(range::has<range::callable::chop(
+                          random_access_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::chop(bidirectional_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              bidirectional_type, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              bidirectional_type, direction::back)>) );
+        static_assert(
+            range::has<range::callable::chop(bidirectional_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          bidirectional_type, direction::front)>::value);
+        static_assert(range::has<range::callable::chop(
+                          bidirectional_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(forward_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              forward_type, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((
-            range::has<range::callable::chop(forward_type, direction::back)>) );
+        static_assert(range::has<range::callable::chop(forward_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          forward_type, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          forward_type, direction::back)>::value);
 
         // Only for rvalue input.
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(input_type)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              input_type &&, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop(input_type, direction::back)>) );
+        static_assert(range::has<range::callable::chop(input_type)>::value);
+        static_assert(range::has<range::callable::chop(
+                          input_type &&, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          input_type, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop(input_type &)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop(
-                                  input_type &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((
-            range::has<range::callable::chop(input_type &, direction::back)>) );
+        static_assert(!range::has<range::callable::chop(input_type &)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          input_type &, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop(
+                          input_type &, direction::back)>::value);
 
         // chop_in_place: only for lvalue references.
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(random_access_type)>) );
-        BOOST_MPL_ASSERT((
-            range::has<range::callable::chop_in_place(random_access_type &)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              random_access_type &, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              random_access_type &, direction::back)>) );
+        static_assert(!range::has<range::callable::chop_in_place(
+                          random_access_type)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          random_access_type &)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          random_access_type &, direction::front)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          random_access_type &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                                  bidirectional_type &&)>) );
-        BOOST_MPL_ASSERT((
-            range::has<range::callable::chop_in_place(bidirectional_type &)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              bidirectional_type &, direction::front)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              bidirectional_type &, direction::back)>) );
+        static_assert(!range::has<range::callable::chop_in_place(
+                          bidirectional_type &&)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          bidirectional_type &)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          bidirectional_type &, direction::front)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          bidirectional_type &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(forward_type)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::chop_in_place(forward_type &)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              forward_type &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                                  forward_type &, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::chop_in_place(forward_type)>::value);
+        static_assert(
+            range::has<range::callable::chop_in_place(forward_type &)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          forward_type &, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          forward_type &, direction::back)>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(input_type)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::chop_in_place(input_type &)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop_in_place(
-                              input_type &, direction::front)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::chop_in_place(
-                                  input_type &, direction::back)>) );
+        static_assert(
+            !range::has<range::callable::chop_in_place(input_type)>::value);
+        static_assert(
+            range::has<range::callable::chop_in_place(input_type &)>::value);
+        static_assert(range::has<range::callable::chop_in_place(
+                          input_type &, direction::front)>::value);
+        static_assert(!range::has<range::callable::chop_in_place(
+                          input_type &, direction::back)>::value);
     }
 
     // Spot check result_of::
     {
         // view
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::view(
-                              random_access_type)>::type,
-                          random_access_type>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::view(
-                              bidirectional_type &, direction::back)>::type,
-                          bidirectional_type &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::view(
-                              forward_type const &, direction::front &)>::type,
-                          forward_type const &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::view(
-                              input_type, direction::front &)>::type,
-                          input_type>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::view(
+                          random_access_type)>::type,
+                      random_access_type>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::view(
+                          bidirectional_type &, direction::back)>::type,
+                      bidirectional_type &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::view(
+                          forward_type const &, direction::front &)>::type,
+                      forward_type const &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::view(
+                          input_type, direction::front &)>::type,
+                      input_type>);
 
         // forward_view.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::forward_view(
-                    random_access_type)>::type,
-                random_access_type &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::forward_view(
-                    bidirectional_type &, direction::back)>::type,
-                bidirectional_type &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::forward_view(
-                    forward_type const &, direction::front &)>::type,
-                forward_type const &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::forward_view(
-                    input_type, direction::front &)>::type,
-                input_type &&>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::forward_view(
+                          random_access_type)>::type,
+                      random_access_type &&>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::forward_view(
+                          bidirectional_type &, direction::back)>::type,
+                      bidirectional_type &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::forward_view(
+                          forward_type const &, direction::front &)>::type,
+                      forward_type const &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::forward_view(
+                          input_type, direction::front &)>::type,
+                      input_type &&>);
 
         // empty
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::empty(
-                              random_access_type)>::type,
-                          bool>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::empty(
-                              bidirectional_type, direction::back)>::type,
-                          bool>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::empty(
-                              forward_type, direction::front)>::type,
-                          bool>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::empty(
-                              input_type, direction::front)>::type,
-                          bool>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::empty(
+                          random_access_type)>::type,
+                      bool>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::empty(
+                          bidirectional_type, direction::back)>::type,
+                      bool>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::empty(
+                          forward_type, direction::front)>::type,
+                      bool>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::empty(
+                          input_type, direction::front)>::type,
+                      bool>);
 
         // size returns an unsigned integer.
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::size(
-                              random_access_type)>::type,
-                          std::size_t>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::size(
+                          random_access_type)>::type,
+                      std::size_t>);
 
         // first
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              random_access_type)>::type,
-                          int &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              bidirectional_type, direction::back)>::type,
-                          double &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              const_bidirectional_type, direction::back)>::type,
-                          double const &>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              forward_type, direction::front)>::type,
-                          char &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          random_access_type)>::type,
+                      int &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          bidirectional_type, direction::back)>::type,
+                      double &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          const_bidirectional_type, direction::back)>::type,
+                      double const &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          forward_type, direction::front)>::type,
+                      char &>);
         // For input ranges, "first" should return the value_type.
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::first(
-                              input_type, direction::front)>::type,
-                          float>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::first(
+                          input_type, direction::front)>::type,
+                      float>);
 
         // drop
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::drop(
-                              random_access_type)>::type,
-                          random_access_type>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::drop(
-                              bidirectional_type &, direction::back)>::type,
-                          bidirectional_type>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::drop(
-                              forward_type)>::type,
-                          forward_type>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::drop(
-                              input_type)>::type,
-                          input_type>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::drop(
+                          random_access_type)>::type,
+                      random_access_type>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::drop(
+                          bidirectional_type &, direction::back)>::type,
+                      bidirectional_type>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::drop(
+                          forward_type)>::type,
+                      forward_type>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::drop(
+                          input_type)>::type,
+                      input_type>);
 
         // chop.
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::chop(
-                              random_access_type)>::type,
-                          range::chopped<int &, random_access_type>>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::chop(
-                              bidirectional_type &, direction::back)>::type,
-                          range::chopped<double &, bidirectional_type>>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop(
+                          random_access_type)>::type,
+                      range::chopped<int &, random_access_type>>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop(
+                          bidirectional_type &, direction::back)>::type,
+                      range::chopped<double &, bidirectional_type>>);
+        static_assert(
+            std::is_same_v<
                 typename range::result_of<range::callable::chop(
                     const_bidirectional_type &, direction::back)>::type,
-                range::chopped<double const &, const_bidirectional_type>>) );
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::chop(
-                              forward_type)>::type,
-                          range::chopped<char &, forward_type>>) );
+                range::chopped<double const &, const_bidirectional_type>>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop(
+                          forward_type)>::type,
+                      range::chopped<char &, forward_type>>);
         // For input ranges, return a value, never a reference.
-        BOOST_MPL_ASSERT((std::is_same<
-                          typename range::result_of<range::callable::chop(
-                              input_type &&)>::type,
-                          range::chopped<float, input_type>>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop(
+                          input_type &&)>::type,
+                      range::chopped<float, input_type>>);
 
         // chop_in_place returns the same as "first" (and mutates the range).
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::chop_in_place(
-                    random_access_type &)>::type,
-                int &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::chop_in_place(
-                    bidirectional_type &, direction::back)>::type,
-                double &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::chop_in_place(
-                    const_bidirectional_type &, direction::back)>::type,
-                double const &>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::chop_in_place(
-                    forward_type &, direction::front)>::type,
-                char &>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop_in_place(
+                          random_access_type &)>::type,
+                      int &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop_in_place(
+                          bidirectional_type &, direction::back)>::type,
+                      double &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop_in_place(
+                          const_bidirectional_type &, direction::back)>::type,
+                      double const &>);
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop_in_place(
+                          forward_type &, direction::front)>::type,
+                      char &>);
         // For input ranges, "chop_in_place" should return the value_type.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                typename range::result_of<range::callable::chop_in_place(
-                    input_type &, direction::front)>::type,
-                float>) );
+        static_assert(std::is_same_v<
+                      typename range::result_of<range::callable::chop_in_place(
+                          input_type &, direction::front)>::type,
+                      float>);
     }
 }
 
@@ -593,10 +578,9 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
         forward_type f2 = f;
         // Copying is disabled for input ranges.
         // input_type i2 = i;
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<forward_type, forward_type &>) );
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_constructible<input_type, input_type &>) );
+        static_assert(
+            std::is_constructible<forward_type, forward_type &>::value);
+        static_assert(!std::is_constructible<input_type, input_type &>::value);
 
         BOOST_CHECK(range::empty(view(r2)));
         BOOST_CHECK_EQUAL(range::size(r2), 0u);
@@ -807,6 +791,47 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
         BOOST_CHECK_EQUAL(first(drop(r, 3, back), back), 3);
         BOOST_CHECK_EQUAL(first(drop(r, rime::int_<3>(), back), back), 3);
 
+        // begin() and end() should be the same as the original container.
+
+        BOOST_CHECK(range::begin(r) == random_access_container.begin());
+        BOOST_CHECK(range::end(r) == random_access_container.end());
+        BOOST_CHECK(range::begin(b) == bidirectional_container.begin());
+        BOOST_CHECK(range::end(b) == bidirectional_container.end());
+        BOOST_CHECK(range::begin(cb) == bidirectional_container.begin());
+        BOOST_CHECK(range::end(cb) == bidirectional_container.end());
+        BOOST_CHECK(range::begin(f) == forward_container.begin());
+        BOOST_CHECK(range::end(f) == forward_container.end());
+
+        // begin() and end() should allow C++11 range-based for loops.
+        {
+            int sum = 0;
+            for (int i : r) {
+                sum += i;
+            }
+            BOOST_CHECK_EQUAL(sum, 3 + 5 + 7 + 9);
+        }
+        {
+            double sum = 0;
+            for (double d : b) {
+                sum += d;
+            }
+            BOOST_CHECK_EQUAL(sum, 4.3 + 4.5 + 4.7 + 4.9);
+        }
+        {
+            double sum = 0;
+            for (double d : cb) {
+                sum += d;
+            }
+            BOOST_CHECK_EQUAL(sum, 4.3 + 4.5 + 4.7 + 4.9);
+        }
+        {
+            int sum = 0;
+            for (char c : f) {
+                sum += c - '0';
+            }
+            BOOST_CHECK_EQUAL(sum, 3 + 5 + 7 + 9);
+        }
+
         // Mutate original container.
         first(r) = 30;
         BOOST_CHECK_EQUAL(random_access_container.front(), 30);
@@ -947,6 +972,19 @@ BOOST_AUTO_TEST_CASE(test_range_iterator_range_dynamic)
                 input_iterator_type(stream), input_iterator_type()))))),
             16.f);
     }
+
+    // begin() and end() work.
+    s = "19.5 18 17.25 16";
+    {
+        std::stringstream stream(s);
+        auto i = input_type(input_iterator_type(stream), input_iterator_type());
+
+        float sum = 0;
+        for (float f : i) {
+            sum += f;
+        }
+        BOOST_CHECK_EQUAL(sum, 19.5f + 18.f + 17.25f + 16.f);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_make_iterator_range)
@@ -958,44 +996,34 @@ BOOST_AUTO_TEST_CASE(test_make_iterator_range)
 
     // Silly arguments.
     static_assert(
-        !range::has<range::callable::make_iterator_range(int)>::value, "");
+        !range::has<range::callable::make_iterator_range(int)>::value);
     static_assert(
-        !range::has<range::callable::make_iterator_range(int, int)>::value, "");
+        !range::has<range::callable::make_iterator_range(int, int)>::value);
     static_assert(
-        !range::has<range::callable::make_iterator_range(double, int)>::value,
-        "");
-    static_assert(
-        !range::has<range::callable::make_iterator_range(
-            double, int, int)>::value,
-        "");
+        !range::has<range::callable::make_iterator_range(double, int)>::value);
+    static_assert(!range::has<range::callable::make_iterator_range(
+                      double, int, int)>::value);
 
     std::vector<int> v;
 
     // Pass in a container.
     static_assert(
-        range::has<range::callable::make_iterator_range(decltype(v))>::value,
-        "");
-    static_assert(
-        std::is_same<
-            range::result_of<range::callable::make_iterator_range(
-                decltype((v)))>::type,
-            random_access_type>::value,
-        "");
+        range::has<range::callable::make_iterator_range(decltype(v))>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::make_iterator_range(
+                      decltype((v)))>::type,
+                  random_access_type>);
 
     // Pass in two iterators.
-    static_assert(
-        range::has<range::callable::make_iterator_range(
-            decltype(v.begin()), decltype(v.end()))>::value,
-        "");
-    static_assert(
-        std::is_same<
-            range::result_of<range::callable::make_iterator_range(
-                decltype(v.begin()), decltype(v.end()))>::type,
-            random_access_type>::value,
-        "");
+    static_assert(range::has<range::callable::make_iterator_range(
+                      decltype(v.begin()), decltype(v.end()))>::value);
+    static_assert(std::is_same_v<
+                  range::result_of<range::callable::make_iterator_range(
+                      decltype(v.begin()), decltype(v.end()))>::type,
+                  random_access_type>);
 
     auto ir = range::make_iterator_range(v);
-    static_assert(std::is_same<decltype(ir), random_access_type>::value, "");
+    static_assert(std::is_same_v<decltype(ir), random_access_type>);
 
     BOOST_CHECK(empty(ir));
 

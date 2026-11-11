@@ -10,7 +10,7 @@ Allow interaction with Python iterables.
 #define RANGE_PYTHON_PYTHON_RANGE_HPP_INCLUDED
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
+#include "nanobind/nanobind.h"
 
 #include <cassert>
 #include <cstdint>

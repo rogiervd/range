@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_view_shared
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/view_shared.hpp"
 
@@ -179,8 +179,8 @@ BOOST_AUTO_TEST_CASE(test_range_view_shared_unique)
 {
     auto v = return_5_16_18_one_time();
 
-    static_assert(!has<callable::drop(decltype(v) const &)>::value, "");
-    static_assert(!has<callable::chop(decltype(v) const &)>::value, "");
+    static_assert(!has<callable::drop(decltype(v) const &)>::value);
+    static_assert(!has<callable::chop(decltype(v) const &)>::value);
 
     auto chopped1 = chop(std::move(v));
     BOOST_CHECK_EQUAL(chopped1.first(), 5);

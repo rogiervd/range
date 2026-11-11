@@ -4,7 +4,7 @@
 
 module(
     name = "range",
-    version = "1.0.0",
+    version = "1.1.1",
 )
 
 bazel_dep(name = "rules_cc", version = "0.2.22")
@@ -25,7 +25,9 @@ bazel_dep(name = "boost.any", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.iostreams", version = "1.90.0.bcr.2")
 bazel_dep(name = "boost.exception", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.filesystem", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.test", version = "1.90.0.bcr.1")
+
+bazel_dep(name = "boost.test", version = "1.90.0.bcr.1", dev_dependency = True)
+
 bazel_dep(name = "nanobind_bazel", version = "2.12.0")
 
 # IDEs as well as other tools can use a compile_commands.json databse to know
@@ -77,7 +79,7 @@ pip.parse(
 use_repo(pip, "range_pypi")
 
 # Doxygen, for generating C++ API documentation.
-bazel_dep(name = "rules_doxygen", version = "2.6.4")
+bazel_dep(name = "rules_doxygen", version = "2.6.4", dev_dependency = True)
 
-doxygen_extension = use_extension("@rules_doxygen//:extensions.bzl", "doxygen_extension")
+doxygen_extension = use_extension("@rules_doxygen//:extensions.bzl", "doxygen_extension", dev_dependency = True)
 use_repo(doxygen_extension, "doxygen")

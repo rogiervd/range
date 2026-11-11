@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_zip
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/zip.hpp"
 
@@ -56,16 +56,14 @@ BOOST_AUTO_TEST_CASE(homogeneous)
         auto z = range::zip(vi, vd);
 
         static_assert(
-            std::is_same<
+            std::is_same_v<
                 decltype(z),
                 range::zip_range<
-                    direction::front, decltype(view(vi)),
-                    decltype(view(vd))>>::value,
-            "");
+                    direction::front, decltype(view(vi)), decltype(view(vd))>>);
 
-        static_assert(range::is_range<decltype(z)>::value, "");
+        static_assert(range::is_range<decltype(z)>::value);
         static_assert(
-            range::is_homogeneous<decltype(z), direction::front>::value, "");
+            range::is_homogeneous<decltype(z), direction::front>::value);
         BOOST_CHECK(range::default_direction(z) == range::front);
 
         BOOST_CHECK(range::empty(z));
@@ -74,17 +72,17 @@ BOOST_AUTO_TEST_CASE(homogeneous)
         BOOST_CHECK_EQUAL(range::size(z), 0u);
         BOOST_CHECK_EQUAL(range::size(z, range::front), 0u);
 
-        static_assert(has<callable::drop(decltype(z))>::value, "");
+        static_assert(has<callable::drop(decltype(z))>::value);
         static_assert(
-            has<callable::drop(decltype(z), direction::front)>::value, "");
+            has<callable::drop(decltype(z), direction::front)>::value);
         static_assert(
-            !has<callable::drop(decltype(z), direction::back)>::value, "");
+            !has<callable::drop(decltype(z), direction::back)>::value);
 
-        static_assert(has<callable::chop(decltype(z))>::value, "");
+        static_assert(has<callable::chop(decltype(z))>::value);
         static_assert(
-            has<callable::chop(decltype(z), direction::front)>::value, "");
+            has<callable::chop(decltype(z), direction::front)>::value);
         static_assert(
-            !has<callable::chop(decltype(z), direction::back)>::value, "");
+            !has<callable::chop(decltype(z), direction::back)>::value);
     }
 
     vi.push_back(1);
@@ -146,10 +144,8 @@ BOOST_AUTO_TEST_CASE(homogeneous)
 
             auto first_element = first(z);
 
-            static_assert(
-                range::has<range::callable::chop(
-                    decltype(drop(z)) const &)>::value,
-                "");
+            static_assert(range::has<range::callable::chop(
+                              decltype(drop(z)) const &)>::value);
 
             BOOST_CHECK_EQUAL(first(first_element), 1);
             BOOST_CHECK_EQUAL(second(first_element), 2.5);
@@ -165,15 +161,12 @@ BOOST_AUTO_TEST_CASE(homogeneous)
 
             auto chopped = chop(drop(z));
 
-            static_assert(
-                range::has<range::callable::chop(decltype(zip_from(t)))>::value,
-                "");
+            static_assert(range::has<range::callable::chop(
+                              decltype(zip_from(t)))>::value);
             // show_types <decltype (z)> st;
             // show_types <decltype (range::default_direction (z))> st2;
-            static_assert(
-                range::has<range::callable::chop(
-                    decltype(zip_from(t, range::back)))>::value,
-                "");
+            static_assert(range::has<range::callable::chop(
+                              decltype(zip_from(t, range::back)))>::value);
 
             BOOST_CHECK_EQUAL(first(chopped.first()), 3);
             BOOST_CHECK_EQUAL(second(chopped.first()), 27.5);

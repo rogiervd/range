@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_container_std_tuple
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/std/tuple.hpp"
 
 #include <tuple>
 #include <type_traits>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "utility/test/tracked.hpp"
 
@@ -55,40 +55,39 @@ using utility::tracked_counts;
 BOOST_AUTO_TEST_CASE(test_std_tuple_types)
 {
     {
-        BOOST_MPL_ASSERT_NOT((is_view<std::tuple<>>) );
-        BOOST_MPL_ASSERT_NOT((is_view<std::tuple<>>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<std::tuple<>>) );
+        static_assert(!is_view<std::tuple<>>::value);
+        static_assert(!is_view<std::tuple<>>::value);
+        static_assert(!is_homogeneous<std::tuple<>>::value);
         std::tuple<> t;
-        BOOST_MPL_ASSERT((is_view<decltype(view(t))>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(view(t))>) );
+        static_assert(is_view<decltype(view(t))>::value);
+        static_assert(!is_homogeneous<decltype(view(t))>::value);
     }
     {
-        BOOST_MPL_ASSERT_NOT((is_view<std::tuple<int>>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<std::tuple<int>>) );
+        static_assert(!is_view<std::tuple<int>>::value);
+        static_assert(!is_homogeneous<std::tuple<int>>::value);
         std::tuple<int> t(4);
-        BOOST_MPL_ASSERT((is_view<decltype(view(t)) &>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(view(t))>) );
+        static_assert(is_view<decltype(view(t)) &>::value);
+        static_assert(!is_homogeneous<decltype(view(t))>::value);
     }
     {
-        BOOST_MPL_ASSERT_NOT((is_view<std::tuple<int, double> &>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<std::tuple<int, double>>) );
+        static_assert(!is_view<std::tuple<int, double> &>::value);
+        static_assert(!is_homogeneous<std::tuple<int, double>>::value);
         std::tuple<int, double> t(4, 5.);
-        BOOST_MPL_ASSERT((is_view<decltype(view(t)) const>) );
-        BOOST_MPL_ASSERT_NOT((is_homogeneous<decltype(view(t))>) );
+        static_assert(is_view<decltype(view(t)) const>::value);
+        static_assert(!is_homogeneous<decltype(view(t))>::value);
     }
 
     {
         std::tuple<int> t;
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(t)), int &>) );
+        static_assert(std::is_same_v<decltype(first(t)), int &>);
     }
     {
         std::tuple<int> const t;
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(t)), int const &>) );
+        static_assert(std::is_same_v<decltype(first(t)), int const &>);
     }
     {
         std::tuple<int> t;
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(std::move(t))), int &&>) );
+        static_assert(std::is_same_v<decltype(first(std::move(t))), int &&>);
     }
 }
 
@@ -98,42 +97,40 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
     {
         std::tuple<> t;
         BOOST_CHECK(empty(t));
-        BOOST_MPL_ASSERT((always_empty<decltype(t), direction::front>) );
-        BOOST_MPL_ASSERT((always_empty<decltype(t), direction::back>) );
+        static_assert(always_empty<decltype(t), direction::front>::value);
+        static_assert(always_empty<decltype(t), direction::back>::value);
         check_equal_value(size(t), zero_type());
 
-        BOOST_MPL_ASSERT_NOT((has<range::callable::first(decltype(t))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::at(decltype(t), zero_type)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::at(decltype(t), rime::size_t<1>)>) );
+        static_assert(!has<range::callable::first(decltype(t))>::value);
+        static_assert(!has<range::callable::at(decltype(t), zero_type)>::value);
+        static_assert(
+            !has<range::callable::at(decltype(t), rime::size_t<1>)>::value);
 
-        BOOST_MPL_ASSERT_NOT((has<range::callable::chop(decltype(t))>) );
+        static_assert(!has<range::callable::chop(decltype(t))>::value);
     }
 
     // One element.
     {
         std::tuple<double> const t(6.3);
         BOOST_CHECK(!empty(t));
-        BOOST_MPL_ASSERT((never_empty<decltype(t), direction::front>) );
-        BOOST_MPL_ASSERT((never_empty<decltype(t), direction::back>) );
+        static_assert(never_empty<decltype(t), direction::front>::value);
+        static_assert(never_empty<decltype(t), direction::back>::value);
         check_equal_value(size(t), one);
 
-        BOOST_MPL_ASSERT((has<range::callable::first(decltype(t) &)>) );
-        BOOST_MPL_ASSERT((has<range::callable::at(decltype(t), zero_type)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::at(rime::size_t<1>, decltype(t))>) );
+        static_assert(has<range::callable::first(decltype(t) &)>::value);
+        static_assert(has<range::callable::at(decltype(t), zero_type)>::value);
+        static_assert(
+            !has<range::callable::at(rime::size_t<1>, decltype(t))>::value);
 
-        BOOST_MPL_ASSERT((has<range::callable::chop(decltype(t))>) );
-        BOOST_MPL_ASSERT((has<range::callable::chop(decltype(view(t)))>) );
+        static_assert(has<range::callable::chop(decltype(t))>::value);
+        static_assert(has<range::callable::chop(decltype(view(t)))>::value);
 
         // Tuples are not homogeneous.
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(t))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)) &)>) );
+        static_assert(!has<range::callable::chop_in_place(decltype(t))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)) &)>::value);
 
         check_equal_value(first(t), 6.3);
         check_equal_value(first(t, front), 6.3);
@@ -149,12 +146,12 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
         check_equal_value(first_and_empty_2.first(), 6.3);
         check_equal_value(empty(first_and_empty_1.rest()), true_);
         check_equal_value(empty(first_and_empty_2.rest()), true_);
-        BOOST_MPL_ASSERT(
-            (always_empty<
-                decltype(first_and_empty_2.rest()), direction::front>) );
-        BOOST_MPL_ASSERT(
-            (always_empty<
-                decltype(first_and_empty_2.rest()), direction::back>) );
+        static_assert(
+            always_empty<
+                decltype(first_and_empty_2.rest()), direction::front>::value);
+        static_assert(
+            always_empty<
+                decltype(first_and_empty_2.rest()), direction::back>::value);
     }
 
     // Two elements.
@@ -162,8 +159,8 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
         std::tuple<int, char> t(4, 'a');
 
         BOOST_CHECK(!empty(t));
-        BOOST_MPL_ASSERT((never_empty<decltype(t), direction::front>) );
-        BOOST_MPL_ASSERT((never_empty<decltype(t), direction::back>) );
+        static_assert(never_empty<decltype(t), direction::front>::value);
+        static_assert(never_empty<decltype(t), direction::back>::value);
         check_equal_value(size(t), two);
 
         check_equal_value(first(t, front), 4);
@@ -194,12 +191,11 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
         check_equal_value(first_and_empty.first(), 4);
         check_equal_value(empty(first_and_empty.rest()), true_);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(t))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)) &)>) );
+        static_assert(!has<range::callable::chop_in_place(decltype(t))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)) &)>::value);
     }
 
     // Three elements
@@ -247,12 +243,11 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
         check_equal_value(middle_and_empty.first(), 'a');
         check_equal_value(empty(middle_and_empty.rest()), true_);
 
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(t))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<range::callable::chop_in_place(decltype(view(t)) &)>) );
+        static_assert(!has<range::callable::chop_in_place(decltype(t))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)))>::value);
+        static_assert(
+            !has<range::callable::chop_in_place(decltype(view(t)) &)>::value);
     }
 
     utility::tracked_registry r;
@@ -267,9 +262,9 @@ BOOST_AUTO_TEST_CASE(test_std_tuple)
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 2, 0, 0, 0, 0, 2));
 
         auto v = view_once(std::move(t));
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(v)), tracked<int> &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(v, back)), tracked<double> &&>) );
+        static_assert(std::is_same_v<decltype(first(v)), tracked<int> &&>);
+        static_assert(
+            std::is_same_v<decltype(first(v, back)), tracked<double> &&>);
 
         // The elements should be moved out.
         tracked<int> i = at_c<0>(v);
@@ -293,11 +288,11 @@ BOOST_AUTO_TEST_CASE(test_std_pair)
         p, t);
 
     auto && second = at_c<1>(view_once(p));
-    BOOST_MPL_ASSERT((std::is_same<decltype(second), char &>) );
+    static_assert(std::is_same_v<decltype(second), char &>);
     BOOST_CHECK_EQUAL(second, 'a');
 
     auto && second_move = at_c<1>(view_once(std::move(p)));
-    BOOST_MPL_ASSERT((std::is_same<decltype(second_move), char &&>) );
+    static_assert(std::is_same_v<decltype(second_move), char &&>);
     BOOST_CHECK_EQUAL(second_move, 'a');
 }
 

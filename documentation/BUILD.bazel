@@ -19,6 +19,7 @@
 load("@doxygen//:doxygen.bzl", "doxygen")
 load("@sphinxdocs//sphinxdocs:sphinx.bzl", "sphinx_build_binary", "sphinx_docs")
 load("@sphinxdocs//sphinxdocs:sphinx_docs_library.bzl", "sphinx_docs_library")
+load(":module_version.bzl", "module_version")
 
 # Build the API documentation from C++ source code with Doxygen, for Breathe
 # to pick up.
@@ -37,6 +38,7 @@ doxygen(
     macro_expansion = True,
     predefined = ["RETURNS(...)=;"],
     project_name = "range",
+    project_number = module_version(),
 )
 
 # Install the Sphinx binary, and modules that the documentation needs.
@@ -68,7 +70,14 @@ sphinx_docs(
     config = "conf.py",
     # Treat Sphinx warnings (including Breathe's, such as unresolved
     # references into the Doxygen output) as errors.
-    extra_opts = ["--fail-on-warning"],
+    # Take the version from MODULE.bazel, so it is specified in one place.
+    extra_opts = [
+        "--fail-on-warning",
+        "-D",
+        "version=" + module_version(),
+        "-D",
+        "release=" + module_version(),
+    ],
     formats = ["html"],
     sphinx = ":sphinx-build",
     deps = [

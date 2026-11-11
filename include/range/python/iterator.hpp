@@ -10,7 +10,7 @@ Expose views as Python iterators.
 #define RANGE_PYTHON_ITERATOR_HPP_INCLUDED
 
 // Include Python headers before C++ headers
-#include <nanobind/nanobind.h>
+#include "nanobind/nanobind.h"
 
 #include <cstdint>
 #include <type_traits>
@@ -118,14 +118,14 @@ namespace range { namespace python {
             is_view<View>::value, "view_caster can only be used on views.");
 
         static_assert(
-            std::is_same<View, typename std::decay<View>::type>::value,
+            std::is_same_v<View, typename std::decay<View>::type>,
             "view_caster requires an unqualified type.");
 
         static_assert(
-            std::is_same<
+            std::is_same_v<
                 typename decayed_result_of<
                     callable::default_direction(View)>::type,
-                direction::front>::value,
+                direction::front>,
             "The default direction must be direction::front.");
 
         using Value = View;

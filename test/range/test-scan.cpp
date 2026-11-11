@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: Copyright 2014, 2015 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2014, 2015, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_scan
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/scan.hpp"
 
@@ -11,7 +11,7 @@
 #include <tuple>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include "boost/optional.hpp"
 
 #include "utility/returns.hpp"
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
     std::vector<int> v;
     {
         auto acc = scan(0, v, plus());
-        static_assert(is_homogeneous<decltype(acc)>::value, "");
+        static_assert(is_homogeneous<decltype(acc)>::value);
 
         RIME_CHECK_EQUAL(empty(acc), false);
         BOOST_CHECK_EQUAL(size(acc), 1u);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
     {
         int i = 0;
         auto acc = scan(i, v, reference_right());
-        static_assert(std::is_same<decltype(first(acc)), int &>::value, "");
+        static_assert(std::is_same_v<decltype(first(acc)), int &>);
         BOOST_CHECK_EQUAL(&first(acc), &i);
 
         auto chopped = chop(acc);
@@ -178,6 +178,21 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
         static_assert(
             !has<callable::size(decltype(acc))>::value,
             "Scan over forward range cannot implement size.");
+    }
+
+    // For loop, using begin() and end().
+    {
+        std::vector<int> v {1, 2, 3, 4, 5};
+
+        auto s = range::scan(0, v, plus());
+
+        int sum = 0;
+        for (int i : s) {
+            BOOST_CHECK(
+                i == 0 || i == 1 || i == 3 || i == 6 || i == 10 || i == 15);
+            sum += i;
+        }
+        BOOST_CHECK_EQUAL(sum, 0 + 1 + 3 + 6 + 10 + 15);
     }
 }
 
@@ -244,20 +259,20 @@ BOOST_AUTO_TEST_CASE(scan_unique_range)
     std::vector<int> v;
     {
         auto acc = scan(0, one_time_view(v), plus());
-        static_assert(is_homogeneous<decltype(acc)>::value, "");
+        static_assert(is_homogeneous<decltype(acc)>::value);
 
         RIME_CHECK_EQUAL(empty(acc), false);
         BOOST_CHECK_EQUAL(size(acc), 1u);
 
-        static_assert(has<callable::first(decltype(acc) &&)>::value, "");
-        static_assert(has<callable::first(decltype(acc) const &)>::value, "");
+        static_assert(has<callable::first(decltype(acc) &&)>::value);
+        static_assert(has<callable::first(decltype(acc) const &)>::value);
 
         // drop and chop only available for rvalue references.
-        static_assert(has<callable::drop(decltype(acc) &&)>::value, "");
-        static_assert(has<callable::chop(decltype(acc) &&)>::value, "");
+        static_assert(has<callable::drop(decltype(acc) &&)>::value);
+        static_assert(has<callable::chop(decltype(acc) &&)>::value);
 
-        static_assert(!has<callable::drop(decltype(acc) const &)>::value, "");
-        static_assert(!has<callable::chop(decltype(acc) const &)>::value, "");
+        static_assert(!has<callable::drop(decltype(acc) const &)>::value);
+        static_assert(!has<callable::chop(decltype(acc) const &)>::value);
 
         auto chopped = chop(std::move(acc));
         BOOST_CHECK_EQUAL(chopped.first(), 0);
@@ -268,7 +283,7 @@ BOOST_AUTO_TEST_CASE(scan_unique_range)
     v.push_back(7);
     {
         auto acc = scan(0, unique_view(v), plus());
-        static_assert(is_homogeneous<decltype(acc)>::value, "");
+        static_assert(is_homogeneous<decltype(acc)>::value);
 
         RIME_CHECK_EQUAL(empty(acc), false);
         BOOST_CHECK_EQUAL(size(acc), 3u);

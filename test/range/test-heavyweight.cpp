@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_iterator_range
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/heavyweight.hpp"
 
@@ -116,15 +116,15 @@ BOOST_AUTO_TEST_SUITE(test_range_heavyweight)
 
 BOOST_AUTO_TEST_CASE(test_range_heavyweight)
 {
-    BOOST_MPL_ASSERT(
-        (range::has<range::callable::empty(std::forward_list<int>)>) );
-    BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                          std::forward_list<int> &, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::size(std::forward_list<int> const)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<range::callable::size(
-             std::forward_list<int> const &, direction::front &)>) );
+    static_assert(
+        range::has<range::callable::empty(std::forward_list<int>)>::value);
+    static_assert(range::has<range::callable::empty(
+                      std::forward_list<int> &, direction::front)>::value);
+    static_assert(!range::has<range::callable::size(
+                      std::forward_list<int> const)>::value);
+    static_assert(
+        !range::has<range::callable::size(
+            std::forward_list<int> const &, direction::front &)>::value);
 
     using range::at;
     using range::back;
@@ -165,21 +165,21 @@ BOOST_AUTO_TEST_CASE(test_range_heavyweight)
         BOOST_CHECK(empty(first_and_rest.rest()));
 
         auto v = range::view(l);
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::chop_in_place(decltype(l) &)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::chop_in_place(decltype(v) &)>) );
+        static_assert(
+            !range::has<range::callable::chop_in_place(decltype(l) &)>::value);
+        static_assert(
+            range::has<range::callable::chop_in_place(decltype(v) &)>::value);
 
         // view_once on lvalue: equivalent to view.
         auto v2 = range::view_once(l);
-        BOOST_MPL_ASSERT((std::is_same<decltype(v2), decltype(v)>) );
+        static_assert(std::is_same_v<decltype(v2), decltype(v)>);
 
         // view_once on rvalue reference: move elements out.
         auto v3 = range::view_once(std::move(l));
-        BOOST_MPL_ASSERT_NOT((std::is_same<decltype(v3), decltype(v)>) );
+        static_assert(!std::is_same_v<decltype(v3), decltype(v)>);
         auto && element = first(v3);
         BOOST_CHECK_EQUAL(element, 5);
-        BOOST_MPL_ASSERT((std::is_same<decltype(element), int &&>) );
+        static_assert(std::is_same_v<decltype(element), int &&>);
     }
 
     // std::vector
@@ -222,46 +222,46 @@ BOOST_AUTO_TEST_CASE(test_range_heavyweight)
 
         auto && first_element = at(moved_view, 0);
         BOOST_CHECK_EQUAL(first_element, 3.3);
-        BOOST_MPL_ASSERT((std::is_same<decltype(first_element), double &&>) );
+        static_assert(std::is_same_v<decltype(first_element), double &&>);
 
         auto && second_element = at(moved_view, 1);
         BOOST_CHECK_EQUAL(second_element, 5.5);
-        BOOST_MPL_ASSERT((std::is_same<decltype(second_element), double &&>) );
+        static_assert(std::is_same_v<decltype(second_element), double &&>);
     }
 
     // weird_heavyweight_count
     {
         // weird_direction.
-        BOOST_MPL_ASSERT((range::has<range::callable::view(
-                              weird_heavyweight_count, weird_direction)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::empty(
-                              weird_heavyweight_count, weird_direction)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::size(
-                                  weird_heavyweight_count, weird_direction)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::first(
-                 weird_heavyweight_count const &, weird_direction)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::drop(
-                              weird_heavyweight_count &, weird_direction)>) );
-        BOOST_MPL_ASSERT(
-            (range::has<range::callable::drop(
-                 weird_heavyweight_count &, int, weird_direction)>) );
-        BOOST_MPL_ASSERT((range::has<range::callable::chop(
-                              weird_heavyweight_count &, weird_direction)>) );
+        static_assert(range::has<range::callable::view(
+                          weird_heavyweight_count, weird_direction)>::value);
+        static_assert(range::has<range::callable::empty(
+                          weird_heavyweight_count, weird_direction)>::value);
+        static_assert(!range::has<range::callable::size(
+                          weird_heavyweight_count, weird_direction)>::value);
+        static_assert(
+            range::has<range::callable::first(
+                weird_heavyweight_count const &, weird_direction)>::value);
+        static_assert(range::has<range::callable::drop(
+                          weird_heavyweight_count &, weird_direction)>::value);
+        static_assert(
+            range::has<range::callable::drop(
+                weird_heavyweight_count &, int, weird_direction)>::value);
+        static_assert(range::has<range::callable::chop(
+                          weird_heavyweight_count &, weird_direction)>::value);
 
         // without direction.
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::view(weird_heavyweight_count)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::empty(weird_heavyweight_count)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::size(weird_heavyweight_count)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::first(
-                                  weird_heavyweight_count const &)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (range::has<range::callable::drop(weird_heavyweight_count &)>) );
-        BOOST_MPL_ASSERT_NOT((range::has<range::callable::drop(
-                                  int, weird_heavyweight_count &)>) );
+        static_assert(
+            !range::has<range::callable::view(weird_heavyweight_count)>::value);
+        static_assert(!range::has<range::callable::empty(
+                          weird_heavyweight_count)>::value);
+        static_assert(
+            !range::has<range::callable::size(weird_heavyweight_count)>::value);
+        static_assert(!range::has<range::callable::first(
+                          weird_heavyweight_count const &)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          weird_heavyweight_count &)>::value);
+        static_assert(!range::has<range::callable::drop(
+                          int, weird_heavyweight_count &)>::value);
 
         weird_heavyweight_count w;
         weird_direction d(7);

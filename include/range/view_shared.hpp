@@ -36,9 +36,8 @@ struct view_of_shared
 {
 public:
     static_assert(
-        std::is_same<
-            Heavyweight,
-            typename std::remove_reference<Heavyweight>::type>::value,
+        std::is_same_v<
+            Heavyweight, typename std::remove_reference<Heavyweight>::type>,
         "The heavyweight range should not be a reference type.");
 
     typedef Heavyweight heavyweight_type;

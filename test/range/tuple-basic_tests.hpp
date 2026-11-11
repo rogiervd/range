@@ -57,35 +57,35 @@ template <class Tuple> void check_tuple(Tuple const & t)
     RIME_CHECK_EQUAL(range::size(t, back), range::size(t));
 
     // One can always drop with an increment of "size".
-    BOOST_MPL_ASSERT((has<callable::drop(Tuple, decltype(size(t)))>) );
+    static_assert(has<callable::drop(Tuple, decltype(size(t)))>::value);
 
     // One can never drop with an run-time increment.
-    BOOST_MPL_ASSERT_NOT((has<callable::drop(Tuple, int)>) );
-    BOOST_MPL_ASSERT_NOT((has<callable::at(Tuple, int)>) );
+    static_assert(!has<callable::drop(Tuple, int)>::value);
+    static_assert(!has<callable::at(Tuple, int)>::value);
 }
 
 template <class Increment, class Tuple>
 void check_has_no_drop(Increment const &, Tuple const &)
 {
     // No drop.
-    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple, Increment)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::drop(Tuple, Increment, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::drop(Tuple, Increment, direction::back)>) );
+    static_assert(!range::has<callable::drop(Tuple, Increment)>::value);
+    static_assert(
+        !range::has<callable::drop(Tuple, Increment, direction::front)>::value);
+    static_assert(
+        !range::has<callable::drop(Tuple, Increment, direction::back)>::value);
 
     // No at.
-    BOOST_MPL_ASSERT_NOT((range::has<callable::at(Tuple, Increment)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::at(Tuple, Increment, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::at(Tuple, Increment, direction::back)>) );
+    static_assert(!range::has<callable::at(Tuple, Increment)>::value);
+    static_assert(
+        !range::has<callable::at(Tuple, Increment, direction::front)>::value);
+    static_assert(
+        !range::has<callable::at(Tuple, Increment, direction::back)>::value);
 }
 
 template <class Tuple> void check_empty_implementation(Tuple const & t)
 {
-    BOOST_MPL_ASSERT((always_empty<Tuple, direction::front>) );
-    BOOST_MPL_ASSERT((always_empty<Tuple, direction::back>) );
+    static_assert(always_empty<Tuple, direction::front>::value);
+    static_assert(always_empty<Tuple, direction::back>::value);
 
     RIME_CHECK_EQUAL(range::empty(t), true_);
     RIME_CHECK_EQUAL(range::size(t), zero);
@@ -93,24 +93,21 @@ template <class Tuple> void check_empty_implementation(Tuple const & t)
     check_tuple(t);
 
     // No first.
-    BOOST_MPL_ASSERT_NOT((range::has<callable::first(Tuple)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::first(Tuple, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::first(Tuple, direction::back)>) );
+    static_assert(!range::has<callable::first(Tuple)>::value);
+    static_assert(!range::has<callable::first(Tuple, direction::front)>::value);
+    static_assert(!range::has<callable::first(Tuple, direction::back)>::value);
 
     // No drop.
-    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::drop(Tuple, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT((range::has<callable::drop(Tuple, direction::back)>) );
+    static_assert(!range::has<callable::drop(Tuple)>::value);
+    static_assert(!range::has<callable::drop(Tuple, direction::front)>::value);
+    static_assert(!range::has<callable::drop(Tuple, direction::back)>::value);
 
     // No at.
-    BOOST_MPL_ASSERT_NOT((range::has<callable::at(Tuple, zero_type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::at(Tuple, zero_type, direction::front)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (range::has<callable::at(Tuple, zero_type, direction::back)>) );
+    static_assert(!range::has<callable::at(Tuple, zero_type)>::value);
+    static_assert(
+        !range::has<callable::at(Tuple, zero_type, direction::front)>::value);
+    static_assert(
+        !range::has<callable::at(Tuple, zero_type, direction::back)>::value);
 
     check_has_no_drop(t, one);
     check_has_no_drop(t, two);
@@ -127,8 +124,8 @@ template <class Tuple> void check_empty(Tuple const & t)
 template <class Tuple, class Element>
 void check_one_element(Tuple const & t, Element const & element)
 {
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
+    static_assert(never_empty<Tuple, direction::front>::value);
+    static_assert(never_empty<Tuple, direction::back>::value);
 
     RIME_CHECK_EQUAL(range::empty(t), false_);
     RIME_CHECK_EQUAL(range::size(t), one);
@@ -151,18 +148,18 @@ void check_one_element(Tuple const & t, Element const & element)
 
     check_has_no_drop(t, two);
 
-    static_assert(has<callable::first(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<1>(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<2>(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::second(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::seventh(Tuple)>::value, "");
+    static_assert(has<callable::first(Tuple)>::value);
+    static_assert(!has<callable::at_c<1>(Tuple)>::value);
+    static_assert(!has<callable::at_c<2>(Tuple, direction::back)>::value);
+    static_assert(!has<callable::second(Tuple, direction::back)>::value);
+    static_assert(!has<callable::seventh(Tuple)>::value);
 }
 
 template <class Tuple, class Element1, class Element2> void check_two_elements(
     Tuple const & t, Element1 const & element1, Element2 const & element2)
 {
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
+    static_assert(never_empty<Tuple, direction::front>::value);
+    static_assert(never_empty<Tuple, direction::back>::value);
 
     RIME_CHECK_EQUAL(range::empty(t), false_);
     RIME_CHECK_EQUAL(range::size(t), two);
@@ -205,11 +202,11 @@ template <class Tuple, class Element1, class Element2> void check_two_elements(
 
     check_has_no_drop(t, three);
 
-    static_assert(has<callable::second(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<2>(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<3>(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::third(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::seventh(Tuple)>::value, "");
+    static_assert(has<callable::second(Tuple)>::value);
+    static_assert(!has<callable::at_c<2>(Tuple)>::value);
+    static_assert(!has<callable::at_c<3>(Tuple, direction::back)>::value);
+    static_assert(!has<callable::third(Tuple, direction::back)>::value);
+    static_assert(!has<callable::seventh(Tuple)>::value);
 }
 
 template <class Tuple, class Element1, class Element2, class Element3>
@@ -217,8 +214,8 @@ void check_three_elements(
     Tuple const & t, Element1 const & element1, Element2 const & element2,
     Element3 const & element3)
 {
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::front>) );
-    BOOST_MPL_ASSERT((never_empty<Tuple, direction::back>) );
+    static_assert(never_empty<Tuple, direction::front>::value);
+    static_assert(never_empty<Tuple, direction::back>::value);
 
     RIME_CHECK_EQUAL(range::empty(t), false_);
     RIME_CHECK_EQUAL(range::size(t), three);
@@ -278,11 +275,11 @@ void check_three_elements(
 
     check_has_no_drop(four, t);
 
-    static_assert(has<callable::third(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<3>(Tuple)>::value, "");
-    static_assert(!has<callable::at_c<4>(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::fourth(Tuple, direction::back)>::value, "");
-    static_assert(!has<callable::seventh(Tuple)>::value, "");
+    static_assert(has<callable::third(Tuple)>::value);
+    static_assert(!has<callable::at_c<3>(Tuple)>::value);
+    static_assert(!has<callable::at_c<4>(Tuple, direction::back)>::value);
+    static_assert(!has<callable::fourth(Tuple, direction::back)>::value);
+    static_assert(!has<callable::seventh(Tuple)>::value);
 }
 
 #endif  // RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED

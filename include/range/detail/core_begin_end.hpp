@@ -214,7 +214,7 @@ namespace callable {
                     class Range,
                     class Enable =
                         std::enable_if_t<is_homogeneous<Range>::value>>
-                auto operator()(Range & range, overload_order<1> *) const
+                auto operator()(Range &, overload_order<1> *) const
                 {
                     return std::monostate {};
                 }

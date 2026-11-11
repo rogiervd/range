@@ -11,6 +11,10 @@ algorithms actually propagate the direction.
 #ifndef RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED
 #define RANGE_TEST_WEIRD_COUNT_HPP_INCLUDED
 
+#include <cstddef>
+
+#include "rime/core.hpp"
+
 #include "range/core.hpp"
 
 #include "weird_direction.hpp"

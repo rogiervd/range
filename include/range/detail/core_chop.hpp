@@ -6,9 +6,15 @@
 #define RANGE_DETAIL_CORE_CHOP_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
 #include "utility/returns.hpp"
 #include "utility/storage.hpp"
+
+#include "range/detail/core_default_direction.hpp"
+#include "range/detail/core_member_access.hpp"
+#include "range/detail/core_tag.hpp"
+#include "range/direction.hpp"
 
 #include "core_base.hpp"
 #include "core_drop.hpp"

@@ -10,8 +10,9 @@ This includes \c \<unordered_set>.
 #ifndef RANGE_STD_UNORDERED_SET_HPP_INCLUDED
 #define RANGE_STD_UNORDERED_SET_HPP_INCLUDED
 
-#include <unordered_set>
+#include <unordered_set>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

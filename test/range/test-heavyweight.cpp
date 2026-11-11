@@ -8,10 +8,21 @@
 #include "range/heavyweight.hpp"
 
 #include <forward_list>
+#include <iterator>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
+#include "rime/core.hpp"
+
+#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/iterator_range.hpp"
 #include "weird_count.hpp"
+#include "weird_direction.hpp"
 
 /**
 Fake heavyweight class that has a wrong direction as a default_direction, and

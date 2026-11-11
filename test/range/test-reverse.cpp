@@ -7,13 +7,13 @@
 
 #include "range/reverse.hpp"
 
-#include "boost/mpl/assert.hpp"
-
+#include "range/core.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_reverse)
 

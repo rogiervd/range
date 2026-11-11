@@ -7,7 +7,8 @@
 
 #include "range/detail/meta_is_linear_subset.hpp"
 
-#include "boost/mpl/assert.hpp"
+#include "meta/vector.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(test_range_detail_linear_subset)
 

@@ -19,6 +19,7 @@ Allow interaction with Python iterables.
 #include <utility>
 
 #include "range/core.hpp"
+#include "range/direction.hpp"
 
 namespace range {
 

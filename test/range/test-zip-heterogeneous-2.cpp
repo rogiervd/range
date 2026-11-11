@@ -7,18 +7,17 @@
 
 #include "range/zip.hpp"
 
-#include <string>
+#include <cstddef>
 #include <vector>
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
-#include "range/for_each_macro.hpp"
+#include "range/core.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
-#include "weird_count.hpp"
-#include "weird_direction.hpp"
 
 using range::tuple;
 

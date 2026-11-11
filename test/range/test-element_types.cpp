@@ -12,8 +12,12 @@
 #include <type_traits>
 #include <vector>
 
+#include "meta/range.hpp"
 #include "meta/vector.hpp"
 
+#include "rime/core.hpp"
+
+#include "range/direction.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"

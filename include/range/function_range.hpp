@@ -7,7 +7,13 @@
 
 #include <type_traits>
 
-#include "rime/always.hpp"
+#include "boost/mpl/if.hpp"
+
+#include "rime/core.hpp"
+
+#include "utility/returns.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 

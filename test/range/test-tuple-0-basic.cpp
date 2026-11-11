@@ -7,10 +7,7 @@
 
 #include "range/tuple.hpp"
 
-#include <tuple>
-#include "range/std/tuple.hpp"
-
-#include "rime/check/check_equal.hpp"
+#include "range/core.hpp"
 
 #include "tuple-basic_tests.hpp"
 

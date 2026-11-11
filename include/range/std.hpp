@@ -12,6 +12,8 @@ For compile speed, prefer to include the headers from \c ./std/.
 #ifndef RANGE_STD_HPP_INCLUDED
 #define RANGE_STD_HPP_INCLUDED
 
+// IWYU pragma: begin_exports
+
 // Sequence containers.
 #include "std/array.hpp"
 #include "std/deque.hpp"
@@ -33,5 +35,7 @@ For compile speed, prefer to include the headers from \c ./std/.
 
 // view_optional.
 #include "std/view_optional.hpp"
+
+// IWYU pragma: end_exports
 
 #endif  // RANGE_STD_HPP_INCLUDED

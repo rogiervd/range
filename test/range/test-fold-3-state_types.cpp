@@ -8,9 +8,11 @@
 #include "range/fold.hpp"
 
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/mpl/assert.hpp"
+#include "rime/variant.hpp"
 
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"

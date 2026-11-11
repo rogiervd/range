@@ -7,6 +7,13 @@
 
 #include "range/view_shared.hpp"
 
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "utility/returns.hpp"
+
+#include "range/core.hpp"
 #include "range/reverse.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"

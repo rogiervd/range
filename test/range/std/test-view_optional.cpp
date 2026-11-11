@@ -7,7 +7,10 @@
 
 #include "range/std/view_optional.hpp"
 
-#include "boost/optional.hpp"
+#include "boost/optional/optional.hpp"
+
+#include "range/core.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(test_range_view_optional)
 

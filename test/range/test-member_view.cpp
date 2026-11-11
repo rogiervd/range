@@ -13,12 +13,18 @@ It is therefore quite thorough.
 
 #include "range/member_view.hpp"
 
+#include <cstddef>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include "meta/vector.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_member_view)
 

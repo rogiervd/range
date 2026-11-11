@@ -9,21 +9,17 @@
 
 #include <list>
 #include <memory>
-#include <string>
 #include <type_traits>
-#include <vector>
+#include <utility>
 
-#include "boost/mpl/assert.hpp"
+#include "rime/core.hpp"
 
+#include "range/core.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
-#include "range/std/vector.hpp"
 #include "range/take.hpp"
 
 #include "utility/test/tracked.hpp"
-#include "utility/unique_ptr.hpp"
-
-#include "rime/check/check_equal.hpp"
 
 #include "unique_range.hpp"
 

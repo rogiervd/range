@@ -10,8 +10,10 @@ This includes \c \<array>.
 #ifndef RANGE_STD_ARRAY_HPP_INCLUDED
 #define RANGE_STD_ARRAY_HPP_INCLUDED
 
-#include <array>
+#include <array>  // IWYU pragma: export
+#include <cstddef>
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

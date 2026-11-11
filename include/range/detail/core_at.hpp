@@ -10,12 +10,17 @@ range.
 #ifndef RANGE_DETAIL_CORE_AT_HPP_INCLUDED
 #define RANGE_DETAIL_CORE_AT_HPP_INCLUDED
 
+#include <cstddef>
+#include <type_traits>
 #include <utility>
 
-#include "boost/mpl/and.hpp"
-#include "boost/mpl/if.hpp"
+#include "rime/core.hpp"
 
-#include "meta/vector.hpp"
+#include "utility/returns.hpp"
+
+#include "range/detail/core_default_direction.hpp"
+#include "range/detail/core_tag.hpp"
+#include "range/direction.hpp"
 
 #include "core_base.hpp"
 #include "core_drop.hpp"

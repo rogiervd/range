@@ -10,15 +10,18 @@ test-python_range.py.
 
 // Include Python headers before C++ headers
 #include "nanobind/nanobind.h"
-#include "nanobind/stl/string.h"
+#include "nanobind/stl/string.h"  // IWYU pragma: keep
 
+#include "utility/returns.hpp"
+
+#include "range/core.hpp"
 #include "range/python/iterator.hpp"
 
 #include <list>
 
 #include <string>
 
-#include "boost/optional.hpp"
+#include "boost/optional/optional.hpp"
 
 #include "range/std/list.hpp"
 #include "range/std/view_optional.hpp"

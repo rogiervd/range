@@ -7,6 +7,12 @@
 
 #include "range/detail/tuple-compare.hpp"
 
+#include <type_traits>
+
+#include "boost/mpl/pair.hpp"
+
+#include "meta/vector.hpp"
+
 #include "rime/core.hpp"
 
 /// Get the predicate results with rime::less and as a vector.

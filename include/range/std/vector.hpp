@@ -10,8 +10,9 @@ This includes \c \<vector>.
 #ifndef RANGE_STD_VECTOR_HPP_INCLUDED
 #define RANGE_STD_VECTOR_HPP_INCLUDED
 
-#include <vector>
+#include <vector>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

@@ -9,13 +9,16 @@
 
 #include <tuple>
 #include <type_traits>
-
-#include "boost/mpl/assert.hpp"
+#include <utility>
 
 #include "utility/test/tracked.hpp"
 
 #include "../check_equal_behaviour.hpp"
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_container_std_tuple)
 

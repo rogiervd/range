@@ -10,8 +10,9 @@ This includes \c \<string>.
 #ifndef RANGE_STD_BASIC_STRING_HPP_INCLUDED
 #define RANGE_STD_BASIC_STRING_HPP_INCLUDED
 
-#include <string>
+#include <string>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

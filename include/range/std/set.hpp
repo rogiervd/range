@@ -10,8 +10,9 @@ This includes \c \<set>.
 #ifndef RANGE_STD_SET_HPP_INCLUDED
 #define RANGE_STD_SET_HPP_INCLUDED
 
-#include <set>
+#include <set>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

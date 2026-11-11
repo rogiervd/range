@@ -7,8 +7,15 @@
 
 #include "unique_range.hpp"
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
+#include "rime/core.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 

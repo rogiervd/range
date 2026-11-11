@@ -7,8 +7,11 @@
 
 #include "range/lazy.hpp"
 
+#include <functional>
+#include <type_traits>
 #include <vector>
 
+#include "range/core.hpp"
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 

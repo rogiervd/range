@@ -19,9 +19,12 @@ Other aspects are tested on different types of ranges by
 
 #include "range/core.hpp"
 
+#include <cstddef>
 #include <type_traits>
 
-#include "boost/mpl/assert.hpp"
+#include "rime/core.hpp"
+
+#include "range/direction.hpp"
 
 #include "weird_count.hpp"
 #include "weird_direction.hpp"

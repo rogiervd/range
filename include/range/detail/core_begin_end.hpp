@@ -5,7 +5,16 @@
 #ifndef RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 #define RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 
+#include <type_traits>
 #include <variant>  // For std::monostate.
+
+#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
+
+#include "range/detail/core_drop.hpp"
+#include "range/detail/core_first.hpp"
+#include "range/detail/core_member_access.hpp"
+#include "range/detail/core_tag.hpp"
 
 #include "core_base.hpp"
 #include "core_empty.hpp"

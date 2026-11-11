@@ -9,8 +9,6 @@
 
 #include <type_traits>
 
-#include "boost/mpl/assert.hpp"
-
 #include "utility/test/tracked.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_detail_underlying)

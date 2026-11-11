@@ -5,9 +5,12 @@
 #ifndef RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED
 #define RANGE_TEST_TUPLE_BASIC_TESTS_HPP_INCLUDED
 
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 using range::at;
 using range::at_c;

@@ -7,13 +7,17 @@
 
 #include "range/count.hpp"
 
+#include <cstddef>
 #include <type_traits>
+#include <vector>
 
 #include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/for_each_macro.hpp"
 #include "range/reverse.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_count)
 

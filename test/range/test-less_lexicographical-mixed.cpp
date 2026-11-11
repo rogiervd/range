@@ -8,16 +8,17 @@
 #include "range/less_lexicographical.hpp"
 
 #include <functional>
-#include <string>
 #include <tuple>
 #include <vector>
 
+#include "range/core.hpp"
 #include "range/reverse.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 #include "range/transform.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 struct negate
 {

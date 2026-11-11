@@ -11,10 +11,17 @@ These tests are very similar to the ones in test-equal-*.cpp.
 #define BOOST_TEST_MODULE range_tuple_equal
 #include "boost/test/unit_test.hpp"
 
+#include <type_traits>
+
+#include "meta/vector.hpp"
+
+#include "range/core.hpp"
+#include "range/detail/tuple-compare.hpp"
 #include "range/equal.hpp"
 #include "range/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 using range::drop;
 using range::equal;

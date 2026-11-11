@@ -7,11 +7,11 @@
 
 #include "range/core.hpp"
 #include "range/count.hpp"
+#include "range/direction.hpp"
 #include "range/for_each_macro.hpp"
 
 #include <iostream>
 #include <ostream>
-#include <vector>
 
 class fibonacci
 {

@@ -5,12 +5,11 @@
 #define BOOST_TEST_MODULE test_range_tuple_basic_2
 #include "boost/test/unit_test.hpp"
 
-#include "range/tuple.hpp"
-
+#include <memory>
 #include <tuple>
+#include <type_traits>
+#include "range/core.hpp"
 #include "range/std/tuple.hpp"
-
-#include "utility/unique_ptr.hpp"
 
 #include "rime/check/check_equal.hpp"
 

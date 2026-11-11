@@ -5,6 +5,8 @@
 #define BOOST_TEST_MODULE test_container_std_adaptor
 #include "boost/test/unit_test.hpp"
 
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/std/array.hpp"
 #include "range/std/deque.hpp"
 #include "range/std/forward_list.hpp"
@@ -16,14 +18,17 @@
 #include "range/std/unordered_set.hpp"
 #include "range/std/vector.hpp"
 
+#include <cstddef>
+#include <iterator>
 #include <type_traits>
+#include <utility>
 
-#include "boost/mpl/assert.hpp"
-
+#include "utility/returns.hpp"
 #include "utility/test/tracked.hpp"
 
 #include "../check_equal_behaviour.hpp"
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_container_std_adaptor)
 

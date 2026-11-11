@@ -9,14 +9,18 @@ Helper to test the behaviour of a range with respect to all operations.
 #ifndef RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED
 #define RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED
 
+#include <cassert>
+#include <cstddef>
 #include <type_traits>
+#include <utility>
 
-#include "boost/utility/enable_if.hpp"
+#include "boost/core/enable_if.hpp"
 
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"
 
 #include "range/core.hpp"
+#include "range/direction.hpp"
 
 /**
 Check whether values are equal in the applicable sense.

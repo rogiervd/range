@@ -10,8 +10,9 @@ This includes \c \<deque>.
 #ifndef RANGE_STD_DEQUE_HPP_INCLUDED
 #define RANGE_STD_DEQUE_HPP_INCLUDED
 
-#include <deque>
+#include <deque>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

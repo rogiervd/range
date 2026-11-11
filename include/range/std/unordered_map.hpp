@@ -10,8 +10,9 @@ This includes \c \<unordered_map>.
 #ifndef RANGE_STD_UNORDERED_MAP_HPP_INCLUDED
 #define RANGE_STD_UNORDERED_MAP_HPP_INCLUDED
 
-#include <unordered_map>
+#include <unordered_map>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

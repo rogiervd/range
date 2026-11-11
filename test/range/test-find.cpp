@@ -7,16 +7,18 @@
 
 #include "range/find.hpp"
 
+#include <cstddef>
 #include <type_traits>
 
-#include "boost/mpl/assert.hpp"
+#include "utility/returns.hpp"
 
 #include "range/core.hpp"
-#include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
+#include "rime/variant.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_find)
 

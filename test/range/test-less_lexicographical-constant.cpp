@@ -12,14 +12,13 @@ by splitting it up, the compiler requires less memory.
 
 #include "range/less_lexicographical.hpp"
 
-#include <functional>
-#include <string>
 #include <tuple>
-#include <vector>
 
+#include "utility/returns.hpp"
+
+#include "range/core.hpp"
 #include "range/reverse.hpp"
 #include "range/std/tuple.hpp"
-#include "range/std/vector.hpp"
 #include "range/transform.hpp"
 
 #include "rime/check/check_equal.hpp"

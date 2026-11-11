@@ -65,7 +65,7 @@ template <class Tuple> void check_tuple(Tuple const & t)
 }
 
 template <class Increment, class Tuple>
-void check_has_no_drop(Increment const & increment, Tuple const & t)
+void check_has_no_drop(Increment const &, Tuple const &)
 {
     // No drop.
     static_assert(!range::has<callable::drop(Tuple, Increment)>::value);

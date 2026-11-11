@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_fold_unassignable_state)
 struct return_right
 {
     template <class Left, class Right>
-    Right && operator()(Left && left, Right && right) const
+    Right && operator()(Left &&, Right && right) const
     {
         return static_cast<Right &&>(right);
     }

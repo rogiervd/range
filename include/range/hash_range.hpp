@@ -58,8 +58,7 @@ namespace callable {
         }
 
         template <class Range, class Direction> static std::size_t compute_hash(
-            Range && range, Direction const & direction, rime::true_type empty,
-            overload_order<1> *)
+            Range &&, Direction const &, rime::true_type, overload_order<1> *)
         {
             return empty_hash;
         }

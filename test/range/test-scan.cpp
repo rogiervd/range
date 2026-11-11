@@ -49,7 +49,7 @@ struct plus
 struct reference_right
 {
     template <class Left, class Right>
-    Right & operator()(Left const & left, Right & right) const
+    Right & operator()(Left const &, Right & right) const
     {
         return right;
     }

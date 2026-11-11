@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_fold_state_types
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/fold.hpp"
 
 #include <tuple>
 #include <vector>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
@@ -44,16 +44,16 @@ BOOST_AUTO_TEST_CASE(test_fold_const_state)
         v.push_back(1);
         v.push_back(2);
         v.push_back(3);
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(fold(int_holder(), v, add_return_const())),
-                          int_holder const>) );
+        static_assert(std::is_same_v<
+                      decltype(fold(int_holder(), v, add_return_const())),
+                      int_holder const>);
         BOOST_CHECK_EQUAL(fold(int_holder(), v, add_return_const()).i, 6);
     }
     {
         std::tuple<int, short, int> v(1, 2, 3);
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(fold(int_holder(), v, add_return_const())),
-                          int_holder const>) );
+        static_assert(std::is_same_v<
+                      decltype(fold(int_holder(), v, add_return_const())),
+                      int_holder const>);
         BOOST_CHECK_EQUAL(fold(int_holder(), v, add_return_const()).i, 6);
     }
 }
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(test_fold_unassignable_state)
 struct return_right
 {
     template <class Left, class Right>
-    Right && operator()(Left && left, Right && right) const
+    Right && operator()(Left &&, Right && right) const
     {
         return static_cast<Right &&>(right);
     }
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(test_fold_lvalue_state)
         v.push_back(1);
         v.push_back(2);
         v.push_back(3);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(fold(i, v, return_right())), int &>) );
+        static_assert(
+            std::is_same_v<decltype(fold(i, v, return_right())), int &>);
         BOOST_CHECK_EQUAL(&fold(i, v, return_right()), &at_c<2>(v));
 
         // Check that nothing has changed.
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE(test_fold_lvalue_state)
     }
     {
         std::tuple<int, short, int> v(1, 2, 3);
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(fold(i, v, return_right())), int &>) );
+        static_assert(
+            std::is_same_v<decltype(fold(i, v, return_right())), int &>);
         BOOST_CHECK_EQUAL(&fold(i, v, return_right()), &at_c<2>(v));
 
         // Check that nothing has changed.
@@ -155,9 +155,9 @@ BOOST_AUTO_TEST_CASE(test_fold_rvalue_state)
         // If 5.5 were an int &&, this should return an rvalue reference.
         // But it doesn't, because rvalue references are (sensibly) stripped
         // from the state argument.
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(fold(5.5, std::move(v), return_right())),
-                          rime::variant<double, int &&>>) );
+        static_assert(std::is_same_v<
+                      decltype(fold(5.5, std::move(v), return_right())),
+                      rime::variant<double, int &&>>);
         // BOOST_CHECK_EQUAL (
         //     &fold (return_right(), std::move (i), std::move (v)),
         //     &at_c <2> (v));
@@ -170,9 +170,8 @@ BOOST_AUTO_TEST_CASE(test_fold_rvalue_state)
     }
     {
         std::tuple<int, short, int> v(1, 2, 3);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(fold(i, std::move(v), return_right())), int &&>) );
+        static_assert(std::is_same_v<
+                      decltype(fold(i, std::move(v), return_right())), int &&>);
         auto && result = fold(i, std::move(v), return_right());
         BOOST_CHECK_EQUAL(&result, &at_c<2>(v));
 

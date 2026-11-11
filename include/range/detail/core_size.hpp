@@ -8,13 +8,15 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <boost/exception/exception.hpp>
+#include "boost/exception/exception.hpp"
 
 #include "utility/overload_order.hpp"
 
 #include "rime/core.hpp"
 
 #include "core_base.hpp"
+#include "core_default_direction.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 

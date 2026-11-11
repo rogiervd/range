@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_tuple_basic_2
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/tuple.hpp"
 
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(tuple_funny_types)
         BOOST_CHECK_EQUAL(first(fours)[1], 44);
         BOOST_CHECK_EQUAL(first(fours)[2], 444);
 
-        BOOST_MPL_ASSERT((std::is_assignable<tuple<int> &, tuple<int> &>) );
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_assignable<tuple<int[3]> &, tuple<int[3]> &>) );
+        static_assert(std::is_assignable<tuple<int> &, tuple<int> &>::value);
+        static_assert(
+            !std::is_assignable<tuple<int[3]> &, tuple<int[3]> &>::value);
     }
 
     // Function.

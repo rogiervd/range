@@ -1,24 +1,24 @@
-// SPDX-FileCopyrightText: Copyright 2013-2015, 2017 Rogier van Dalen
+// SPDX-FileCopyrightText: Copyright 2013-2015, 2017, 2026 Rogier van Dalen
 //
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_container_std_adaptor
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
-#include <range/std/array.hpp>
-#include <range/std/deque.hpp>
-#include <range/std/forward_list.hpp>
-#include <range/std/list.hpp>
-#include <range/std/map.hpp>
-#include <range/std/set.hpp>
-#include <range/std/string.hpp>
-#include <range/std/unordered_map.hpp>
-#include <range/std/unordered_set.hpp>
-#include <range/std/vector.hpp>
+#include "range/std/array.hpp"
+#include "range/std/deque.hpp"
+#include "range/std/forward_list.hpp"
+#include "range/std/list.hpp"
+#include "range/std/map.hpp"
+#include "range/std/set.hpp"
+#include "range/std/string.hpp"
+#include "range/std/unordered_map.hpp"
+#include "range/std/unordered_set.hpp"
+#include "range/std/vector.hpp"
 
 #include <type_traits>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "utility/test/tracked.hpp"
 
@@ -70,20 +70,20 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
         auto container_view = range::view(v);
         auto other_view = range::view_once(v);
 
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(container_view), decltype(other_view)>) );
+        static_assert(
+            std::is_same_v<decltype(container_view), decltype(other_view)>);
 
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(container_view))>) );
-        BOOST_MPL_ASSERT((has<callable::empty(decltype(v))>) );
-        BOOST_MPL_ASSERT_NOT((always_empty<decltype(v), direction::front>) );
-        BOOST_MPL_ASSERT_NOT((never_empty<decltype(v), direction::front>) );
+        static_assert(has<callable::empty(decltype(container_view))>::value);
+        static_assert(has<callable::empty(decltype(v))>::value);
+        static_assert(!always_empty<decltype(v), direction::front>::value);
+        static_assert(!never_empty<decltype(v), direction::front>::value);
 
         BOOST_CHECK(empty(v));
         BOOST_CHECK_EQUAL(size(v), 0u);
 
-        BOOST_MPL_ASSERT_NOT((has<callable::chop_in_place(decltype(v))>) );
-        BOOST_MPL_ASSERT_NOT(
-            (has<callable::chop_in_place(decltype(container_view))>) );
+        static_assert(!has<callable::chop_in_place(decltype(v))>::value);
+        static_assert(
+            !has<callable::chop_in_place(decltype(container_view))>::value);
     }
 
     v.push_back(5);
@@ -190,38 +190,68 @@ BOOST_AUTO_TEST_CASE(test_std_vector_adaptor)
         RIME_CHECK_EQUAL(first(c).content(), 7);
         RIME_CHECK_EQUAL(first(c, back).content(), 45);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 2, 0, 0, 0, 0, 2));
-        auto v = view_once(std::move(c));
-        BOOST_MPL_ASSERT((std::is_same<decltype(first(v)), tracked<int> &&>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<decltype(first(v, back)), tracked<int> &&>) );
+        auto once_view = view_once(std::move(c));
+        static_assert(
+            std::is_same_v<decltype(first(once_view)), tracked<int> &&>);
+        static_assert(
+            std::is_same_v<decltype(first(once_view, back)), tracked<int> &&>);
 
         // The elements should be moved out.
-        tracked<int> i = at(v, 0);
+        tracked<int> i = at(once_view, 0);
         BOOST_CHECK_EQUAL(i.content(), 7);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 3, 0, 0, 0, 0, 2));
 
-        tracked<int> d = at(v, 1);
+        tracked<int> d = at(once_view, 1);
         BOOST_CHECK_EQUAL(d.content(), 45);
         BOOST_CHECK_EQUAL(r.counts(), tracked_counts(2, 0, 4, 0, 0, 0, 0, 2));
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_begin_end)
+{
+    std::vector<int> is {1, 0, 2, -100, 4, 8, 16, 32};
+
+    BOOST_CHECK(range::begin(is) == is.begin());
+    BOOST_CHECK(range::end(is) == is.end());
+
+    int total = 0;
+    for (int & element : is) {
+        // Test "continue".
+        if (element < 0) {
+            continue;
+        }
+        total += element;
+        // Test mutability
+        if (element == 8) {
+            element = -8;
+        }
+        // Test "break".
+        if (element == 16) {
+            break;
+        }
+    }
+
+    BOOST_CHECK_EQUAL(total, 31);
+    BOOST_CHECK_EQUAL(is[5], -8);
+}
+
 
 BOOST_AUTO_TEST_CASE(test_std_list_adaptor)
 {
     std::list<int> l;
 
     auto list_view = range::view(l);
-    static_assert(has<callable::empty(decltype(list_view))>::value, "");
-    static_assert(!has<callable::size(decltype(list_view))>::value, "");
+    static_assert(has<callable::empty(decltype(list_view))>::value);
+    static_assert(!has<callable::size(decltype(list_view))>::value);
 
-    static_assert(has<callable::first(decltype(list_view))>::value, "");
+    static_assert(has<callable::first(decltype(list_view))>::value);
     // second (l) is equivalent to first (drop (l)) and should therefore be
     // available.
-    static_assert(has<callable::second(decltype(list_view))>::value, "");
-    static_assert(!has<callable::third(decltype(list_view))>::value, "");
-    static_assert(!has<callable::seventh(decltype(list_view))>::value, "");
+    static_assert(has<callable::second(decltype(list_view))>::value);
+    static_assert(!has<callable::third(decltype(list_view))>::value);
+    static_assert(!has<callable::seventh(decltype(list_view))>::value);
 
-    static_assert(!has<callable::at(decltype(list_view))>::value, "");
+    static_assert(!has<callable::at(decltype(list_view))>::value);
 }
 
 template <std::size_t Number, class Type> void compare_array(
@@ -229,10 +259,10 @@ template <std::size_t Number, class Type> void compare_array(
 {
     typedef std::array<Type, Number> array_type;
 
-    BOOST_MPL_ASSERT_NOT((is_view<array_type>) );
-    BOOST_MPL_ASSERT_NOT((is_homogeneous<array_type>) );
-    BOOST_MPL_ASSERT((is_view<decltype(view(a))>) );
-    BOOST_MPL_ASSERT((is_homogeneous<decltype(view(a)) &>) );
+    static_assert(!is_view<array_type>::value);
+    static_assert(!is_homogeneous<array_type>::value);
+    static_assert(is_view<decltype(view(a))>::value);
+    static_assert(is_homogeneous<decltype(view(a)) &>::value);
 
     check_equal_behaviour<true_type, true_type, false_type, true_type>(a, v);
 }
@@ -244,15 +274,15 @@ void compare_sequence_containers(std::vector<Type> const & v)
     std::forward_list<Type> fl(v.begin(), v.end());
     std::list<Type> l(v.begin(), v.end());
 
-    BOOST_MPL_ASSERT_NOT((is_view<std::deque<Type>>) );
-    BOOST_MPL_ASSERT_NOT((is_homogeneous<std::deque<Type>>) );
-    BOOST_MPL_ASSERT((is_view<decltype(view(d))>) );
-    BOOST_MPL_ASSERT((is_homogeneous<decltype(view(d)) &>) );
+    static_assert(!is_view<std::deque<Type>>::value);
+    static_assert(!is_homogeneous<std::deque<Type>>::value);
+    static_assert(is_view<decltype(view(d))>::value);
+    static_assert(is_homogeneous<decltype(view(d)) &>::value);
 
-    BOOST_MPL_ASSERT_NOT((is_view<std::list<Type> &>) );
-    BOOST_MPL_ASSERT_NOT((is_homogeneous<std::forward_list<Type>>) );
-    BOOST_MPL_ASSERT((is_view<decltype(view(fl))>) );
-    BOOST_MPL_ASSERT((is_homogeneous<decltype(view(l)) const>) );
+    static_assert(!is_view<std::list<Type> &>::value);
+    static_assert(!is_homogeneous<std::forward_list<Type>>::value);
+    static_assert(is_view<decltype(view(fl))>::value);
+    static_assert(is_homogeneous<decltype(view(l)) const>::value);
 
     check_equal_behaviour<true_type, true_type, false_type, true_type>(v, v);
 
@@ -447,43 +477,42 @@ template <class Container> auto get_iterator_type(Container &&) RETURNS(
 
 BOOST_AUTO_TEST_CASE(test_std_container_const)
 {
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(get_iterator_type(std::vector<int>())),
-                      decltype(get_iterator_type(view(std::vector<int>())))>) );
+    static_assert(std::is_same_v<
+                  decltype(get_iterator_type(std::vector<int>())),
+                  decltype(get_iterator_type(view(std::vector<int>())))>);
 
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            decltype(get_iterator_type(view_once(std::vector<int>()))),
-            type<std::move_iterator<std::vector<int>::iterator>>>) );
+    static_assert(std::is_same_v<
+                  decltype(get_iterator_type(view_once(std::vector<int>()))),
+                  type<std::move_iterator<std::vector<int>::iterator>>>);
 
     {
         std::vector<int> v;
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(v)),
-                          decltype(get_iterator_type(view(v)))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(v)),
+                      decltype(get_iterator_type(view(v)))>);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(v)),
-                          decltype(get_iterator_type(view_once(v)))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(v)),
+                      decltype(get_iterator_type(view_once(v)))>);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(std::move(v))),
-                          decltype(get_iterator_type(view(std::move(v))))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(std::move(v))),
+                      decltype(get_iterator_type(view(std::move(v))))>);
     }
 
     {
         std::vector<int> const v;
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(v)),
-                          decltype(get_iterator_type(view(v)))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(v)),
+                      decltype(get_iterator_type(view(v)))>);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(v)),
-                          decltype(get_iterator_type(view_once(v)))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(v)),
+                      decltype(get_iterator_type(view_once(v)))>);
 
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(get_iterator_type(std::move(v))),
-                          decltype(get_iterator_type(view(std::move(v))))>) );
+        static_assert(std::is_same_v<
+                      decltype(get_iterator_type(std::move(v))),
+                      decltype(get_iterator_type(view(std::move(v))))>);
     }
 }
 

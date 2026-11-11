@@ -8,9 +8,9 @@
 #include <type_traits>
 #include <utility>
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
-#include <boost/mpl/and.hpp>
+#include "boost/mpl/and.hpp"
 
 #include "utility/overload_order.hpp"
 
@@ -156,8 +156,8 @@ namespace callable {
                     class Enable2 = typename std::enable_if<
                         (Size::value <= Limit::value)>::type>
                 Range2 operator()(
-                    Range2 && range, Limit const & limit,
-                    Direction const & direction, overload_order<1> *) const
+                    Range2 && range, Limit const &, Direction const &,
+                    overload_order<1> *) const
                 {
                     return std::forward<Range2>(range);
                 }

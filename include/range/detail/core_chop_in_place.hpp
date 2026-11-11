@@ -7,14 +7,19 @@
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/if.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/if.hpp"
 
 #include "meta/vector.hpp"
 
 #include "utility/storage.hpp"
 
 #include "core_base.hpp"
+#include "core_chop.hpp"
+#include "core_default_direction.hpp"
+#include "core_drop.hpp"
+#include "core_first.hpp"
+#include "core_member_access.hpp"
 
 namespace range {
 

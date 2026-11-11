@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE range_test_less_lexicographical_heterogeneous
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/less_lexicographical.hpp"
 

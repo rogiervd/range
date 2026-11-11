@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_range_hash_range
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "range/hash_range.hpp"
 
@@ -12,7 +12,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include "boost/functional/hash.hpp"
 
 #include "range/std/string.hpp"
 #include "range/std/tuple.hpp"

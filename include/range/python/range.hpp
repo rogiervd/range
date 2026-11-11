@@ -284,6 +284,7 @@ namespace nanobind { namespace detail {
         static constexpr auto Name = const_name("Iterable");
 
         template <class T> using Cast = movable_cast_t<T>;
+        template <class T> static constexpr bool can_cast() { return true; }
 
         // Python_range is not default-constructible.
         std::optional<Range> value;

@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(example)
         }
 
         // Set the first element to the length of the second element.
-        first(pair) = size(second(pair));
+        first(pair) = int(size(second(pair)));
 
         ++count;
     }
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(begin_end)
         }
 
         // Set the first element to the length of the second element.
-        first(pair) = size(second(pair));
+        first(pair) = int(size(second(pair)));
 
         ++count;
     }
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(structured_binding)
         }
 
         // Set the first element to the length of the second element.
-        number = size(name);
+        number = int(size(name));
 
         ++count;
     }

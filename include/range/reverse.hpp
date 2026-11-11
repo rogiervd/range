@@ -12,13 +12,12 @@ the fly.
 
 #include <type_traits>
 
-#include "boost/utility/enable_if.hpp"
-
-#include "boost/mpl/and.hpp"
 #include "boost/mpl/apply.hpp"
 #include "boost/mpl/placeholders.hpp"
 
 #include "utility/returns.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 

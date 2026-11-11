@@ -11,7 +11,8 @@ This includes \<tuple>.
 #ifndef RANGE_STD_TUPLE_HPP_INCLUDED
 #define RANGE_STD_TUPLE_HPP_INCLUDED
 
-#include <tuple>
+#include <tuple>  // IWYU pragma: export
+#include <type_traits>
 #include <utility>
 
 #include "boost/mpl/pair.hpp"
@@ -20,6 +21,10 @@ This includes \<tuple>.
 #include "meta/enumerate.hpp"
 #include "meta/transform.hpp"
 #include "meta/vector.hpp"
+
+#include "rime/core.hpp"
+
+#include "utility/returns.hpp"
 
 #include "range/core.hpp"
 #include "range/heavyweight.hpp"
@@ -108,7 +113,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_pair_member_view<
             std::pair<First, Second> const &>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_pair_tag, bool once,
+        std_tuple_operation::std_pair_tag, bool /* once */,
         std::pair<First, Second> const & pair, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {
@@ -121,7 +126,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_pair_member_view<
             std::pair<First, Second> &>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_pair_tag, bool once,
+        std_tuple_operation::std_pair_tag, bool /* once */,
         std::pair<First, Second> & pair, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {
@@ -134,7 +139,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_pair_member_view<
             std::pair<First, Second> &&>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_pair_tag, rime::true_type once,
+        std_tuple_operation::std_pair_tag, rime::true_type /* once */,
         std::pair<First, Second> && pair, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {
@@ -148,7 +153,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_tuple_member_view<
             std::tuple<Types...> const &, Types...>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_tuple_tag, bool once,
+        std_tuple_operation::std_tuple_tag, bool /* once */,
         std::tuple<Types...> const & tuple, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {
@@ -161,7 +166,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_tuple_member_view<
             std::tuple<Types...> &, Types...>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_tuple_tag, bool once,
+        std_tuple_operation::std_tuple_tag, bool /* once */,
         std::tuple<Types...> & tuple, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {
@@ -174,7 +179,7 @@ namespace std_tuple_operation {
         class Result = typename std_tuple_operation::std_tuple_member_view<
             std::tuple<Types...> &&, Types...>::type>
     inline Result implement_make_view(
-        std_tuple_operation::std_tuple_tag, rime::true_type once,
+        std_tuple_operation::std_tuple_tag, rime::true_type /* once */,
         std::tuple<Types...> && tuple, helper::front_or_back,
         helper::front_or_back = helper::front_or_back())
     {

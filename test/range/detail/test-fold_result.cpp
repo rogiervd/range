@@ -8,12 +8,16 @@
 #include "range/detail/fold_result.hpp"
 
 #include "boost/mpl/apply.hpp"
-#include "boost/mpl/assert.hpp"
 #include "boost/mpl/placeholders.hpp"
 
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
+#include "meta/set.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 #include "range/take.hpp"

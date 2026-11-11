@@ -8,7 +8,13 @@
 #include "range/any_range/capability.hpp"
 
 #include <type_traits>
+#include <utility>
 
+#include "meta/map.hpp"
+#include "meta/set.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/function_range.hpp"
 #include "range/std/forward_list.hpp"
 #include "range/std/list.hpp"

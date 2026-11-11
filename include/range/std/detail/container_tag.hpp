@@ -12,7 +12,9 @@ iterator_range.
 
 #include "rime/enable_if_constant.hpp"
 
-#include "range/core.hpp"
+#include "utility/returns.hpp"
+
+#include "range/direction.hpp"
 #include "range/heavyweight.hpp"
 #include "range/iterator_range.hpp"
 
@@ -33,14 +35,16 @@ namespace std_container_operation {
     template <
         class Once, class Container,
         class Enable = typename rime::disable_if_constant_true<Once>::type>
-    inline auto make_iterator_range_with_once(Once once, Container && container)
+    inline auto make_iterator_range_with_once(
+        Once /* once */, Container && container)
         RETURNS(make_iterator_range(std::forward<Container>(container)));
 
     // If Once is compile-time true.
     template <
         class Once, class Container,
         class Enable = typename rime::enable_if_constant_true<Once>::type>
-    inline auto make_iterator_range_with_once(Once once, Container && container)
+    inline auto make_iterator_range_with_once(
+        Once /* once */, Container && container)
         RETURNS(make_move_iterator_range(std::forward<Container>(container)));
 
     /* implement_make_view. */

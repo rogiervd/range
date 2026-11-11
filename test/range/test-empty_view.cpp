@@ -7,6 +7,8 @@
 
 #include "range/empty_view.hpp"
 
+#include "range/core.hpp"
+
 BOOST_AUTO_TEST_SUITE(test_range_empty_view)
 
 BOOST_AUTO_TEST_CASE(test_range_empty_view)

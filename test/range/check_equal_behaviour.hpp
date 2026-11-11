@@ -9,14 +9,18 @@ Helper to test the behaviour of a range with respect to all operations.
 #ifndef RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED
 #define RANGE_TEST_CHECK_EQUAL_BEHAVIOUR_HPP_INCLUDED
 
+#include <cassert>
+#include <cstddef>
 #include <type_traits>
+#include <utility>
 
-#include "boost/utility/enable_if.hpp"
+#include "boost/core/enable_if.hpp"
 
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"
 
 #include "range/core.hpp"
+#include "range/direction.hpp"
 
 /**
 Check whether values are equal in the applicable sense.
@@ -27,7 +31,7 @@ and compare equal.
 */
 template <class Value, class Reference>
 typename boost::enable_if<rime::is_constant<Reference>>::type check_equal_value(
-    Value const & value, Reference const & reference)
+    Value const &, Reference const &)
 {
     static_assert(
         rime::is_rime_constant<Value>::value, "Value must be a Rime constant");
@@ -113,7 +117,7 @@ typename boost::enable_if<HasSize>::type check_size(
 }
 template <class HasSize, class Range, class Reference>
 typename boost::disable_if<HasSize>::type check_size(
-    Range const & range, Reference const & reference, void * = 0)
+    Range const &, Reference const &, void * = 0)
 {
     static_assert(
         !range::has<range::callable::size(Range, direction::front)>::value);
@@ -245,8 +249,7 @@ template <class HasSize, class HasBack, class Zero> struct check_drop_n
         template <class Range, class Direction>
         typename boost::enable_if<range::always_empty<Range, Direction>>::type
             check_first_equal(
-                Range const & range1, Range const & range2,
-                Direction const & direction) const
+                Range const &, Range const &, Direction const &) const
         {}
 
         template <class Range1, class Direction, class Range2> void check_equal(

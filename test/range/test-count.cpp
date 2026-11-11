@@ -7,13 +7,17 @@
 
 #include "range/count.hpp"
 
+#include <cstddef>
 #include <type_traits>
+#include <vector>
 
 #include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/for_each_macro.hpp"
 #include "range/reverse.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_count)
 
@@ -108,7 +112,7 @@ template <
     class True, class Zero, class One, class Two, class Three, class Four,
     class Five, class Six>
 void check_finite(
-    True true_, Zero zero, One one, Two two, Three three, Four four, Five five,
+    True true_, Zero zero, One one, Two two, Three three, Four, Five five,
     Six six)
 {
     {
@@ -229,7 +233,7 @@ void check_finite_negative(
 }
 
 template <class Zero, class One, class Two, class Three, class Four>
-void check_infinite(Zero zero, One one, Two two, Three three, Four four)
+void check_infinite(Zero, One one, Two two, Three three, Four four)
 {
     auto c = count_from(one);
 

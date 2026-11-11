@@ -7,8 +7,11 @@
 
 #include "range/lazy.hpp"
 
+#include <functional>
+#include <type_traits>
 #include <vector>
 
+#include "range/core.hpp"
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
@@ -18,7 +21,7 @@ BOOST_AUTO_TEST_SUITE(test_range_lazy)
 
 struct take_4_true_tuple
 {
-    int operator()(tuple<> t, int i, bool b) const
+    int operator()(tuple<>, int i, bool b) const
     {
         BOOST_CHECK_EQUAL(i, 4);
         BOOST_CHECK_EQUAL(b, true);

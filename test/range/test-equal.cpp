@@ -10,10 +10,12 @@
 #include <tuple>
 #include <vector>
 
+#include "range/core.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(range_equal_test_suite)
 

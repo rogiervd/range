@@ -8,9 +8,11 @@
 #include "range/fold.hpp"
 
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/mpl/assert.hpp"
+#include "rime/variant.hpp"
 
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
@@ -106,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_fold_unassignable_state)
 struct return_right
 {
     template <class Left, class Right>
-    Right && operator()(Left && left, Right && right) const
+    Right && operator()(Left &&, Right && right) const
     {
         return static_cast<Right &&>(right);
     }

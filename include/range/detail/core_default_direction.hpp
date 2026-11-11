@@ -7,9 +7,10 @@
 
 #include <type_traits>
 
-#include "boost/utility/enable_if.hpp"
+#include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
+#include "range/detail/core_tag.hpp"
+#include "range/direction.hpp"
 
 #include "core_base.hpp"
 #include "core_member_access.hpp"
@@ -44,7 +45,7 @@ namespace callable {
 
                 // If no function or member is defined, return range::front.
                 template <class Range> direction::front operator()(
-                    Range const & range, overload_order<16> *) const
+                    Range const &, overload_order<16> *) const
                 {
                     return range::front;
                 }

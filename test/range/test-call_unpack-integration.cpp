@@ -18,6 +18,7 @@ Therefore, this file tests this directly.
 
 #include "rime/check/check_equal.hpp"
 
+#include "range/core.hpp"
 #include "range/for_each.hpp"
 #include "range/std/vector.hpp"
 #include "range/transform.hpp"

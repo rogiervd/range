@@ -26,16 +26,16 @@ the same structure.
 #ifndef RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 #define RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
-#include <type_traits>
 
+#include "boost/core/enable_if.hpp"
 #include "boost/mpl/placeholders.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "meta/fold.hpp"
 #include "meta/range.hpp"
-#include "meta/vector.hpp"
+#include "meta/set.hpp"
 
 #include "capability.hpp"
 
@@ -259,7 +259,7 @@ namespace range { namespace any_range_interface {
         destructed only after the call has finished.
         */
         virtual chopped<Element, interface_ptr> chop_destructive(
-            Direction const &, interface_ptr & this_)
+            Direction const &, interface_ptr &)
         {
             throw std::logic_error("Bug in any_range.");
         }

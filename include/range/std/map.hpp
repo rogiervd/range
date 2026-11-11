@@ -10,8 +10,9 @@ This includes \c \<map>.
 #ifndef RANGE_STD_MAP_HPP_INCLUDED
 #define RANGE_STD_MAP_HPP_INCLUDED
 
-#include <map>
+#include <map>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

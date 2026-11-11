@@ -6,13 +6,19 @@
 #define RANGE_DETAIL_CORE_VIEW_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/placeholders.hpp"
 
 #include "meta/all_of_c.hpp"
+#include "meta/vector.hpp"
 
 #include "rime/core.hpp"
+
+#include "utility/returns.hpp"
+
+#include "range/detail/core_tag.hpp"
 
 #include "../direction.hpp"
 
@@ -85,7 +91,7 @@ namespace callable {
                 typename std::conditional<Forward, Range &&, Range>::type
                     operator()(
                         overload_order<16> *, Range && range,
-                        Directions const &... directions) const
+                        Directions const &...) const
                 {
                     return std::forward<Range>(range);
                 }

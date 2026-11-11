@@ -5,7 +5,16 @@
 #ifndef RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 #define RANGE_DETAIL_CORE_BEGIN_END_INCLUDED
 
+#include <type_traits>
 #include <variant>  // For std::monostate.
+
+#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
+
+#include "range/detail/core_drop.hpp"
+#include "range/detail/core_first.hpp"
+#include "range/detail/core_member_access.hpp"
+#include "range/detail/core_tag.hpp"
 
 #include "core_base.hpp"
 #include "core_empty.hpp"
@@ -214,7 +223,7 @@ namespace callable {
                     class Range,
                     class Enable =
                         std::enable_if_t<is_homogeneous<Range>::value>>
-                auto operator()(Range & range, overload_order<1> *) const
+                auto operator()(Range &, overload_order<1> *) const
                 {
                     return std::monostate {};
                 }

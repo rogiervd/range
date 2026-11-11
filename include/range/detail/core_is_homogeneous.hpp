@@ -6,14 +6,16 @@
 #define RANGE_DETAIL_CORE_IS_HOMOGENEOUS_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
 #include "utility/enable_if_compiles.hpp"
 
 #include "rime/core.hpp"
 
+#include "range/detail/core_tag.hpp"
+
 #include "../direction.hpp"
 
-#include "core_base.hpp"
 #include "core_chop_in_place.hpp"
 
 namespace range {

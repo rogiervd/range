@@ -5,14 +5,17 @@
 #ifndef RANGE_BUFFER_HPP_INCLUDED
 #define RANGE_BUFFER_HPP_INCLUDED
 
+#include <cassert>
+#include <cstddef>
 #include <memory>
-#include <new>
 #include <type_traits>
 
-#include "utility/disable_if_same.hpp"
+#include "rime/core.hpp"
+
 #include "utility/pointer_policy.hpp"
-#include "utility/returns.hpp"
-#include "utility/unique_ptr.hpp"
+#include "utility/shared.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 
@@ -324,9 +327,9 @@ private:
     typename std::aligned_storage<sizeof(Element), alignof(Element)>::type
         memory_[buffer_size];
 
-    void destruct_elements(rime::true_type trivial) {}
+    void destruct_elements(rime::true_type /* trivial */) {}
 
-    void destruct_elements(rime::false_type trivial)
+    void destruct_elements(rime::false_type /* trivial */)
     {
         Element * current = memory();
         while (current != this->end_) {

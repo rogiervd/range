@@ -7,11 +7,12 @@
 
 #include "range/all_of.hpp"
 #include "range/any_of.hpp"
+#include "range/core.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 #include "range/std/tuple.hpp"
-#include "range/std/vector.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_all_of_any_of_heterogeneous)
 

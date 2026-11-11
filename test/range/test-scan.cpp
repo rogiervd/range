@@ -8,21 +8,28 @@
 #include "range/scan.hpp"
 
 #include <list>
+#include <string>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/optional.hpp"
+#include "boost/optional/optional.hpp"
 
 #include "utility/returns.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
+#include "range/core.hpp"
+#include "range/iterator_range.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
 #include "unique_range.hpp"
 #include "weird_count.hpp"
+#include "weird_direction.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_scan)
 
@@ -49,7 +56,7 @@ struct plus
 struct reference_right
 {
     template <class Left, class Right>
-    Right & operator()(Left const & left, Right & right) const
+    Right & operator()(Left const &, Right & right) const
     {
         return right;
     }
@@ -182,9 +189,9 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
 
     // For loop, using begin() and end().
     {
-        std::vector<int> v {1, 2, 3, 4, 5};
+        std::vector<int> numbers {1, 2, 3, 4, 5};
 
-        auto s = range::scan(0, v, plus());
+        auto s = range::scan(0, numbers, plus());
 
         int sum = 0;
         for (int i : s) {

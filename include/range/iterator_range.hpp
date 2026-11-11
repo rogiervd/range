@@ -9,11 +9,14 @@
 #include <iterator>
 #include <type_traits>
 
+#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/if.hpp"
-#include "boost/utility.hpp"
+#include "boost/mpl/not.hpp"
 
 #include "utility/returns.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 
@@ -381,7 +384,7 @@ static constexpr auto make_move_iterator_range =
 namespace iterator_range_operation {
 
     template <class IteratorTag, class Range> inline auto implement_chop(
-        iterator_range_tag<IteratorTag> const & tag, Range && range,
+        iterator_range_tag<IteratorTag> const &, Range && range,
         direction::front const & direction)
         RETURNS(
             helper::chop_by_chop_in_place(

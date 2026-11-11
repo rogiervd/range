@@ -8,9 +8,14 @@
 #include "range/file_buffer.hpp"
 
 #include <fstream>
+#include <ios>
+#include <string>
+#include <utility>
 
 #include "boost/filesystem/operations.hpp"
 
+#include "range/buffer.hpp"
+#include "range/core.hpp"
 #include "range/count.hpp"
 #include "range/for_each_macro.hpp"
 

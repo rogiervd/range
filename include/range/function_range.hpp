@@ -7,7 +7,13 @@
 
 #include <type_traits>
 
-#include "rime/always.hpp"
+#include "boost/mpl/if.hpp"
+
+#include "rime/core.hpp"
+
+#include "utility/returns.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 
@@ -56,7 +62,7 @@ namespace function_range_operation {
     struct function_range_tag {};
 
     template <class Function> inline auto implement_chop(
-        function_range_tag const & tag, function_range<Function> && range,
+        function_range_tag const &, function_range<Function> && range,
         direction::front const & direction)
         RETURNS(helper::chop_by_chop_in_place(std::move(range), direction));
 

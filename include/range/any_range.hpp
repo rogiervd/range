@@ -5,11 +5,17 @@
 #ifndef RANGE_ANY_RANGE_HPP_INCLUDED
 #define RANGE_ANY_RANGE_HPP_INCLUDED
 
+#include <cstddef>
 #include <memory>
 #include <type_traits>
 
-#include "meta/all_of_c.hpp"
+#include "boost/core/enable_if.hpp"
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/if.hpp"
+
 #include "meta/contains.hpp"
+#include "meta/range.hpp"
+#include "meta/set.hpp"
 
 #include "utility/disable_if_same.hpp"
 #include "utility/returns.hpp"
@@ -342,7 +348,7 @@ private:
 namespace any_range_operation {
 
     template <class AnyRange, class Direction> inline auto implement_chop(
-        any_range_tag const & tag, AnyRange && r, Direction const & direction)
+        any_range_tag const &, AnyRange && r, Direction const & direction)
         RETURNS(
             helper::chop_by_chop_in_place(
                 std::forward<AnyRange>(r), direction));

@@ -1,0 +1,5 @@
+# Check out text files with LF line endings on every platform. For example,
+# test-buffer-file reads test/range/example/short.txt in binary mode and
+# expects "\n" line endings; Git for Windows would otherwise convert them to
+# "\r\n".
+* text=auto eol=lf

@@ -13,6 +13,7 @@ path = [
   ".clang-format",
   ".clang-tidy",
   ".git-blame-ignore-revs",
+  ".gitattributes",
   ".gitignore",
   ".vscode/**",
   ".yamllint.yaml",

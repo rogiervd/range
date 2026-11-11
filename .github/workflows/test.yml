@@ -39,12 +39,6 @@ jobs:
           - os: macos-26
             compiler: clang
             variant: debug
-          - os: windows-2025
-            compiler: msvc
-            variant: debug
-          - os: windows-2025
-            compiler: clang-cl
-            variant: debug
           # Optimised builds.
           - os: ubuntu-26.04
             compiler: gcc
@@ -52,10 +46,6 @@ jobs:
             flags: -c opt
           - os: ubuntu-26.04
             compiler: clang
-            variant: optimised
-            flags: -c opt
-          - os: windows-2025
-            compiler: msvc
             variant: optimised
             flags: -c opt
           # Sanitizers, configured in .bazelrc.

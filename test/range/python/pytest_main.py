@@ -13,17 +13,17 @@ if __name__ == "__main__":
     # pytest from adding it to the path, so add it explicitly.
     here = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, here)
-    # Use this directory as pytest's root directory, and pass the test files
-    # as absolute paths. Otherwise pytest may choose a root directory higher
-    # up (on Windows, Bazel's execution root, where it finds pyproject.toml)
-    # and look at files there that other build actions create and delete
-    # concurrently. Also do not write a cache there.
+    # Keep pytest within this directory. Otherwise, on Windows, it finds
+    # pyproject.toml in Bazel's execution root, and collects that directory
+    # and every directory in between, while other build actions create and
+    # delete files there. Also do not write a cache.
     test_files = [os.path.abspath(argument) for argument in sys.argv[1:]]
     sys.exit(
         pytest.main(
             [
                 "--import-mode=importlib",
                 "--rootdir=" + here,
+                "--confcutdir=" + here,
                 "-p",
                 "no:cacheprovider",
             ]

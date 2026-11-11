@@ -20,14 +20,12 @@ namespace less_lexicographical_detail {
 
     template <class Direction, class Less> struct less_lexicographical_default
     {
-    private:
-        // Homogeneous implementation.
-        struct when_homogeneous
+        template <class Range1, class Range2> auto operator()(
+            Range1 && range1, Range2 && range2, Direction const & direction,
+            Less && less) const
         {
-            template <class Range1, class Range2> bool operator()(
-                Range1 range1, Range2 range2, Direction const & direction,
-                Less && less)
-            {
+            // Homogeneous implementation: loop.
+            auto when_homogeneous = [&](auto range1, auto range2) {
                 while (!range::empty(range1, direction)
                        && !range::empty(range2, direction)) {
                     if (less(
@@ -45,75 +43,69 @@ namespace less_lexicographical_detail {
                     range2 = range::drop(std::move(range2), direction);
                 }
                 return !range::empty(range2, direction);
-            }
-        };
+            };
 
-        // Heterogeneous implementation: recursive.
-        // At every step, the condition can be known at compile time (in which
-        // case the other branch is not instantiated) or only at run time.
-        // The steps are generic lambdas that take the ranges as parameters, so
-        // that their bodies are only instantiated if they are actually called.
-        // E.g. range::first() must not be instantiated on an empty range.
-        struct when_heterogeneous
-        {
-            template <class Range1, class Range2> auto operator()(
-                Range1 && range1, Range2 && range2, Direction const & direction,
-                Less && less) const
-            {
-                auto next = [&](auto && range1, auto && range2) {
-                    return less_lexicographical_default()(
-                        range::drop(
-                            std::forward<decltype(range1)>(range1), direction),
-                        range::drop(
-                            std::forward<decltype(range2)>(range2), direction),
-                        direction, std::forward<Less>(less));
-                };
-                auto when_range1_not_less = [&](auto && range1,
-                                                auto && range2) {
-                    return rime::call_if(
-                        less(
-                            range::first(range2, direction),
-                            range::first(range1, direction)),
-                        rime::always<rime::false_type>(), next,
-                        std::forward<decltype(range1)>(range1),
-                        std::forward<decltype(range2)>(range2));
-                };
-                auto when_neither_empty = [&](auto && range1, auto && range2) {
-                    return rime::call_if(
-                        less(
-                            range::first(range1, direction),
-                            range::first(range2, direction)),
-                        rime::always<rime::true_type>(), when_range1_not_less,
-                        std::forward<decltype(range1)>(range1),
-                        std::forward<decltype(range2)>(range2));
-                };
-                auto when_range2_not_empty = [&](auto && range1,
-                                                 auto && range2) {
-                    return rime::call_if(
-                        range::empty(range1, direction),
-                        rime::always<rime::true_type>(), when_neither_empty,
-                        std::forward<decltype(range1)>(range1),
-                        std::forward<decltype(range2)>(range2));
-                };
+            // Heterogeneous implementation: recursive.
+            // Each condition may be known at compile time, in which case
+            // rime::call_if does not instantiate the branch that is not taken.
+            // For this to work, each branch is a generic lambda that takes the
+            // ranges as parameters, so that its body is only instantiated when
+            // it is called.
+            // E.g. range::first() must not be instantiated on a range that is
+            // known at compile time to be empty.
+            auto when_heterogeneous = [&](auto && range1, auto && range2) {
                 return rime::call_if(
+                    // Also if both are empty.
                     range::empty(range2, direction),
-                    rime::always<rime::false_type>(), when_range2_not_empty,
-                    std::forward<Range1>(range1), std::forward<Range2>(range2));
-            }
-        };
+                    rime::always<rime::false_type>(),
+                    [&](auto & range1, auto & range2) {
+                        return rime::call_if(
+                            range::empty(range1, direction),
+                            rime::always<rime::true_type>(),
+                            [&](auto & range1, auto & range2) {
+                                return rime::call_if(
+                                    less(
+                                        range::first(range1, direction),
+                                        range::first(range2, direction)),
+                                    rime::always<rime::true_type>(),
+                                    [&](auto & range1, auto & range2) {
+                                        return rime::call_if(
+                                            less(
+                                                range::first(range2, direction),
+                                                range::first(
+                                                    range1, direction)),
+                                            rime::always<rime::false_type>(),
+                                            // Recurse on the rest of the
+                                            // ranges.
+                                            [&](auto & range1, auto & range2) {
+                                                return (*this)(
+                                                    range::drop(
+                                                        std::forward<Range1>(
+                                                            range1),
+                                                        direction),
+                                                    range::drop(
+                                                        std::forward<Range2>(
+                                                            range2),
+                                                        direction),
+                                                    direction,
+                                                    std::forward<Less>(less));
+                                            },
+                                            range1, range2);
+                                    },
+                                    range1, range2);
+                            },
+                            range1, range2);
+                    },
+                    range1, range2);
+            };
 
-    public:
-        template <class Range1, class Range2> auto operator()(
-            Range1 && range1, Range2 && range2, Direction const & direction,
-            Less && less) const
-            RETURNS(
-                rime::call_if(
-                    rime::and_(
-                        is_homogeneous<Range1, Direction>(),
-                        is_homogeneous<Range2, Direction>()),
-                    when_homogeneous(), when_heterogeneous(),
-                    std::forward<Range1>(range1), std::forward<Range2>(range2),
-                    direction, std::forward<Less>(less)));
+            return rime::call_if(
+                rime::and_(
+                    is_homogeneous<Range1, Direction>(),
+                    is_homogeneous<Range2, Direction>()),
+                when_homogeneous, when_heterogeneous,
+                std::forward<Range1>(range1), std::forward<Range2>(range2));
+        }
     };
 
     struct less

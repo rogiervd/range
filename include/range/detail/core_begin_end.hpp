@@ -80,7 +80,7 @@ namespace begin_end_detail {
     public:
         static_assert(is_view<View>::value);
 
-        iterable_adaptor(View const & view) : view_(view) {}
+        iterable_adaptor(View const & range_view) : view_(range_view) {}
 
         auto operator*() const { return ::range::first(view_, front); }
 

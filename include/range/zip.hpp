@@ -444,12 +444,12 @@ namespace zip_operation {
             view_once(std::move(r.underlying())), lazy::chop(direction)));
         // Produce underlying with rvalue references to the "first"
         // elements first1 &&, first2 &&, ...
-        auto first = transform(chopped, zip_detail::move_first());
+        auto firsts = transform(chopped, zip_detail::move_first());
         // ... and the "rest" elements
         // rest1 &&, rest2 &&, ....
         auto rest = transform(chopped, zip_detail::move_rest());
 
-        return Result(std::move(first), NewRest(direction, std::move(rest)));
+        return Result(std::move(firsts), NewRest(direction, std::move(rest)));
     }
 
 }  // namespace zip_operation

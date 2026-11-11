@@ -121,7 +121,7 @@ namespace callable {
     private:
         struct dispatch
         {
-            template <class View, class Function, class... Directions>
+            template <class View, class Function>
             auto operator()(View && view, Function && function) const RETURNS(
                 range::transform_view<
                     typename std::decay<View>::type,

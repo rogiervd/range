@@ -1,0 +1,14 @@
+alias "range" :
+    # Run all .cpp files in this directory as tests.
+    [ run_glob *.cpp ]
+
+    # Run a few tests without Valgrind.
+    [ run test-shared_list-2-full.cpp : --full :
+        # Remove the attribute; must be character-for-character the same as the
+        # attribute that is added in ../Jamfile
+        : -<target-os>linux:<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+        : test-shared_list-2-full-full ]
+    [ run test-shared_list-3-large.cpp : --full :
+        : -<target-os>linux:<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+        : test-shared_list-3-large-full ]
+;

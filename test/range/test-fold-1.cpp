@@ -12,10 +12,14 @@
 #include <vector>
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
+#include "rime/variant.hpp"
 #include "unique_range.hpp"
 #include "utility/returns.hpp"
 #include "weird_direction.hpp"
 
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 

@@ -7,9 +7,14 @@
 
 #include "range/for_each.hpp"
 
-#include "boost/any.hpp"
-#include "boost/mpl/assert.hpp"
+#include <vector>
 
+#include "boost/any.hpp"
+
+#include "rime/core.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/tuple.hpp"
 
 #include "weird_direction.hpp"

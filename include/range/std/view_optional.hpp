@@ -13,9 +13,8 @@ must be explicitly converted into a range.
 
 #include <type_traits>
 
-#include "rime/always.hpp"
-
 #include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/empty_view.hpp"
 
 namespace range {

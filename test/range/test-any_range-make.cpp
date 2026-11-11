@@ -8,18 +8,20 @@
 #include "range/any_range.hpp"
 
 #include <list>
-#include <tuple>
 #include <type_traits>
 #include <vector>
 
+#include "meta/map.hpp"
+#include "meta/set.hpp"
+
+#include "range/any_range/capability.hpp"
+#include "range/core.hpp"
+#include "range/direction.hpp"
 #include "range/function_range.hpp"
 #include "range/std/list.hpp"
-#include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 #include "range/tuple.hpp"
 
-#include "unique_range.hpp"
-#include "weird_count.hpp"
 
 using range::has;
 namespace callable = range::callable;

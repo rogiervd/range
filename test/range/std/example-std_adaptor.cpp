@@ -9,20 +9,21 @@ Example to be used in the documentation.
 #define BOOST_TEST_MODULE example_std_adaptor
 #include "boost/test/unit_test.hpp"
 
+#include "boost/optional/optional.hpp"
+
+#include "range/core.hpp"
 #include "range/std/string.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 #include "range/std/view_optional.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <ostream>
 #include <string>
 #include <tuple>
 #include <vector>
 
-#include "boost/optional.hpp"
-
-#include "range/fold.hpp"
 
 BOOST_AUTO_TEST_SUITE(example_std_adaptor)
 

@@ -7,9 +7,10 @@
 
 #include <type_traits>
 
-#include "boost/utility/enable_if.hpp"
+#include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
+#include "range/detail/core_tag.hpp"
+#include "range/direction.hpp"
 
 #include "core_base.hpp"
 #include "core_member_access.hpp"

@@ -9,12 +9,15 @@ Test the RANGE_FOR_EACH macro.
 #define BOOST_TEST_MODULE test_range_for_each_macro
 #include "boost/test/unit_test.hpp"
 
-#include <iostream>
 #include "range/for_each_macro.hpp"
 
+#include "range/core.hpp"
 #include "range/function_range.hpp"
 #include "range/std/vector.hpp"
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 BOOST_AUTO_TEST_SUITE(test_range_for_each_macro)

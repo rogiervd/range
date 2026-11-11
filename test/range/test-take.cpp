@@ -7,10 +7,13 @@
 
 #include "range/take.hpp"
 
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
+#include "range/core.hpp"
 #include "range/count.hpp"
 #include "range/function_range.hpp"
 #include "range/std/list.hpp"
@@ -19,6 +22,7 @@
 
 #include "check_equal_behaviour.hpp"
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_take)
 

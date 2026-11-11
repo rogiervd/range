@@ -5,8 +5,12 @@
 #ifndef RANGE_CALL_UNPACK_HPP_INCLUDED
 #define RANGE_CALL_UNPACK_HPP_INCLUDED
 
-#include "meta/count_c.hpp"
+#include <cstddef>
 
+#include "meta/count_c.hpp"
+#include "meta/vector_c.hpp"
+
+#include "utility/returns.hpp"
 #include "utility/storage.hpp"
 
 #include "range/core.hpp"

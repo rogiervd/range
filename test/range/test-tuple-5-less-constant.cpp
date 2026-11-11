@@ -13,11 +13,15 @@ all that is tested.
 #define BOOST_TEST_MODULE range_test_tuple_less_constant
 #include "boost/test/unit_test.hpp"
 
+#include "utility/returns.hpp"
+
+#include "range/core.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
 #include "range/tuple.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 struct less
 {

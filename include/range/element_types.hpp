@@ -5,6 +5,7 @@
 #ifndef RANGE_ELEMENT_TYPES_HPP_INCLUDED
 #define RANGE_ELEMENT_TYPES_HPP_INCLUDED
 
+#include "meta/fwd.hpp"
 #include "meta/range.hpp"
 
 #include "core.hpp"

@@ -5,7 +5,6 @@
 #ifndef RANGE_EMPTY_VIEW_HPP_INCLUDED
 #define RANGE_EMPTY_VIEW_HPP_INCLUDED
 
-#include "rime/always.hpp"
 #include "rime/core.hpp"
 
 #include "core.hpp"

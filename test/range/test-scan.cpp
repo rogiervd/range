@@ -8,21 +8,28 @@
 #include "range/scan.hpp"
 
 #include <list>
+#include <string>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/optional.hpp"
+#include "boost/optional/optional.hpp"
 
 #include "utility/returns.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
+#include "range/core.hpp"
+#include "range/iterator_range.hpp"
 #include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
 #include "unique_range.hpp"
 #include "weird_count.hpp"
+#include "weird_direction.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_scan)
 

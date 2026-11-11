@@ -6,13 +6,12 @@
 #define RANGE_DETAIL_CORE_CHOP_IN_PLACE_HPP_INCLUDED
 
 #include <type_traits>
+#include <utility>
 
-#include "boost/mpl/and.hpp"
-#include "boost/mpl/if.hpp"
+#include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
-
-#include "utility/storage.hpp"
+#include "range/detail/core_tag.hpp"
+#include "range/direction.hpp"
 
 #include "core_base.hpp"
 #include "core_chop.hpp"

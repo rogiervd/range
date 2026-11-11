@@ -12,6 +12,8 @@ Helpers for all() and any().
 #include "rime/always.hpp"
 #include "rime/core.hpp"
 
+#include "utility/returns.hpp"
+
 #include "../find.hpp"
 
 namespace range { namespace callable { namespace find_bool_detail {

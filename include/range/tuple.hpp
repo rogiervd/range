@@ -9,23 +9,27 @@ Define a general heterogeneous container.
 #ifndef RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 #define RANGE_CONTAINER_TUPLE_HPP_INCLUDED
 
-#include "boost/utility/enable_if.hpp"
+#include <cstddef>
+#include <tuple>
+#include <type_traits>
 
+#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
-#include "boost/mpl/if.hpp"
 #include "boost/mpl/not.hpp"
 
 #include "meta/count_c.hpp"
+#include "meta/range.hpp"
+#include "meta/vector.hpp"
+#include "meta/vector_c.hpp"
 
 #include "utility/disable_if_same.hpp"
-#include "utility/overload_order.hpp"
+#include "utility/returns.hpp"
 #include "utility/storage.hpp"
 #include "utility/type_sequence_traits.hpp"
 
-#include "rime/always.hpp"
-#include "rime/assert.hpp"
 #include "rime/core.hpp"
-#include "rime/enable_if_constant.hpp"
+
+#include "range/direction.hpp"
 
 #include "core.hpp"
 #include "element_types.hpp"
@@ -33,7 +37,6 @@ Define a general heterogeneous container.
 #include "heavyweight.hpp"
 #include "less_lexicographical.hpp"
 
-#include "detail/tuple-compare.hpp"
 #include "detail/tuple-fwd.hpp"
 #include "detail/tuple_is_convertible.hpp"
 

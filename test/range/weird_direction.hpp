@@ -9,7 +9,11 @@ Provide a simple direction class for testing the Range library.
 #ifndef RANGE_TEST_WEIRD_DIRECTION_HPP_INCLUDED
 #define RANGE_TEST_WEIRD_DIRECTION_HPP_INCLUDED
 
-#include "range/direction.hpp"
+#include <cassert>
+
+#include "direction/tag.hpp"
+
+#include "rime/core.hpp"
 
 struct forgotten_to_define_direction;
 struct weird_direction;

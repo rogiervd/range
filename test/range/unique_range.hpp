@@ -9,9 +9,9 @@ Provide a range wrapper for testing the Range library.
 #ifndef RANGE_TEST_UNIQUE_RANGE_HPP_INCLUDED
 #define RANGE_TEST_UNIQUE_RANGE_HPP_INCLUDED
 
-#include "utility/returns.hpp"
+#include <type_traits>
 
-#include "rime/assert.hpp"
+#include "utility/returns.hpp"
 
 #include "range/core.hpp"
 #include "range/helper/underlying.hpp"

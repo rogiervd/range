@@ -7,15 +7,21 @@
 
 #include "range/iterator_range.hpp"
 
+#include <cstddef>
 #include <forward_list>
 #include <iterator>
 #include <list>
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/mpl/assert.hpp"
+#include "rime/core.hpp"
+
+#include "range/core.hpp"
+#include "range/direction.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(test_range_iterator_range)
 

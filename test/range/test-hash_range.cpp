@@ -7,13 +7,16 @@
 
 #include "range/hash_range.hpp"
 
+#include <cstddef>
 #include <string>
 #include <tuple>
 #include <unordered_set>
 #include <vector>
 
+#include "boost/container_hash/hash.hpp"
 #include "boost/functional/hash.hpp"
 
+#include "range/core.hpp"
 #include "range/std/string.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/unordered_set.hpp"

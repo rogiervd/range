@@ -10,8 +10,9 @@ This includes \c \<forward_list>.
 #ifndef RANGE_FORWARD_LIST_HPP_INCLUDED
 #define RANGE_FORWARD_LIST_HPP_INCLUDED
 
-#include <forward_list>
+#include <forward_list>  // IWYU pragma: export
 
+#include "range/core.hpp"
 #include "range/std/detail/container_tag.hpp"
 
 namespace range {

@@ -14,6 +14,7 @@ Test structured binding for range::tuple.
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 #include "range/std/vector.hpp"
 

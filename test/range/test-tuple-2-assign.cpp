@@ -8,19 +8,17 @@
 #include "range/tuple.hpp"
 
 #include <memory>
-#include <string>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "boost/mpl/assert.hpp"
-
 #include "utility/test/tracked.hpp"
-#include "utility/unique_ptr.hpp"
 
+#include "range/core.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
 
-#include "rime/check/check_equal.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_range_tuple_assign)
 

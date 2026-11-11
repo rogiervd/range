@@ -8,9 +8,11 @@
 #include "range/function_range.hpp"
 
 #include <type_traits>
+#include <utility>
 
-#include "boost/mpl/assert.hpp"
-#include "boost/mpl/if.hpp"
+#include "range/core.hpp"
+#include "range/direction.hpp"
+
 
 BOOST_AUTO_TEST_SUITE(test_suite_function_range)
 

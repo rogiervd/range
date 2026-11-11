@@ -10,7 +10,9 @@ test-tuple.py.
 
 // Include Python headers before C++ headers
 #include "nanobind/nanobind.h"
-#include "nanobind/stl/string.h"
+#include "nanobind/stl/string.h"  // IWYU pragma: keep
+
+#include "utility/returns.hpp"
 
 #include "range/python/tuple.hpp"
 

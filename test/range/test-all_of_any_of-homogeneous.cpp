@@ -16,10 +16,14 @@ evaluated.
 #define BOOST_TEST_MODULE test_range_all_of_any_of
 #include "boost/test/unit_test.hpp"
 
+#include <type_traits>
+
 #include "range/all_of.hpp"
 #include "range/any_of.hpp"
+#include "range/core.hpp"
 
 #include "rime/check/check_equal.hpp"
+#include "rime/core.hpp"
 
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"

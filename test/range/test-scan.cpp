@@ -182,9 +182,9 @@ BOOST_AUTO_TEST_CASE(test_scan_homogeneous)
 
     // For loop, using begin() and end().
     {
-        std::vector<int> v {1, 2, 3, 4, 5};
+        std::vector<int> numbers {1, 2, 3, 4, 5};
 
-        auto s = range::scan(0, v, plus());
+        auto s = range::scan(0, numbers, plus());
 
         int sum = 0;
         for (int i : s) {

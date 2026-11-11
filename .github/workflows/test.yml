@@ -62,11 +62,11 @@ jobs:
           - os: ubuntu-26.04
             compiler: clang
             variant: asan
-            flags: --config=asan
+            flags: --config=asan --test_tag_filters=-no-sanitizers
           - os: ubuntu-26.04
             compiler: clang
             variant: ubsan
-            flags: --config=ubsan
+            flags: --config=ubsan --test_tag_filters=-no-sanitizers
           - os: ubuntu-26.04
             compiler: gcc
             variant: valgrind

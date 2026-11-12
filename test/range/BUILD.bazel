@@ -178,7 +178,6 @@ cc_test(
     ],
     deps = [
         "//:range",
-        "@boost.filesystem",
         "@boost.test//:unit_test_main",
     ],
 )

@@ -35,14 +35,25 @@ test_names = [
                 "@platforms//os:windows": [],
                 "//conditions:default": ["-fvisibility=hidden"],
             }),
+            # On Windows, Python's headers ask the linker to find the Python
+            # library by name (#pragma comment(lib, "python312.lib")), which
+            # it cannot find in its search path. The library is linked
+            # explicitly (see deps), so tell the linker to ignore that request.
+            # This must match the Python version in MODULE.bazel.
+            linkopts = select({
+                "@platforms//os:windows": [
+                    "/NODEFAULTLIB:python312.lib",
+                    "/NODEFAULTLIB:python312_d.lib",
+                ],
+                "//conditions:default": [],
+            }),
             local_defines = ["NB_ABORT_ON_LEAK"],
             deps = [
                 "@nanobind",
                 "@range//:range_python",
             ] + select({
-                # On Windows, Python's headers make the linker look for the
-                # Python library (e.g. python312.lib), so link with it.
-                # Elsewhere, extensions must not link with libpython.
+                # On Windows, extensions must link with the Python library.
+                # Elsewhere, they must not link with libpython.
                 "@platforms//os:windows": [
                     "@rules_python//python/cc:current_py_cc_libs",
                 ],

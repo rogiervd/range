@@ -7,9 +7,8 @@
 
 #include "range/for_each.hpp"
 
+#include <any>
 #include <vector>
-
-#include "boost/any.hpp"
 
 #include "rime/core.hpp"
 
@@ -106,14 +105,14 @@ Since the loop is manually unrolled, it is important to check up to the number
 that is manually unrolled.
 */
 
-// Collect all elements in a vector of boost::any.
+// Collect all elements in a vector of std::any.
 struct collect_any
 {
-    std::vector<boost::any> elements;
+    std::vector<std::any> elements;
 
     template <class Element> void operator()(Element const & element)
     {
-        elements.push_back(boost::any(element));
+        elements.push_back(std::any(element));
     }
 };
 
@@ -132,7 +131,7 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 1u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
     }
     // Tuple with 2 elements.
     {
@@ -140,8 +139,8 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 2u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
     }
     // Tuple with 3 elements.
     {
@@ -149,9 +148,9 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, range::back, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 3u);
-        BOOST_CHECK_EQUAL(boost::any_cast<bool>(c.elements[0]), true);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[2]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<bool>(c.elements[0]), true);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[2]), 87.5);
     }
     // Tuple with 4 elements.
     {
@@ -159,10 +158,10 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, range::front, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 4u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
-        BOOST_CHECK_EQUAL(boost::any_cast<bool>(c.elements[2]), true);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(c.elements[3]), -5);
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<bool>(c.elements[2]), true);
+        BOOST_CHECK_EQUAL(std::any_cast<int>(c.elements[3]), -5);
     }
     // Tuple with 5 elements.
     {
@@ -171,11 +170,11 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 5u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
-        BOOST_CHECK_EQUAL(boost::any_cast<bool>(c.elements[2]), true);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(c.elements[3]), -5);
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned>(c.elements[4]), 900u);
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<bool>(c.elements[2]), true);
+        BOOST_CHECK_EQUAL(std::any_cast<int>(c.elements[3]), -5);
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned>(c.elements[4]), 900u);
     }
     // Tuple with 8 elements.
     {
@@ -184,14 +183,14 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 8u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
-        BOOST_CHECK_EQUAL(boost::any_cast<bool>(c.elements[2]), true);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(c.elements[3]), -5);
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned>(c.elements[4]), 900u);
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned short>(c.elements[5]), 30u);
-        BOOST_CHECK_EQUAL(boost::any_cast<float>(c.elements[6]), 4.5f);
-        BOOST_CHECK_EQUAL(boost::any_cast<char>(c.elements[7]), 'A');
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<bool>(c.elements[2]), true);
+        BOOST_CHECK_EQUAL(std::any_cast<int>(c.elements[3]), -5);
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned>(c.elements[4]), 900u);
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned short>(c.elements[5]), 30u);
+        BOOST_CHECK_EQUAL(std::any_cast<float>(c.elements[6]), 4.5f);
+        BOOST_CHECK_EQUAL(std::any_cast<char>(c.elements[7]), 'A');
     }
     // Tuple with 9 elements.
     {
@@ -203,15 +202,15 @@ BOOST_AUTO_TEST_CASE(unrolled)
         collect_any c;
         for_each(t, c);
         BOOST_CHECK_EQUAL(c.elements.size(), 9u);
-        BOOST_CHECK_EQUAL(boost::any_cast<double>(c.elements[0]), 87.5);
-        BOOST_CHECK_EQUAL(boost::any_cast<short>(c.elements[1]), 43);
-        BOOST_CHECK_EQUAL(boost::any_cast<bool>(c.elements[2]), true);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(c.elements[3]), -5);
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned>(c.elements[4]), 900u);
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned short>(c.elements[5]), 30u);
-        BOOST_CHECK_EQUAL(boost::any_cast<float>(c.elements[6]), 4.5f);
-        BOOST_CHECK_EQUAL(boost::any_cast<char>(c.elements[7]), 'A');
-        BOOST_CHECK_EQUAL(boost::any_cast<unsigned char>(c.elements[8]), 'q');
+        BOOST_CHECK_EQUAL(std::any_cast<double>(c.elements[0]), 87.5);
+        BOOST_CHECK_EQUAL(std::any_cast<short>(c.elements[1]), 43);
+        BOOST_CHECK_EQUAL(std::any_cast<bool>(c.elements[2]), true);
+        BOOST_CHECK_EQUAL(std::any_cast<int>(c.elements[3]), -5);
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned>(c.elements[4]), 900u);
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned short>(c.elements[5]), 30u);
+        BOOST_CHECK_EQUAL(std::any_cast<float>(c.elements[6]), 4.5f);
+        BOOST_CHECK_EQUAL(std::any_cast<char>(c.elements[7]), 'A');
+        BOOST_CHECK_EQUAL(std::any_cast<unsigned char>(c.elements[8]), 'q');
     }
 }
 

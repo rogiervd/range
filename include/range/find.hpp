@@ -8,7 +8,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
 
@@ -113,8 +112,8 @@ namespace find_detail {
         };
 
         // Normal implementation.
-        template <class Range, class Direction> typename boost::lazy_disable_if<
-            always_empty<Range, Direction>,
+        template <class Range, class Direction> typename std::enable_if_t<
+            !always_empty<Range, Direction>::value,
             typename rime::make_variant_over<meta::vector<
                 typename result_of<NonEmptyActor(Range)>::type,
                 typename result_of<EmptyActor(Range)>::type>>>::type
@@ -133,8 +132,9 @@ namespace find_detail {
 
         // Implementation for compile-time true predicates.
         // This makes a difference for the return type.
-        template <class Range, class Direction> typename boost::lazy_enable_if<
-            always_empty<Range, Direction>, result_of<EmptyActor(Range)>>::type
+        template <class Range, class Direction> typename std::enable_if_t<
+            always_empty<Range, Direction>::value,
+            result_of<EmptyActor(Range)>>::type
             operator()(
                 finder_ & f, Range range, Direction const & direction) const
         {

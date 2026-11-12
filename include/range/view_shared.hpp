@@ -8,7 +8,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 
 #include "utility/returns.hpp"
 
@@ -191,7 +190,7 @@ namespace callable {
 
         template <class MakeView, class Heavyweight> struct make_view_if_range<
             MakeView, Heavyweight,
-            typename boost::enable_if<is_range<Heavyweight>>::type>
+            std::enable_if_t<is_range<Heavyweight>::value>>
         : std::decay<typename result_of<MakeView(Heavyweight &)>::type> {};
 
     public:
@@ -227,8 +226,7 @@ namespace callable {
 
         template <
             class Heavyweight,
-            class Enable =
-                typename boost::enable_if<is_range<Heavyweight>>::type>
+            class Enable = std::enable_if_t<is_range<Heavyweight>::value>>
         view_of_shared<Heavyweight> operator()(
             std::shared_ptr<Heavyweight> heavyweight) const
         {
@@ -237,8 +235,7 @@ namespace callable {
 
         template <
             class Heavyweight,
-            class Enable =
-                typename boost::enable_if<is_range<Heavyweight>>::type>
+            class Enable = std::enable_if_t<is_range<Heavyweight>::value>>
         view_of_shared<typename std::decay<Heavyweight>::type> operator()(
             Heavyweight && heavyweight) const
         {

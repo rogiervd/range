@@ -8,7 +8,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "boost/core/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"
@@ -264,10 +263,9 @@ private:
     */
     template <
         class Direction2,
-        class Enable1 = typename boost::enable_if<
-            std::is_same<Direction2, Direction>>::type,
-        class Enable2 = typename boost::enable_if<meta::all_of_c<
-            has<callable::size(Ranges, Direction2)>::value...>>::type>
+        class Enable1 = std::enable_if_t<std::is_same_v<Direction2, Direction>>,
+        class Enable2 = std::enable_if_t<meta::all_of_c<
+            has<callable::size(Ranges, Direction2)>::value...>::value>>
     auto size(Direction2 const & direction) const RETURNS(
         reduce()(
             range::transform(underlying_, lazy::size(direction)), rime::min));
@@ -375,8 +373,8 @@ namespace zip_operation {
     // first.
     template <
         class Direction, class ZipRange,
-        class Enable = typename boost::enable_if<
-            zip_detail::first_implemented_all<ZipRange &&, Direction>>::type>
+        class Enable = std::enable_if_t<
+            zip_detail::first_implemented_all<ZipRange &&, Direction>::value>>
     inline auto implement_first(
         zip_range_tag<Direction> const &, ZipRange && r,
         Direction const & direction)
@@ -387,9 +385,8 @@ namespace zip_operation {
     // drop.
     template <
         class Direction, class ZipRange, class Increment,
-        class Enable =
-            typename boost::enable_if<zip_detail::drop_implemented_all<
-                ZipRange &&, Increment, Direction>>::type>
+        class Enable = std::enable_if_t<zip_detail::drop_implemented_all<
+            ZipRange &&, Increment, Direction>::value>>
     inline auto implement_drop(
         zip_range_tag<Direction> const &, ZipRange && r,
         Increment const & increment, Direction const & direction)
@@ -403,8 +400,8 @@ namespace zip_operation {
     // Lvalue.
     template <
         class Direction, class ZipRange,
-        class Enable = typename boost::enable_if<
-            zip_detail::chop_implemented_all<ZipRange &, Direction>>::type,
+        class Enable = std::enable_if_t<
+            zip_detail::chop_implemented_all<ZipRange &, Direction>::value>,
         // If chop is implemented for lvalues, so are first and drop.
         // Using first and drop may be faster, and it is definitely easier.
         class Result = chopped<
@@ -423,9 +420,8 @@ namespace zip_operation {
     // Rvalue.
     template <
         class Direction, class... Ranges,
-        class Enable =
-            typename boost::enable_if<zip_detail::chop_implemented_all<
-                zip_range<Direction, Ranges...> &&, Direction>>::type,
+        class Enable = std::enable_if_t<zip_detail::chop_implemented_all<
+            zip_range<Direction, Ranges...> &&, Direction>::value>,
         class NewFirst = tuple<typename result_of<
             range::callable::first(Ranges, Direction)>::type...>,
         class NewRest = zip_range<

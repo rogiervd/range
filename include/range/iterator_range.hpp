@@ -9,7 +9,6 @@
 #include <iterator>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/if.hpp"
 #include "boost/mpl/not.hpp"
@@ -135,9 +134,9 @@ namespace iterator_range_detail {
 // Implementation for forward and higher iterators: copy is possible.
 template <class Iterator> class iterator_range<
     Iterator,
-    typename boost::enable_if<std::is_base_of<
+    std::enable_if_t<std::is_base_of_v<
         std::forward_iterator_tag,
-        typename std::iterator_traits<Iterator>::iterator_category>>::type>
+        typename std::iterator_traits<Iterator>::iterator_category>>>
 : public iterator_range_detail::iterator_range_base<Iterator>
 {
     typedef iterator_range_detail::iterator_range_base<Iterator> base;
@@ -242,14 +241,15 @@ private:
 // Implementation for input iterators: copy is not possible; move is.
 template <class Iterator> class iterator_range<
     Iterator,
-    typename boost::enable_if<boost::mpl::and_<
+    std::enable_if_t<boost::mpl::and_<
         std::is_base_of<
             std::input_iterator_tag,
             typename std::iterator_traits<Iterator>::iterator_category>,
         boost::mpl::not_<std::is_base_of<
             std::forward_iterator_tag,
-            typename std::iterator_traits<Iterator>::iterator_category>>>>::
-        type> : public iterator_range_detail::iterator_range_base<Iterator>
+            typename std::iterator_traits<Iterator>::iterator_category>>>::
+                         value>>
+: public iterator_range_detail::iterator_range_base<Iterator>
 {
     typedef iterator_range_detail::iterator_range_base<Iterator> base;
 

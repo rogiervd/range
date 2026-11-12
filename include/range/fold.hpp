@@ -18,7 +18,6 @@ to include this file.
 
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 
 #include "utility/assignable.hpp"
@@ -89,9 +88,8 @@ namespace fold_detail {
         */
         template <
             class Range,
-            class Enable = typename boost::enable_if<has_first<Range>>::type,
-            class Enable2 =
-                typename boost::enable_if<is_homogeneous_fold<Range>>::type>
+            class Enable = std::enable_if_t<has_first<Range>::value>,
+            class Enable2 = std::enable_if_t<is_homogeneous_fold<Range>::value>>
         Result operator()(
             State && state_, Range && range_, Direction const & direction,
             Function && function, overload_order<1> *) const
@@ -111,9 +109,8 @@ namespace fold_detail {
         */
         template <
             class Range,
-            class Enable = typename boost::disable_if<has_first<Range>>::type,
-            class Enable2 =
-                typename boost::enable_if<is_homogeneous_fold<Range>>::type>
+            class Enable = std::enable_if_t<!has_first<Range>::value>,
+            class Enable2 = std::enable_if_t<is_homogeneous_fold<Range>::value>>
         Result operator()(
             State && state_, Range && range_, Direction const & direction,
             Function && function, overload_order<2> *) const
@@ -135,7 +132,7 @@ namespace fold_detail {
         template <
             class Range,
             class Enable =
-                typename boost::enable_if<always_empty<Range, Direction>>::type>
+                std::enable_if_t<always_empty<Range, Direction>::value>>
         Result operator()(
             State && state, Range &&, Direction const &, Function &&,
             overload_order<3> *) const
@@ -146,10 +143,9 @@ namespace fold_detail {
         // Heterogeneous: if the range is non-empty.
         // Using first() and drop().
         template <class Range>
-        typename boost::enable_if<has_first<Range>, Result>::type
-            apply_non_empty(
-                State && state, Range && range, Direction const & direction,
-                Function && function) const
+        std::enable_if_t<has_first<Range>::value, Result> apply_non_empty(
+            State && state, Range && range, Direction const & direction,
+            Function && function) const
         {
             // rime::assert_ (!range::empty (direction, range));
             fold<
@@ -165,10 +161,9 @@ namespace fold_detail {
 
         // Using chop().
         template <class Range>
-        typename boost::disable_if<has_first<Range>, Result>::type
-            apply_non_empty(
-                State && state, Range && range, Direction const & direction,
-                Function && function) const
+        std::enable_if_t<!has_first<Range>::value, Result> apply_non_empty(
+            State && state, Range && range, Direction const & direction,
+            Function && function) const
         {
             // rime::assert_ (!range::empty (direction, range));
             fold<
@@ -187,7 +182,7 @@ namespace fold_detail {
         The range is never empty: call the implementation recursively.
         */
         template <class Range>
-        typename boost::enable_if<never_empty<Range, Direction>, Result>::type
+        std::enable_if_t<never_empty<Range, Direction>::value, Result>
             operator()(
                 State && state, Range && range, Direction const & direction,
                 Function && function, overload_order<3> *) const

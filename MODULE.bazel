@@ -28,7 +28,7 @@ bazel_dep(name = "boost.filesystem", version = "1.90.0.bcr.1")
 
 bazel_dep(name = "boost.test", version = "1.90.0.bcr.1", dev_dependency = True)
 
-bazel_dep(name = "nanobind_bazel", version = "2.12.0")
+bazel_dep(name = "nanobind", version = "3.1.0")
 
 # IDEs as well as other tools can use a compile_commands.json databse to know
 # how files are compiled.

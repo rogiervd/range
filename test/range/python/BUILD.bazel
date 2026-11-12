@@ -39,7 +39,15 @@ test_names = [
             deps = [
                 "@nanobind",
                 "@range//:range_python",
-            ],
+            ] + select({
+                # On Windows, Python's headers make the linker look for the
+                # Python library (e.g. python312.lib), so link with it.
+                # Elsewhere, extensions must not link with libpython.
+                "@platforms//os:windows": [
+                    "@rules_python//python/cc:current_py_cc_libs",
+                ],
+                "//conditions:default": [],
+            }),
         ),
         cc_shared_library(
             name = test_name + "_example",

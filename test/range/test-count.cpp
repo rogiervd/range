@@ -197,7 +197,7 @@ void check_finite(
 
         // This does not have to be true:
         // rime::size_t<1> vs rime::constant <size_t, 1>.
-        // BOOST_MPL_ASSERT ((std::is_same <decltype (c), decltype (c2)>));
+        // static_assert(std::is_same <decltype (c), decltype (c2)>::value);
 
         RIME_CHECK_EQUAL(first(c), three);
         RIME_CHECK_EQUAL(first(c2), three);

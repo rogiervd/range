@@ -14,7 +14,6 @@ Helper to test the behaviour of a range with respect to all operations.
 #include <type_traits>
 #include <utility>
 
-#include "boost/core/enable_if.hpp"
 
 #include "rime/call_if.hpp"
 #include "rime/core.hpp"
@@ -30,7 +29,7 @@ If the reference is a run-time value, then value should be of the same type
 and compare equal.
 */
 template <class Value, class Reference>
-typename boost::enable_if<rime::is_constant<Reference>>::type check_equal_value(
+std::enable_if_t<rime::is_constant<Reference>::value> check_equal_value(
     Value const &, Reference const &)
 {
     static_assert(
@@ -41,8 +40,8 @@ typename boost::enable_if<rime::is_constant<Reference>>::type check_equal_value(
 }
 
 template <class Value, class Reference>
-typename boost::disable_if<rime::is_constant<Reference>>::type
-    check_equal_value(Value const & value, Reference const & reference)
+std::enable_if_t<!rime::is_constant<Reference>::value> check_equal_value(
+    Value const & value, Reference const & reference)
 {
     static_assert(
         std::is_same_v<Value, Reference>,
@@ -103,7 +102,7 @@ void check_empty(Range const & range, Reference const & reference)
 
 // Check size.
 template <class HasSize, class Range, class Reference>
-typename boost::enable_if<HasSize>::type check_size(
+std::enable_if_t<HasSize::value> check_size(
     Range const & range, Reference const & reference)
 {
     static_assert(
@@ -116,7 +115,7 @@ typename boost::enable_if<HasSize>::type check_size(
         range::size(range, range::back), range::size(range, range::front));
 }
 template <class HasSize, class Range, class Reference>
-typename boost::disable_if<HasSize>::type check_size(
+std::enable_if_t<!HasSize::value> check_size(
     Range const &, Reference const &, void * = 0)
 {
     static_assert(
@@ -234,7 +233,7 @@ template <class HasSize, class HasBack, class Zero> struct check_drop_n
         // (It may be known to be non-empty, in which case this happily
         // compiles.)
         template <class Range, class Direction>
-        typename boost::disable_if<range::always_empty<Range, Direction>>::type
+        std::enable_if_t<!range::always_empty<Range, Direction>::value>
             check_first_equal(
                 Range const & range1, Range const & range2,
                 Direction const & direction) const
@@ -247,7 +246,7 @@ template <class HasSize, class HasBack, class Zero> struct check_drop_n
         }
         // Known only at compile time that the range is empty.
         template <class Range, class Direction>
-        typename boost::enable_if<range::always_empty<Range, Direction>>::type
+        std::enable_if_t<range::always_empty<Range, Direction>::value>
             check_first_equal(
                 Range const &, Range const &, Direction const &) const
         {}

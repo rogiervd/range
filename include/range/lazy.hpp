@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"
@@ -124,8 +123,8 @@ namespace callable {
         \param new_arguments
             The arguments to be used in the call behind the stored arguments.
         */
-        template <class Range> typename boost::lazy_enable_if<
-            is_range<Range>, call_result<Range>>::type
+        template <class Range> typename std::enable_if_t<
+            is_range<Range>::value, call_result<Range>>::type
             operator()(Range && range) const
         {
             return (call_with(
@@ -139,8 +138,8 @@ namespace callable {
         \param new_arguments
             The arguments to be appended to the currently stored arguments.
         */
-        template <class... NewArguments> typename boost::lazy_disable_if<
-            meta::any_of_c<is_range<NewArguments>::value...>,
+        template <class... NewArguments> typename std::enable_if_t<
+            !meta::any_of_c<is_range<NewArguments>::value...>::value,
             next_type<NewArguments...>>::type
             operator()(NewArguments &&... new_arguments) const
         {

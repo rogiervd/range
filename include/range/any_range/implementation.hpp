@@ -23,7 +23,6 @@ implementation linearly inherits from all of them.
 #include <type_traits>
 #include <utility>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/placeholders.hpp"
 
 #include "meta/fold.hpp"
@@ -90,8 +89,8 @@ namespace range { namespace any_range_implementation {
         class Element, class CapabilityKeys, class KeyToRemove, class Base>
     struct implement_lose_capability<
         Element, CapabilityKeys, KeyToRemove, Base,
-        typename boost::disable_if<
-            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
+        std::enable_if_t<
+            !meta::has_key<capability::copy_construct, CapabilityKeys>::value>>
     : Base
     {
         static_assert(capability::is_capability_keys<CapabilityKeys>::value);
@@ -107,8 +106,8 @@ namespace range { namespace any_range_implementation {
         class Element, class CapabilityKeys, class KeyToRemove, class Base>
     struct implement_lose_capability<
         Element, CapabilityKeys, KeyToRemove, Base,
-        typename boost::enable_if<
-            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
+        std::enable_if_t<
+            meta::has_key<capability::copy_construct, CapabilityKeys>::value>>
     : Base
     {
         static_assert(capability::is_capability_keys<CapabilityKeys>::value);

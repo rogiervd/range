@@ -9,7 +9,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/if.hpp"
 
@@ -207,9 +206,9 @@ public:
     */
     template <
         class Range, class... Directions,
-        class Enable1 = typename boost::enable_if<is_range<Range>>::type,
-        class Enable2 = typename boost::disable_if<
-            is_any_range_with_same_element_type<Range>>::type>
+        class Enable1 = std::enable_if_t<is_range<Range>::value>,
+        class Enable2 = std::enable_if_t<
+            !is_any_range_with_same_element_type<Range>::value>>
     explicit any_range(Range && range, Directions const &... directions)
     : implementation_(
           wrap_view(range::view(std::forward<Range>(range), directions...)))
@@ -249,10 +248,10 @@ public:
         class OtherCapabilities, class CapabilityKeys = capability_keys,
         class Enable1 = typename utility::disable_if_same_or_derived<
             any_range<Element, OtherCapabilities>, any_range>::type,
-        class Enable2 = typename boost::enable_if<
-            any_range_is_convertible<OtherCapabilities>>::type,
-        class Enable3 = typename boost::enable_if<
-            meta::has_key<capability::copy_construct, CapabilityKeys>>::type>
+        class Enable2 = std::enable_if_t<
+            any_range_is_convertible<OtherCapabilities>::value>,
+        class Enable3 = std::enable_if_t<
+            meta::has_key<capability::copy_construct, CapabilityKeys>::value>>
     any_range(any_range<Element, OtherCapabilities> const & other)
     : implementation_(convert_from<OtherCapabilities>()(other))
     {}
@@ -290,8 +289,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::empty, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::empty, Direction>::value>>
     bool empty(Direction const & direction) const
     {
         return implementation_->empty(direction);
@@ -299,8 +298,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::size, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::size, Direction>::value>>
     std::size_t size(Direction const & direction) const
     {
         return implementation_->size(direction);
@@ -308,8 +307,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::first, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::first, Direction>::value>>
     Element first(Direction const & direction) const
     {
         return implementation_->first(direction);
@@ -317,8 +316,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::drop_one, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::drop_one, Direction>::value>>
     any_range drop_one(Direction const & direction) const
     {
         return any_range(implementation_->drop_one(direction));
@@ -326,8 +325,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::drop_n, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::drop_n, Direction>::value>>
     any_range drop(size_t increment, Direction const & direction) const
     {
         return any_range(implementation_->drop_n(increment, direction));
@@ -335,8 +334,8 @@ private:
 
     template <
         class Direction,
-        class Enable = typename boost::enable_if<
-            is_implemented<capability::chop_destructive, Direction>>::type>
+        class Enable = std::enable_if_t<
+            is_implemented<capability::chop_destructive, Direction>::value>>
     Element chop_in_place(Direction const & direction)
     {
         auto chopped =

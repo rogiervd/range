@@ -13,7 +13,6 @@ Define a general heterogeneous container.
 #include <tuple>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
 
@@ -196,8 +195,8 @@ namespace tuple_detail {
 
         template <
             class Type2 = Type,
-            class Enable = typename boost::enable_if<
-                std::is_assignable<Type2 &, Type2 const &>>::type>
+            class Enable =
+                std::enable_if_t<std::is_assignable_v<Type2 &, Type2 const &>>>
         contain & operator=(contain const & that)
         {
             static_cast<Type &>(this->element_) =
@@ -207,8 +206,8 @@ namespace tuple_detail {
 
         template <
             class Type2 = Type,
-            class Enable = typename boost::enable_if<
-                std::is_assignable<Type2 &, Type2 &&>>::type>
+            class Enable =
+                std::enable_if_t<std::is_assignable_v<Type2 &, Type2 &&>>>
         contain & operator=(contain && that)
         {
             static_cast<Type &>(this->element_) =
@@ -514,11 +513,11 @@ namespace tuple_detail {
         Forward the range...
         \throw size_mismatch if the range is not empty.
         */
-        template <class Range> static typename boost::enable_if<
+        template <class Range> static std::enable_if_t<
             boost::mpl::and_<
                 has<callable::first(Range const &, direction::front)>,
-                has<callable::drop(Range, direction::front)>>,
-            Range &&>::type
+                has<callable::drop(Range, direction::front)>>::value,
+            Range &&>
             maybe_chop(Range && range)
         {
             if (empty(range, front)) {
@@ -541,10 +540,10 @@ namespace tuple_detail {
         Actually apply "chop" on the range...
         \throw size_mismatch if the range is not empty.
         */
-        template <class Range> static typename boost::lazy_disable_if<
-            boost::mpl::and_<
+        template <class Range> static typename std::enable_if_t<
+            !boost::mpl::and_<
                 has<callable::first(Range const &, direction::front)>,
-                has<callable::drop(Range, direction::front)>>,
+                has<callable::drop(Range, direction::front)>>::value,
             result_of<callable::chop(Range, direction::front)>>::type
             maybe_chop(Range && range)
         {
@@ -674,8 +673,8 @@ public:
     */
     template <
         class Types2 = meta::vector<Types...>,
-        class Enable = typename boost::enable_if<
-            utility::are_default_constructible<Types2>>::type>
+        class Enable =
+            std::enable_if_t<utility::are_default_constructible<Types2>::value>>
     tuple() : elements_()
     {}
 
@@ -692,9 +691,9 @@ public:
     */
     template <
         class... Arguments,
-        class Enable = typename boost::enable_if<
-            tuple_detail::are_implicitly_constructible<
-                stored_types, meta::vector<Arguments...>>>::type>
+        class Enable =
+            std::enable_if_t<tuple_detail::are_implicitly_constructible<
+                stored_types, meta::vector<Arguments...>>::value>>
     tuple(Arguments &&... arguments)
     : elements_(
           tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
@@ -710,10 +709,10 @@ public:
     */
     template <
         class... Arguments,
-        typename boost::enable_if<
+        std::enable_if_t<
             tuple_detail::are_only_explicitly_constructible<
-                stored_types, meta::vector<Arguments...>>,
-            int>::type = 0>
+                stored_types, meta::vector<Arguments...>>::value,
+            int> = 0>
     explicit tuple(Arguments &&... arguments)
     : elements_(
           tuple_detail::from_elements(), std::forward<Arguments>(arguments)...)
@@ -729,9 +728,9 @@ public:
     */
     template <
         class Range,
-        class Enable = typename boost::enable_if<boost::mpl::and_<
+        class Enable = std::enable_if_t<boost::mpl::and_<
             not_this_tuple<Range>, is_range<Range>,
-            range_is_convertible<Range>>>::type>
+            range_is_convertible<Range>>::value>>
     tuple(Range && range, dummy_type = dummy_type())
     : elements_(
           tuple_detail::from_range(),
@@ -753,9 +752,9 @@ public:
     */
     template <
         class Range,
-        class Enable = typename boost::enable_if<boost::mpl::and_<
+        class Enable = std::enable_if_t<boost::mpl::and_<
             not_this_tuple<Range>, is_range<Range>,
-            range_is_constructible_but_not_convertible<Range>>>::type>
+            range_is_constructible_but_not_convertible<Range>>::value>>
     explicit tuple(Range && range)
     : elements_(
           tuple_detail::from_range(),
@@ -775,9 +774,9 @@ public:
     */
     template <
         class Range,
-        class Enable = typename boost::enable_if<boost::mpl::and_<
+        class Enable = std::enable_if_t<boost::mpl::and_<
             not_this_tuple<Range>, is_range<Range>,
-            range_is_assignable<Range>>>::type>
+            range_is_assignable<Range>>::value>>
     tuple & operator=(Range && range)
     {
         elements_ = view_once(std::forward<Range>(range), front);

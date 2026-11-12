@@ -5,9 +5,10 @@
 #ifndef RANGE_COUNT_HPP_INCLUDED
 #define RANGE_COUNT_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <cstddef>
 
-#include "boost/core/enable_if.hpp"
 
 #include "rime/assert.hpp"
 #include "rime/cast.hpp"
@@ -71,8 +72,8 @@ If \a end is a constant, then the range is heterogeneous.
 \pre <c>end >= 0</c>.
 */
 // Case where End is a run-time value.
-template <class End> inline typename boost::disable_if<
-    rime::is_constant<End>, count_range<End, End>>::type
+template <class End>
+inline std::enable_if_t<!rime::is_constant<End>::value, count_range<End, End>>
     count(End const & end)
 {
     return count(End(), end);
@@ -80,9 +81,9 @@ template <class End> inline typename boost::disable_if<
 
 // Case where End is a constant.
 /// \cond DONT_DOCUMENT
-template <class End> inline typename boost::enable_if<
-    rime::is_constant<End>,
-    count_range<rime::constant<typename rime::value<End>::type, 0>, End>>::type
+template <class End> inline std::enable_if_t<
+    rime::is_constant<End>::value,
+    count_range<rime::constant<typename rime::value<End>::type, 0>, End>>
     count(End const & end)
 {
     rime::constant<typename rime::value<End>::type, 0> begin;

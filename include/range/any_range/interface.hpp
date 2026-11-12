@@ -26,11 +26,12 @@ the same structure.
 #ifndef RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 #define RANGE_ANY_RANGE_INTERFACE_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
 
-#include "boost/core/enable_if.hpp"
 #include "boost/mpl/placeholders.hpp"
 
 #include "meta/fold.hpp"
@@ -148,8 +149,8 @@ namespace range { namespace any_range_interface {
     // Direction cannot be default-constructed.
     template <class Direction, class Base> struct implement_default_direction<
         Direction, Base,
-        typename boost::disable_if<
-            capability::default_construct_direction<Direction>>::type> : Base
+        std::enable_if_t<
+            !capability::default_construct_direction<Direction>::value>> : Base
     {
         virtual Direction default_direction() const = 0;
     };
@@ -158,8 +159,8 @@ namespace range { namespace any_range_interface {
     // (And the method does not need to be virtual.)
     template <class Direction, class Base> struct implement_default_direction<
         Direction, Base,
-        typename boost::enable_if<
-            capability::default_construct_direction<Direction>>::type> : Base
+        std::enable_if_t<
+            capability::default_construct_direction<Direction>::value>> : Base
     {
         Direction default_direction() const { return Direction(); }
     };

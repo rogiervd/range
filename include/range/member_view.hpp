@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <type_traits>
 
-#include "boost/core/enable_if.hpp"
 
 #include "meta/range.hpp"
 
@@ -166,8 +165,8 @@ public:
     */
     template <class Extractors2> member_view(
         member_view<Structure, Extractors2> const & that,
-        typename boost::enable_if<
-            detail::is_linear_subset<Extractors, Extractors2>>::type * = 0)
+        std::enable_if_t<
+            detail::is_linear_subset<Extractors, Extractors2>::value> * = 0)
     : base(that)
     {}
 
@@ -189,8 +188,8 @@ private:
     template <class Direction> struct first_type
     : result_of<typename first_extractor<Direction>::type(Structure)> {};
 
-    template <class Direction> typename boost::lazy_enable_if_c<
-        (extractor_num != 0), first_type<Direction>>::type
+    template <class Direction>
+    typename std::enable_if_t<(extractor_num != 0), first_type<Direction>>::type
         first(Direction) const
     {
         return typename first_extractor<Direction>::type()(this->structure());
@@ -204,8 +203,7 @@ private:
         typedef member_view<Structure, new_extractors> type;
     };
 
-    template <class Direction, class Increment>
-    typename boost::lazy_enable_if_c<
+    template <class Direction, class Increment> typename std::enable_if_t<
         (std::size_t(Increment::value) <= extractor_num),
         drop_result<Increment, Direction>>::type
         drop_constant(Increment const &, Direction const &) const

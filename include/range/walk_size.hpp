@@ -5,10 +5,11 @@
 #ifndef RANGE_WALK_SIZE_HPP_INCLUDED
 #define RANGE_WALK_SIZE_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <cstddef>
 #include <utility>
 
-#include "boost/core/enable_if.hpp"
 
 #include "core.hpp"
 
@@ -26,9 +27,9 @@ namespace callable {
             return range::size(std::forward<Range>(range), direction);
         }
 
-        template <class Range, class Direction> typename boost::disable_if<
-            range::has<range::callable::size(Range, Direction)>,
-            std::size_t>::type
+        template <class Range, class Direction> std::enable_if_t<
+            !range::has<range::callable::size(Range, Direction)>::value,
+            std::size_t>
             operator()(Range && range, Direction const & direction) const
         {
             std::size_t size = 0;

@@ -6,7 +6,8 @@
 This test builds four Python extensions, each tested with a .py test.
 """
 
-load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 
 test_names = [
@@ -16,16 +17,34 @@ test_names = [
     "return_view",
 ]
 
+# Each Python extension is a cc_library, wrapped in a cc_shared_library whose
+# file name is the module name.
 [
-    nanobind_extension(
-        name = test_name + "_example",
-        srcs = [test_name + "_example.cpp"],
-        local_defines = ["NB_ABORT_ON_LEAK"],
-        deps = [
-            "@nanobind_bazel//:nanobind",
-            "@range//:range_python",
-        ],
-    )
+    [
+        cc_library(
+            name = test_name + "_example_lib",
+            srcs = [test_name + "_example.cpp"],
+            # nanobind declares its namespace with hidden visibility, so Python
+            # extensions must be compiled with hidden visibility by default, as
+            # nanobind's own build does. Otherwise, GCC warns that classes
+            # (e.g. Boost.MPL templates instantiated with nanobind types) have
+            # greater visibility than their bases.
+            copts = select({
+                "@rules_cc//cc/compiler:msvc-cl": [],
+                "//conditions:default": ["-fvisibility=hidden"],
+            }),
+            local_defines = ["NB_ABORT_ON_LEAK"],
+            deps = [
+                "@nanobind",
+                "@range//:range_python",
+            ],
+        ),
+        cc_shared_library(
+            name = test_name + "_example",
+            shared_lib_name = test_name + "_example.so",
+            deps = [test_name + "_example_lib"],
+        ),
+    ]
     for test_name in test_names
 ]
 
@@ -38,15 +57,15 @@ test_names = [
             "test-" + test_name + ".py",
         ],
         args = ["$(rootpath test-" + test_name + ".py)"],
-        data = ["test-" + test_name + ".py"],
+        data = [
+            "test-" + test_name + ".py",
+            test_name + "_example",
+        ],
         main = "pytest_main.py",
         # Do not run these tests with sanitizers, because symbols can't be found
         # in the Python extension.
         tags = ["no-sanitizers"],
-        deps = [
-            test_name + "_example",
-            "@range_pypi//pytest",
-        ],
+        deps = ["@range_pypi//pytest"],
     )
     for test_name in test_names
 ]

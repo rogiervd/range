@@ -9,6 +9,7 @@ This test builds four Python extensions, each tested with a .py test.
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_python//python:py_test.bzl", "py_test")
+load(":python_libs.bzl", "python_libs")
 
 test_names = [
     "python_range",
@@ -16,6 +17,11 @@ test_names = [
     "tuple",
     "return_view",
 ]
+
+python_libs(
+    name = "python_libs",
+    tags = ["manual"],
+)
 
 # Each Python extension is a cc_library, wrapped in a cc_shared_library whose
 # file name is the module name.
@@ -38,37 +44,28 @@ test_names = [
                 "@platforms//os:windows": ["/UNB_SHARED"],
                 "//conditions:default": ["-fvisibility=hidden"],
             }),
-            # On Windows, Python's headers ask the linker to find the Python
-            # library by name (#pragma comment(lib, "python312.lib")), which
-            # it cannot find in its search path. The library is linked
-            # explicitly (see deps), so tell the linker to ignore that request.
-            # This must match the Python version in MODULE.bazel.
-            linkopts = select({
-                "@platforms//os:windows": [
-                    "/NODEFAULTLIB:python312.lib",
-                    "/NODEFAULTLIB:python312_d.lib",
-                ],
-                "//conditions:default": [],
-            }),
             local_defines = ["NB_ABORT_ON_LEAK"],
             deps = [
                 "@nanobind",
                 "@range//:range_python",
-            ] + select({
-                # On Windows, extensions must link with the Python library.
-                # Elsewhere, they must not link with libpython.
-                "@platforms//os:windows": [
-                    "@rules_python//python/cc:current_py_cc_libs",
-                ],
-                "//conditions:default": [],
-            }),
+            ],
         ),
         cc_shared_library(
             name = test_name + "_example",
+            # On Windows, extensions must link with the Python library.
+            # Elsewhere, they must not link with libpython.
+            additional_linker_inputs = select({
+                "@platforms//os:windows": [":python_libs"],
+                "//conditions:default": [],
+            }),
             # Python on Windows only imports extension modules named .pyd.
             shared_lib_name = test_name + "_example" + select({
                 "@platforms//os:windows": ".pyd",
                 "//conditions:default": ".so",
+            }),
+            user_link_flags = select({
+                "@platforms//os:windows": ["$(locations :python_libs)"],
+                "//conditions:default": [],
             }),
             deps = [test_name + "_example_lib"],
         ),

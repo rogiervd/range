@@ -6,7 +6,8 @@
 This test builds four Python extensions, each tested with a .py test.
 """
 
-load("@nanobind_bazel//:build_defs.bzl", "nanobind_extension")
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_shared_library.bzl", "cc_shared_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 
 test_names = [
@@ -17,14 +18,24 @@ test_names = [
 ]
 
 [
-    nanobind_extension(
-        name = test_name + "_example",
+    cc_library(
+        name = test_name + "_example_lib",
         srcs = [test_name + "_example.cpp"],
         local_defines = ["NB_ABORT_ON_LEAK"],
         deps = [
-            "@nanobind_bazel//:nanobind",
+            "@nanobind",
             "@range//:range_python",
         ],
+    )
+    for test_name in test_names
+]
+
+# Each Python extension is a shared library whose file name is the module name.
+[
+    cc_shared_library(
+        name = test_name + "_example",
+        shared_lib_name = test_name + "_example.so",
+        deps = [test_name + "_example_lib"],
     )
     for test_name in test_names
 ]
@@ -38,15 +49,15 @@ test_names = [
             "test-" + test_name + ".py",
         ],
         args = ["$(rootpath test-" + test_name + ".py)"],
-        data = ["test-" + test_name + ".py"],
+        data = [
+            "test-" + test_name + ".py",
+            test_name + "_example",
+        ],
         main = "pytest_main.py",
         # Do not run these tests with sanitizers, because symbols can't be found
         # in the Python extension.
         tags = ["no-sanitizers"],
-        deps = [
-            test_name + "_example",
-            "@range_pypi//pytest",
-        ],
+        deps = ["@range_pypi//pytest"],
     )
     for test_name in test_names
 ]

@@ -32,7 +32,10 @@ test_names = [
             copts = select({
                 # Windows has no symbol visibility, and clang-cl does not
                 # accept -fvisibility.
-                "@platforms//os:windows": [],
+                # @nanobind defines NB_SHARED, which on Windows declares its
+                # functions as imported from a DLL. However, it is linked
+                # statically, so undefine NB_SHARED.
+                "@platforms//os:windows": ["/UNB_SHARED"],
                 "//conditions:default": ["-fvisibility=hidden"],
             }),
             # On Windows, Python's headers ask the linker to find the Python

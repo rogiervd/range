@@ -21,6 +21,15 @@ test_names = [
     cc_library(
         name = test_name + "_example_lib",
         srcs = [test_name + "_example.cpp"],
+        # nanobind declares its namespace with hidden visibility, so Python
+        # extensions must be compiled with hidden visibility by default, as
+        # nanobind's own build does. Otherwise, GCC warns that classes
+        # (e.g. Boost.MPL templates instantiated with nanobind types) have
+        # greater visibility than their bases.
+        copts = select({
+            "@rules_cc//cc/compiler:msvc-cl": [],
+            "//conditions:default": ["-fvisibility=hidden"],
+        }),
         local_defines = ["NB_ABORT_ON_LEAK"],
         deps = [
             "@nanobind",

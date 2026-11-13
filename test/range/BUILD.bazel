@@ -51,6 +51,7 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-for_each_macro",
         "test-for_each",
         "test-function_range",
+        "test-hash_append",
         "test-hash_range",
         "test-heavyweight",
         "test-lazy",

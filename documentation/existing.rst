@@ -55,13 +55,15 @@ and then, for example::
 Optionals
 =========
 
-Another type of container is ``boost::optional``, or ``std::optional``, when that comes through.
+Another type of container is ``std::optional``.
 To use this as a range, of length 0 or 1, ``range::view_optional`` must be used.
 For example::
 
+    #include <optional>
+
     #include "range/std/view_optional.hpp"
 
-    using boost::optional;
+    using std::optional;
     using namespace range;
 
     optional <int> none;

@@ -8,13 +8,12 @@
 #include "range/scan.hpp"
 
 #include <list>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#include "boost/optional/optional.hpp"
 
 #include "utility/returns.hpp"
 
@@ -319,7 +318,7 @@ input.
 */
 template <class Type> struct parse_outcome
 {
-    boost::optional<Type> output;
+    std::optional<Type> output;
     input_type rest;
 
     parse_outcome(input_type const & rest) : output(), rest(rest) {}
@@ -392,10 +391,10 @@ BOOST_AUTO_TEST_CASE(test_scan_parser)
         auto result2 = drop(result);
         auto result3 = drop(result2);
 
-        BOOST_CHECK_EQUAL(first(result3).output.get(), 'B');
+        BOOST_CHECK_EQUAL(*first(result3).output, 'B');
 
         auto result4 = drop(result3);
-        BOOST_CHECK_EQUAL(first(result4).output.get(), 'R');
+        BOOST_CHECK_EQUAL(*first(result4).output, 'R');
 
         auto result5 = drop(result4);
 

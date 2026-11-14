@@ -27,8 +27,8 @@ Counting
 ========
 
 .. doxygenfunction:: range::count_from
-.. doxygenfunction:: range::count(Begin const &, End const &)
-.. doxygenfunction:: range::count(End const &)
+.. doxygenfunction:: range::count(Start const &, Finish const &)
+.. doxygenfunction:: range::count(Finish const &)
 .. doxygenfunction:: range::count()
 
 Function range

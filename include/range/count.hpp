@@ -21,8 +21,8 @@
 
 namespace range {
 
-template <class Begin, class End> class count_range;
-template <class Begin> class infinite_count_range;
+template <class Start, class Stop> class count_range;
+template <class Start> class infinite_count_range;
 
 /* Functions. */
 // These are used mutually recursively by the classes so they must be defined
@@ -31,76 +31,78 @@ template <class Begin> class infinite_count_range;
 /** \brief
 Return an infinite range that contains an arithmetic progression of integers.
 
-It starts with \a begin, the next element is <c>begin + 1</c>, etc.
-If \a begin is a run-time value, then the range is homogeneous, i.e., the other
+It starts with \a start, the next element is <c>start + 1</c>, etc.
+If \a start is a run-time value, then the range is homogeneous, i.e., the other
 elements have the same type.
-If \a begin is a constant, the other elements are also constants of the same
+If \a start is a constant, the other elements are also constants of the same
 type.
-However, if \a begin is a constant and <c>drop (increment, r)</c> is called with
+However, if \a start is a constant and <c>drop (increment, r)</c> is called with
 non-constant increment, then the resulting range will have a run-time value
 of the same type as the value type of the original constant.
 */
-template <class Begin>
-inline infinite_count_range<Begin> count_from(Begin const & begin)
+template <class Start>
+inline infinite_count_range<Start> count_from(Start const & start)
 {
-    return infinite_count_range<Begin>(begin);
+    return infinite_count_range<Start>(start);
 }
 
 /** \brief
 Return a range that contains an arithmetic progression of integers.
 
-It starts with \a begin, and finishes one before \a end.
-\a begin and \a end can be run-time values or compile-time values.
+It starts with \a start, and finishes one before \a stop.
+\a start and \a stop can be run-time values or compile-time values.
 If they are run-time values, like \c int, then the resulting range is
 homogeneous.
 If not, then the range is heterogeneous.
-\param begin First value in the range.
-\param end One-past-last value in the range.
-\pre <c>begin \<= end</c>.
+\param start First value in the range.
+\param stop One-past-last value in the range.
+\pre <c>start \<= stop</c>.
 */
-template <class Begin, class End>
-inline auto count(Begin const & begin, End const & end)
-    RETURNS(count_range<Begin, End>(begin, end));
+template <class Start, class Stop>
+inline auto count(Start const & start, Stop const & stop)
+    RETURNS(count_range<Start, Stop>(start, stop));
 
 /** \brief
-Return a range with \a end elements that starts with 0.
+Return a range with \a stop elements that starts with 0.
 
-If \a end is a run-time value, then the range is homogeneous.
-If \a end is a constant, then the range is heterogeneous.
-\param end One-past-last value in the range.
-\pre <c>end >= 0</c>.
+If \a stop is a run-time value, then the range is homogeneous.
+If \a stop is a constant, then the range is heterogeneous.
+\param stop One-past-last value in the range.
+\pre <c>stop >= 0</c>.
 */
-// Case where End is a run-time value.
-template <class End> inline typename boost::disable_if<
-    rime::is_constant<End>, count_range<End, End>>::type
-    count(End const & end)
+// Case where Stop is a run-time value.
+template <class Stop> inline typename boost::disable_if<
+    rime::is_constant<Stop>, count_range<Stop, Stop>>::type
+    count(Stop const & stop)
 {
-    return count(End(), end);
+    return count(Stop(), stop);
 }
 
-// Case where End is a constant.
+// Case where Stop is a constant.
 /// \cond DONT_DOCUMENT
-template <class End> inline typename boost::enable_if<
-    rime::is_constant<End>,
-    count_range<rime::constant<typename rime::value<End>::type, 0>, End>>::type
-    count(End const & end)
+template <class Stop> inline typename boost::enable_if<
+    rime::is_constant<Stop>,
+    count_range<rime::constant<typename rime::value<Stop>::type, 0>, Stop>>::
+    type
+    count(Stop const & stop)
 {
-    rime::constant<typename rime::value<End>::type, 0> begin;
-    return count(begin, end);
+    rime::constant<typename rime::value<Stop>::type, 0> start;
+    return count(start, stop);
 }
 /// \endcond
 
 /* Implementation of ranges. */
 
-template <class Begin, class End> class count_range
+template <class Start, class Stop> class count_range
 {
-    Begin begin_;
-    End end_;
+    Start start_;
+    Stop stop_;
 
 public:
-    count_range(Begin const & begin, End const & end) : begin_(begin), end_(end)
+    count_range(Start const & start, Stop const & stop)
+    : start_(start), stop_(stop)
     {
-        rime::assert_(!rime::less(end, begin));
+        rime::assert_(!rime::less(stop, start));
     }
 
     count_range(count_range const &) = default;
@@ -108,46 +110,46 @@ public:
     count_range & operator=(count_range const &) = default;
     count_range & operator=(count_range &&) = default;
 
-    Begin begin() const { return begin_; }
-    End end() const { return end_; }
+    Start start() const { return start_; }
+    Stop stop() const { return stop_; }
 
 private:
     friend class helper::member_access;
 
-    auto empty(direction::front) const RETURNS(begin_ == end_);
+    auto empty(direction::front) const RETURNS(start_ == stop_);
 
     auto size(direction::front) const
-        RETURNS(rime::cast_value<End>(rime::minus(end_, begin_)));
+        RETURNS(rime::cast_value<Stop>(rime::minus(stop_, start_)));
 
-    Begin first(direction::front) const { return begin_; }
+    Start first(direction::front) const { return start_; }
 
     auto first(direction::back) const
-        RETURNS(rime::cast_value<End>(rime::minus(end_, rime::size_t<1>())));
+        RETURNS(rime::cast_value<Stop>(rime::minus(stop_, rime::size_t<1>())));
 
     template <class Increment>
     auto drop(Increment const & increment, direction::front) const RETURNS(
         range::count(
-            rime::cast_value<Begin>(rime::plus(begin_, increment)), end_));
+            rime::cast_value<Start>(rime::plus(start_, increment)), stop_));
 
     template <class Increment>
     auto drop(Increment const & increment, direction::back) const RETURNS(
         range::count(
-            begin_, rime::cast_value<End>(rime::minus(end_, increment))));
+            start_, rime::cast_value<Stop>(rime::minus(stop_, increment))));
 };
 
-template <class Begin> class infinite_count_range
+template <class Start> class infinite_count_range
 {
-    Begin begin_;
+    Start start_;
 
 public:
-    infinite_count_range(Begin const & begin) : begin_(begin) {}
+    infinite_count_range(Start const & start) : start_(start) {}
 
     infinite_count_range(infinite_count_range const &) = default;
     infinite_count_range(infinite_count_range &&) = default;
     infinite_count_range & operator=(infinite_count_range const &) = default;
     infinite_count_range & operator=(infinite_count_range &&) = default;
 
-    Begin begin() const { return begin_; }
+    Start start() const { return start_; }
 
 private:
     friend class helper::member_access;
@@ -156,25 +158,25 @@ private:
 
     // size is not defined.
 
-    Begin first(direction::front) const { return begin_; }
+    Start first(direction::front) const { return start_; }
 
     template <class Increment>
     auto drop(Increment const & increment, direction::front) const RETURNS(
         range::count_from(
-            rime::cast_value<Begin>(rime::plus(begin_, increment))));
+            rime::cast_value<Start>(rime::plus(start_, increment))));
 };
 
 namespace count_operation {
     struct count_range_tag {};
 }  // namespace count_operation
 
-template <class Begin, class End>
-struct tag_of_qualified<count_range<Begin, End>>
+template <class Start, class Stop>
+struct tag_of_qualified<count_range<Start, Stop>>
 {
     typedef count_operation::count_range_tag type;
 };
 
-template <class Begin> struct tag_of_qualified<infinite_count_range<Begin>>
+template <class Start> struct tag_of_qualified<infinite_count_range<Start>>
 {
     typedef count_operation::count_range_tag type;
 };

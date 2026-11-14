@@ -89,7 +89,7 @@ template <class Finish> inline typename boost::enable_if<
     rime::constant<typename rime::value<Finish>::type, 0> start;
     return count(start, finish);
 }
-/// \finishcond
+/// \endcond
 
 /* Implementation of ranges. */
 

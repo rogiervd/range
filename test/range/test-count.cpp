@@ -48,9 +48,33 @@ BOOST_AUTO_TEST_CASE(straightforward)
     }
     {
         int total = 0;
+        for (int n : count(10)) {
+            total += n;
+        }
+        BOOST_CHECK_EQUAL(total, 45);
+    }
+    {
+        int total = 0;
         RANGE_FOR_EACH(n, count(5, 8))
         total += n;
         BOOST_CHECK_EQUAL(total, 18);
+    }
+    {
+        int total = 0;
+        for (int n : count(5, 8)) {
+            total += n;
+        }
+        BOOST_CHECK_EQUAL(total, 18);
+    }
+    {
+        int total = 0;
+        for (int n : count()) {
+            if (n > 6) {
+                break;
+            }
+            total += n;
+        }
+        BOOST_CHECK_EQUAL(total, 1 + 2 + 3 + 4 + 5 + 6);
     }
 }
 

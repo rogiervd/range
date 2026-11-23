@@ -9,8 +9,6 @@ Example to be used in the documentation.
 #define BOOST_TEST_MODULE example_std_adaptor
 #include "boost/test/unit_test.hpp"
 
-#include "boost/optional/optional.hpp"
-
 #include "range/core.hpp"
 #include "range/std/string.hpp"
 #include "range/std/tuple.hpp"
@@ -19,6 +17,7 @@ Example to be used in the documentation.
 
 #include <cassert>
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <tuple>
@@ -73,8 +72,8 @@ BOOST_AUTO_TEST_CASE(example_view_optional)
 {
     using namespace range;
 
-    boost::optional<int> none;
-    boost::optional<int> three(3);
+    std::optional<int> none;
+    std::optional<int> three(3);
 
     assert(empty(view_optional(none)));
 

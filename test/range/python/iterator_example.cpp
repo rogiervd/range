@@ -18,10 +18,8 @@ test-python_range.py.
 #include "range/python/iterator.hpp"
 
 #include <list>
-
+#include <optional>
 #include <string>
-
-#include "boost/optional/optional.hpp"
 
 #include "range/std/list.hpp"
 #include "range/std/view_optional.hpp"
@@ -40,7 +38,7 @@ range::tuple<int, std::string, float> tuple;
 
 auto get_tuple() RETURNS(range::view(tuple));
 
-boost::optional<bool> optional;
+std::optional<bool> optional;
 
 auto get_optional() RETURNS(range::view_optional(optional));
 

@@ -22,7 +22,19 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
     for test_name in [
         "test-std_container",
         "test-std_tuple",
-        "test-view_optional",
         "example-std_adaptor",
     ]
 ]
+
+cc_test(
+    name = "test-view_optional",
+    size = "small",
+    srcs = ["test-view_optional.cpp"],
+    deps = [
+        "//:range",
+        # To test views of optional references, which std::optional does not
+        # support.
+        "@boost.optional",
+        "@boost.test//:unit_test_main",
+    ],
+)

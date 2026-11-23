@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /** \file
-Provide a view of boost::optional as a range.
-boost::optional is not a range (this would cause confusing overloads), so it
-must be explicitly converted into a range.
+Provide a view of an optional, like std::optional, as a range.
+An optional is not a range (this would cause confusing overloads), so it must be
+explicitly converted into a range.
 */
 
 #ifndef RANGE_STD_VIEW_OPTIONAL_HPP_INCLUDED
@@ -61,12 +61,12 @@ private:
     value_type & first(direction::front) const
     {
         assert(!empty());
-        return this->optional_.get();
+        return *this->optional_;
     }
     value_type & first(direction::back) const
     {
         assert(!empty());
-        return this->optional_.get();
+        return *this->optional_;
     }
 
     // drop_one.
@@ -100,7 +100,8 @@ namespace callable {
 View an "optional" as a range containing zero or one elements.
 
 \param optional
-    A boost::optional or std::optional (when that becomes available).
+    A std::optional, or another type with the same interface, like
+    boost::optional.
     This should not be an rvalue, since a reference to the optional is stored.
 */
 static auto const view_optional = callable::view_optional();

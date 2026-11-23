@@ -7,6 +7,8 @@
 
 #include "range/std/view_optional.hpp"
 
+#include <optional>
+
 #include "boost/optional/optional.hpp"
 
 #include "range/core.hpp"
@@ -16,20 +18,20 @@ BOOST_AUTO_TEST_SUITE(test_range_view_optional)
 
 BOOST_AUTO_TEST_CASE(test_range_view_optional_properties)
 {
-    static_assert(!range::is_range<boost::optional<int>>::value);
+    static_assert(!range::is_range<std::optional<int>>::value);
 
     // Only works on lvalues (const or non-const).
+    static_assert(
+        !range::has<range::callable::view_optional(std::optional<int>)>::value);
     static_assert(!range::has<range::callable::view_optional(
-                      boost::optional<int>)>::value);
-    static_assert(!range::has<range::callable::view_optional(
-                      boost::optional<int> &&)>::value);
+                      std::optional<int> &&)>::value);
     static_assert(range::has<range::callable::view_optional(
-                      boost::optional<int> &)>::value);
+                      std::optional<int> &)>::value);
     static_assert(range::has<range::callable::view_optional(
-                      boost::optional<int> const &)>::value);
+                      std::optional<int> const &)>::value);
 
     typedef typename range::result_of<range::callable::view_optional(
-        boost::optional<int> &)>::type view_type;
+        std::optional<int> &)>::type view_type;
 
     static_assert(range::is_range<view_type>::value);
 }
@@ -37,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_properties)
 BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)
 {
     {
-        boost::optional<int> empty;
+        std::optional<int> empty;
 
         auto empty_view = range::view_optional(empty);
 
@@ -45,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)
         BOOST_CHECK_EQUAL(range::size(empty_view), 0u);
     }
     {
-        boost::optional<int const> empty;
+        std::optional<int const> empty;
 
         auto empty_view = range::view_optional(empty);
 
@@ -54,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)
         BOOST_CHECK_EQUAL(range::size(empty_view), 0u);
     }
     {
-        boost::optional<int> const empty;
+        std::optional<int> const empty;
 
         auto empty_view = range::view_optional(empty);
 
@@ -62,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)
         BOOST_CHECK_EQUAL(range::size(empty_view), 0u);
     }
     {
-        boost::optional<int const> const empty;
+        std::optional<int const> const empty;
 
         auto empty_view = range::view_optional(empty);
 
@@ -74,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_empty)
 BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
 {
     {
-        boost::optional<int> five(5);
+        std::optional<int> five(5);
 
         auto five_view = range::view_optional(five);
 
@@ -83,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
 
         BOOST_CHECK_EQUAL(range::first(five_view), 5);
         range::first(five_view) = -5;
-        BOOST_CHECK_EQUAL(five.get(), -5);
+        BOOST_CHECK_EQUAL(*five, -5);
 
         auto empty = range::drop(five_view);
         BOOST_CHECK(range::empty(empty));
@@ -93,7 +95,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
         BOOST_CHECK(range::empty(five_and_empty.rest()));
     }
     {
-        boost::optional<int const> five(5);
+        std::optional<int const> five(5);
 
         auto five_view = range::view_optional(five);
 
@@ -106,7 +108,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
         BOOST_CHECK(range::empty(empty));
     }
     {
-        boost::optional<int> const five(5);
+        std::optional<int> const five(5);
 
         auto five_view = range::view_optional(five);
 
@@ -119,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
         BOOST_CHECK(range::empty(empty));
     }
     {
-        boost::optional<int const> const five(5);
+        std::optional<int const> const five(5);
 
         auto five_view = range::view_optional(five);
 
@@ -135,6 +137,8 @@ BOOST_AUTO_TEST_CASE(test_range_view_optional_not_empty)
 
 BOOST_AUTO_TEST_CASE(test_range_view_optional_reference)
 {
+    // std::optional does not support references (until C++26), but
+    // boost::optional does, and view_optional works with that too.
     {
         int i = 5;
         boost::optional<int &> five(i);

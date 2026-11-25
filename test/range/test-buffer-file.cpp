@@ -7,12 +7,12 @@
 
 #include "range/file_buffer.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <ios>
+#include <random>
 #include <string>
 #include <utility>
-
-#include "boost/filesystem/operations.hpp"
 
 #include "range/buffer.hpp"
 #include "range/core.hpp"
@@ -88,8 +88,10 @@ BOOST_AUTO_TEST_CASE(error)
 
 BOOST_AUTO_TEST_CASE(long_file)
 {
-    auto temporary_file_name = boost::filesystem::temp_directory_path()
-        / boost::filesystem::unique_path();
+    // std::filesystem has no equivalent of boost::filesystem::unique_path.
+    std::random_device random;
+    auto temporary_file_name = std::filesystem::temp_directory_path()
+        / ("range-test-buffer-file-" + std::to_string(random()));
 
     // Make 100k file with cycling chars.
     {
@@ -109,7 +111,7 @@ BOOST_AUTO_TEST_CASE(long_file)
         BOOST_CHECK(empty(b));
     }
 
-    boost::filesystem::remove(temporary_file_name);
+    std::filesystem::remove(temporary_file_name);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

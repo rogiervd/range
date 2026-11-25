@@ -28,6 +28,7 @@ cc_library(
     # Dependencies of this library.
     deps = [
         "@boost.exception",
+        "@boost.hash2",
         "@boost.iostreams",
         "@meta",
         "@rime",

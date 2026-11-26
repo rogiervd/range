@@ -162,7 +162,6 @@ cc_test(
     ],
     deps = [
         "//:range",
-        "@boost.any",
         "@boost.test//:unit_test_main",
     ],
 )

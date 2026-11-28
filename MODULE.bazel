@@ -44,6 +44,13 @@ python.toolchain(
 )
 use_repo(python, "python_3_12", "python_3_12_host")
 
+# Do not let rules_python create __init__.py files implicitly in the runfiles
+# of Python targets. This behaviour is deprecated, and will be switched off by
+# default in a future release of rules_python.
+# See https://github.com/bazel-contrib/rules_python/issues/2945
+rules_python_config = use_extension("@rules_python//python/extensions:config.bzl", "config")
+rules_python_config.explicit_init_py(default = True)
+
 # uv toolchain, only used for locking requirements
 uv = use_extension(
     "@rules_python//python/uv:uv.bzl",

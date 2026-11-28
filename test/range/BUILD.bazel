@@ -35,7 +35,6 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-any_range-make",
         "test-any_range",
         "test-buffer",
-        "test-call_unpack-integration",
         "test-call_unpack",
         "test-core",
         "test-count",

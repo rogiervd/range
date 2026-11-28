@@ -132,24 +132,18 @@ cc_test(
     ],
 )
 
-[
-    cc_test(
-        name = test_name,
-        size = "small",
-        srcs = [
-            test_name + ".cpp",
-            "tuple-basic_tests.hpp",
-        ],
-        deps = [
-            "//:range",
-            "@boost.test//:unit_test_main",
-        ],
-    )
-    for test_name in [
-        "test-tuple-0-basic-2",
-        "test-tuple-0-basic",
-    ]
-]
+cc_test(
+    name = "test-tuple-0-basic",
+    size = "small",
+    srcs = [
+        "test-tuple-0-basic.cpp",
+        "tuple-basic_tests.hpp",
+    ],
+    deps = [
+        "//:range",
+        "@boost.test//:unit_test_main",
+    ],
+)
 
 cc_test(
     name = "test-tuple-5-for_each",

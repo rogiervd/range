@@ -2,11 +2,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/** \file
+Test any_range, its capabilities, and make_any_range.
+*/
+
 #define BOOST_TEST_MODULE test_range_any_range
 #include "boost/test/unit_test.hpp"
 
 #include "range/any_range.hpp"
 
+#include <list>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -19,8 +24,11 @@
 #include "range/core.hpp"
 #include "range/direction.hpp"
 #include "range/function_range.hpp"
+#include "range/std/forward_list.hpp"
+#include "range/std/list.hpp"
 #include "range/std/tuple.hpp"
 #include "range/std/vector.hpp"
+#include "range/tuple.hpp"
 
 #include "unique_range.hpp"
 
@@ -388,6 +396,356 @@ BOOST_AUTO_TEST_CASE(test_any_range_copy_move)
     range_with_size r(v);
     range_with_size r2(std::move(r));
     BOOST_CHECK_EQUAL(size(r2), 1u);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(test_range_any_range_capability)
+
+using range::capability::detect_capabilities;
+using range::capability::detect_capabilities_for_key;
+using range::capability::detect_capability_keys;
+using range::capability::is_subset;
+
+using range::capability::copy_construct;
+using range::capability::default_direction;
+
+using range::capability::chop_destructive;
+using range::capability::drop_n;
+using range::capability::drop_one;
+using range::capability::empty;
+using range::capability::first;
+using range::capability::size;
+
+typedef decltype(range::view(std::declval<std::vector<int> &>())) vector;
+typedef decltype(range::view(std::declval<std::list<int> &>())) list;
+typedef decltype(range::view(
+    std::declval<std::forward_list<int> &>())) forward_list;
+
+typedef decltype(range::view(std::declval<range::tuple<int> &>())) tuple;
+typedef decltype(range::view(std::declval<range::tuple<> &>())) empty_tuple;
+
+typedef range::function_range<int (*)()> function_range;
+
+BOOST_AUTO_TEST_CASE(test_capabilities_for_direction)
+{
+    static_assert(
+        std::is_same_v<
+            detect_capabilities_for_key<vector, direction::front>::type,
+            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>);
+
+    static_assert(
+        std::is_same_v<
+            detect_capabilities_for_key<function_range, direction::front>::type,
+            meta::set<empty, chop_destructive>>);
+
+    // An known-empty range has all capabilities!
+    // (But they're all not allowed at run time.)
+    static_assert(
+        std::is_same_v<
+            detect_capabilities_for_key<range::tuple<>, direction::back>::type,
+            meta::set<empty, size, first, drop_one, drop_n, chop_destructive>>);
+    static_assert(std::is_same_v<
+                  detect_capabilities_for_key<
+                      range::tuple<int>, direction::back>::type,
+                  meta::set<empty, size, first, drop_one, chop_destructive>>);
+}
+
+BOOST_AUTO_TEST_CASE(test_detect_capability_keys)
+{
+    static_assert(
+        std::is_same_v<
+            detect_capability_keys<vector>::type,
+            meta::set<copy_construct, direction::front, direction::back>>);
+
+    static_assert(std::is_same_v<
+                  detect_capability_keys<forward_list>::type,
+                  meta::set<copy_construct, direction::front>>);
+
+    static_assert(
+        std::is_same_v<
+            detect_capability_keys<tuple>::type,
+            meta::set<copy_construct, direction::front, direction::back>>);
+    static_assert(
+        std::is_same_v<
+            detect_capability_keys<empty_tuple>::type,
+            meta::set<copy_construct, direction::front, direction::back>>);
+
+    static_assert(std::is_same_v<
+                  detect_capability_keys<function_range>::type,
+                  meta::set<direction::front>>);
+}
+
+BOOST_AUTO_TEST_CASE(test_detect_capabilities)
+{
+    static_assert(std::is_same_v<
+                  detect_capabilities<vector>::type,
+                  meta::map<
+                      meta::map_element<default_direction, direction::front>,
+                      meta::map_element<copy_construct, void>,
+                      meta::map_element<
+                          direction::front,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>,
+                      meta::map_element<
+                          direction::back,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>>>);
+
+    static_assert(
+        std::is_same_v<
+            detect_capabilities<list>::type,
+            meta::map<
+                meta::map_element<default_direction, direction::front>,
+                meta::map_element<copy_construct, void>,
+                meta::map_element<
+                    direction::front,
+                    meta::set<empty, first, drop_one, chop_destructive>>,
+                meta::map_element<
+                    direction::back,
+                    meta::set<empty, first, drop_one, chop_destructive>>>>);
+
+    static_assert(
+        std::is_same_v<
+            detect_capabilities<tuple>::type,
+            meta::map<
+                meta::map_element<default_direction, direction::front>,
+                meta::map_element<copy_construct, void>,
+                meta::map_element<
+                    direction::front,
+                    meta::set<empty, size, first, drop_one, chop_destructive>>,
+                meta::map_element<
+                    direction::back,
+                    meta::set<
+                        empty, size, first, drop_one, chop_destructive>>>>);
+
+    static_assert(std::is_same_v<
+                  detect_capabilities<empty_tuple>::type,
+                  meta::map<
+                      meta::map_element<default_direction, direction::front>,
+                      meta::map_element<copy_construct, void>,
+                      meta::map_element<
+                          direction::front,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>,
+                      meta::map_element<
+                          direction::back,
+                          meta::set<
+                              empty, size, first, drop_one, drop_n,
+                              chop_destructive>>>>);
+
+    // function_range: no copy constrution.
+    static_assert(
+        std::is_same_v<
+            detect_capabilities<function_range>::type,
+            meta::map<
+                meta::map_element<default_direction, direction::front>,
+                meta::map_element<
+                    direction::front, meta::set<empty, chop_destructive>>>>);
+}
+
+BOOST_AUTO_TEST_CASE(test_is_subset)
+{
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<function_range>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<function_range>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<list>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<list>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<forward_list>::type,
+                  detect_capabilities<vector>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<vector>::type,
+                  detect_capabilities<forward_list>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<forward_list>::type,
+                  detect_capabilities<list>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<list>::type,
+                  detect_capabilities<forward_list>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<function_range>::type,
+                  detect_capabilities<tuple>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<tuple>::type,
+                  detect_capabilities<function_range>::type>::value);
+
+    static_assert(is_subset<
+                  detect_capabilities<tuple>::type,
+                  detect_capabilities<empty_tuple>::type>::value);
+    static_assert(!is_subset<
+                  detect_capabilities<empty_tuple>::type,
+                  detect_capabilities<tuple>::type>::value);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(test_range_make_any_range)
+
+BOOST_AUTO_TEST_CASE(test_make_any_range)
+{
+    /*
+    make_any_range decides on the any_range type and puts the view in it.
+    The types is therefore the only thing to test.
+    */
+    using range::capability::copy_construct;
+    using range::capability::default_direction;
+
+    using range::capability::chop_destructive;
+    using range::capability::drop_n;
+    using range::capability::drop_one;
+    using range::capability::empty;
+    using range::capability::first;
+    using range::capability::size;
+
+    using meta::map;
+    using meta::map_element;
+    using meta::set;
+
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::front,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>,
+                          map_element<
+                              direction::back,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
+
+    // Passing in front and back explicitly.
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::front, direction::back>::type,
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &>::type>);
+
+    // Only front.
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::front>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::front,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
+
+    // Only back: default_direction is still front.
+    static_assert(std::is_same_v<
+                  std::invoke_result<
+                      callable::make_any_range, std::vector<int> &,
+                      direction::back>::type,
+                  any_range<
+                      int &,
+                      map<map_element<default_direction, direction::front>,
+                          map_element<copy_construct, void>,
+                          map_element<
+                              direction::back,
+                              set<empty, size, first, drop_one, drop_n,
+                                  chop_destructive>>>>>);
+
+    {
+        std::vector<int> v;
+        v.push_back(6);
+        v.push_back(65);
+
+        auto a1 = make_any_range(v);
+        BOOST_CHECK_EQUAL(range::first(a1), 6);
+        BOOST_CHECK_EQUAL(range::first(a1, range::back), 65);
+
+        auto a2 = make_any_range(v, range::back);
+        // The default direction does not match the available directions.
+        static_assert(!has<callable::first(decltype(a2))>::value);
+        BOOST_CHECK_EQUAL(range::first(a1, range::back), 65);
+        BOOST_CHECK(range::empty(range::drop(a1, 2, range::back)));
+    }
+
+    static_assert(
+        std::is_same_v<
+            std::invoke_result<
+                callable::make_any_range, std::list<double> const &>::type,
+            any_range<
+                double const &,
+                map<map_element<default_direction, direction::front>,
+                    map_element<copy_construct, void>,
+                    map_element<
+                        direction::front,
+                        set<empty, first, drop_one, chop_destructive>>,
+                    map_element<
+                        direction::back,
+                        set<empty, first, drop_one, chop_destructive>>>>>);
+
+    typedef range::function_range<int (*)()> function_range;
+
+    static_assert(
+        std::is_same_v<
+            std::invoke_result<
+                callable::make_any_range, function_range &&>::type,
+            any_range<
+                int,
+                map<map_element<default_direction, direction::front>,
+                    map_element<
+                        direction::front, set<empty, chop_destructive>>>>>);
+
+    {
+        struct count
+        {
+            int i;
+            count() : i(0) {}
+
+            int operator()() { return ++i; }
+        };
+
+        auto a = make_any_range(range::make_function_range(count()));
+
+        BOOST_CHECK_EQUAL(range::chop_in_place(a), 1);
+        BOOST_CHECK_EQUAL(range::chop_in_place(a), 2);
+    }
+
+    // Heterogeneous: only if there is at least one element.
+    static_assert(
+        std::is_same_v<
+            std::invoke_result<
+                callable::make_any_range, range::tuple<int> &>::type,
+            any_range<
+                int &,
+                map<map_element<default_direction, direction::front>,
+                    map_element<copy_construct, void>,
+                    map_element<
+                        direction::front,
+                        set<empty, size, first, drop_one, chop_destructive>>,
+                    map_element<
+                        direction::back,
+                        set<empty, size, first, drop_one,
+                            chop_destructive>>>>>);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

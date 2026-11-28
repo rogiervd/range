@@ -31,8 +31,6 @@ exports_files(["check_equal_behaviour.hpp"])
         "example-fibonacci",
         "test-all_of_any_of-heterogeneous",
         "test-all_of_any_of-homogeneous",
-        "test-any_range-capability",
-        "test-any_range-make",
         "test-any_range",
         "test-buffer",
         "test-call_unpack-integration",

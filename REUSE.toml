@@ -9,6 +9,7 @@ version = 1
 [[annotations]]
 path = [
   ".bazelversion",
+  "AGENTS.md",
   ".bcr/**",
   ".clang-format",
   ".clang-tidy",

@@ -29,8 +29,7 @@ exports_files(["check_equal_behaviour.hpp"])
     )
     for test_name in [
         "example-fibonacci",
-        "test-all_of_any_of-heterogeneous",
-        "test-all_of_any_of-homogeneous",
+        "test-all_of_any_of",
         "test-any_range-capability",
         "test-any_range-make",
         "test-any_range",

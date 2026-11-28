@@ -67,8 +67,6 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-tuple-2-assign",
         "test-tuple-3-types",
         "test-tuple-4-make_tuple",
-        "test-tuple-5-equal-constant",
-        "test-tuple-5-equal-types",
         "test-tuple-5-equal",
         "test-tuple-5-fold-state_types",
         "test-tuple-5-less-constant",

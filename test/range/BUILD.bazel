@@ -79,13 +79,7 @@ exports_files(["check_equal_behaviour.hpp"])
         "test-unique_range",
         "test-view_shared",
         "test-walk_size",
-        "test-zip-heterogeneous-1",
-        "test-zip-heterogeneous-2",
-        "test-zip-heterogeneous-3",
-        "test-zip-homogeneous-1",
-        "test-zip-homogeneous-2",
-        "test-zip-homogeneous-3",
-        "test-zip-homogeneous-4",
+        "test-zip",
     ]
 ]
 
